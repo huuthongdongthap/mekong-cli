@@ -1,5 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { StorageError } from './errors';
+import { validateTaskStoreStructure } from './input-validation';
 
 export class JsonStorageAdapter {
   /**
@@ -10,12 +12,22 @@ export class JsonStorageAdapter {
     try {
       await fs.access(filePath);
       const content = await fs.readFile(filePath, 'utf-8');
-      return JSON.parse(content) as T;
+      const data = JSON.parse(content) as T;
+
+      // Validate structure if it's a task store
+      if (data && typeof data === 'object' && 'tasks' in data) {
+        validateTaskStoreStructure(data);
+      }
+
+      return data;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         return null;
       }
-      throw error;
+      if (error instanceof SyntaxError) {
+        throw new StorageError(`Invalid JSON in file: ${error.message}`, filePath);
+      }
+      throw new StorageError(`Failed to read file: ${(error as Error).message}`, filePath);
     }
   }
 
@@ -24,23 +36,27 @@ export class JsonStorageAdapter {
    * Writes to a temp file first, then renames it to the target file.
    */
   public async write<T>(filePath: string, data: T): Promise<void> {
-    const dir = path.dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
-
-    const tempPath = `${filePath}.tmp.${Date.now()}`;
-    const content = JSON.stringify(data, null, 2);
-
     try {
-      await fs.writeFile(tempPath, content, 'utf-8');
-      await fs.rename(tempPath, filePath);
-    } catch (error) {
-      // Clean up temp file if something went wrong
+      const dir = path.dirname(filePath);
+      await fs.mkdir(dir, { recursive: true });
+
+      const tempPath = `${filePath}.tmp.${Date.now()}`;
+      const content = JSON.stringify(data, null, 2);
+
       try {
-        await fs.unlink(tempPath);
-      } catch (e) {
-        // Ignore unlink error
+        await fs.writeFile(tempPath, content, 'utf-8');
+        await fs.rename(tempPath, filePath);
+      } catch (error) {
+        // Clean up temp file if something went wrong
+        try {
+          await fs.unlink(tempPath);
+        } catch (e) {
+          // Ignore unlink error
+        }
+        throw error;
       }
-      throw error;
+    } catch (error) {
+      throw new StorageError(`Failed to write file: ${(error as Error).message}`, filePath);
     }
   }
 

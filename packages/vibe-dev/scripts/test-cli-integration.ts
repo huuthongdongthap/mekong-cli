@@ -34,7 +34,7 @@ async function main() {
 
   // 2. Execute
   const result = await cmd.execute({
-    githubToken: 'dummy',
+    githubToken: 'ghp_mocktoken1234567890abcdefghij',
     owner: 'test-owner',
     projectNumber: 1,
     localPath: 'test.json',

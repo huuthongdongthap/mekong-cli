@@ -1,7 +1,7 @@
 {
     "name": "@agencyos/vibe-dev",
     "version": "1.0.0",
-    "description": "🟢 Earth - Development Workflow Layer",
+    "description": "🟢 Earth - Development Workflow Layer - Bidirectional sync between GitHub Projects V2 and local JSON",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
@@ -14,8 +14,39 @@
         "test:sync-up": "ts-node scripts/test-sync-up.ts",
         "test:sync-engine": "ts-node scripts/test-sync-engine.ts",
         "test:cli": "ts-node scripts/test-cli-integration.ts",
-        "test:e2e": "ts-node scripts/test-e2e-real-github.ts"
+        "test:e2e": "ts-node scripts/test-e2e-real-github.ts",
+        "prepublishOnly": "npm run build"
     },
+    "keywords": [
+        "github",
+        "projects",
+        "projectsv2",
+        "sync",
+        "cli",
+        "task-management",
+        "graphql",
+        "workflow",
+        "automation"
+    ],
+    "author": "AgencyOS",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/agencyos/vibe-dev.git"
+    },
+    "bugs": {
+        "url": "https://github.com/agencyos/vibe-dev/issues"
+    },
+    "homepage": "https://github.com/agencyos/vibe-dev#readme",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "files": [
+        "dist/",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
     "dependencies": {
         "@types/inquirer": "^9.0.9",
         "chalk": "^4.1.2",
