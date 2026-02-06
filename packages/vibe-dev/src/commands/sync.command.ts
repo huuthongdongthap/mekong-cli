@@ -3,6 +3,8 @@ import { ProjectService } from '../lib/project-service';
 import { JsonStorageAdapter } from '../lib/storage-adapter';
 import { SyncEngine } from '../lib/sync-engine';
 import { SyncResult } from '../types/sync.types';
+import { validateOwner, validateProjectNumber, validateLocalPath } from '../lib/input-validation';
+import { VibeDevError } from '../lib/errors';
 
 export interface SyncCommandConfig {
   githubToken: string;
@@ -27,34 +29,55 @@ export class SyncCommand {
   public async execute(config: SyncCommandConfig): Promise<SyncResult> {
     console.log('Initializing Sync Command...');
 
-    // 1. Initialize dependencies (use injected or create new)
-    const client = this.deps.client || new GitHubClient(config.githubToken);
-    const projectService = this.deps.projectService || new ProjectService(client);
-    const storage = this.deps.storage || new JsonStorageAdapter();
-    const engine = this.deps.engine || new SyncEngine(projectService, storage);
+    try {
+      // 0. Validate inputs
+      validateOwner(config.owner);
+      validateProjectNumber(config.projectNumber);
+      validateLocalPath(config.localPath);
 
-    // 2. Validate Local Path
-    const exists = await storage.exists(config.localPath);
-    if (!exists) {
-      console.warn(`Local file ${config.localPath} does not exist. A new one will be created during sync if remote items exist.`);
-    }
+      // 1. Initialize dependencies (use injected or create new)
+      const client = this.deps.client || new GitHubClient(config.githubToken);
+      const projectService = this.deps.projectService || new ProjectService(client);
+      const storage = this.deps.storage || new JsonStorageAdapter();
+      const engine = this.deps.engine || new SyncEngine(projectService, storage);
 
-    // 3. Run Sync
-    const result = await engine.runSync(
-      config.localPath,
-      config.owner,
-      config.projectNumber,
-      !!config.isOrg,
-      {
-        autoResolve: config.autoResolve ?? true,
-        dryRun: !!config.dryRun
+      // 2. Validate Local Path
+      const exists = await storage.exists(config.localPath);
+      if (!exists) {
+        console.warn(`Local file ${config.localPath} does not exist. A new one will be created during sync if remote items exist.`);
       }
-    );
 
-    // 4. Report
-    this.printReport(result);
+      // 3. Run Sync
+      const result = await engine.runSync(
+        config.localPath,
+        config.owner,
+        config.projectNumber,
+        !!config.isOrg,
+        {
+          autoResolve: config.autoResolve ?? true,
+          dryRun: !!config.dryRun
+        }
+      );
 
-    return result;
+      // 4. Report
+      this.printReport(result);
+
+      return result;
+    } catch (error) {
+      if (error instanceof VibeDevError) {
+        // Structured error - already formatted
+        console.error(`\n❌ ${error.name}: ${error.message}`);
+        console.error(`   Error Code: ${error.code}`);
+        if (error.recoverable) {
+          console.error(`   This error may be transient. Please try again.`);
+        }
+      } else if (error instanceof Error) {
+        console.error(`\n❌ Error: ${error.message}`);
+      } else {
+        console.error(`\n❌ Unknown error occurred`);
+      }
+      throw error;
+    }
   }
 
   private printReport(result: SyncResult) {
