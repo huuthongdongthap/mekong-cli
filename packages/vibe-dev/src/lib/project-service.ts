@@ -43,8 +43,8 @@ export class ProjectService {
     let endCursor: string | null = null;
 
     while (hasNextPage) {
-      const itemsData = await this.client.graphql<any>(GET_PROJECT_V2_ITEMS, { projectId, after: endCursor });
-      const itemNodes = itemsData.node.items;
+      const itemsData: any = await this.client.graphql<any>(GET_PROJECT_V2_ITEMS, { projectId, after: endCursor });
+      const itemNodes: any = itemsData.node.items;
 
       items.push(...itemNodes.nodes);
 
