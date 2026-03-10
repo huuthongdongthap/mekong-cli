@@ -212,3 +212,86 @@ def benchmark() -> None:
     except Exception:
         pass
 
+
+@app.command()
+def matrix() -> None:
+    """🔮 Show AGI module interconnection matrix — the neural map."""
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
+
+    # Define the 9 modules and their interconnections
+    modules = ["NLU", "Mem", "Ref", "WM", "Tool", "Brw", "Col", "Evo", "Vec"]
+    icons = ["📡", "💾", "🪞", "🌍", "🔧", "🌐", "🤝", "🧬", "🧠"]
+
+    # Connection matrix: which modules talk to which
+    # 0=none, 1=reads, 2=writes, 3=bidirectional
+    connections = [
+        # NLU Mem Ref  WM Tool Brw Col Evo Vec
+        [0,   2,  0,   0,  0,  0,  0,  0,  0],  # NLU → writes to Memory
+        [1,   0,  1,   0,  0,  0,  0,  0,  1],  # Mem ← reads from NLU, Ref, Vec
+        [0,   1,  0,   1,  0,  0,  0,  0,  1],  # Ref reads Mem, WM, Vec
+        [0,   0,  1,   0,  1,  0,  0,  1,  0],  # WM reads Ref, Tool, Evo
+        [0,   0,  0,   1,  0,  1,  0,  0,  0],  # Tool reads WM, Brw
+        [0,   0,  0,   0,  1,  0,  0,  0,  0],  # Brw reads Tool
+        [0,   1,  1,   1,  0,  0,  0,  1,  0],  # Col reads Mem, Ref, WM, Evo
+        [0,   0,  1,   1,  1,  0,  1,  0,  1],  # Evo reads Ref, WM, Tool, Col, Vec
+        [0,   1,  0,   0,  0,  0,  0,  0,  0],  # Vec reads Mem
+    ]
+
+    symbols = {0: "·", 1: "←", 2: "→", 3: "⇄"}
+    colors = {0: "dim", 1: "cyan", 2: "green", 3: "magenta"}
+
+    table = Table(
+        title="🔮 AGI Neural Matrix — Module Interconnections",
+        show_lines=True,
+        border_style="bright_blue",
+    )
+    table.add_column("", style="bold", width=6)
+    for i, name in enumerate(modules):
+        table.add_column(f"{icons[i]}", justify="center", width=5)
+
+    total_connections = 0
+    for i, row in enumerate(connections):
+        cells = []
+        for j, val in enumerate(row):
+            if i == j:
+                cells.append("[bold yellow]■[/bold yellow]")
+            else:
+                sym = symbols[val]
+                col = colors[val]
+                if val > 0:
+                    total_connections += 1
+                cells.append(f"[{col}]{sym}[/{col}]")
+        table.add_row(f"{icons[i]} {modules[i]}", *cells)
+
+    console.print(table)
+
+    # Data flow summary
+    flow = Text()
+    flow.append("Data Flow: ", style="bold")
+    flow.append("← reads  ", style="cyan")
+    flow.append("→ writes  ", style="green")
+    flow.append("⇄ bidirectional  ", style="magenta")
+    flow.append("· none  ", style="dim")
+    flow.append("■ self", style="yellow")
+    console.print(flow)
+    console.print(
+        f"\n[bold]Active Connections:[/bold] {total_connections} | "
+        f"[bold]Density:[/bold] {total_connections / (len(modules) * (len(modules) - 1)) * 100:.0f}%"
+    )
+
+    # AGI score
+    try:
+        from src.core.agi_score import AGIScoreEngine
+        report = AGIScoreEngine().calculate()
+        grade_colors = {"S": "magenta", "A": "green", "B": "cyan", "C": "yellow"}
+        gc = grade_colors.get(report.grade, "white")
+        filled = int(report.total_score / 5)
+        bar = "█" * filled + "░" * (20 - filled)
+        console.print(
+            f"\n[{gc}]🏆 Score: {report.total_score:.0f}/100 ({report.grade})[/{gc}] {bar}"
+        )
+    except Exception:
+        pass
+
