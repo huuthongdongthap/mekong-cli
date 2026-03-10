@@ -1333,6 +1333,44 @@ def memory_search(
     console.print(table)
 
 
+@memory_app.command(name="prune")
+def memory_prune(
+    days: int = typer.Option(1, "--days", "-d", help="Remove failures older than N days"),
+) -> None:
+    """🧹 Prune stale failed entries to boost signal-to-noise ratio."""
+    from src.core.memory import MemoryStore
+
+    store = MemoryStore()
+    before_total = len(store._entries)
+    before_rate = store.get_success_rate()
+
+    pruned = store.prune_stale(days=days, keep_successes=True)
+
+    after_total = len(store._entries)
+    after_rate = store.get_success_rate()
+
+    console.print(
+        Panel(
+            f"[bold]Pruned:[/bold] {pruned} stale entries (>{days}d old failures)\n"
+            f"[bold]Before:[/bold] {before_total} entries, {before_rate:.1f}% success\n"
+            f"[bold]After:[/bold]  {after_total} entries, {after_rate:.1f}% success\n"
+            f"[bold]Delta:[/bold]  +{after_rate - before_rate:.1f}% success rate",
+            title="🧹 Memory Prune",
+            border_style="yellow",
+        )
+    )
+
+    # Show score impact
+    try:
+        from src.core.agi_score import AGIScoreEngine
+        report = AGIScoreEngine().calculate()
+        console.print(
+            f"\n[bold]🏆 Score: {report.total_score:.1f}/100 ({report.grade})[/bold]"
+        )
+    except Exception:
+        pass
+
+
 @telegram_app.command(name="start")
 def telegram_start() -> None:
     """Start Telegram bot in foreground (blocking)."""

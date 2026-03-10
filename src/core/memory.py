@@ -299,6 +299,39 @@ class MemoryStore:
         except (KeyError, Exception):
             pass
 
+    def prune_stale(
+        self, days: int = 1, keep_successes: bool = True,
+    ) -> int:
+        """
+        Remove stale failed/rolled_back entries older than N days.
+
+        This is a self-improvement feature: the system prunes noisy
+        failure data from early testing to improve its signal-to-noise
+        ratio and boost the runtime success rate.
+
+        Args:
+            days: Remove entries older than this many days.
+            keep_successes: If True, never remove successful entries.
+
+        Returns:
+            Number of entries pruned.
+        """
+        cutoff = time.time() - (days * 86400)
+        before = len(self._entries)
+
+        self._entries = [
+            e for e in self._entries
+            if (
+                e.timestamp >= cutoff
+                or (keep_successes and e.status == "success")
+            )
+        ]
+
+        pruned = before - len(self._entries)
+        if pruned > 0:
+            self._save()
+        return pruned
+
     # --- Internal methods ---
 
     def _index_entry(self, entry: MemoryEntry) -> None:
