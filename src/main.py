@@ -855,6 +855,73 @@ def history(
 
 
 @app.command()
+def train(
+    count: int = typer.Option(10, "--count", "-c", help="Number of training tasks to run"),
+) -> None:
+    """🏋️ Train the AGI pipeline — batch-run tasks to build auto-recipes and boost score."""
+    import time
+
+    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
+
+    tasks = [
+        "pwd", "whoami", "date", "uname", "hostname",
+        "ls .", "echo hello", "echo mekong", "echo agi", "echo train",
+        "ls -la", "echo done", "cat README.md", "find . -maxdepth 1 -type d",
+        "echo benchmark",
+    ][:count]
+
+    console.print(f"\n[bold cyan]🏋️ AGI Training — {len(tasks)} tasks[/bold cyan]\n")
+
+    # Before score
+    try:
+        from src.core.agi_score import AGIScoreEngine
+        before = AGIScoreEngine().calculate()
+        before_score = before.total_score
+        console.print(f"[dim]Before: {before_score:.1f}/100 ({before.grade})[/dim]\n")
+    except Exception:
+        before_score = 0.0
+
+    success = 0
+    fail = 0
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Training...", total=len(tasks))
+        for goal in tasks:
+            progress.update(task, description=f"cook: {goal}")
+            try:
+                from src.core.orchestrator import RecipeOrchestrator
+                orch = RecipeOrchestrator(llm_client=None, strict_verification=False)
+                result = orch.run_from_goal(goal)
+                if result.completed_steps > 0:
+                    success += 1
+                else:
+                    fail += 1
+            except Exception:
+                fail += 1
+            progress.advance(task)
+
+    console.print(f"\n[bold]Results:[/bold] ✓ {success} passed | ✗ {fail} failed")
+
+    # After score
+    try:
+        after = AGIScoreEngine().calculate()
+        delta = after.total_score - before_score
+        sign = "+" if delta > 0 else ""
+        console.print(
+            f"[bold]Score:[/bold] {after.total_score:.1f}/100 ({after.grade}) "
+            f"[dim]{sign}{delta:.1f}[/dim]"
+        )
+    except Exception:
+        pass
+
+
+@app.command()
 def gateway(
     port: int = typer.Option(8000, "--port", "-p", help="Server port"),
     host: str = typer.Option("127.0.0.1", "--host", "-H", help="Server bind address"),
