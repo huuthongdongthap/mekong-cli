@@ -784,6 +784,77 @@ def debug_cmd(
 
 
 @app.command()
+def history(
+    limit: int = typer.Option(20, "--limit", "-l", help="Number of entries to show"),
+    stats: bool = typer.Option(False, "--stats", "-s", help="Show summary stats only"),
+) -> None:
+    """📜 Show cook execution history with AGI insights."""
+    from pathlib import Path as _Path
+
+    from rich.table import Table
+
+    from src.core.memory import MemoryStore
+
+    store = MemoryStore()
+    all_stats = store.stats()
+    entries = store._entries[-limit:]
+
+    if stats or not entries:
+        # Stats-only mode
+        total = all_stats.get("total", 0)
+        success_rate = all_stats.get("success_rate", 0.0)
+        avg_ms = all_stats.get("avg_duration_ms", 0.0)
+        auto_dir = _Path("recipes/auto")
+        auto_count = sum(1 for _ in auto_dir.glob("*.md")) if auto_dir.exists() else 0
+
+        console.print(
+            Panel(
+                f"[bold]Total Executions:[/bold] {total}\n"
+                f"[bold]Success Rate:[/bold] {success_rate:.1f}%\n"
+                f"[bold]Avg Duration:[/bold] {avg_ms:.0f}ms\n"
+                f"[bold]Auto Recipes:[/bold] {auto_count}",
+                title="📜 Cook History Summary",
+                border_style="cyan",
+            )
+        )
+        if not entries:
+            console.print("[dim]No entries yet. Run `mekong cook` to start.[/dim]")
+        return
+
+    # Table mode
+    table = Table(title=f"📜 Last {len(entries)} Cook Executions", show_lines=False)
+    table.add_column("#", style="dim", width=4)
+    table.add_column("Goal", max_width=40)
+    table.add_column("Status")
+    table.add_column("Duration", justify="right")
+    table.add_column("Recipe", style="dim")
+
+    for i, entry in enumerate(entries, 1):
+        status_str = (
+            "[green]✓ success[/green]" if entry.status == "success"
+            else "[red]✗ failed[/red]"
+        )
+        dur = f"{entry.duration_ms:.0f}ms" if entry.duration_ms else "-"
+        recipe = entry.recipe_used or "-"
+        goal_short = entry.goal[:38] + "…" if len(entry.goal) > 38 else entry.goal
+        table.add_row(str(i), goal_short, status_str, dur, recipe)
+
+    console.print(table)
+
+    # AGI insight
+    try:
+        from src.core.agi_score import AGIScoreEngine
+        report = AGIScoreEngine().calculate()
+        console.print(
+            f"\n[dim]🏆 AGI Score: {report.total_score:.0f}/100 ({report.grade}) │ "
+            f"Executions: {all_stats.get('total', 0)} │ "
+            f"Success: {all_stats.get('success_rate', 0.0):.0f}%[/dim]"
+        )
+    except Exception:
+        pass
+
+
+@app.command()
 def gateway(
     port: int = typer.Option(8000, "--port", "-p", help="Server port"),
     host: str = typer.Option("127.0.0.1", "--host", "-H", help="Server bind address"),
