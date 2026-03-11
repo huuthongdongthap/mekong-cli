@@ -20,11 +20,25 @@ CYCLE=0
 ALERT_COUNT=0
 DISPATCHED_TASKS=0
 CURRENT_PLAN=""
+HEAL_COUNT=0
+
+# Worker config dirs for auto-heal restart
+AGENT_CONFIGS=(
+    "$HOME/.claude-planner"
+    "$HOME/.claude-developer"
+    "$HOME/.claude-tester"
+    "$HOME/.claude-planner"
+)
 
 # Cooldown: skip redispatch for N cycles after worker completes
 declare -A WORKER_COOLDOWN
 WORKER_COOLDOWN=([0]=0 [1]=0 [2]=0 [3]=0)
 COOLDOWN_CYCLES=3  # Skip this many cycles before redispatching
+
+# Track heal attempts to avoid infinite restart loops
+declare -A HEAL_ATTEMPTS
+HEAL_ATTEMPTS=([0]=0 [1]=0 [2]=0 [3]=0)
+MAX_HEAL_ATTEMPTS=3  # Max restarts per worker per session
 
 # Auto-detect best model
 detect_model() {
@@ -312,6 +326,61 @@ ACTION: SCOUT,COOK,FIX,TEST,REFACTOR,REVIEW,COMMIT" 80)
     done
 }
 
+# ═══ AUTO-HEAL: detect crashed workers → restart CCC ═══
+auto_heal_workers() {
+    for i in 0 1 2 3; do
+        local pout=$(get_pane_output $i 10)
+        local pstatus=$(get_pane_status "$pout")
+        
+        # Check if worker is EXITED or showing shell prompt (claude died)
+        local needs_heal=false
+        if [ "$pstatus" = "EXITED" ]; then
+            needs_heal=true
+        fi
+        # Detect bare shell (zsh prompt visible, no claude running)
+        if echo "$pout" | grep -qE "^(❯|\$|%)\s*$" && ! echo "$pout" | grep -q "Claude Code"; then
+            needs_heal=true
+        fi
+        # Detect empty pane (tmux pane with nothing)
+        if [ -z "$(echo "$pout" | tr -d '[:space:]')" ]; then
+            needs_heal=true
+        fi
+        
+        if [ "$needs_heal" = true ]; then
+            local attempts=${HEAL_ATTEMPTS[$i]:-0}
+            if [ "$attempts" -ge "$MAX_HEAL_ATTEMPTS" ]; then
+                echo "🚫 P$i: Max heal attempts ($MAX_HEAL_ATTEMPTS) reached — skipping"
+                continue
+            fi
+            
+            HEAL_ATTEMPTS[$i]=$((attempts + 1))
+            HEAL_COUNT=$((HEAL_COUNT + 1))
+            local config="${AGENT_CONFIGS[$i]:-$HOME/.claude-planner}"
+            
+            echo "🏥 P$i: CRASHED → restarting CCC (attempt $((attempts+1))/$MAX_HEAL_ATTEMPTS)"
+            
+            # Kill any zombie process in pane
+            $TMUX_BIN send-keys -t "$SESSION:0.$i" C-c 2>/dev/null
+            sleep 1
+            $TMUX_BIN send-keys -t "$SESSION:0.$i" "exit" C-m 2>/dev/null
+            sleep 1
+            
+            # Respawn pane with fresh CCC
+            $TMUX_BIN respawn-pane -k -t "$SESSION:0.$i" \
+                "cd $PROJECT && CLAUDE_CONFIG_DIR=$config claude; zsh" 2>/dev/null
+            
+            echo "[$(date +%H:%M:%S)] HEAL P$i: restart CCC (attempt $((attempts+1)))" >> "$REPORT_DIR/heal_log.txt"
+            
+            # Wait for CCC to boot, then redispatch if plan exists
+            WORKER_COOLDOWN[$i]=2
+            sleep 3
+        else
+            # Reset heal attempts if worker is healthy
+            HEAL_ATTEMPTS[$i]=0
+        fi
+    done
+}
+
 # ═══ PANE FUNCTIONS ═══
 get_pane_output() {
     local pane=$1; local lines=${2:-20}
@@ -453,17 +522,22 @@ while true; do
         echo ""
     done
 
-    # 5. AUTO-REDISPATCH IDLE (every 5 cycles = ~1 min)
+    # 5. AUTO-HEAL crashed workers (every 3 cycles)
+    if [ $((CYCLE % 3)) -eq 0 ]; then
+        auto_heal_workers
+    fi
+
+    # 6. AUTO-REDISPATCH IDLE (every 5 cycles = ~1 min)
     if [ $((CYCLE % 5)) -eq 0 ]; then
         auto_redispatch_idle
     fi
 
-    # 6. REPORT (every 15 cycles = ~3 min)
+    # 7. REPORT (every 15 cycles = ~3 min)
     if [ $((CYCLE % 15)) -eq 0 ]; then
         write_report
     fi
     
-    echo "📨 Inbox: $([ -f "$PLAN_INBOX" ] && echo "📬 NEW PLAN!" || echo "empty") | Next scan: 12s"
+    echo "📨 Inbox: $([ -f "$PLAN_INBOX" ] && echo "📬 NEW PLAN!" || echo "empty") | Healed: $HEAL_COUNT | Next: 12s"
 
     sleep 12
 done
