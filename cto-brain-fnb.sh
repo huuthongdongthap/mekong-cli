@@ -1,13 +1,12 @@
 #!/bin/zsh
 # ═══════════════════════════════════════════════════════════
-# 🧠 CTO F&B v4 — NARROW PANE SAFE
+# 🧠 CTO F&B v7 — CONTEXT-AWARE + ANTI-OVERLAP
 #
-# ROOT CAUSE FIX: panes are 44 chars wide.
-# "esc to interrupt" needs 67+ chars → ALWAYS TRUNCATED.
-# grep for "esc to interrupt" NEVER works in tiled layout.
-#
-# NEW APPROACH: detect BUSY from task content signals,
-# not from status bar text that gets cut off.
+# RULES:
+# 1. Read worker output FIRST → decide next task
+# 2. NEVER dispatch to busy/queued workers
+# 3. NEVER duplicate tasks across workers
+# 4. Single atomic pane read per worker per cycle
 # ═══════════════════════════════════════════════════════════
 
 FNB_APP="/Users/mac/mekong-cli/apps/fnb-caffe-container"
@@ -17,134 +16,210 @@ W="fnb"
 NP=4
 LOG="/Users/mac/mekong-cli/.cto-reports/fnb/cto-fnb.log"
 
-mkdir -p /Users/mac/mekong-cli/.cto-reports/fnb "$FNB_APP"
+mkdir -p /Users/mac/mekong-cli/.cto-reports/fnb
 
-IDX=0
-TASKS=(
-    '/dev-feature "Them dark mode toggle va theme switching cho '$FNB_APP' tat ca pages"'
-    '/dev-feature "Build online payment integration QR code VNPay MoMo cho '$FNB_APP'/checkout.html"'
-    '/frontend-ui-build "Nang cap UI animations micro-interactions skeleton loading cho '$FNB_APP'"'
-    '/dev-feature "Build real-time order tracking WebSocket notification cho '$FNB_APP'"'
-    '/cook "Toi uu Core Web Vitals LCP FCP CLS performance cho '$FNB_APP' dat 90+ Lighthouse"'
-    '/dev-bug-sprint "Fix tat ca console errors broken links accessibility issues trong '$FNB_APP'"'
-    '/frontend-responsive-fix "Fix responsive 375px 768px 1024px cho '$FNB_APP' tat ca pages"'
-    '/eng-tech-debt "Refactor '$FNB_APP' DRY code shared components optimize bundle size"'
-    '/dev-feature "Build customer reviews rating system cho '$FNB_APP'/menu.html"'
-    '/dev-feature "Them i18n da ngon ngu Vietnamese English cho '$FNB_APP'"'
-    '/release-ship "Git commit push '$FNB_APP' viet release notes deploy Cloudflare"'
-    '/cook "Audit security headers CSP CORS HTTPS cho '$FNB_APP' production ready"'
-)
-TL=${#TASKS[@]}
 CYCLE=0
 DIS=0
+LOCK_SEC=60
 
 typeset -A LAST_DISPATCH
 LAST_DISPATCH=([0]=0 [1]=0 [2]=0 [3]=0)
-LOCK_SEC=45  # 45s — content-based detection handles overlap
+
+DISPATCHED_LIST=""
 
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 
-is_worker_busy() {
+get_worker_snapshot() {
     local p=$1
-    local raw=$($T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -5)
-
-    # ANY of these patterns = DEFINITELY BUSY
-    if echo "$raw" | grep -qE \
-        "thinking|Unfurling|Precipitating|Stewing|Pondering|Whirlpooling|Crunching|Clauding"; then
-        return 0  # busy
-    fi
-    if echo "$raw" | grep -qE \
-        "queued messages|Press up to edit"; then
-        return 0  # busy — tasks already stacked!
-    fi
-    if echo "$raw" | grep -qE \
-        "◻|◼|pending|completed"; then
-        return 0  # busy — task checklist visible
-    fi
-    if echo "$raw" | grep -qE \
-        "Read.*file|Write\(|Bash\(|Searched|Created|Updated|ctrl\+o"; then
-        return 0  # busy — CC CLI operations in progress
-    fi
-    if echo "$raw" | grep -qE \
-        "approve edit|confirm|Enter to select|navigate.*Esc"; then
-        return 0  # busy — prompt waiting
-    fi
-    if echo "$raw" | grep -qE \
-        "esc to"; then
-        return 0  # busy — partial match works in narrow panes
-    fi
-
-    return 1  # not busy
+    $T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -15
 }
 
-can_dispatch() {
-    local p=$1
-    local now=$(date +%s)
-
-    # CHECK 1: lock timer
-    local last=${LAST_DISPATCH[$p]:-0}
-    local age=$((now - last))
-    if (( age < LOCK_SEC )); then
-        return 1
+get_worker_state() {
+    local snap="$1"
+    local last5=$(echo "$snap" | tail -5)
+    
+    if echo "$last5" | grep -qE "esc to"; then
+        echo "BUSY"; return
     fi
-
-    # CHECK 2: worker must NOT be busy
-    if is_worker_busy "$p"; then
-        # Renew lock — worker still working
-        LAST_DISPATCH[$p]=$now
-        return 1
+    if echo "$last5" | grep -qE "thinking|Unfurling|Precipitating|Stewing|Pondering|Whirlpooling|Crunching|Clauding|Symbioting|Envisioning"; then
+        echo "BUSY"; return
     fi
-
-    # CHECK 3: must see bypass or shortcuts = CC CLI idle prompt
-    local raw=$($T capture-pane -t "$S:$W.$p" -p -S -3 2>/dev/null)
-    if echo "$raw" | grep -qE "bypass permissions|shortcuts"; then
-        return 0  # TRULY IDLE
+    if echo "$last5" | grep -qE "queued messages|Press up to edit"; then
+        echo "QUEUED"; return
     fi
-
-    return 1  # unknown = skip
+    if echo "$last5" | grep -qE "◻|◼|pending|completed"; then
+        echo "BUSY"; return
+    fi
+    if echo "$last5" | grep -qE "Read.*file|Write\(|Bash\(|Searched|Created|Updated|ctrl\+o|ctrl\+c"; then
+        echo "BUSY"; return
+    fi
+    if echo "$last5" | grep -qE "approve edit|confirm|Enter to select|navigate.*Esc|Compacting"; then
+        echo "BUSY"; return
+    fi
+    
+    if echo "$last5" | grep -qE "bypass permissions|shortcuts"; then
+        echo "IDLE"; return
+    fi
+    
+    echo "DEAD"
 }
 
-# Auto-select checkboxes and confirms
-do_auto_select() {
+classify_completed_work() {
+    local ctx="$1"
+    
+    if echo "$ctx" | grep -qiE "commit|push|release|deploy|shipped|cloudflare"; then
+        echo "SHIPPED"
+    elif echo "$ctx" | grep -qiE "test.*pass|tests.*pass|coverage|jest|vitest"; then
+        echo "TESTED"
+    elif echo "$ctx" | grep -qiE "fix.*bug|debug|console.*error|broken.*link|error.*fix"; then
+        echo "FIXED"
+    elif echo "$ctx" | grep -qiE "responsive|breakpoint|375px|768px|mobile"; then
+        echo "RESPONSIVE"
+    elif echo "$ctx" | grep -qiE "refactor|duplicate|tech.*debt|cleanup|DRY"; then
+        echo "REFACTORED"
+    elif echo "$ctx" | grep -qiE "build|creat|implement|feature|add.*page|dark.*mode|payment|i18n|component"; then
+        echo "BUILT"
+    elif echo "$ctx" | grep -qiE "review|audit|scan|accessibility|quality|security"; then
+        echo "REVIEWED"
+    elif echo "$ctx" | grep -qiE "performance|minify|lazy.*load|lighthouse|cache|skeleton|animation"; then
+        echo "OPTIMIZED"
+    else
+        echo "UNKNOWN"
+    fi
+}
+
+pick_next_task() {
+    local phase="$1"
+    
+    case "$phase" in
+        BUILT)
+            echo '/dev-bug-sprint "Viet tests verify code vua build trong '$FNB_APP'"'
+            ;;
+        TESTED)
+            echo '/frontend-responsive-fix "Fix responsive 375px 768px 1024px '$FNB_APP'"'
+            ;;
+        FIXED)
+            echo '/cook "Toi uu Core Web Vitals performance '$FNB_APP'"'
+            ;;
+        RESPONSIVE)
+            echo '/dev-pr-review "Review code quality accessibility '$FNB_APP'"'
+            ;;
+        REVIEWED)
+            echo '/dev-feature "Build next feature dua tren review '$FNB_APP'"'
+            ;;
+        REFACTORED)
+            echo '/dev-bug-sprint "Run tests verify refactor '$FNB_APP'"'
+            ;;
+        OPTIMIZED)
+            echo '/dev-feature "Them dark mode payment QR i18n '$FNB_APP'"'
+            ;;
+        SHIPPED)
+            echo '/cook "Scan loi moi sau deploy broken links '$FNB_APP'"'
+            ;;
+        *)
+            echo '/cook "Scan project status broken links '$FNB_APP'"'
+            ;;
+    esac
+}
+
+is_duplicate_task() {
+    local task_key=$(echo "$1" | grep -oE '/[a-z-]+ "' | head -1)
+    echo "$DISPATCHED_LIST" | grep -q "$task_key"
+}
+
+get_fallback_task() {
+    local worker=$1
+    local tasks=(
+        '/eng-tech-debt "Refactor DRY shared components '$FNB_APP'"'
+        '/cook "Them SEO metadata structured data '$FNB_APP'"'
+        '/dev-feature "Build customer reviews rating '$FNB_APP'/menu.html"'
+        '/frontend-ui-build "Nang cap UI animations skeleton '$FNB_APP'"'
+    )
+    echo "${tasks[$((worker % ${#tasks[@]} + 1))]}"
+}
+
+safe_dispatch() {
     local p=$1
-    local raw=$($T capture-pane -t "$S:$W.$p" -p -S -15 2>/dev/null)
-    if echo "$raw" | grep -qE "Enter to select|Tab.*navigate" && echo "$raw" | grep -qE "\[ \]"; then
-        local n=$(echo "$raw" | grep -c "\[ \]")
-        for ((j=0; j<n; j++)); do
-            $T send-keys -t "$S:$W.$p" " "; sleep 0.3
-            $T send-keys -t "$S:$W.$p" Down; sleep 0.3
-        done
-        $T send-keys -t "$S:$W.$p" Down; sleep 0.3
-        $T send-keys -t "$S:$W.$p" Enter
-        log "🎯 F$p: Auto-select"
+    local task="$2"
+    
+    local verify=$($T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -3)
+    
+    if echo "$verify" | grep -qE "thinking|esc to|◻|◼|queued|Read|Write|Bash|Searched|Compacting"; then
+        log "🚫 F$p: ABORT — worker busy before dispatch"
+        return 1
     fi
-    if echo "$raw" | grep -qE "Yes, clear context.*bypass|Yes, and bypass"; then
-        $T send-keys -t "$S:$W.$p" "1" Enter
-        log "🎯 F$p: Auto-confirm"
+    
+    if echo "$verify" | grep -qE "queued messages|Press up to edit"; then
+        log "🚫 F$p: ABORT — queued messages"
+        return 1
     fi
+    
+    $T send-keys -t "$S:$W.$p" Escape 2>/dev/null
+    sleep 0.3
+    
+    $T send-keys -t "$S:$W.$p" "$task" Enter
+    return 0
 }
 
 echo "╔══════════════════════════════════════════╗"
-echo "║ 🧠 CTO F&B v4 — NARROW PANE SAFE       ║"
-echo "║ Lock: ${LOCK_SEC}s | Busy: content-based ║"
+echo "║ 🧠 CTO F&B v7 — ANTI-OVERLAP           ║"
+echo "║ Atomic read | Pre-dispatch verify       ║"
+echo "║ No queue stacking | Context-aware       ║"
 echo "╚══════════════════════════════════════════╝"
+
+DISPATCHED_LIST=""
 
 while true; do
     ((CYCLE++))
+    
+    if (( CYCLE % 4 == 0 )); then
+        DISPATCHED_LIST=""
+    fi
 
     for ((p=0; p<NP; p++)); do
-        do_auto_select "$p"
-
-        if can_dispatch "$p"; then
-            local task="${TASKS[$((IDX % TL + 1))]}"
-            log "✅ F$p → $(echo $task | head -c 55)..."
-            $T send-keys -t "$S:$W.$p" "$task" Enter
-            LAST_DISPATCH[$p]=$(date +%s)
-            ((IDX++))
-            ((DIS++))
+        local now=$(date +%s)
+        local last=${LAST_DISPATCH[$p]:-0}
+        local age=$((now - last))
+        
+        if (( age < LOCK_SEC )); then
+            continue
         fi
+        
+        local snap=$(get_worker_snapshot "$p")
+        local state=$(get_worker_state "$snap")
+        
+        case "$state" in
+            BUSY)
+                LAST_DISPATCH[$p]=$now
+                ;;
+            QUEUED)
+                LAST_DISPATCH[$p]=$now
+                log "⏸️  F$p: QUEUED — skip, wait for clear"
+                ;;
+            DEAD)
+                log "🔧 F$p: DEAD → restarting CC CLI"
+                $T send-keys -t "$S:$W.$p" "cd $FNB_APP && claude --dangerously-skip-permissions" Enter
+                LAST_DISPATCH[$p]=$((now + 25))
+                ;;
+            IDLE)
+                local phase=$(classify_completed_work "$snap")
+                local task=$(pick_next_task "$phase")
+                
+                if is_duplicate_task "$task"; then
+                    task=$(get_fallback_task "$p")
+                    log "⚡ F$p: duplicate → fallback"
+                fi
+                
+                if safe_dispatch "$p" "$task"; then
+                    log "✅ F$p [$phase] → $(echo $task | head -c 55)..."
+                    LAST_DISPATCH[$p]=$now
+                    DISPATCHED_LIST="$DISPATCHED_LIST|$(echo $task | grep -oE '/[a-z-]+ "' | head -1)"
+                    ((DIS++))
+                fi
+                ;;
+        esac
     done
 
-    echo "═══ 🧠 FNB-v4 $(date +%H:%M:%S) cy:$CYCLE dis:$DIS ═══"
+    echo "═══ 🧠 FNB-v7 $(date +%H:%M:%S) cy:$CYCLE dis:$DIS ═══"
     sleep 15
 done
