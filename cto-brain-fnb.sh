@@ -1,12 +1,11 @@
 #!/bin/zsh
 # ═══════════════════════════════════════════════════════════
-# 🧠 CTO F&B v7 — CONTEXT-AWARE + ANTI-OVERLAP
+# 🧠 CTO F&B v8 — UNIQUE TASK PER WORKER
 #
 # RULES:
-# 1. Read worker output FIRST → decide next task
-# 2. NEVER dispatch to busy/queued workers
-# 3. NEVER duplicate tasks across workers
-# 4. Single atomic pane read per worker per cycle
+# 1. Each worker gets a UNIQUE task — no two workers same task
+# 2. Fixed slot assignment: F0=scan F1=feature F2=bugfix F3=UI
+# 3. Never dispatch to busy/queued workers
 # ═══════════════════════════════════════════════════════════
 
 FNB_APP="/Users/mac/mekong-cli/apps/fnb-caffe-container"
@@ -25,117 +24,82 @@ LOCK_SEC=60
 typeset -A LAST_DISPATCH
 LAST_DISPATCH=([0]=0 [1]=0 [2]=0 [3]=0)
 
-DISPATCHED_LIST=""
+typeset -A WORKER_TASK_ROUND
+WORKER_TASK_ROUND=([0]=0 [1]=0 [2]=0 [3]=0)
+
+# F0 = Scan / Audit / SEO / Performance
+SLOT_0_TASKS=(
+    '/cook "Scan broken links accessibility audit '$FNB_APP'"'
+    '/cook "Toi uu Core Web Vitals LCP FCP CLS '$FNB_APP'"'
+    '/cook "Audit security headers CSP CORS '$FNB_APP'"'
+    '/cook "Them SEO metadata structured data '$FNB_APP'"'
+)
+# F1 = Features / Build
+SLOT_1_TASKS=(
+    '/dev-feature "Them dark mode toggle theme switching '$FNB_APP'"'
+    '/dev-feature "Build customer reviews rating '$FNB_APP'/menu.html"'
+    '/dev-feature "Build payment QR VNPay MoMo '$FNB_APP'/checkout.html"'
+    '/dev-feature "Them i18n da ngon ngu Vietnamese English '$FNB_APP'"'
+)
+# F2 = Bug Fix / Test
+SLOT_2_TASKS=(
+    '/dev-bug-sprint "Fix console errors broken links '$FNB_APP'"'
+    '/dev-bug-sprint "Viet tests verify components '$FNB_APP'"'
+    '/dev-bug-sprint "Fix loi visual alignment spacing '$FNB_APP'"'
+    '/frontend-responsive-fix "Fix responsive 375px 768px 1024px '$FNB_APP'"'
+)
+# F3 = UI / Refactor / Release
+SLOT_3_TASKS=(
+    '/frontend-ui-build "Nang cap UI animations skeleton loading '$FNB_APP'"'
+    '/eng-tech-debt "Refactor DRY shared components '$FNB_APP'"'
+    '/release-ship "Git commit push release notes deploy Cloudflare '$FNB_APP'"'
+    '/dev-pr-review "Review code quality patterns '$FNB_APP'"'
+)
 
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 
-get_worker_snapshot() {
-    local p=$1
-    $T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -15
+get_unique_task() {
+    local worker=$1
+    local round=${WORKER_TASK_ROUND[$worker]:-0}
+    
+    case "$worker" in
+        0) local arr=("${SLOT_0_TASKS[@]}"); local sz=${#SLOT_0_TASKS[@]} ;;
+        1) local arr=("${SLOT_1_TASKS[@]}"); local sz=${#SLOT_1_TASKS[@]} ;;
+        2) local arr=("${SLOT_2_TASKS[@]}"); local sz=${#SLOT_2_TASKS[@]} ;;
+        3) local arr=("${SLOT_3_TASKS[@]}"); local sz=${#SLOT_3_TASKS[@]} ;;
+    esac
+    
+    local idx=$(( (round % sz) + 1 ))
+    WORKER_TASK_ROUND[$worker]=$((round + 1))
+    echo "${arr[$idx]}"
 }
 
 get_worker_state() {
-    local snap="$1"
-    local last5=$(echo "$snap" | tail -5)
+    local p=$1
+    local raw=$($T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -5)
     
-    if echo "$last5" | grep -qE "esc to"; then
+    if echo "$raw" | grep -qE "esc to"; then
         echo "BUSY"; return
     fi
-    if echo "$last5" | grep -qE "thinking|Unfurling|Precipitating|Stewing|Pondering|Whirlpooling|Crunching|Clauding|Symbioting|Envisioning"; then
+    if echo "$raw" | grep -qE "thinking|Unfurling|Precipitating|Stewing|Pondering|Whirlpooling|Crunching|Clauding|Symbioting|Envisioning|Simmering"; then
         echo "BUSY"; return
     fi
-    if echo "$last5" | grep -qE "queued messages|Press up to edit"; then
+    if echo "$raw" | grep -qE "queued messages|Press up to edit"; then
         echo "QUEUED"; return
     fi
-    if echo "$last5" | grep -qE "◻|◼|pending|completed"; then
+    if echo "$raw" | grep -qE "◻|◼|pending|completed"; then
         echo "BUSY"; return
     fi
-    if echo "$last5" | grep -qE "Read.*file|Write\(|Bash\(|Searched|Created|Updated|ctrl\+o|ctrl\+c"; then
+    if echo "$raw" | grep -qE "Read.*file|Write\(|Bash\(|Searched|Created|Updated|ctrl\+o|ctrl\+c"; then
         echo "BUSY"; return
     fi
-    if echo "$last5" | grep -qE "approve edit|confirm|Enter to select|navigate.*Esc|Compacting"; then
+    if echo "$raw" | grep -qE "approve edit|confirm|Enter to select|navigate.*Esc|Compacting"; then
         echo "BUSY"; return
     fi
-    
-    if echo "$last5" | grep -qE "bypass permissions|shortcuts"; then
+    if echo "$raw" | grep -qE "bypass permissions|shortcuts"; then
         echo "IDLE"; return
     fi
-    
     echo "DEAD"
-}
-
-classify_completed_work() {
-    local ctx="$1"
-    
-    if echo "$ctx" | grep -qiE "commit|push|release|deploy|shipped|cloudflare"; then
-        echo "SHIPPED"
-    elif echo "$ctx" | grep -qiE "test.*pass|tests.*pass|coverage|jest|vitest"; then
-        echo "TESTED"
-    elif echo "$ctx" | grep -qiE "fix.*bug|debug|console.*error|broken.*link|error.*fix"; then
-        echo "FIXED"
-    elif echo "$ctx" | grep -qiE "responsive|breakpoint|375px|768px|mobile"; then
-        echo "RESPONSIVE"
-    elif echo "$ctx" | grep -qiE "refactor|duplicate|tech.*debt|cleanup|DRY"; then
-        echo "REFACTORED"
-    elif echo "$ctx" | grep -qiE "build|creat|implement|feature|add.*page|dark.*mode|payment|i18n|component"; then
-        echo "BUILT"
-    elif echo "$ctx" | grep -qiE "review|audit|scan|accessibility|quality|security"; then
-        echo "REVIEWED"
-    elif echo "$ctx" | grep -qiE "performance|minify|lazy.*load|lighthouse|cache|skeleton|animation"; then
-        echo "OPTIMIZED"
-    else
-        echo "UNKNOWN"
-    fi
-}
-
-pick_next_task() {
-    local phase="$1"
-    
-    case "$phase" in
-        BUILT)
-            echo '/dev-bug-sprint "Viet tests verify code vua build trong '$FNB_APP'"'
-            ;;
-        TESTED)
-            echo '/frontend-responsive-fix "Fix responsive 375px 768px 1024px '$FNB_APP'"'
-            ;;
-        FIXED)
-            echo '/cook "Toi uu Core Web Vitals performance '$FNB_APP'"'
-            ;;
-        RESPONSIVE)
-            echo '/dev-pr-review "Review code quality accessibility '$FNB_APP'"'
-            ;;
-        REVIEWED)
-            echo '/dev-feature "Build next feature dua tren review '$FNB_APP'"'
-            ;;
-        REFACTORED)
-            echo '/dev-bug-sprint "Run tests verify refactor '$FNB_APP'"'
-            ;;
-        OPTIMIZED)
-            echo '/dev-feature "Them dark mode payment QR i18n '$FNB_APP'"'
-            ;;
-        SHIPPED)
-            echo '/cook "Scan loi moi sau deploy broken links '$FNB_APP'"'
-            ;;
-        *)
-            echo '/cook "Scan project status broken links '$FNB_APP'"'
-            ;;
-    esac
-}
-
-is_duplicate_task() {
-    local task_key=$(echo "$1" | grep -oE '/[a-z-]+ "' | head -1)
-    echo "$DISPATCHED_LIST" | grep -q "$task_key"
-}
-
-get_fallback_task() {
-    local worker=$1
-    local tasks=(
-        '/eng-tech-debt "Refactor DRY shared components '$FNB_APP'"'
-        '/cook "Them SEO metadata structured data '$FNB_APP'"'
-        '/dev-feature "Build customer reviews rating '$FNB_APP'/menu.html"'
-        '/frontend-ui-build "Nang cap UI animations skeleton '$FNB_APP'"'
-    )
-    echo "${tasks[$((worker % ${#tasks[@]} + 1))]}"
 }
 
 safe_dispatch() {
@@ -144,37 +108,25 @@ safe_dispatch() {
     
     local verify=$($T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -3)
     
-    if echo "$verify" | grep -qE "thinking|esc to|◻|◼|queued|Read|Write|Bash|Searched|Compacting"; then
-        log "🚫 F$p: ABORT — worker busy before dispatch"
-        return 1
-    fi
-    
-    if echo "$verify" | grep -qE "queued messages|Press up to edit"; then
-        log "🚫 F$p: ABORT — queued messages"
+    if echo "$verify" | grep -qE "thinking|esc to|◻|◼|queued|Read|Write|Bash|Searched|Compacting|Press up"; then
+        log "🚫 F$p: ABORT — busy"
         return 1
     fi
     
     $T send-keys -t "$S:$W.$p" Escape 2>/dev/null
     sleep 0.3
-    
     $T send-keys -t "$S:$W.$p" "$task" Enter
     return 0
 }
 
 echo "╔══════════════════════════════════════════╗"
-echo "║ 🧠 CTO F&B v7 — ANTI-OVERLAP           ║"
-echo "║ Atomic read | Pre-dispatch verify       ║"
-echo "║ No queue stacking | Context-aware       ║"
+echo "║ 🧠 CTO F&B v8 — UNIQUE SLOTS           ║"
+echo "║ F0=scan/perf F1=feature F2=bug/test     ║"
+echo "║ F3=UI/refactor | No duplicates          ║"
 echo "╚══════════════════════════════════════════╝"
-
-DISPATCHED_LIST=""
 
 while true; do
     ((CYCLE++))
-    
-    if (( CYCLE % 4 == 0 )); then
-        DISPATCHED_LIST=""
-    fi
 
     for ((p=0; p<NP; p++)); do
         local now=$(date +%s)
@@ -185,8 +137,7 @@ while true; do
             continue
         fi
         
-        local snap=$(get_worker_snapshot "$p")
-        local state=$(get_worker_state "$snap")
+        local state=$(get_worker_state "$p")
         
         case "$state" in
             BUSY)
@@ -194,32 +145,25 @@ while true; do
                 ;;
             QUEUED)
                 LAST_DISPATCH[$p]=$now
-                log "⏸️  F$p: QUEUED — skip, wait for clear"
+                log "⏸️  F$p: QUEUED — skip"
                 ;;
             DEAD)
-                log "🔧 F$p: DEAD → restarting CC CLI"
+                log "🔧 F$p: DEAD → restart"
                 $T send-keys -t "$S:$W.$p" "cd $FNB_APP && claude --dangerously-skip-permissions" Enter
                 LAST_DISPATCH[$p]=$((now + 25))
                 ;;
             IDLE)
-                local phase=$(classify_completed_work "$snap")
-                local task=$(pick_next_task "$phase")
-                
-                if is_duplicate_task "$task"; then
-                    task=$(get_fallback_task "$p")
-                    log "⚡ F$p: duplicate → fallback"
-                fi
+                local task=$(get_unique_task "$p")
                 
                 if safe_dispatch "$p" "$task"; then
-                    log "✅ F$p [$phase] → $(echo $task | head -c 55)..."
+                    log "✅ F$p [slot$p] → $(echo $task | head -c 60)..."
                     LAST_DISPATCH[$p]=$now
-                    DISPATCHED_LIST="$DISPATCHED_LIST|$(echo $task | grep -oE '/[a-z-]+ "' | head -1)"
                     ((DIS++))
                 fi
                 ;;
         esac
     done
 
-    echo "═══ 🧠 FNB-v7 $(date +%H:%M:%S) cy:$CYCLE dis:$DIS ═══"
+    echo "═══ 🧠 FNB-v8 $(date +%H:%M:%S) cy:$CYCLE dis:$DIS ═══"
     sleep 15
 done
