@@ -1,4 +1,5 @@
 #!/bin/zsh
+set +e  # NEVER exit on error — CTO must survive
 # ═══════════════════════════════════════════════════════════
 # 🧠 CTO F&B v8 — UNIQUE TASK PER WORKER
 #
@@ -25,35 +26,42 @@ typeset -A LAST_DISPATCH
 LAST_DISPATCH=([0]=0 [1]=0 [2]=0 [3]=0)
 
 typeset -A WORKER_TASK_ROUND
-WORKER_TASK_ROUND=([0]=0 [1]=0 [2]=0 [3]=0)
+ROUND_FILE="/Users/mac/mekong-cli/.cto-reports/fnb/round_state.txt"
 
-# F0 = Scan / Audit / SEO / Performance
+# Load persisted round counters (survives restart)
+if [[ -f "$ROUND_FILE" ]]; then
+    source "$ROUND_FILE"
+else
+    WORKER_TASK_ROUND=([0]=0 [1]=0 [2]=0 [3]=0)
+fi
+
+# F0 = New pages and features
 SLOT_0_TASKS=(
-    '/cook "Scan broken links accessibility audit '$FNB_APP'"'
-    '/cook "Toi uu Core Web Vitals LCP FCP CLS '$FNB_APP'"'
-    '/cook "Audit security headers CSP CORS '$FNB_APP'"'
-    '/cook "Them SEO metadata structured data '$FNB_APP'"'
+    'Tao file moi loyalty-program.html chuong trinh tich diem khach hang VIP voi UI dep trong '$FNB_APP''
+    'Tao file moi kitchen-display.html man hinh hien thi don hang realtime cho bep trong '$FNB_APP''
+    'Tao file moi staff-schedule.html lich lam viec nhan vien drag drop theo tuan trong '$FNB_APP''
+    'Tao file moi analytics-dashboard.html bieu do doanh thu Chart.js top 10 mon ban chay trong '$FNB_APP''
 )
-# F1 = Features / Build
+# F1 = Interactive components
 SLOT_1_TASKS=(
-    '/dev-feature "Them dark mode toggle theme switching '$FNB_APP'"'
-    '/dev-feature "Build customer reviews rating '$FNB_APP'/menu.html"'
-    '/dev-feature "Build payment QR VNPay MoMo '$FNB_APP'/checkout.html"'
-    '/dev-feature "Them i18n da ngon ngu Vietnamese English '$FNB_APP'"'
+    'Tao file moi table-reservation.html he thong dat ban online chon ngay gio so nguoi trong '$FNB_APP''
+    'Tao file moi feedback-form.html form danh gia 5 sao comment upload anh mon an trong '$FNB_APP''
+    'Tao file moi promotions.html trang flash sale countdown timer voucher code trong '$FNB_APP''
+    'Tao file moi delivery-tracking.html theo doi don giao hang status timeline trong '$FNB_APP''
 )
-# F2 = Bug Fix / Test
+# F2 = JS modules
 SLOT_2_TASKS=(
-    '/dev-bug-sprint "Fix console errors broken links '$FNB_APP'"'
-    '/dev-bug-sprint "Viet tests verify components '$FNB_APP'"'
-    '/dev-bug-sprint "Fix loi visual alignment spacing '$FNB_APP'"'
-    '/frontend-responsive-fix "Fix responsive 375px 768px 1024px '$FNB_APP'"'
+    'Tao file moi js/cart-manager.js module gio hang add remove quantity localStorage tinh tien trong '$FNB_APP''
+    'Tao file moi js/order-api.js mock REST API tao don hang goi mon tinh bill trong '$FNB_APP''
+    'Tao file moi js/notification.js toast notification system voi bell icon badge count trong '$FNB_APP''
+    'Tao file moi js/search-filter.js tim kiem mon theo ten loc theo gia category realtime trong '$FNB_APP''
 )
-# F3 = UI / Refactor / Release
+# F3 = Design and content pages
 SLOT_3_TASKS=(
-    '/frontend-ui-build "Nang cap UI animations skeleton loading '$FNB_APP'"'
-    '/eng-tech-debt "Refactor DRY shared components '$FNB_APP'"'
-    '/release-ship "Git commit push release notes deploy Cloudflare '$FNB_APP'"'
-    '/dev-pr-review "Review code quality patterns '$FNB_APP'"'
+    'Tao file moi receipt-template.html va css/print-receipt.css mau in hoa don nhiet A5 trong '$FNB_APP''
+    'Tao file moi about-us.html trang gioi thieu quan cafe lich su doi ngu hinh anh trong '$FNB_APP''
+    'Tao file moi contact.html ban do Google Maps form lien he so dien thoai email trong '$FNB_APP''
+    'Tao file moi gallery.html lightbox slider hinh anh mon an khong gian nha hang trong '$FNB_APP''
 )
 
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
@@ -71,6 +79,8 @@ get_unique_task() {
     
     local idx=$(( (round % sz) + 1 ))
     WORKER_TASK_ROUND[$worker]=$((round + 1))
+    # Persist to disk so rotation survives restart
+    echo "WORKER_TASK_ROUND=([0]=${WORKER_TASK_ROUND[0]:-0} [1]=${WORKER_TASK_ROUND[1]:-0} [2]=${WORKER_TASK_ROUND[2]:-0} [3]=${WORKER_TASK_ROUND[3]:-0})" > "$ROUND_FILE"
     echo "${arr[$idx]}"
 }
 
@@ -126,7 +136,7 @@ echo "║ F3=UI/refactor | No duplicates          ║"
 echo "╚══════════════════════════════════════════╝"
 
 while true; do
-    ((CYCLE++))
+    CYCLE=$((CYCLE + 1))
 
     for ((p=0; p<NP; p++)); do
         local now=$(date +%s)
@@ -153,12 +163,16 @@ while true; do
                 LAST_DISPATCH[$p]=$((now + 25))
                 ;;
             IDLE)
-                local task=$(get_unique_task "$p")
+                # ═══ READ 45 LINES CONTEXT BEFORE DISPATCH ═══
+                local ctx=$(read_context_45 "$p")
+                local summary=$(get_context_summary "$ctx")
+                local task=$(get_unique_task "$p" "$ctx")
                 
                 if safe_dispatch "$p" "$task"; then
-                    log "✅ F$p [slot$p] → $(echo $task | head -c 60)..."
+                    log "✅ F$p [slot$p] → $(echo $task | head -c 55)..."
+                    log "   📖 ctx: $summary"
                     LAST_DISPATCH[$p]=$now
-                    ((DIS++))
+                    DIS=$((DIS + 1))
                 fi
                 ;;
         esac

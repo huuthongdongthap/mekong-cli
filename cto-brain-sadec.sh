@@ -1,4 +1,5 @@
 #!/bin/zsh
+set +e  # NEVER exit on error — CTO must survive
 # ═══════════════════════════════════════════════════════════
 # 🧠 CTO SADEC v8 — UNIQUE TASK PER WORKER
 #
@@ -28,7 +29,14 @@ LAST_DISPATCH=([0]=0 [1]=0 [2]=0 [3]=0 [4]=0 [5]=0)
 # ═══ TASK REGISTRY — each worker slot gets unique task ═══
 # 6 workers = 6 different task categories, rotated each round
 typeset -A WORKER_TASK_ROUND
-WORKER_TASK_ROUND=([0]=0 [1]=0 [2]=0 [3]=0 [4]=0 [5]=0)
+ROUND_FILE="/Users/mac/mekong-cli/.cto-reports/sadec/round_state.txt"
+
+# Load persisted round counters (survives restart)
+if [[ -f "$ROUND_FILE" ]]; then
+    source "$ROUND_FILE"
+else
+    WORKER_TASK_ROUND=([0]=0 [1]=0 [2]=0 [3]=0 [4]=0 [5]=0)
+fi
 
 # Fixed task slots — worker N always gets category N
 # Each category has multiple tasks that rotate per round
@@ -67,6 +75,7 @@ log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 
 get_unique_task() {
     local worker=$1
+    local ctx="$2"
     local round=${WORKER_TASK_ROUND[$worker]:-0}
     
     case "$worker" in
@@ -80,12 +89,14 @@ get_unique_task() {
     
     local idx=$(( (round % sz) + 1 ))
     WORKER_TASK_ROUND[$worker]=$((round + 1))
+    # Persist rotation
+    echo "WORKER_TASK_ROUND=([0]=${WORKER_TASK_ROUND[0]:-0} [1]=${WORKER_TASK_ROUND[1]:-0} [2]=${WORKER_TASK_ROUND[2]:-0} [3]=${WORKER_TASK_ROUND[3]:-0} [4]=${WORKER_TASK_ROUND[4]:-0} [5]=${WORKER_TASK_ROUND[5]:-0})" > "$ROUND_FILE"
     echo "${arr[$idx]}"
 }
 
 get_worker_state() {
     local p=$1
-    local raw=$($T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -5)
+    local raw=$($T capture-pane -t "$S:$W.$p" -p 2>/dev/null | tail -5 || echo "")
     
     if echo "$raw" | grep -qE "esc to"; then
         echo "BUSY"; return
@@ -135,7 +146,7 @@ echo "║ S4=refactor S5=perf  | No duplicates    ║"
 echo "╚══════════════════════════════════════════╝"
 
 while true; do
-    ((CYCLE++))
+    CYCLE=$((CYCLE + 1))
 
     for ((p=0; p<NP; p++)); do
         local now=$(date +%s)
@@ -162,12 +173,16 @@ while true; do
                 LAST_DISPATCH[$p]=$((now + 25))
                 ;;
             IDLE)
-                local task=$(get_unique_task "$p")
+                # ═══ READ 45 LINES CONTEXT BEFORE DISPATCH ═══
+                local ctx=$(read_context_45 "$p")
+                local summary=$(get_context_summary "$ctx")
+                local task=$(get_unique_task "$p" "$ctx")
                 
                 if safe_dispatch "$p" "$task"; then
-                    log "✅ S$p [slot$p] → $(echo $task | head -c 60)..."
+                    log "✅ S$p [slot$p] → $(echo $task | head -c 55)..."
+                    log "   📖 ctx: $summary"
                     LAST_DISPATCH[$p]=$now
-                    ((DIS++))
+                    DIS=$((DIS + 1))
                 fi
                 ;;
         esac
