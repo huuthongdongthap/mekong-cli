@@ -41,34 +41,34 @@ fi
 # Fixed task slots — worker N always gets category N
 # Each category has multiple tasks that rotate per round
 SLOT_0_TASKS=(
-    '/cook "Scan broken links meta tags accessibility audit '$SADEC_APP'"'
-    '/cook "Audit security headers CSP CORS XSS '$SADEC_APP'"'
-    '/cook "Toi uu SEO metadata og tags structured data '$SADEC_APP'"'
+    '/cook "Tao file moi engagement-tracker.html trang theo doi tuong tac khach hang trong '$SADEC_APP'"'
+    '/cook "Tao file moi campaign-builder.html tao chien dich marketing drag drop trong '$SADEC_APP'"'
+    '/cook "Tao file moi social-scheduler.html len lich dang bai Facebook Instagram trong '$SADEC_APP'"'
 )
 SLOT_1_TASKS=(
-    '/dev-feature "Build notification system toast messages '$SADEC_APP'"'
-    '/dev-feature "Them dark mode theme switching '$SADEC_APP'"'
-    '/dev-feature "Build dashboard widgets charts KPIs '$SADEC_APP'/admin"'
+    '/cook "Tao file moi lead-funnel.html pheu chuyen doi khach hang tu cold den hot trong '$SADEC_APP'"'
+    '/cook "Tao file moi email-template-editor.html trinh soan email marketing template trong '$SADEC_APP'"'
+    '/cook "Tao file moi crm-contacts.html quan ly danh ba khach hang tags notes trong '$SADEC_APP'"'
 )
 SLOT_2_TASKS=(
-    '/dev-bug-sprint "Fix console errors broken imports warnings '$SADEC_APP'"'
-    '/dev-bug-sprint "Viet them tests tang coverage '$SADEC_APP'"'
-    '/dev-bug-sprint "Debug fix loi visual UI alignment '$SADEC_APP'"'
+    '/cook "Tao file moi js/analytics-engine.js module tinh toan ROI CPL CTR cac chien dich trong '$SADEC_APP'"'
+    '/cook "Tao file moi js/ab-testing.js he thong A/B test so sanh 2 phien ban landing page trong '$SADEC_APP'"'
+    '/cook "Tao file moi js/form-builder.js module tao form dong keo tha cac truong input trong '$SADEC_APP'"'
 )
 SLOT_3_TASKS=(
-    '/frontend-responsive-fix "Fix responsive 375px 768px 1024px '$SADEC_APP'"'
-    '/frontend-responsive-fix "Fix mobile navigation hamburger menu '$SADEC_APP'"'
-    '/frontend-responsive-fix "Fix tablet layout grid spacing '$SADEC_APP'"'
+    '/cook "Tao file moi brand-guidelines.html trang huong dan thuong hieu logo mau font trong '$SADEC_APP'"'
+    '/cook "Tao file moi content-calendar.html lich noi dung hang thang dang bai theo chu de trong '$SADEC_APP'"'
+    '/cook "Tao file moi competitor-analysis.html bang phan tich doi thu canh tranh trong '$SADEC_APP'"'
 )
 SLOT_4_TASKS=(
-    '/eng-tech-debt "Refactor DRY shared utils consolidate '$SADEC_APP'"'
-    '/eng-tech-debt "Remove dead code unused imports '$SADEC_APP'"'
-    '/eng-tech-debt "Optimize bundle size tree shake '$SADEC_APP'"'
+    '/cook "Tao file moi seo-audit-tool.html cong cu kiem tra SEO on-page meta title description trong '$SADEC_APP'"'
+    '/cook "Tao file moi keyword-research.html nghien cuu tu khoa volume difficulty SERP trong '$SADEC_APP'"'
+    '/cook "Tao file moi sitemap-generator.html tao sitemap XML tu dong cho website trong '$SADEC_APP'"'
 )
 SLOT_5_TASKS=(
-    '/cook "Toi uu performance minify CSS JS lazy load '$SADEC_APP'"'
-    '/dev-pr-review "Review code quality patterns '$SADEC_APP'"'
-    '/release-ship "Git commit push release notes '$SADEC_APP'"'
+    '/cook "Tao file moi report-builder.html xuat bao cao PDF tong hop chien dich marketing trong '$SADEC_APP'"'
+    '/cook "Tao file moi client-portal.html cong khach hang xem bao cao thanh toan invoice trong '$SADEC_APP'"'
+    '/cook "Tao file moi team-workspace.html khong gian lam viec nhom task board kanban trong '$SADEC_APP'"'
 )
 
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }

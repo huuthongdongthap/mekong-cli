@@ -37,31 +37,31 @@ fi
 
 # F0 = New pages and features
 SLOT_0_TASKS=(
-    'Tao file moi loyalty-program.html chuong trinh tich diem khach hang VIP voi UI dep trong '$FNB_APP''
-    'Tao file moi kitchen-display.html man hinh hien thi don hang realtime cho bep trong '$FNB_APP''
-    'Tao file moi staff-schedule.html lich lam viec nhan vien drag drop theo tuan trong '$FNB_APP''
-    'Tao file moi analytics-dashboard.html bieu do doanh thu Chart.js top 10 mon ban chay trong '$FNB_APP''
+    '/cook "Tao file moi loyalty-program.html chuong trinh tich diem khach hang VIP voi UI dep trong '$FNB_APP'"'
+    '/cook "Tao file moi kitchen-display.html man hinh hien thi don hang realtime cho bep trong '$FNB_APP'"'
+    '/cook "Tao file moi staff-schedule.html lich lam viec nhan vien drag drop theo tuan trong '$FNB_APP'"'
+    '/cook "Tao file moi analytics-dashboard.html bieu do doanh thu Chart.js top 10 mon ban chay trong '$FNB_APP'"'
 )
 # F1 = Interactive components
 SLOT_1_TASKS=(
-    'Tao file moi table-reservation.html he thong dat ban online chon ngay gio so nguoi trong '$FNB_APP''
-    'Tao file moi feedback-form.html form danh gia 5 sao comment upload anh mon an trong '$FNB_APP''
-    'Tao file moi promotions.html trang flash sale countdown timer voucher code trong '$FNB_APP''
-    'Tao file moi delivery-tracking.html theo doi don giao hang status timeline trong '$FNB_APP''
+    '/cook "Tao file moi table-reservation.html he thong dat ban online chon ngay gio so nguoi trong '$FNB_APP'"'
+    '/cook "Tao file moi feedback-form.html form danh gia 5 sao comment upload anh mon an trong '$FNB_APP'"'
+    '/cook "Tao file moi promotions.html trang flash sale countdown timer voucher code trong '$FNB_APP'"'
+    '/cook "Tao file moi delivery-tracking.html theo doi don giao hang status timeline trong '$FNB_APP'"'
 )
 # F2 = JS modules
 SLOT_2_TASKS=(
-    'Tao file moi js/cart-manager.js module gio hang add remove quantity localStorage tinh tien trong '$FNB_APP''
-    'Tao file moi js/order-api.js mock REST API tao don hang goi mon tinh bill trong '$FNB_APP''
-    'Tao file moi js/notification.js toast notification system voi bell icon badge count trong '$FNB_APP''
-    'Tao file moi js/search-filter.js tim kiem mon theo ten loc theo gia category realtime trong '$FNB_APP''
+    '/cook "Tao file moi js/cart-manager.js module gio hang add remove quantity localStorage tinh tien trong '$FNB_APP'"'
+    '/cook "Tao file moi js/order-api.js mock REST API tao don hang goi mon tinh bill trong '$FNB_APP'"'
+    '/cook "Tao file moi js/notification.js toast notification system voi bell icon badge count trong '$FNB_APP'"'
+    '/cook "Tao file moi js/search-filter.js tim kiem mon theo ten loc theo gia category realtime trong '$FNB_APP'"'
 )
 # F3 = Design and content pages
 SLOT_3_TASKS=(
-    'Tao file moi receipt-template.html va css/print-receipt.css mau in hoa don nhiet A5 trong '$FNB_APP''
-    'Tao file moi about-us.html trang gioi thieu quan cafe lich su doi ngu hinh anh trong '$FNB_APP''
-    'Tao file moi contact.html ban do Google Maps form lien he so dien thoai email trong '$FNB_APP''
-    'Tao file moi gallery.html lightbox slider hinh anh mon an khong gian nha hang trong '$FNB_APP''
+    '/cook "Tao file moi receipt-template.html va css/print-receipt.css mau in hoa don nhiet A5 trong '$FNB_APP'"'
+    '/cook "Tao file moi about-us.html trang gioi thieu quan cafe lich su doi ngu hinh anh trong '$FNB_APP'"'
+    '/cook "Tao file moi contact.html ban do Google Maps form lien he so dien thoai email trong '$FNB_APP'"'
+    '/cook "Tao file moi gallery.html lightbox slider hinh anh mon an khong gian nha hang trong '$FNB_APP'"'
 )
 
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
