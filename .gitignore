@@ -407,3 +407,10 @@ supabase/
 conftest.py
 .coveragerc
 .env*.local
+# Coverage & test artifacts
+*.lcov
+# Environment
+mekong-env.js
+# Dependencies
+# Build artifacts
+*.tmp
