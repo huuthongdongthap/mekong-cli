@@ -56,11 +56,11 @@ export class VibeOps {
 
         // Simulated deployment steps
         result.logs.push(`📦 Building ${config.project}...`);
-        result.logs.push(`🔗 Linking to Vercel project...`);
-        result.logs.push(`⬆️ Pushing to ${config.branch}...`);
+        result.logs.push(`🔗 Linking to Cloudflare project...`);
+        result.logs.push(`⬆️ Deploying to Cloudflare Pages...`);
 
         result.status = 'success';
-        result.url = `https://${config.project}.vercel.app`;
+        result.url = `https://${config.project}.pages.dev`;
         result.duration = Date.now() - startTime;
         result.logs.push(`✅ Deployed to ${result.url}`);
 
@@ -97,10 +97,10 @@ export class VibeOps {
 
 export const commands = {
     build: 'turbo build',
-    deploy: 'vercel --prod --yes',
-    link: 'vercel link --yes',
-    pull: 'vercel pull',
-    logs: 'vercel logs',
+    deploy: 'wrangler deploy',
+    link: 'wrangler login',
+    pull: 'wrangler deploy --dry-run',
+    logs: 'wrangler tail',
 };
 
 export const ops = new VibeOps();

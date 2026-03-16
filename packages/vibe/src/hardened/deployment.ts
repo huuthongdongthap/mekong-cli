@@ -1,21 +1,22 @@
 /**
  * 🛡️ VIBE Hardened - Deployment Logic
+ * Updated: 2026-03-16 - Migrated from Vercel to Cloudflare
  */
 export interface DeployConfig {
     project: string;
     environment: 'development' | 'staging' | 'production';
-    vercelFlags: string[];
+    cloudflareProjectId?: string;
 }
 
 export const DEPLOY_COMMANDS = {
-    link: 'vercel link --yes',
-    pull: 'vercel pull',
-    build: 'vercel build',
-    deploy: 'vercel --prod --yes',
-    logs: 'vercel logs',
+    link: 'wrangler login',
+    pull: 'wrangler deploy --dry-run',
+    build: 'npm run build',
+    deploy: 'wrangler deploy',
+    logs: 'wrangler tail',
 };
 
 export function getDeployCommand(env: DeployConfig['environment']): string {
     if (env === 'production') return DEPLOY_COMMANDS.deploy;
-    return 'vercel --yes';
+    return `wrangler deploy --env ${env}`;
 }

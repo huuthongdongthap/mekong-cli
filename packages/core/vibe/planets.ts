@@ -89,10 +89,10 @@ export function validateWinWinWin(tier: DealTier) {
 // ============================================
 
 export const DEPLOY_COMMANDS = {
-    link: 'vercel link --yes',
-    pull: 'vercel pull',
-    build: 'vercel build',
-    deploy: 'vercel --prod --yes',
+    link: 'wrangler login',
+    pull: 'wrangler deploy --dry-run',
+    build: 'npm run build',
+    deploy: 'wrangler deploy',
 };
 
 // ============================================
