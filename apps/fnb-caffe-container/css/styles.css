@@ -1629,6 +1629,31 @@ body {
     gap: 12px;
 }
 
+.item-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    width: 100%;
+}
+
+.item-rating .stars {
+    color: #FFD700;
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+}
+
+.item-rating .rating-count {
+    font-size: 0.75rem;
+    color: var(--md-sys-color-outline);
+    font-weight: 500;
+}
+
+/* M3 Card variant */
+.m3-card-header .item-rating {
+    margin-top: 4px;
+}
+
 .m3-card-title {
     font-family: var(--md-sys-typescale-title-font);
     font-size: 1.125rem;

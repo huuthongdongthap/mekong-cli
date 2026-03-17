@@ -2,6 +2,8 @@
 //  F&B CAFFE CONTAINER — Menu Page Interactions
 // ═══════════════════════════════════════════════
 
+import { reviews } from './reviews.js';
+
 let MENU_DATA = null;
 let CART = [];
 
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   registerServiceWorker();
   initAddToCart();
   updateCartCount();
+  loadReviewsRatings(); // Load average ratings for menu items
 });
 
 // ─── Load Menu Data from JSON ───
@@ -468,3 +471,63 @@ function updateThemeIcon(icon, theme) {
 
 // Initialize theme on page load
 initThemeToggle();
+
+// ─── Load Reviews & Ratings for Menu Items ───
+async function loadReviewsRatings() {
+  if (!MENU_DATA?.items) return;
+
+  const allItems = MENU_DATA.items;
+  const ratingsCache = {};
+
+  // Fetch ratings for all items in parallel
+  const ratingPromises = allItems.map(async (item) => {
+    try {
+      const stats = await reviews.getStats(item.id);
+      if (stats.success && stats.stats) {
+        ratingsCache[item.id] = {
+          average: parseFloat(stats.stats.average) || 0,
+          count: stats.stats.count || 0,
+        };
+      }
+    } catch (_error) {
+      if (DEBUG) {console.warn(`Failed to load rating for ${item.id}:`, _error);}
+    }
+  });
+
+  await Promise.all(ratingPromises);
+
+  // Render ratings to menu cards
+  allItems.forEach((item) => {
+    const ratingData = ratingsCache[item.id];
+    if (!ratingData || ratingData.count === 0) return;
+
+    // Find button by data-product, then find parent card
+    const btn = document.querySelector(`.btn-add-cart[data-product*='"${item.id}"']`);
+    if (!btn) return;
+
+    const card = btn.closest('.menu-item-card, .m3-menu-card');
+    if (!card) return;
+
+    const itemHeader = card.querySelector('.item-header, .m3-card-header');
+    if (!itemHeader) return;
+
+    const stars = getStarString(ratingData.average);
+    const ratingHtml = `
+      <div class="item-rating" title="${ratingData.average}/5 (${ratingData.count} đánh giá)">
+        <span class="stars">${stars}</span>
+        <span class="rating-count">(${ratingData.count})</span>
+      </div>
+    `;
+
+    // Insert rating after item name
+    const itemName = itemHeader.querySelector('.item-name, .m3-card-title');
+    if (itemName) {
+      itemName.insertAdjacentHTML('afterend', ratingHtml);
+    }
+  });
+}
+
+function getStarString(rating) {
+  const r = Math.round(rating);
+  return '★'.repeat(r) + '☆'.repeat(5 - r);
+}

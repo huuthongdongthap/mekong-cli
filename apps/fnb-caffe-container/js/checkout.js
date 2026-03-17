@@ -73,7 +73,7 @@ async function loadCartFromAPI() {
       // Cart is empty
       handleEmptyCart();
     }
-  } catch (error) {
+  } catch (_error) {
     // Fallback to localStorage
     cart = JSON.parse(localStorage.getItem('cart')) || { items: [], total: 0, count: 0 };
     loadCartToSummary();
@@ -290,7 +290,7 @@ async function removeItem(id) {
     } else {
       showToast('Không thể xóa sản phẩm', 'error');
     }
-  } catch (error) {
+  } catch (_error) {
     // Fallback to localStorage
     delete cart[id];
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -443,7 +443,7 @@ function initSubmitOrder() {
       } else {
         throw new Error(result.detail || 'Có lỗi xảy ra');
       }
-    } catch (error) {
+    } catch (_error) {
       showToast('⚠️ Lỗi: ' + error.message, 'error');
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<span class="btn-text">✅ Xác Nhận Đặt Hàng</span>';
@@ -488,7 +488,7 @@ function sendOrderToWebSocket(order) {
       status: 'pending',
       created_at: order.created_at || new Date().toISOString()
     });
-  } catch (error) {
+  } catch (_error) {
     // Silent fail for production
   }
 }
@@ -515,7 +515,7 @@ async function handleMoMoPayment(order) {
       // Fallback: show QR code modal
       throw new Error('Không thể tạo liên kết thanh toán MoMo');
     }
-  } catch (error) {
+  } catch (_error) {
     // Show QR code modal as fallback
     handlePaymentQR(order, 'momo');
   }
@@ -539,7 +539,7 @@ async function handlePayOSPayment(order) {
     } else {
       throw new Error('Không thể tạo liên kết thanh toán PayOS');
     }
-  } catch (error) {
+  } catch (_error) {
     await handleCODSuccess(order);
   }
 }
@@ -563,7 +563,7 @@ async function handleVNPayPayment(order) {
       // Show QR code modal as fallback
       handlePaymentQR(order, 'vnpay');
     }
-  } catch (error) {
+  } catch (_error) {
     // Show QR code modal as fallback
     handlePaymentQR(order, 'vnpay');
   }
@@ -575,7 +575,7 @@ async function handleVNPayPayment(order) {
 async function clearCart() {
   try {
     await fetch(`${API_BASE}/cart/clear?session_id=${sessionId}`, { method: 'POST' });
-  } catch (error) {
+  } catch (_error) {
     // Silent fail
   }
   localStorage.removeItem('cart');
@@ -799,7 +799,7 @@ async function initializeWebSocketTracking() {
 
     // Start heartbeat
     orderWebSocket.startHeartbeat(30000);
-  } catch (error) {
+  } catch (_error) {
     // Silent fail for production
   }
 }
@@ -1076,7 +1076,7 @@ async function copyAccountNumber() {
   try {
     await navigator.clipboard.writeText(accountNumber);
     showToast('✅ Đã sao chép số tài khoản', 'success');
-  } catch (error) {
+  } catch (_error) {
     showToast('⚠️ Không thể sao chép', 'error');
   }
 }

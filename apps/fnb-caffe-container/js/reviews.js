@@ -1,354 +1,369 @@
 /**
- * Customer Reviews & Rating System
- * F&B Container Café
+ * ═══════════════════════════════════════════════
+ *  F&B CAFFE CONTAINER — Reviews Module
+ *  Customer reviews with star ratings
+ * ═══════════════════════════════════════════════
+ *
+ * Usage:
+ *   import { reviews } from '/js/reviews.js';
+ *
+ *   // Submit review
+ *   const result = await reviews.submitReview({
+ *     item_id: 'coffee-001',
+ *     rating: 5,
+ *     comment: 'Ngon tuyệt!',
+ *     customer_name: 'Nguyen Van A'
+ *   });
+ *
+ *   // Load reviews
+ *   const data = await reviews.loadReviews({ item_id: 'coffee-001' });
+ *
+ *   // Get stats
+ *   const stats = await reviews.getStats('coffee-001');
  */
 
-export class ReviewsSystem {
-  constructor() {
-    this.storageKey = 'fnb_cafe_reviews';
-    this.reviews = this.loadReviews();
-    this.init();
-  }
+import { API_CONFIG } from './config.js';
 
-  init() {
-    this.renderReviews();
-    this.initStarRating();
-    this.initReviewForm();
-    this.initSorting();
-    this.updateAverageRating();
-  }
+// Debug logging configuration
+const DEBUG = typeof FNB_DEBUG !== 'undefined' && FNB_DEBUG;
 
-  // ============ LOAD/SAVE REVIEWS ============
+/**
+ * Reviews API Client
+ */
+export const reviews = {
+  /**
+   * Submit a new review
+   * @param {object} reviewData - Review information
+   * @param {string} reviewData.item_id - Menu item ID
+   * @param {number} reviewData.rating - Rating 1-5
+   * @param {string} reviewData.comment - Review comment
+   * @param {string} reviewData.customer_name - Customer name
+   * @param {string} [reviewData.customer_email] - Customer email
+   * @returns {Promise<{success: boolean, message?: string, review?: object, error?: string}>}
+   */
+  async submitReview(reviewData) {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE}/api/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData),
+      });
 
-  loadReviews() {
-    const stored = localStorage.getItem(this.storageKey);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-    // Default sample reviews
-    return [
-      {
-        id: 1,
-        name: 'Nguyễn Văn A',
-        rating: 5,
-        comment: 'Cà phê ngon, không gian đẹp! Nhân viên phục vụ nhiệt tình.',
-        date: '2026-03-10',
-        helpful: 12
-      },
-      {
-        id: 2,
-        name: 'Trần Thị B',
-        rating: 4,
-        comment: 'Không gian check-in rất sống ảo. Đồ uống ổn, giá hợp lý.',
-        date: '2026-03-12',
-        helpful: 8
-      },
-      {
-        id: 3,
-        name: 'Lê Văn C',
-        rating: 5,
-        comment: 'Container Special ngon tuyệt! Sẽ quay lại.',
-        date: '2026-03-13',
-        helpful: 15
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit review');
       }
-    ];
+
+      return data;
+    } catch (_error) {
+      if (DEBUG) {console.error('SubmitReview error:', _error);}
+      return {
+        success: false,
+        error: 'Lỗi kết nối: ' + _error.message,
+      };
+    }
+  },
+
+  /**
+   * Load reviews
+   * @param {object} params - Query parameters
+   * @param {string} [params.item_id] - Filter by menu item
+   * @param {number} [params.limit] - Max results
+   * @param {number} [params.offset] - Offset
+   * @returns {Promise<{success: boolean, reviews?: array, averageRating?: string, error?: string}>}
+   */
+  async loadReviews(params = {}) {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const endpoint = queryString
+        ? `/api/reviews?${queryString}`
+        : '/api/reviews';
+
+      const response = await fetch(`${API_CONFIG.BASE}${endpoint}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to load reviews');
+      }
+
+      return data;
+    } catch (_error) {
+      if (DEBUG) {console.error('LoadReviews error:', _error);}
+      return {
+        success: false,
+        error: 'Lỗi kết nối: ' + _error.message,
+      };
+    }
+  },
+
+  /**
+   * Get review statistics for a menu item
+   * @param {string} itemId - Menu item ID
+   * @returns {Promise<{success: boolean, stats?: object, error?: string}>}
+   */
+  async getStats(itemId) {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE}/api/reviews/stats/${itemId}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to load stats');
+      }
+
+      return data;
+    } catch (_error) {
+      if (DEBUG) {console.error('GetStats error:', _error);}
+      return {
+        success: false,
+        error: 'Lỗi kết nối: ' + _error.message,
+      };
+    }
+  },
+};
+
+/**
+ * Initialize reviews page
+ */
+export function initReviewsPage() {
+  const form = document.getElementById('reviewForm');
+  const reviewList = document.getElementById('reviewList');
+  const menuItemSelect = document.getElementById('menuItem');
+  const ratingSummary = document.getElementById('ratingSummary');
+
+  if (!form || !reviewList) {
+    if (DEBUG) {console.warn('[Reviews] Review elements not found');}
+    return;
   }
 
-  saveReviews() {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.reviews));
-  }
+  // Load menu items for selector
+  loadMenuItems();
 
-  addReview(review) {
-    const newReview = {
-      id: Date.now(),
-      name: review.name,
-      rating: review.rating,
-      comment: review.comment,
-      date: new Date().toISOString().split('T')[0],
-      helpful: 0
+  // Load reviews
+  loadAllReviews();
+
+  // Form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('.btn-submit');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang gửi...';
+
+    const formData = new FormData(form);
+    const reviewData = {
+      item_id: formData.get('item_id'),
+      rating: parseInt(formData.get('rating')),
+      comment: formData.get('comment'),
+      customer_name: formData.get('customer_name'),
+      customer_email: formData.get('customer_email'),
     };
-    this.reviews.unshift(newReview);
-    this.saveReviews();
-    this.renderReviews();
-    this.updateAverageRating();
-  }
 
-  // ============ STAR RATING INTERACTION ============
-
-  initStarRating() {
-    document.querySelectorAll('.star-rating-input').forEach(rating => {
-      const stars = rating.parentElement.querySelectorAll('.star');
-
-      stars.forEach((star, index) => {
-        star.addEventListener('click', () => {
-          const value = index + 1;
-          rating.value = value;
-          this.updateStarDisplay(stars, value);
-        });
-
-        star.addEventListener('mouseenter', () => {
-          this.updateStarDisplay(stars, index + 1, true);
-        });
-      });
-
-      rating.parentElement.addEventListener('mouseleave', () => {
-        const currentValue = parseInt(rating.value) || 0;
-        this.updateStarDisplay(stars, currentValue);
-      });
-    });
-  }
-
-  updateStarDisplay(stars, value, isHover = false) {
-    const fillClass = isHover ? 'star-fill-hover' : 'star-fill';
-    stars.forEach((star, index) => {
-      if (index < value) {
-        star.classList.add(fillClass);
-        star.classList.remove('star-empty');
-      } else {
-        star.classList.remove(fillClass);
-        star.classList.add('star-empty');
-      }
-    });
-  }
-
-  // ============ REVIEW FORM ============
-
-  initReviewForm() {
-    const form = document.getElementById('reviewForm');
-    if (!form) {return;}
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const name = document.getElementById('reviewerName')?.value.trim();
-      const rating = document.getElementById('reviewRating')?.value;
-      const comment = document.getElementById('reviewComment')?.value.trim();
-
-      if (!name || !rating || !comment) {
-        this.showNotification('Vui lòng điền đầy đủ thông tin!', 'error');
-        return;
-      }
-
-      if (rating < 1) {
-        this.showNotification('Vui lòng chọn số sao!', 'error');
-        return;
-      }
-
-      this.addReview({ name, rating, comment });
-
-      // Reset form
-      form.reset();
-      document.querySelectorAll('.star-rating-input').forEach(r => {
-        r.value = 0;
-        this.updateStarDisplay(r.parentElement.querySelectorAll('.star'), 0);
-      });
-
-      this.showNotification('Cảm ơn bạn đã đánh giá!', 'success');
-
-      // Close modal if exists
-      const modal = document.getElementById('reviewModal');
-      if (modal) {modal.classList.remove('active');}
-    });
-  }
-
-  // ============ RENDER REVIEWS ============
-
-  renderReviews(sortBy = 'newest') {
-    const container = document.getElementById('reviewsList');
-    if (!container) {return;}
-
-    const sortedReviews = [...this.reviews];
-
-    switch (sortBy) {
-    case 'highest':
-      sortedReviews.sort((a, b) => b.rating - a.rating);
-      break;
-    case 'lowest':
-      sortedReviews.sort((a, b) => a.rating - b.rating);
-      break;
-    case 'helpful':
-      sortedReviews.sort((a, b) => b.helpful - a.helpful);
-      break;
-    case 'newest':
-    default:
-      sortedReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Validation
+    if (!reviewData.item_id || !reviewData.rating || !reviewData.customer_name) {
+      alert('Vui lòng điền đầy đủ thông tin bắt buộc');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      return;
     }
 
-    container.innerHTML = sortedReviews.map(review => this.renderReviewCard(review)).join('');
+    try {
+      const result = await reviews.submitReview(reviewData);
 
-    // Init helpful button listeners
-    container.querySelectorAll('.helpful-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const reviewId = parseInt(e.target.dataset.reviewId);
-        this.markHelpful(reviewId);
-      });
-    });
+      if (result.success) {
+        alert('Cảm ơn bạn đã đánh giá!');
+        form.reset();
+        loadAllReviews(); // Reload reviews
+      } else {
+        alert('Có lỗi xảy ra: ' + (result.error || 'Không thể gửi đánh giá'));
+      }
+    } catch (_error) {
+      alert('Lỗi kết nối: ' + _error.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+
+  /**
+   * Load menu items for selector
+   */
+  async function loadMenuItems() {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE}/api/menu?available=true`);
+      const data = await response.json();
+
+      if (data.success && data.items) {
+        const items = data.items;
+        const grouped = {};
+
+        items.forEach(item => {
+          if (!grouped[item.category]) {
+            grouped[item.category] = [];
+          }
+          grouped[item.category].push(item);
+        });
+
+        menuItemSelect.innerHTML = '<option value="">-- Chọn món --</option>';
+
+        Object.keys(grouped).forEach(category => {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = category;
+
+          grouped[category].forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = `${item.name} - ${formatPrice(item.price)}`;
+            optgroup.appendChild(option);
+          });
+
+          menuItemSelect.appendChild(optgroup);
+        });
+      }
+    } catch (_error) {
+      if (DEBUG) {console.error('LoadMenuItems error:', _error);}
+    }
   }
 
-  renderReviewCard(review) {
-    const stars = this.renderStars(review.rating, false);
-    const date = new Date(review.date).toLocaleDateString('vi-VN', {
+  /**
+   * Load all reviews with stats
+   */
+  async function loadAllReviews() {
+    reviewList.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Đang tải đánh giá...</p>
+      </div>
+    `;
+
+    try {
+      const result = await reviews.loadReviews({ limit: 50 });
+
+      if (result.success) {
+        // Update rating summary
+        if (result.averageRating) {
+          updateRatingSummary(result);
+        }
+
+        // Render reviews
+        renderReviews(result.reviews);
+      } else {
+        reviewList.innerHTML = '<p class="no-reviews">Không thể tải đánh giá</p>';
+      }
+    } catch (_error) {
+      if (DEBUG) {console.error('LoadAllReviews error:', _error);}
+      reviewList.innerHTML = '<p class="no-reviews">Có lỗi xảy ra khi tải đánh giá</p>';
+    }
+  }
+
+  /**
+   * Update rating summary UI
+   */
+  function updateRatingSummary(data) {
+    const avg = parseFloat(data.averageRating) || 0;
+    const total = data.reviews?.length || 0;
+
+    document.getElementById('avgRating').textContent = avg.toFixed(1);
+    document.getElementById('totalReviews').textContent = total;
+    document.getElementById('avgStars').textContent = getStarString(avg);
+
+    // Count by rating
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    data.reviews?.forEach(r => {
+      counts[r.rating] = (counts[r.rating] || 0) + 1;
+    });
+
+    const maxCount = Math.max(...Object.values(counts), 1);
+
+    for (let i = 5; i >= 1; i--) {
+      const count = counts[i] || 0;
+      const percentage = (count / maxCount) * 100;
+      document.getElementById(`count${i}`).textContent = count;
+      document.getElementById(`bar${i}`).style.width = `${percentage}%`;
+    }
+
+    ratingSummary.style.display = 'flex';
+  }
+
+  /**
+   * Render reviews list
+   */
+  function renderReviews(reviewsList) {
+    if (!reviewsList || reviewsList.length === 0) {
+      reviewList.innerHTML = `
+        <div class="no-reviews">
+          <p>Chưa có đánh giá nào</p>
+          <p>Hãy là người đầu tiên chia sẻ trải nghiệm!</p>
+        </div>
+      `;
+      return;
+    }
+
+    reviewList.innerHTML = reviewsList.map(review => `
+      <div class="review-card">
+        <div class="review-card-header">
+          <div>
+            <div class="customer-name">${escapeHtml(review.customer_name)}</div>
+            <div class="rating">${getStarString(review.rating)}</div>
+          </div>
+          <div class="date">${formatDate(review.created_at)}</div>
+        </div>
+        ${review.item_id ? `<div class="review-card-item">${escapeHtml(review.item_id)}</div>` : ''}
+        <div class="review-card-comment">${escapeHtml(review.comment)}</div>
+      </div>
+    `).join('');
+  }
+
+  /**
+   * Helper: Get star string
+   */
+  function getStarString(rating) {
+    const r = Math.round(rating);
+    return '★'.repeat(r) + '☆'.repeat(5 - r);
+  }
+
+  /**
+   * Helper: Format price
+   */
+  function formatPrice(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  }
+
+  /**
+   * Helper: Format date
+   */
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
-    });
-
-    return `
-            <div class="review-card reveal" data-rating="${review.rating}">
-                <div class="review-header">
-                    <div class="reviewer-info">
-                        <div class="reviewer-avatar">
-                            ${review.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="reviewer-details">
-                            <h4 class="reviewer-name">${this.escapeHtml(review.name)}</h4>
-                            <span class="review-date">${date}</span>
-                        </div>
-                    </div>
-                    <div class="review-rating">
-                        ${stars}
-                    </div>
-                </div>
-                <p class="review-comment">${this.escapeHtml(review.comment)}</p>
-                <div class="review-footer">
-                    <button class="helpful-btn" data-review-id="${review.id}">
-                        👍 Hữu ích (${review.helpful})
-                    </button>
-                </div>
-            </div>
-        `;
-  }
-
-  renderStars(rating, interactive = true) {
-    const inputHtml = interactive ?
-      `<input type="hidden" class="star-rating-input" value="${rating}">` : '';
-
-    let starsHtml = '';
-    for (let i = 1; i <= 5; i++) {
-      const filled = i <= rating ? 'star-fill' : 'star-empty';
-      starsHtml += `<span class="star ${filled}">★</span>`;
-    }
-
-    return `<div class="star-rating ${interactive ? 'interactive' : ''}">
-            ${inputHtml}${starsHtml}
-        </div>`;
-  }
-
-  // ============ SORTING ============
-
-  initSorting() {
-    const sortSelect = document.getElementById('reviewSort');
-    if (!sortSelect) {return;}
-
-    sortSelect.addEventListener('change', (e) => {
-      this.renderReviews(e.target.value);
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
 
-  // ============ AVERAGE RATING ============
-
-  updateAverageRating() {
-    const totalReviews = this.reviews.length;
-    const totalStars = this.reviews.reduce((sum, r) => sum + r.rating, 0);
-    const average = totalReviews > 0 ? (totalStars / totalReviews).toFixed(1) : 0;
-
-    // Update average display
-    const avgElement = document.getElementById('averageRating');
-    if (avgElement) {
-      avgElement.textContent = average;
-    }
-
-    const totalReviewsElement = document.getElementById('totalReviews');
-    if (totalReviewsElement) {
-      totalReviewsElement.textContent = totalReviews;
-    }
-
-    // Update rating bars
-    this.renderRatingDistribution();
-  }
-
-  renderRatingDistribution() {
-    const distributionContainer = document.getElementById('ratingDistribution');
-    if (!distributionContainer) {return;}
-
-    const distribution = [5, 4, 3, 2, 1].map(stars => {
-      const count = this.reviews.filter(r => r.rating === stars).length;
-      const percentage = this.reviews.length > 0
-        ? (count / this.reviews.length * 100).toFixed(0)
-        : 0;
-      return { stars, count, percentage };
-    });
-
-    distributionContainer.innerHTML = distribution.map(item => `
-            <div class="rating-bar">
-                <span class="rating-bar-stars">${item.stars} ★</span>
-                <div class="rating-bar-track">
-                    <div class="rating-bar-fill" style="width: ${item.percentage}%"></div>
-                </div>
-                <span class="rating-bar-count">${item.count}</span>
-            </div>
-        `).join('');
-  }
-
-  // ============ HELPER FUNCTIONS ============
-
-  markHelpful(reviewId) {
-    const review = this.reviews.find(r => r.id === reviewId);
-    if (review) {
-      review.helpful++;
-      this.saveReviews();
-      this.renderReviews();
-    }
-  }
-
-  escapeHtml(text) {
+  /**
+   * Helper: Escape HTML
+   */
+  function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-
-  showNotification(message, type = 'success') {
-    // Remove existing notification
-    const existing = document.querySelector('.review-notification');
-    if (existing) {existing.remove();}
-
-    const notification = document.createElement('div');
-    notification.className = `review-notification ${type}`;
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-      notification.classList.add('show');
-    }, 10);
-
-    setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  }
-
-  // ============ FILTER BY RATING ============
-
-  filterByRating(minRating) {
-    const container = document.getElementById('reviewsList');
-    if (!container) {return;}
-
-    const cards = container.querySelectorAll('.review-card');
-    cards.forEach(card => {
-      const rating = parseInt(card.dataset.rating);
-      if (rating >= minRating || minRating === 0) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  }
 }
 
-// Auto-initialize on DOM ready
-if (typeof window !== 'undefined') {
+// Auto-init on DOMContentLoaded
+if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
-    window.reviewsSystem = new ReviewsSystem();
+    initReviewsPage();
   });
 }
+
+// Default export
+export default reviews;

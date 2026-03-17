@@ -18,6 +18,11 @@ import {
   logoutUser,
   getCurrentUser,
 } from './routes/auth.js';
+import {
+  getReviews,
+  createReview,
+  getReviewStats,
+} from './routes/reviews.js';
 
 // Debug logging configuration
 const DEBUG = typeof FNB_DEBUG !== 'undefined' && FNB_DEBUG;
@@ -97,11 +102,28 @@ export default {
         return getCurrentUser(request, env);
       }
 
+      // Reviews Routes
+      // GET /api/reviews
+      if (path === '/api/reviews' && method === 'GET') {
+        return getReviews(request, env);
+      }
+
+      // POST /api/reviews
+      if (path === '/api/reviews' && method === 'POST') {
+        return createReview(request, env);
+      }
+
+      // GET /api/reviews/stats/:item_id
+      if (path.match(/^\/api\/reviews\/stats\/[^/]+$/) && method === 'GET') {
+        const itemId = path.split('/')[4];
+        return getReviewStats(request, env, itemId);
+      }
+
       // 404 for unmatched routes
       return errorResponse('Not Found', 404);
 
     } catch (error) {
-      if (DEBUG) console.error('Worker error:', error);
+      if (DEBUG) {console.error('Worker error:', error);}
       return errorResponse('Internal Server Error: ' + error.message, 500);
     }
   },

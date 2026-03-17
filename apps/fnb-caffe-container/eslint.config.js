@@ -34,6 +34,14 @@ export default [
         performance: 'readonly',
         Image: 'readonly',
         alert: 'readonly',
+        prompt: 'readonly',
+        confirm: 'readonly',
+        // F&B Caffe Container debug flag
+        FNB_DEBUG: 'readonly',
+        // Service Worker globals
+        self: 'readonly',
+        caches: 'readonly',
+        clients: 'readonly',
         // Node.js globals
         process: 'readonly',
         __dirname: 'readonly',
