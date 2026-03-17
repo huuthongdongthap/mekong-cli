@@ -1,10 +1,15 @@
 #!/bin/zsh
 # ═══════════════════════════════════════════════════════════
-# 🧠 CTO BRAIN v2.1 — FULLY AUTONOMOUS
+# 🧠 CTO BRAIN v3.0 — SMART MODEL ROUTER
 # Plan→Dispatch→Watch→Unblock→Redispatch (zero human needed)
-# Model: Ollama cto-brain:32b (thinking ON)
-# Antigravity chỉ ghi plan.md → CTO Brain tự xử tất cả
+# Critical tasks: GLM-5 API (DashScope) — dispatch, drift fix
+# Routine tasks:  Qwen3 32B local (Ollama) — analyze, reports
+# Fallback: all local when DASHSCOPE_API_KEY not set
 # ═══════════════════════════════════════════════════════════
+
+# Auto-load .env (sources DASHSCOPE_API_KEY and other vars)
+ENV_FILE="${HOME}/mekong-cli/.env"
+[ -f "$ENV_FILE" ] && set -a && source "$ENV_FILE" && set +a
 
 PROJECT="${1:-/Users/mac/mekong-cli}"
 # ═══ ACTIVE PROJECT (injected — all workers must use this path) ═══
@@ -23,6 +28,17 @@ ALERT_COUNT=0
 DISPATCHED_TASKS=0
 CURRENT_PLAN=""
 HEAL_COUNT=0
+
+# ═══ SMART MODEL ROUTER CONFIG ═══
+DASHSCOPE_API_KEY="${DASHSCOPE_API_KEY:-}"
+DASHSCOPE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+GLM5_MODEL="glm-5"
+
+# Budget tracking
+GLM5_CALLS=0
+LOCAL_CALLS=0
+GLM5_INPUT_TOKENS=0
+GLM5_OUTPUT_TOKENS=0
 
 # Worker config dirs for auto-heal restart
 AGENT_CONFIGS=(
@@ -56,7 +72,7 @@ MODEL=$(detect_model)
 mkdir -p "$REPORT_DIR" "$PLAN_PROCESSED"
 cd "$PROJECT" 2>/dev/null
 
-# ═══ AI CALL (thinking ON, graceful fallback) ═══
+# ═══ AI CALL — LOCAL (Qwen3 32B via Ollama, thinking ON) ═══
 ai_call() {
     local prompt="$1"
     local max_tokens="${2:-400}"
@@ -65,6 +81,7 @@ ai_call() {
         echo "⏸️ AI offline (Ollama off for M1 cooling)"
         return 1
     fi
+    LOCAL_CALLS=$((LOCAL_CALLS + 1))
     curl -sS --connect-timeout 8 --max-time 60 \
         "$OLLAMA_URL" \
         -d "{
@@ -85,6 +102,68 @@ try:
     print(clean[:600])
 except: print('❌ AI parse error')
 " 2>/dev/null
+}
+
+# ═══ AI CALL — GLM-5 API (DashScope, for critical decisions) ═══
+ai_call_glm5() {
+    local prompt="$1"
+    local max_tokens="${2:-400}"
+    if [ -z "$DASHSCOPE_API_KEY" ]; then
+        echo "⚠️ GLM-5: No DASHSCOPE_API_KEY → fallback local"
+        ai_call "$prompt" "$max_tokens"
+        return $?
+    fi
+    GLM5_CALLS=$((GLM5_CALLS + 1))
+    local json_prompt=$(echo "$prompt" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
+    local response=$(curl -sS --connect-timeout 10 --max-time 90 \
+        "$DASHSCOPE_URL" \
+        -H "Authorization: Bearer $DASHSCOPE_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"model\":\"$GLM5_MODEL\",
+            \"messages\":[{\"role\":\"user\",\"content\":$json_prompt}],
+            \"max_tokens\":$max_tokens,
+            \"temperature\":0.3
+        }" 2>/dev/null)
+    
+    echo "$response" | python3 -c "
+import sys,json
+try:
+    r=json.load(sys.stdin)
+    if 'error' in r:
+        print('❌ GLM-5 API error:', r['error'].get('message','unknown')[:80])
+    else:
+        content=r.get('choices',[{}])[0].get('message',{}).get('content','')
+        usage=r.get('usage',{})
+        inp=usage.get('prompt_tokens',0)
+        out=usage.get('completion_tokens',0)
+        print(content[:600])
+        # Print token usage for budget tracking
+        print(f'📊 GLM-5: {inp}in/{out}out tokens', file=sys.stderr)
+except Exception as e:
+    print('❌ GLM-5 parse error:', str(e)[:60])
+" 2>>"$REPORT_DIR/glm5_usage.log"
+}
+
+# ═══ SMART ROUTER — chọn model theo vai trò task ═══
+# Usage: ai_call_smart "prompt" max_tokens "critical|routine"
+#   critical → GLM-5 API (dispatch, drift fix, architecture)
+#   routine  → Qwen3 32B local (analyze, report, status)
+ai_call_smart() {
+    local prompt="$1"
+    local max_tokens="${2:-400}"
+    local role="${3:-routine}"
+    
+    case "$role" in
+        critical)
+            echo "🧠 [GLM-5 API] critical task" >&2
+            ai_call_glm5 "$prompt" "$max_tokens"
+            ;;
+        *)
+            echo "🏠 [Qwen3 local] routine task" >&2
+            ai_call "$prompt" "$max_tokens"
+            ;;
+    esac
 }
 
 # ═══ MAP ACTION → /COMMAND (ONLY real CC CLI commands from .claude/commands/) ═══
@@ -417,7 +496,7 @@ Dựa vào context, giao task mới PHÙ HỢP cho worker này.
 Output CHÍNH XÁC 1 dòng: P$widx|ACTION|mô tả task rõ ràng
 ACTION: COOK,FIX,TEST,REVIEW,BUILD,UI,API,RESPONSIVE,REFACTOR,COMMIT"
 
-        local task_result=$(ai_call "$ai_context" 100)
+        local task_result=$(ai_call_smart "$ai_context" 100 "critical")
         local parsed=$(echo "$task_result" | grep "^P[0-5]|" | head -1)
         
         if [ -n "$parsed" ]; then
@@ -533,7 +612,7 @@ analyze_agent() {
     local idx=$1 pout="$2" pstatus="$3"
     local task=$(get_task $idx)
     local clean=$(clean_log "$pout" | tail -8)
-    ai_call "CTO giám sát. Tiếng Việt, 3 dòng:
+    ai_call_smart "CTO giám sát. Tiếng Việt, 3 dòng:
 WORKER: ${NAMES[$((idx+1))]}
 TASK: $task
 STATUS: $pstatus
@@ -542,7 +621,7 @@ $clean
 Format:
 ĐANG LÀM: [1 dòng]
 ĐÚNG TASK: [OK/LỆCH/XONG/KẸT]
-TIẾN ĐỘ: [0-100]%" 150
+TIẾN ĐỘ: [0-100]%" 150 "routine"
 }
 
 handle_drift() {
@@ -550,9 +629,9 @@ handle_drift() {
     if echo "$analysis" | grep -qi "LỆCH\|KẸT"; then
         ALERT_COUNT=$((ALERT_COUNT + 1))
         echo "⚠️ ${NAMES[$((idx+1))]} LỆCH/KẸT!"
-        local fix_result=$(ai_call "${NAMES[$((idx+1))]} bị LỆCH/KẸT.
+        local fix_result=$(ai_call_smart "${NAMES[$((idx+1))]} bị LỆCH/KẸT.
 Task: $(get_task $idx)
-Output 1 dòng: P$idx|ACTION|fix description" 80)
+Output 1 dòng: P$idx|ACTION|fix description" 80 "critical")
         local parsed=$(echo "$fix_result" | grep "^P[0-3]|" | head -1)
         if [ -n "$parsed" ]; then
             echo "$parsed" | IFS='|' read -r t action desc
@@ -569,7 +648,8 @@ write_report() {
     local report="$REPORT_DIR/report_$(date +%H%M).md"
     {
         echo "# 🧠 CTO Brain Report — $(date '+%Y-%m-%d %H:%M')"
-        echo "## Model: $MODEL | Dispatched: $DISPATCHED_TASKS | Alerts: $ALERT_COUNT"
+        echo "## Model: Local=$MODEL | GLM-5=$GLM5_MODEL | Dispatched: $DISPATCHED_TASKS | Alerts: $ALERT_COUNT"
+        echo "## Budget: GLM5=$GLM5_CALLS calls | Local=$LOCAL_CALLS calls"
         for i in 0 1 2 3 4 5; do
             local pout=$(get_pane_output $i 15)
             echo "### ${NAMES[$((i+1))]} — $(get_pane_status "$pout")"
@@ -587,26 +667,32 @@ write_report() {
 # ═══════════════════════════════════════
 
 echo "╔═══════════════════════════════════════════════════╗"
-echo "║  🧠 CTO BRAIN v2.1 — FULLY AUTONOMOUS           ║"
-echo "║  Plan→Dispatch→Watch→Unblock→Redispatch          ║"
-echo "║  Model: $MODEL"
+echo "║  🧠 CTO BRAIN v3.0 — SMART MODEL ROUTER          ║"
+echo "║  Critical → GLM-5 API | Routine → Qwen3 local    ║"
+echo "║  Local: $MODEL"
+echo "║  GLM-5: $GLM5_MODEL via DashScope"
 echo "║  Plan inbox: $PLAN_INBOX"
 echo "╚═══════════════════════════════════════════════════╝"
 echo ""
-echo "🔄 Checking model..."
+echo "🔄 Checking models..."
 if curl -sS --connect-timeout 2 "http://localhost:11434/api/tags" >/dev/null 2>&1; then
-    echo "✅ Ollama online — AI dispatch enabled"
+    echo "✅ Ollama online — Qwen3 local ready"
 else
     echo "⚠️ Ollama offline — rule-based dispatch only (M1 cooling mode)"
 fi
-echo "✅ CTO Brain tự vận hành — Antigravity CHỈ ghi plan.md"
+if [ -n "$DASHSCOPE_API_KEY" ]; then
+    echo "✅ DashScope API key set — GLM-5 enabled for critical tasks"
+else
+    echo "⚠️ No DASHSCOPE_API_KEY — all tasks use local model"
+fi
+echo "✅ CTO Brain v3.0 — Smart Model Router active"
 echo ""
 
 while true; do
     CYCLE=$((CYCLE + 1))
     echo "" >> /tmp/cto-brain.log
     
-    echo "═══ 🧠 CTO v2.1 $(date +%H:%M:%S) ═══ cycle:$CYCLE dispatched:$DISPATCHED_TASKS alerts:$ALERT_COUNT ═══"
+    echo "═══ 🧠 CTO v3.0 $(date +%H:%M:%S) ═══ cycle:$CYCLE dispatched:$DISPATCHED_TASKS alerts:$ALERT_COUNT | 🧠GLM5:$GLM5_CALLS 🏠Local:$LOCAL_CALLS ═══"
     echo ""
 
     # 1. PLAN INBOX
