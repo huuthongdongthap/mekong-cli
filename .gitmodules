@@ -4,12 +4,6 @@
 	ignore = dirty
 
 
-[submodule "apps/openclaw-worker/external/serena"]
-	path = apps/openclaw-worker/external/serena
-	url = https://github.com/oraios/serena.git
-	ignore = dirty
-
-
 [submodule "apps/starter-template"]
 	path = apps/starter-template
 	url = https://github.com/longtho638-jpg/agencyos-starter.git
