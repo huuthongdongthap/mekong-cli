@@ -1,0 +1,4 @@
+description = "Mekong: worker-backup"
+[steps]
+[steps.run]
+command = "mekong worker-backup {{args}}"

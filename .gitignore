@@ -387,9 +387,10 @@ i18next-scanner.config.js
 
 # Rogue dirs (third pass)
 antigravity/
-config/
+/config/
+!config/cto-config.json
 docker/
-lib/
+/lib/
 locales/
 # mekong/ — tracked (core namespace)
 templates/
@@ -411,6 +412,10 @@ conftest.py
 *.lcov
 # Environment
 mekong-env.js
-# Dependencies
 # Build artifacts
 *.tmp
+
+# Private apps — NOT for public repo
+apps/
+mekong/daemon/
+mekong/hooks/

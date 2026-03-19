@@ -16,4 +16,4 @@ export * from "./src/devops/types/metrics";
 export * from "./src/devops/types/github";
 export * from "./src/devops/client/github-client";
 export * from "./src/devops/engine/metrics-engine";
-export * from "./src/devops/cli/metrics-command";
+export { metricsCommand } from "./src/devops/cli/metrics-command";

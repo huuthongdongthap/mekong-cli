@@ -8,7 +8,7 @@
  * Package version: uses IExchange interface, no app-specific dependencies.
  */
 
-import { IExchange } from '@agencyos/trading-core/interfaces';
+import { IExchange } from '@mekong/trading-core/interfaces';
 import { getArbLogger } from './arb-logger';
 import {
   ArbitrageOpportunity, ScannerConfig, ExecutorConfig,
@@ -311,7 +311,7 @@ export class SpreadDetectorEngine {
       for (const [name, client] of clients) {
         for (const symbol of this.config.symbols) {
           try {
-            const rawBook = await client.fetchOrderBook(symbol, 20);
+            const rawBook = await client.fetchOrderBook(symbol);
             if (rawBook) {
               this.orderbook.updateOrderBook({
                 exchange: name, symbol,

@@ -1,0 +1,4 @@
+description = "Mekong: worker-commit"
+[steps]
+[steps.run]
+command = "mekong worker-commit {{args}}"

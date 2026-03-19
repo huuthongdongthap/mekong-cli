@@ -27,6 +27,44 @@
 - **Affiliate System** (`affiliate/`) — Referral tracking, commission management
 - **Auth** (`auth/`) — Đăng nhập/đăng ký thống nhất, RBAC
 
+## UNIFIED WRAPPER — `mekong` is the ONLY entry point
+
+```
+mekong-cli (outer shell)  →  CC CLI (inner engine)  →  .claude/commands/ (300+ commands)
+scripts/mekong-wrapper.sh    claude|gemini|qwen|bb     135 root + package commands
+scripts/shell-init.sh        --dangerously-skip-perms  257 skills auto-loaded
+```
+
+### Quick Start
+
+```bash
+source ~/mekong-cli/scripts/shell-init.sh   # Add to .zshrc/.bashrc
+
+mekong              # Interactive CC CLI with all mekong commands
+mekong-opus         # Force Anthropic Claude Opus 4.6
+mekong-sonnet       # Force Anthropic Claude Sonnet 4.6
+mekong-qwen         # Force DashScope Qwen 3.5 Plus
+mekong-cto          # CTO daemon mode (P->D->V->S loop)
+mekong-continue     # Resume last session
+mekong-print "task" # Non-interactive (pipe output)
+mekong-status       # Show current API config
+```
+
+### Provider Routing
+
+| Alias | Provider | Binary | Model |
+|-------|----------|--------|-------|
+| `mekong` | claude (default) | `claude` | CC CLI default |
+| `mekong-opus` | claude | `claude` | claude-opus-4-6 |
+| `mekong-qwen` | dashscope | `claude` | qwen3.5-plus |
+| `mekong --provider gemini` | google | `gemini` | gemini default |
+
+All providers launch from `~/mekong-cli` root, ensuring `.claude/commands/` discovery.
+
+---
+
+## ARCHITECTURE
+
 ### Roles (RBAC)
 
 ```
@@ -470,6 +508,75 @@ node --check assets/js/*.js
 - **Ngôn ngữ UI**: Tiếng Việt (code comments có thể song ngữ)
 - **Design System**: Material Design 3 Expressive, theme "Mekong Aurora"
 - **Powered by**: OpenClaw & AI Agents
+
+---
+
+## QUALITY RULES
+
+| Rule | Standard |
+|------|----------|
+| File size | < 200 lines (split into modules) |
+| Type hints | Required for all functions |
+| Docstrings | Every class and public method |
+| Tests | `python3 -m pytest tests/` must pass |
+| Naming | snake_case (Python), kebab-case (files) |
+| Secrets | Never in code — use `.env` |
+| Commits | Conventional: `feat/fix/refactor/docs/test/chore` |
+| No AI refs | Clean commit messages |
+
+### Binh Phap Quality Fronts
+
+| Front | Target |
+|-------|--------|
+| Tech Debt | 0 TODO/FIXME, 0 console.log |
+| Type Safety | 0 `any` types, strict mode |
+| Performance | Build < 10s, LCP < 2.5s |
+| Security | Input validation, no secrets |
+| UX | Loading states, error boundaries |
+| Documentation | Self-documenting code |
+
+## 🚨 PUBLIC REPO BOUNDARY — KHÔNG ĐƯỢC VI PHẠM
+
+**mekong-cli là PUBLIC repo.** Bất kỳ ai trên internet đều thấy.
+
+### ❌ CẤM TUYỆT ĐỐI commit/push:
+| Path | Lý do |
+|------|-------|
+| `apps/` | Dự án khách hàng PRIVATE (algo-trader, sophia, well...) |
+| `mekong/daemon/` | Internal CTO brain, API keys, secrets |
+| `mekong/hooks/` | Internal automation hooks |
+| `.env`, `.env.*` | Secrets, API keys |
+| `*.pem`, `*.key` | Certificates |
+
+### ✅ CHỈ commit/push:
+| Path | Nội dung |
+|------|----------|
+| `packages/` | openclaw-engine, mekong-cli-core (PUBLIC SDK) |
+| `recipes/` | Command recipes (PUBLIC) |
+| `.claude/skills/` | Skill definitions (PUBLIC) |
+| `.claude/commands/` | Command definitions (PUBLIC) |
+| `factory/contracts/` | Machine contracts (PUBLIC) |
+| Root files | package.json, tsconfig, README, CLAUDE.md |
+
+### Khi `git add -A` hoặc `git commit`:
+1. **LUÔN kiểm tra** `git diff --cached --name-only` trước khi commit
+2. Nếu thấy `apps/` hoặc `mekong/daemon/` → **DỪNG LẠI**, chạy `git reset HEAD -- apps/ mekong/daemon/`
+3. Pre-commit hook sẽ block, nhưng **đừng dùng --no-verify**
+
+---
+
+## GIT PROTOCOL
+
+```bash
+# Pre-commit: blocks apps/ + secrets + runs tsc
+# Pre-push: pytest must pass
+# Commit format:
+feat: add new command
+fix: resolve billing edge case
+refactor: simplify PEV orchestrator
+```
+
+Never commit: `.env`, API keys, `node_modules`, `__pycache__`, `.pyc`, `apps/`, `mekong/daemon/`
 
 ---
 
