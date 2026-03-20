@@ -34,25 +34,63 @@ RAAS_GOAL="Sell RaaS (ROI-as-a-Service). Packages: raas-landing, raas-dashboard,
 
 # ---- DOANH TRẠI: Pane Roles (Binh Pháp military model) ----
 # P1=TIÊN PHONG (complex/plan), P2=CÔNG BINH (build/fix), P3=HIẾN BINH (review/test)
-PANE_ROLE_1="tien_phong"   # Complex tasks: /plan:hard, /cook complex features, /debug hard bugs
+PANE_ROLE_0="tien_phong"   # Pane 0: mekong-cli monorepo — complex/planning tasks
+PANE_ROLE_1="tien_phong"   # Complex tasks: /plan hard, /cook complex features, /debug hard bugs
 PANE_ROLE_2="cong_binh"    # Build tasks: /cook build, /fix, /code, /backend-api-build
 PANE_ROLE_3="hien_binh"    # Review tasks: /review, /test, /check-and-commit
 
 # Role-specific fallback tasks (indexed arrays — bash 3.2 compatible)
-ROLE_FB_1_0='/plan:hard "Analyze mekong-engine architecture — identify gaps for RaaS launch readiness"'
-ROLE_FB_1_1='/cook "Implement missing governance features — check spec vs implementation gaps"'
-ROLE_FB_1_2='/debug "Analyze and fix any TypeScript errors across all packages"'
+ROLE_FB_0_0='/idea "OpenClaw RaaS Gateway: Robot-as-a-Service platform API. Metered AI agent execution, multi-tenant billing, Cloudflare edge. Target: SaaS founders. Revenue: MCU billing."'
+ROLE_FB_0_1='/cook "Read .mekong/company.json and execute next 5-layer command toward $1M ARR. If no company.json, run /idea first."'
+ROLE_FB_0_2='/studio-strategy "Portfolio analysis: evaluate all apps/ projects for RaaS readiness and $1M ARR potential."'
+ROLE_FB_0_COUNT=3
+
+ROLE_FB_1_0='/idea "Algo-Trader: AI-powered crypto arbitrage engine. Multi-exchange spread detection, automated execution. Target: institutional traders. Revenue: SaaS + performance fees."'
+ROLE_FB_1_1='/cook "Read .mekong/company.json and execute 5-layer GTM toward $1M ARR. Focus: fix bugs → build features → deploy production."'
+ROLE_FB_1_2='/sales-pipeline-build "Build sales pipeline for current project. ICP, outreach sequences, deal stages."'
 ROLE_FB_1_COUNT=3
 
-ROLE_FB_2_0='/cook "Fix and polish raas-landing — check build, fix errors, improve SEO"'
+ROLE_FB_2_0='/idea "WellNexus: B2B healthcare platform for VN hospitals. Patient management, telemedicine, pharmacy integration. Target: 1000+ private clinics. Revenue: SaaS per-clinic."'
 ROLE_FB_2_1='/cook "Harden mekong-engine API — input validation on all routes"'
 ROLE_FB_2_2='/cook "Build missing frontend components in dashboard pages"'
 ROLE_FB_2_COUNT=3
 
-ROLE_FB_3_0='/review "Review packages/mekong-engine/src/routes/ for code quality and security"'
+ROLE_FB_3_0='/idea "Sophia AI Factory: AI proposal generator for agencies. Auto-generates pitch decks, SOWs, contracts. Target: digital agencies. Revenue: tiered SaaS."'
 ROLE_FB_3_1='/test "Run all tests in packages/mekong-engine — fix any failures"'
 ROLE_FB_3_2='/cook "Add error handling and edge case coverage to API endpoints"'
 ROLE_FB_3_COUNT=3
+
+# ---- DEDUP GUARD: track last dispatched command per pane ----
+DEDUP_STATE_FILE="${MEKONG_DIR:-$HOME/.mekong}/dedup-state"
+declare -A LAST_DISPATCH_CMD  # pane_idx → last command sent
+declare -A LAST_DISPATCH_TIME # pane_idx → epoch when sent
+declare -A PANE_RESPAWN_COUNT   # FIX #12: replace eval with associative array
+declare -A LAST_ANSWER_TIME     # FIX #12: replace eval with associative array
+DEDUP_MIN_INTERVAL=300        # seconds before allowing same command again
+
+# FIX #8: normalize commands for dedup (brain rephrasing no longer bypasses)
+_normalize_dedup() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9/]/ /g' | tr -s ' ' | cut -c1-60
+}
+
+is_duplicate_dispatch() {
+  local pane_idx=$1 cmd=$2
+  local norm=$(_normalize_dedup "$cmd")
+  local last_norm=$(_normalize_dedup "${LAST_DISPATCH_CMD[$pane_idx]:-}")
+  local last_time="${LAST_DISPATCH_TIME[$pane_idx]:-0}"
+  local now
+  now=$(date +%s)
+  if [[ "$norm" == "$last_norm" && $((now - last_time)) -lt $DEDUP_MIN_INTERVAL ]]; then
+    return 0
+  fi
+  return 1
+}
+
+record_dispatch() {
+  local pane_idx=$1 cmd=$2
+  LAST_DISPATCH_CMD[$pane_idx]="$cmd"
+  LAST_DISPATCH_TIME[$pane_idx]=$(date +%s)
+}
 
 # Persist fallback index across restarts
 FALLBACK_STATE_FILE="${MEKONG_DIR:-$HOME/.mekong}/fallback-state"
@@ -130,9 +168,77 @@ log() {
   fi
 }
 
-# ---- CTO BRAIN: Ollama qwen3:32b via scripts/brain_think.py ----
-OLLAMA_URL="${OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
+# ---- OLLAMA HEALTH CHECK + AUTO-RECOVERY ----
+# HARDCODED — never depend on env vars for Ollama native API
+OLLAMA_URL="http://127.0.0.1:11434"
 OLLAMA_MODEL="${OPENCLAW_WORKER_MODEL:-qwen3:32b}"
+BRAIN_CONSECUTIVE_FAILS=0
+BRAIN_MAX_FAILS=3
+
+# Check if Ollama is alive and model loaded
+ollama_health_check() {
+  # 1. Check Ollama server responding
+  if ! curl -sf "${OLLAMA_URL}/" >/dev/null 2>&1; then
+    log "OLLAMA HEALTH: Server DOWN at ${OLLAMA_URL}"
+    return 1
+  fi
+
+  # 2. Check model is loaded (in ps output)
+  local ps_output
+  ps_output=$(curl -sf "${OLLAMA_URL}/api/ps" 2>/dev/null || echo "")
+  if [[ -z "$ps_output" ]] || ! echo "$ps_output" | python3 -c "import json,sys; d=json.load(sys.stdin); models=[m['name'] for m in d.get('models',[])]; sys.exit(0 if any('${OLLAMA_MODEL}'.split(':')[0] in m for m in models) else 1)" 2>/dev/null; then
+    log "OLLAMA HEALTH: Model ${OLLAMA_MODEL} NOT loaded"
+    return 2
+  fi
+
+  return 0
+}
+
+# Auto-recover Ollama: restart serve + pull/warmup model
+ollama_auto_recover() {
+  log "OLLAMA RECOVERY: Starting auto-recovery sequence..."
+
+  # Step 1: Check if ollama serve is running
+  if ! pgrep -f "ollama serve" >/dev/null 2>&1; then
+    log "OLLAMA RECOVERY: Launching ollama serve..."
+    nohup ollama serve >/dev/null 2>&1 &
+    sleep 5
+  fi
+
+  # Step 2: Verify server is up
+  local attempts=0
+  while [[ $attempts -lt 10 ]]; do
+    if curl -sf "${OLLAMA_URL}/" >/dev/null 2>&1; then
+      log "OLLAMA RECOVERY: Server alive after ${attempts}s"
+      break
+    fi
+    attempts=$((attempts + 1))
+    sleep 2
+  done
+
+  if [[ $attempts -ge 10 ]]; then
+    log "OLLAMA RECOVERY: FAILED — server not responding after 20s"
+    save_memory "BRAIN" "CRITICAL: Ollama server failed to start"
+    return 1
+  fi
+
+  # Step 3: Warmup model (keep_alive ensures it stays loaded)
+  log "OLLAMA RECOVERY: Warming up ${OLLAMA_MODEL}..."
+  curl -sf "${OLLAMA_URL}/api/generate" -d "{\"model\":\"${OLLAMA_MODEL}\",\"prompt\":\"ping\",\"stream\":false,\"keep_alive\":\"5m\"}" >/dev/null 2>&1 || true
+  sleep 2
+
+  # Step 4: Verify model loaded
+  if ollama_health_check; then
+    log "OLLAMA RECOVERY: SUCCESS — ${OLLAMA_MODEL} loaded and ready"
+    save_memory "BRAIN" "Ollama auto-recovered, model ${OLLAMA_MODEL} loaded"
+    return 0
+  else
+    log "OLLAMA RECOVERY: Model warmup failed — may need manual intervention"
+    return 1
+  fi
+}
+
+# ---- CTO BRAIN: Ollama qwen3:32b via scripts/brain_think.py ----
 
 # Load 135-command catalog for brain dispatch (loaded once at startup)
 COMMAND_CATALOG_FILE="${MEKONG_DIR}/commands-catalog.txt"
@@ -141,11 +247,57 @@ if [[ -f "$COMMAND_CATALOG_FILE" ]]; then
   COMMAND_CATALOG=$(cat "$COMMAND_CATALOG_FILE")
 fi
 
-# Call Ollama via standalone Python script (handles thinking mode, /no_think, keep_alive)
+# Call Ollama via standalone Python script with 45s hard timeout
+# Uses bash background + wait to prevent daemon hang on brain freeze
+BRAIN_TIMEOUT=45
+
 cto_brain_think() {
   local prompt="$1"
   local sd; sd="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  OLLAMA_URL="${OLLAMA_URL}" OLLAMA_MODEL="${OLLAMA_MODEL}" python3 "${sd}/scripts/brain_think.py" <<< "$prompt" 2>>"${MEKONG_DIR}/brain-errors.log" || echo ""
+  local tmpfile="${MEKONG_DIR}/brain-output.tmp"
+
+  # Run brain in background with hard timeout
+  (OLLAMA_URL="${OLLAMA_URL}" OLLAMA_MODEL="${OLLAMA_MODEL}" \
+    python3 "${sd}/scripts/brain_think.py" <<< "$prompt" \
+    > "$tmpfile" 2>>"${MEKONG_DIR}/brain-errors.log") &
+  local brain_pid=$!
+
+  # Wait with timeout (portable macOS — no gtimeout needed)
+  local elapsed=0
+  while kill -0 "$brain_pid" 2>/dev/null && [[ $elapsed -lt $BRAIN_TIMEOUT ]]; do
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  # Kill if still running (timed out)
+  if kill -0 "$brain_pid" 2>/dev/null; then
+    kill "$brain_pid" 2>/dev/null
+    wait "$brain_pid" 2>/dev/null
+    echo "[$(date '+%H:%M:%S')] BRAIN: TIMEOUT after ${BRAIN_TIMEOUT}s" >> "$LOG_FILE"
+    BRAIN_CONSECUTIVE_FAILS=$((BRAIN_CONSECUTIVE_FAILS + 1))
+    rm -f "$tmpfile"
+    echo ""
+    return
+  fi
+
+  wait "$brain_pid" 2>/dev/null
+  local result
+  result=$(cat "$tmpfile" 2>/dev/null)
+  rm -f "$tmpfile"
+
+  if [[ -z "$result" ]]; then
+    BRAIN_CONSECUTIVE_FAILS=$((BRAIN_CONSECUTIVE_FAILS + 1))
+    if [[ $BRAIN_CONSECUTIVE_FAILS -ge $BRAIN_MAX_FAILS ]]; then
+      echo "[$(date '+%H:%M:%S')] BRAIN CRITICAL: ${BRAIN_CONSECUTIVE_FAILS} fails — auto-recovering" >> "$LOG_FILE"
+      ollama_auto_recover
+      BRAIN_CONSECUTIVE_FAILS=0
+    fi
+    echo ""
+    return
+  fi
+
+  BRAIN_CONSECUTIVE_FAILS=0
+  echo "$result"
 }
 
 # Build context-rich prompt and dispatch via brain
@@ -178,14 +330,14 @@ cto_brain_dispatch() {
 ${COMMAND_CATALOG}
 Pick the MOST SPECIFIC command."
   else
-    catalog_section="Commands: /cook \"task\" /debug \"issue\" /fix \"bug\" /test \"scope\" /plan:hard \"feature\" /review"
+    catalog_section="Commands: /cook \"task\" /debug \"issue\" /fix \"bug\" /test \"scope\" /plan hard \"feature\" /review"
   fi
 
   # Role context for this pane
   local role=$(get_pane_role "$pane_idx")
   local role_desc
   case "$role" in
-    tien_phong) role_desc="TIÊN PHONG (complex): /plan:hard, /debug hard bugs, /cook complex features" ;;
+    tien_phong) role_desc="TIÊN PHONG (complex): /plan hard, /debug hard bugs, /cook complex features" ;;
     cong_binh)  role_desc="CÔNG BINH (build): /cook build, /fix, /backend-api-build, /frontend-ui-build" ;;
     hien_binh)  role_desc="HIẾN BINH (review): /review, /test, /check-and-commit, /code-review" ;;
   esac
@@ -194,20 +346,19 @@ Pick the MOST SPECIFIC command."
 You are CTO Brain (QUÂN SƯ). Dispatching PANE ${pane_idx} role: ${role_desc}
 
 PROJECT: ${name} | DIR: ${dir} | DEPLOY: ${deploy}
+CONSTRAINT: ONLY modify files inside ${dir}/. Do NOT touch other projects.
 ${_codebase_ctx}
 PANE OUTPUT: ${pane_tail}
 ${error_lines:+ERRORS: ${error_lines}}
 
 ${catalog_section}
 
-THINK: What is the SINGLE most impactful action to make RaaS sellable?
-Priority chain: fix errors → fix tests → polish UI → harden API → add features → write docs.
-Give ONE slash command with SPECIFIC file paths or descriptions.
-Examples:
-- /cook \"fix landing page pricing section in packages/raas-landing/src/pages/pricing.astro\"
-- /debug \"TypeError in packages/mekong-engine/src/routes/billing.ts line 45\"
-- /backend-api-build \"add rate limiting to /v1/missions endpoint in mekong-engine\"
-- /test \"run vitest for packages/mekong-engine\"
+THINK: What is the SINGLE most impactful action for ${name} to make RaaS sellable?
+Priority: fix errors → fix tests → polish UI → harden API → add features.
+Give ONE slash command. Include \"${dir}/\" in the task description.
+CRITICAL: ONLY use commands from the AVAILABLE COMMANDS list above.
+NEVER use colon syntax (e.g. /plan:hard). Use SPACE: /plan hard, /cto-architect, /pm-sprint.
+If unsure, default to /cook.
 Reply with ONLY the command. No explanation."
 
   local result
@@ -216,15 +367,35 @@ Reply with ONLY the command. No explanation."
 
   # Strip Qwen thinking prefix: everything before first /command
   local stripped
-  stripped=$(echo "$result" | sed 's/^[^/]*//' | head -1)
+  stripped=$(echo "$result" | sed 's/^[^\/]*//' | head -1)
 
   # Extract /command with optional args (quoted or unquoted)
   local cmd
   cmd=$(echo "$stripped" | grep -oE '/[a-z][a-z0-9_:-]*([ ]+(".*"|.+))?' | head -1 | cut -c1-300)
   if [[ -n "$cmd" ]]; then
+    # VALIDATE: check command base exists in catalog or core commands
+    local cmd_base
+    cmd_base=$(echo "$cmd" | awk '{print $1}')
+    local valid_cores="/cook /fix /debug /test /review /plan hard /plan fast /check-and-commit /clear /compact /docs /docs update"
+    if ! echo " $valid_cores " | grep -q " $cmd_base "; then
+      # Check commands-catalog.txt
+      if [[ -f "$COMMAND_CATALOG_FILE" ]] && ! grep -q "^${cmd_base}$" "$COMMAND_CATALOG_FILE" 2>/dev/null; then
+        # Check .claude/commands/ and .claude/skills/ directories
+        local cmd_name="${cmd_base#/}"
+        if [[ ! -d "${PROJECT_ROOT}/.claude/skills/${cmd_name}" ]] && [[ ! -f "${PROJECT_ROOT}/.claude/commands/${cmd_name}.md" ]]; then
+          echo "[$(date '+%H:%M:%S')] BRAIN: invalid command '${cmd_base}' — falling back to /cook" >> "$LOG_FILE"
+          cmd="/cook $(echo "$cmd" | sed "s|^${cmd_base} *||")"
+        fi
+      fi
+    fi
+    # If bare command (no args), append project context
+    if ! echo "$cmd" | grep -qE '".*"| '; then
+      cmd="${cmd} \"Project: ${name}, Dir: ${dir}. Fix errors, improve code quality.\""
+    fi
     echo "$cmd"
   else
-    log "BRAIN: unparseable response: $(echo "$result" | head -1 | cut -c1-80)"
+    # Write directly to log (NOT via log() which uses tee → stdout → captured by $())
+    echo "[$(date '+%H:%M:%S')] BRAIN: unparseable response: $(echo "$result" | head -1 | cut -c1-80)" >> "$LOG_FILE"
   fi
 }
 
@@ -238,7 +409,7 @@ get_pane_config() {
 
 # Load worker names and dirs from unified panes config
 declare -A WORKER_NAME WORKER_DIR WORKER_DEPLOY WORKER_RETRIES
-for idx in 1 2 3; do
+for idx in 0 1 2 3; do
   WORKER_NAME[$idx]=$(get_pane_config "$idx" "project")
   WORKER_DIR[$idx]=$(get_pane_config "$idx" "dir")
   WORKER_DEPLOY[$idx]=$(get_pane_config "$idx" "deploy_cmd")
@@ -251,21 +422,14 @@ done
 # Dynamic pane-to-project mapping: detect project from tmux pane_current_path
 # This runs EVERY cycle so pane index changes (respawns/splits) are auto-detected
 refresh_worker_mapping() {
-  for idx in 1 2 3; do
-    local pane_path
-    pane_path=$(tmux display-message -t "${CTO_SESSION}:0.${idx}" -p '#{pane_current_path}' 2>/dev/null || echo "")
-    if [[ -n "$pane_path" ]]; then
-      local detected=""
-      case "$pane_path" in
-        */apps/algo-trader*)    detected="algo-trader"; WORKER_DIR[$idx]="apps/algo-trader"; WORKER_DEPLOY[$idx]="npx tsc --noEmit" ;;
-        */apps/well*)           detected="well"; WORKER_DIR[$idx]="apps/well"; WORKER_DEPLOY[$idx]="npm run build" ;;
-        */apps/sophia-proposal*|*/apps/sophia-ai-factory*) detected="sophia-ai-factory"; WORKER_DIR[$idx]="apps/sophia-proposal"; WORKER_DEPLOY[$idx]="npm run build" ;;
-        */mekong-cli)           detected="mekong-cli"; WORKER_DIR[$idx]="."; WORKER_DEPLOY[$idx]="pnpm run build" ;;
-      esac
-      if [[ -n "$detected" && "$detected" != "${WORKER_NAME[$idx]}" ]]; then
-        log "REMAP P${idx}: ${WORKER_NAME[$idx]} → ${detected} (path: ${pane_path})"
-        WORKER_NAME[$idx]="$detected"
-      fi
+  # Use config file as source of truth — NEVER auto-remap from pane path
+  # CC CLI always runs from monorepo root, so pane_current_path is unreliable
+  for idx in 0 1 2 3; do
+    # Only load from config if not already set (first run)
+    if [[ -z "${WORKER_NAME[$idx]:-}" ]]; then
+      WORKER_NAME[$idx]=$(get_pane_config "$idx" "project")
+      WORKER_DIR[$idx]=$(get_pane_config "$idx" "dir")
+      WORKER_DEPLOY[$idx]=$(get_pane_config "$idx" "deploy_cmd")
     fi
   done
 }
@@ -277,7 +441,39 @@ capture_pane() {
 
 send_to_pane() {
   local pane_idx=$1; shift
-  tmux send-keys -t "${CTO_SESSION}:0.${pane_idx}" "$*" Enter
+  local cmd="$*"
+  if [[ "$cmd" != "1" ]]; then
+    local fresh_output
+    fresh_output=$(capture_pane "$pane_idx" 2>/dev/null || echo "")
+    if [[ -n "$fresh_output" ]] && ! is_idle "$fresh_output"; then
+      echo "[$(date '+%H:%M:%S')] SAFETY GATE: Blocked send to P${pane_idx} (pane BUSY): ${cmd:0:80}" >> "$LOG_FILE"
+      return 1
+    fi
+    # FIX #1: TOCTOU double-check — re-capture and run full is_idle (same logic, no divergence)
+    local recheck_output
+    recheck_output=$(capture_pane "$pane_idx" 2>/dev/null || echo "")
+    if [[ -n "$recheck_output" ]] && ! is_idle "$recheck_output"; then
+      echo "[$(date '+%H:%M:%S')] SAFETY GATE RECHECK: P${pane_idx} no longer idle: ${cmd:0:80}" >> "$LOG_FILE"
+      return 1
+    fi
+  fi
+  # Inject project scope: ensure CC CLI works in correct project directory
+  local worker_dir="${WORKER_DIR[$pane_idx]:-}"
+  if [[ -n "$worker_dir" && "$worker_dir" != "." && "$cmd" == /* ]]; then
+    if ! echo "$cmd" | grep -qF "$worker_dir"; then
+      # Replace closing quote with scope + closing quote
+      if echo "$cmd" | grep -qF '"'; then
+        cmd="${cmd%\"} SCOPE: Only work in ${worker_dir}/.\""
+      fi
+    fi
+  fi
+  # FIX: CC CLI Ink TUI needs Escape first to ensure input mode
+  # Without this, send-keys produces "not in a mode" error
+  tmux send-keys -t "${CTO_SESSION}:0.${pane_idx}" Escape
+  sleep 0.5
+  tmux send-keys -t "${CTO_SESSION}:0.${pane_idx}" -l "$cmd"
+  sleep 0.3
+  tmux send-keys -t "${CTO_SESSION}:0.${pane_idx}" Enter
 }
 
 # Launch/respawn a CLI pane via mekong-wrapper (unified entry point)
@@ -294,12 +490,12 @@ cleanup_orphan_nodes() {
   local killed=0
   local MAX_NODE_COUNT=30
 
-  # Hard guard: if node count exceeds MAX, kill all and warn
+  # FIX #9: only count/kill CC CLI-related node processes (not system-wide)
   local node_count
-  node_count=$(pgrep -f 'node' 2>/dev/null | wc -l | tr -d ' ')
+  node_count=$(pgrep -f 'node.*claude\|node.*@anthropic' 2>/dev/null | wc -l | tr -d ' ')
   if [[ "$node_count" -gt "$MAX_NODE_COUNT" ]]; then
-    log "⚠️  GUARD: $node_count node processes (>${MAX_NODE_COUNT}) — killing ALL"
-    killall -9 node 2>/dev/null || true
+    log "⚠️  GUARD: $node_count CC CLI node processes (>${MAX_NODE_COUNT}) — killing CC CLI nodes"
+    pkill -9 -f 'node.*claude|node.*@anthropic' 2>/dev/null || true
     return 0
   fi
 
@@ -390,14 +586,83 @@ QUESTION_PATTERNS="Do you want to proceed|Would you like"
 
 is_idle() {
   local output="$1"
+  local tail10 tail15
+  tail10=$(echo "$output" | tail -10)
+  tail15=$(echo "$output" | tail -15)
 
-  # PRIORITY 1: Multi-tool idle detection (claude/gemini/opencode/aider)
-  if echo "$output" | tail -3 | grep -qE "^❯|⏵⏵ bypass|Type your message|aider>|codex>|^>"; then
-    return 0  # IDLE — pane is at prompt
+  # GUARD 1: "queued messages" = task stuffed, NEVER idle
+  if echo "$tail10" | grep -qiE "queued messages|Press up to edit"; then
+    return 1
   fi
 
-  # No prompt → check if stuck/busy/question
-  return 1  # NOT idle
+  # PRIORITY CHECK: clean ❯ prompt = IDLE (check BEFORE busy guards)
+  if echo "$tail10" | grep -qE "^[[:space:]]*❯[[:space:]]*$"; then
+    return 0
+  fi
+
+  # CC CLI idle: ⏵⏵ visible + NO busy icons in last 8 lines = truly idle
+  # ⏵⏵ is status bar (always visible), so ONLY count as idle if no active work above it
+  if echo "$output" | tail -3 | grep -qE "⏵⏵"; then
+    if ! echo "$output" | tail -8 | grep -qE "⏺|✽|✳|✢|●|◼|▸|Thinking|Running\.\.\.|Searching\.\.\.|pending"; then
+      return 0  # IDLE — status bar visible, no active work
+    fi
+  fi
+
+  # No clean prompt found — check if genuinely busy
+  # GUARD 2: CC CLI ACTIVE icons only (NOT completion icons)
+  # ✻ = COMPLETION ("Cooked for 48s") — NOT busy!
+  # ✶ = COMPLETION variant — NOT busy!
+  # Only match: ⏺ (tool output) ✽ (cooking) ✳ (working) ✢ (phase) ● (active) ◼ (subtask)
+  if echo "$tail15" | grep -qE "⏺|✽|✳|✢|●|◼|▸"; then
+    return 1
+  fi
+
+  # GUARD 3: CC CLI busy verbs (context-aware — require active spinner prefix)
+  if echo "$tail15" | grep -qE "^[[:space:]]*[·✽✳✢⏺●].*Thinking|Running\.\.\.|Searching\.\.\.|Bash\(|Update\(|Write\(|Search\("; then
+    return 1
+  fi
+
+  # IDLE: Completion markers + prompt visible
+  if echo "$tail15" | grep -qE "Brewed for|Cooked for|Crunched for|Churned for|Cogitated for|Sautéed for|Baked for"; then
+    return 0  # Task finished, at prompt
+  fi
+
+  # IDLE: non-CC CLI tool prompts
+  if echo "$output" | tail -2 | grep -qE "aider>|codex>|Type your message"; then
+    return 0
+  fi
+
+  # Default: NOT idle (safe)
+  return 1
+}
+
+# ---- PANE LOCK (2-way dispatch protection) ----
+PANE_LOCK_DIR="${MEKONG_DIR}/pane-lock"
+mkdir -p "$PANE_LOCK_DIR"
+LOCK_TIMEOUT=600  # 10 minutes
+
+acquire_pane_lock() {
+  local session=$1 pane=$2
+  local lock_file="${PANE_LOCK_DIR}/${session}-${pane}.lock"
+  # Check if lock exists and not expired
+  if [[ -f "$lock_file" ]]; then
+    # FIX #7: cross-platform stat (macOS: -f %m, Linux: -c %Y)
+    local mtime
+    mtime=$(stat -f %m "$lock_file" 2>/dev/null || stat -c %Y "$lock_file" 2>/dev/null || echo 0)
+    local age=$(( $(date +%s) - mtime ))
+    if [[ $age -lt $LOCK_TIMEOUT ]]; then
+      return 1  # Lock held, skip dispatch
+    fi
+    # Lock expired, remove it
+    rm -f "$lock_file"
+  fi
+  touch "$lock_file"
+  return 0
+}
+
+release_pane_lock() {
+  local session=$1 pane=$2
+  rm -f "${PANE_LOCK_DIR}/${session}-${pane}.lock"
 }
 
 # Check if pane is actively working (inverse of idle, but also catches stuck state)
@@ -410,7 +675,10 @@ is_busy() {
 
 has_question() {
   local output="$1"
-  echo "$output" | tail -15 | grep -vE "🔋|⏰|📁|🌿|bypass|auto-compact|compact|model" | grep -qE "\?|Do you want|Would you like|proceed"
+  # FIX #4: strict patterns — exclude code output, error messages, URLs
+  local candidate
+  candidate=$(echo "$output" | tail -8 | grep -vE '🔋|⏰|📁|🌿|bypass|auto-compact|model|Error:|Cannot|TODO|FIXME|http|\.ts|\.js|\.py')
+  echo "$candidate" | grep -qE 'Do you want to|Would you like to|Should I |Shall I |Pick an option|Select.*:|Choose.*:|Y/n|\(y/N\)'
 }
 
 get_question() {
@@ -499,8 +767,13 @@ detect_pane_state() {
     return
   fi
 
-  # Build/runtime errors
-  if echo "$tail20" | grep -qiE "error|failed|SyntaxError|TypeError|Cannot find"; then
+  # Build/runtime errors (strict: require real error patterns, not "0 errors" or "error handling")
+  if echo "$tail20" | grep -qiE "SyntaxError|TypeError|ReferenceError|Cannot find module|ENOENT|EACCES|Segmentation fault|panic:|fatal:|build failed|exit code [1-9]|npm ERR!|error TS[0-9]"; then
+    echo "error"
+    return
+  fi
+  # Fallback: lines starting with "Error:" or "ERROR" (not substring matches)
+  if echo "$tail20" | grep -qE "^(Error:|ERROR[: ])|command failed|exited with"; then
     echo "error"
     return
   fi
@@ -552,8 +825,8 @@ build_delegation_task() {
       local error_ctx
       error_ctx=$(extract_error_context "$pane_output")
       if [[ "$retries" -ge 3 ]]; then
-        # Escalate: switch to /plan:hard after 3 failed retries
-        echo "/plan:hard \"${ctx}. ESCALATION: ${retries} retries failed. Error: ${error_ctx}. Analyze root cause deeply, create plan before fixing.\""
+        # Escalate: switch to /plan hard after 3 failed retries
+        echo "/plan hard \"${ctx}. ESCALATION: ${retries} retries failed. Error: ${error_ctx}. Analyze root cause deeply, create plan before fixing.\""
       elif [[ "$retries" -gt 0 ]]; then
         echo "${error_cmd} \"RETRY #${retries}. ${ctx}. Error: ${error_ctx}. Analyze root cause, fix, verify: ${deploy}\""
       else
@@ -582,6 +855,66 @@ dispatch_worker() {
   local pane_idx=$1
   local pane_output="${2:-}"
   local name="${WORKER_NAME[$pane_idx]}"
+
+  # GATE 0: Context % check — NEVER dispatch to full pane (prevents OOM + queue stacking)
+  local ctx_pct
+  ctx_pct=$(echo "$pane_output" | grep -oE '[0-9]+%' | head -1 | tr -d '%')
+  if [[ -n "$ctx_pct" && "$ctx_pct" -ge 85 ]]; then
+    log "P${pane_idx} (${name}): CONTEXT ${ctx_pct}% >= 85% — auto-compacting"
+    send_to_pane "$pane_idx" "/compact"
+    return
+  fi
+
+  # GATE 1: company.json awareness — /idea → $1M flow
+  local project_dir="${WORKER_DIR[$pane_idx]:-}"
+  # Skip gate if WORKER_DIR not yet loaded (first cycle race condition)
+  if [[ -n "$project_dir" && "$project_dir" != "." ]]; then
+    local company_file="${MEKONG_DIR}/${project_dir}/.mekong/company.json"
+    # Fallback: absolute path
+    [[ ! -f "$company_file" ]] && company_file="${HOME}/mekong-cli/${project_dir}/.mekong/company.json"
+    if [[ ! -f "$company_file" ]]; then
+      log "P${pane_idx} (${name}): NO company.json at ${project_dir} — dispatching /idea"
+      local fallback_cmd=$(get_fallback_cmd "$pane_idx")
+      send_to_pane "$pane_idx" "$fallback_cmd"
+      return
+    fi
+  fi
+
+  # LOCK 2: Check pane lock before dispatch
+  if ! acquire_pane_lock "${CTO_SESSION}" "$pane_idx"; then
+    log "P${pane_idx} (${name}): LOCKED — skip dispatch (task in progress)"
+    return
+  fi
+
+  # PRIORITY 0: Read next_commands from company.json (skip brain entirely)
+  local project_dir_p0="${WORKER_DIR[$pane_idx]:-}"
+  if [[ -n "$project_dir_p0" && "$project_dir_p0" != "." ]]; then
+    local cjf="${MEKONG_DIR}/${project_dir_p0}/.mekong/company.json"
+    # Fallback: also check absolute path (daemon bg process path issue)
+    [[ ! -f "$cjf" ]] && cjf="${HOME}/mekong-cli/${project_dir_p0}/.mekong/company.json"
+    if [[ -f "$cjf" ]]; then
+      local next_cmd
+      next_cmd=$(python3 -c "
+import json,sys
+try:
+    d=json.load(open('$cjf'))
+    cmds=d.get('next_commands',[])
+    if cmds: print(cmds[0])
+except: pass
+" 2>/dev/null)
+      if [[ -n "$next_cmd" ]]; then
+        local full_cmd="${next_cmd} "Project: ${name}, Dir: ${project_dir_p0}. Execute toward \$1M ARR. Commit when done.""
+        if ! is_duplicate_dispatch "$pane_idx" "$next_cmd"; then
+          log "P${pane_idx} (${name}): COMPANY.JSON → ${next_cmd}"
+          if send_to_pane "$pane_idx" "$full_cmd"; then
+            record_dispatch "$pane_idx" "$next_cmd"
+            log "DELEGATED P${pane_idx} (${name}) — company.json dispatch"
+            return
+          fi
+        fi
+      fi
+    fi
+  fi
 
   # Priority 1: Check for pending mission files matching this worker's project
   local mission_dir="${MEKONG_DIR}/missions"
@@ -616,9 +949,17 @@ dispatch_worker() {
   local brain_cmd
   brain_cmd=$(cto_brain_dispatch "$pane_idx" "$pane_output")
   if [[ -n "$brain_cmd" ]]; then
+    if is_duplicate_dispatch "$pane_idx" "$brain_cmd"; then
+      log "P${pane_idx} (${name}): DEDUP — skipping duplicate brain cmd"
+      return
+    fi
     log "P${pane_idx} (${name}): BRAIN WARM → ${brain_cmd}"
-    send_to_pane "$pane_idx" "$brain_cmd"
-    log "DELEGATED P${pane_idx} (${name}) — BRAIN dispatch [$(get_pane_role "$pane_idx")]"
+    if send_to_pane "$pane_idx" "$brain_cmd"; then
+      record_dispatch "$pane_idx" "$brain_cmd"
+      log "DELEGATED P${pane_idx} (${name}) — BRAIN dispatch [$(get_pane_role "$pane_idx")]"
+    else
+      log "P${pane_idx} (${name}): BRAIN cmd BLOCKED by safety gate"
+    fi
     return
   fi
   log "P${pane_idx} (${name}): BRAIN COLD/EMPTY — using role fallback"
@@ -633,8 +974,14 @@ dispatch_worker() {
     # Pick from role-specific fallback array (bash 3.2 compatible)
     local fallback_cmd=$(get_fallback_cmd "$pane_idx")
     local pane_role=$(get_pane_role "$pane_idx")
+    if is_duplicate_dispatch "$pane_idx" "$fallback_cmd"; then
+      log "P${pane_idx} (${name}): DEDUP — skipping duplicate fallback [${pane_role}]"
+      return
+    fi
     log "P${pane_idx} (${name}): FALLBACK[${pane_role}]: ${fallback_cmd}"
-    send_to_pane "$pane_idx" "$fallback_cmd"
+    if send_to_pane "$pane_idx" "$fallback_cmd"; then
+      record_dispatch "$pane_idx" "$fallback_cmd"
+    fi
     return
   fi
 
@@ -642,9 +989,15 @@ dispatch_worker() {
   task=$(build_delegation_task "$pane_idx" "$pane_output")
   local chosen_cmd
   chosen_cmd=$(echo "$task" | awk '{print $1}')
+  if is_duplicate_dispatch "$pane_idx" "$chosen_cmd"; then
+    log "P${pane_idx} (${name}): DEDUP — skipping duplicate ${chosen_cmd} (wait ${DEDUP_MIN_INTERVAL}s)"
+    return
+  fi
   log "P${pane_idx} (${name}): FALLBACK STATE=${state} → CMD=${chosen_cmd}"
-  send_to_pane "$pane_idx" "$task"
-  log "DELEGATED P${pane_idx} (${name}) — ${chosen_cmd}"
+  if send_to_pane "$pane_idx" "$task"; then
+    record_dispatch "$pane_idx" "$chosen_cmd"
+    log "DELEGATED P${pane_idx} (${name}) — ${chosen_cmd}"
+  fi
 }
 
 # ---- PHASE 4: VERIFY ----
@@ -652,28 +1005,85 @@ verify_worker() {
   local pane_idx=$1 output="$2"
   local name="${WORKER_NAME[$pane_idx]}"
 
-  # Context 90%+ or 100% → /clear (hard reset, avoids stuck at 100%)
-  if echo "$output" | tail -10 | grep -qE "Context:.*100%|Context:.*9[0-9]%|auto-compact|Auto-compacting"; then
-    log "VERIFY P${pane_idx}: CONTEXT ≥90% → /clear"
-    send_to_pane "$pane_idx" "/clear"
-    save_memory "CLEAR" "P${pane_idx}: context ≥90%, hard reset"
-    return 0
-  fi
-  # Context 80-89% → /compact (soft compress)
-  if echo "$output" | tail -10 | grep -qE "Context:.*8[0-9]%"; then
-    log "VERIFY P${pane_idx}: CONTEXT 80-89% → /compact"
-    send_to_pane "$pane_idx" "/compact"
-    save_memory "COMPACT" "P${pane_idx}: context 80-89%, compacted"
+  # CC CLI selection dialogs — auto-select option 1 (Enter)
+  if echo "$output" | tail -5 | grep -qE "Enter to select|↑/↓ to navigate|Esc to cancel"; then
+    log "VERIFY P${pane_idx}: SELECTION DIALOG → Enter (pick default)"
+    tmux send-keys -t "${CTO_SESSION}:0.${pane_idx}" Enter
     return 0
   fi
 
-  # Check for questions → always compact (key=1 is never useful)
+  # SESSION COMPLETE detection — /clear immediately to recycle pane
+  # IMPORTANT: only check tail -5 to avoid matching old scroll history from previous sessions
+  if echo "$output" | tail -5 | grep -qiE "Session Complete|Hẹn gặp lại|All Tasks Done|Task hoàn thành|Session kết thúc|goodbye|signing off"; then
+    if is_idle "$output"; then
+      log "VERIFY P${pane_idx}: SESSION COMPLETE → /clear for new task"
+      send_to_pane "$pane_idx" "/clear"
+      save_memory "RECYCLE" "P${pane_idx}: session complete, cleared for new dispatch"
+      return 0
+    fi
+  fi
+
+  # CI POLLING STUCK detection — FIX #5: tighten ranges + require idle
+  if echo "$output" | tail -8 | grep -qE "gh run list|gh run view|Waiting.*CI|checking.*deploy"; then
+    if echo "$output" | tail -10 | grep -qE "git push|pushed to"; then
+      if is_idle "$output"; then
+        log "VERIFY P${pane_idx}: CI POLLING STUCK (commit done + idle) → Ctrl-C + /clear"
+        tmux send-keys -t "${CTO_SESSION}:0.${pane_idx}" C-c "" 2>/dev/null
+        sleep 1
+        send_to_pane "$pane_idx" "/clear"
+        save_memory "UNSTUCK" "P${pane_idx}: broke CI polling loop after commit"
+        return 0
+      fi
+    fi
+  fi
+
+  # Context management — ONLY when pane is IDLE (never interrupt active work)
+  if is_idle "$output"; then
+    # Context 90%+ or 100% → /clear (hard reset)
+    # FIX #6: anchor to CC CLI format (has ━ progress bar) — prevents matching code output
+    if echo "$output" | tail -5 | grep -qE 'Context:[[:space:]]*100%[[:space:]]*━|Context:[[:space:]]*9[0-9]%[[:space:]]*━|auto-compact|Auto-compacting'; then
+      log "VERIFY P${pane_idx}: CONTEXT ≥90% + IDLE → /clear"
+      send_to_pane "$pane_idx" "/clear"
+      save_memory "CLEAR" "P${pane_idx}: context ≥90%, hard reset"
+      return 0
+    fi
+    # Context 80-89% → /compact (soft compress)
+    if echo "$output" | tail -5 | grep -qE 'Context:[[:space:]]*8[0-9]%[[:space:]]*━'; then
+      log "VERIFY P${pane_idx}: CONTEXT 80-89% + IDLE → /compact"
+      send_to_pane "$pane_idx" "/compact"
+      save_memory "COMPACT" "P${pane_idx}: context 80-89%, compacted"
+      return 0
+    fi
+  else
+    # Log but don't interrupt working panes
+    if echo "$output" | tail -10 | grep -qE "Context:.*[89][0-9]%|Context:.*100%"; then
+      log "P${pane_idx} (${name}): CONTEXT HIGH but WORKING — skipping clear/compact"
+    fi
+  fi
+
+  # Check for questions — CC CLI asking for user input
+  # Send "1" (pick first option) to unblock, NOT /compact (which causes loop)
   if has_question "$output"; then
     local question
     question=$(get_question "$output")
-    log "VERIFY P${pane_idx}: QUESTION → /compact: ${question}"
-    send_to_pane "$pane_idx" "/compact"
-    save_memory "VERIFY" "P${pane_idx}: question → compacted: ${question}"
+    # Skip if we already answered recently (prevent answer loop)
+    local last_answer_time="${LAST_ANSWER_TIME[$pane_idx]:-0}"
+    local now_ts
+    now_ts=$(date +%s)
+    if [[ $((now_ts - last_answer_time)) -lt 120 ]]; then
+      log "P${pane_idx} (${name}): QUESTION skipped (answered <120s ago)"
+      return 0
+    fi
+    LAST_ANSWER_TIME[$pane_idx]=$now_ts
+    # FIX #10: context-aware answer — pick "proceed/yes" not "cancel"
+    local answer="1"
+    local options_text
+    options_text=$(echo "$output" | tail -10 | grep -E '^[[:space:]]*[0-9]+[).:]')
+    if echo "$options_text" | grep -qiE '2.*proceed|2.*yes|2.*continue|2.*accept'; then
+      answer="2"
+    fi
+    log "VERIFY P${pane_idx}: QUESTION → answering '${answer}': ${question}"
+    send_to_pane "$pane_idx" "$answer"
     return 0
   fi
 
@@ -717,12 +1127,15 @@ phase_integrate() {
 
   # Push any unpushed commits
   local unpushed
-  unpushed=$(git log origin/master..HEAD --oneline 2>/dev/null | wc -l | tr -d ' ')
+  # Auto-detect default branch (main or master)
+  local default_branch
+  default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+  unpushed=$(git log "origin/${default_branch}..HEAD" --oneline 2>/dev/null | wc -l | tr -d ' ')
   if [[ "$unpushed" -gt "0" ]]; then
-    log "INTEGRATE: Pushing $unpushed commits..."
-    if git push origin master 2>&1 | tail -3 >> "$LOG_FILE"; then
+    log "INTEGRATE: Pushing $unpushed commits to ${default_branch}..."
+    if git push origin "${default_branch}" 2>&1 | tail -3 >> "$LOG_FILE"; then
       log "INTEGRATE: Push SUCCESS"
-      save_memory "SHIP" "Pushed $unpushed commits to master"
+      save_memory "SHIP" "Pushed $unpushed commits to ${default_branch}"
     else
       log "INTEGRATE: Push FAILED"
     fi
@@ -753,7 +1166,34 @@ health_check() {
 # Hardened: trap errors so daemon never exits
 # ============================================================
 
-# Safety net: log but don't exit on errors
+# ---- SINGLETON GUARD: prevent multiple daemon instances ----
+PIDFILE="${MEKONG_DIR}/cto-daemon.pid"
+
+# FIX #14: flock if available (more robust), mkdir fallback
+LOCKDIR="${MEKONG_DIR}/cto-daemon.lockdir"
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"${MEKONG_DIR}/cto-daemon.flock"
+  if ! flock -n 9; then
+    echo "CTO DAEMON already running (flock). Exiting."
+    exit 1
+  fi
+fi
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+  # Lock exists — check if holder is still alive
+  if [[ -f "$PIDFILE" ]]; then
+    old_pid=$(cat "$PIDFILE" 2>/dev/null)
+    if [[ -n "$old_pid" ]] && kill -0 "$old_pid" 2>/dev/null; then
+      echo "CTO DAEMON already running (PID $old_pid). Exiting."
+      exit 1
+    fi
+  fi
+  # Stale lock — reclaim
+  rm -rf "$LOCKDIR"
+  mkdir "$LOCKDIR" 2>/dev/null || { echo "Cannot acquire lock"; exit 1; }
+fi
+
+echo $$ > "$PIDFILE"
+trap 'rm -f "$PIDFILE"; rm -rf "$LOCKDIR"; log "DAEMON SHUTDOWN (PID $$)"' EXIT INT TERM
 trap 'log "TRAP: Error at line $LINENO (ignored — daemon continues)"' ERR
 
 log "============================================="
@@ -764,8 +1204,35 @@ log "Workers: P1=${WORKER_NAME[1]} P2=${WORKER_NAME[2]} P3=${WORKER_NAME[3]}"
 log "Config: ${CONFIG_FILE}"
 log "============================================="
 
+# Ensure tmux session exists with 3 panes (required for daemon operation)
+if ! tmux has-session -t "${CTO_SESSION}" 2>/dev/null; then
+  log "BOOTSTRAP: tmux session '${CTO_SESSION}' not found — creating with 3 panes"
+  tmux new-session -d -s "${CTO_SESSION}" -x 200 -y 50
+  tmux split-window -t "${CTO_SESSION}:0" -h
+  tmux split-window -t "${CTO_SESSION}:0" -v
+  sleep 1
+  log "BOOTSTRAP: tmux session '${CTO_SESSION}' created with 3 panes"
+else
+  # Verify pane count
+  pane_count=$(tmux list-panes -t "${CTO_SESSION}:0" 2>/dev/null | wc -l | tr -d ' ')
+  if [[ "$pane_count" -lt 4 ]]; then
+    log "BOOTSTRAP: Only ${pane_count} panes in '${CTO_SESSION}' — adding missing panes"
+    while [[ "$pane_count" -lt 4 ]]; do
+      tmux split-window -t "${CTO_SESSION}:0" 2>/dev/null || break
+      pane_count=$((pane_count + 1))
+    done
+  fi
+  log "BOOTSTRAP: tmux session '${CTO_SESSION}' OK (${pane_count} panes)"
+fi
+
 # Warmup Ollama brain model before first cycle
-bash "${PROJECT_ROOT}/scripts/warmup-ollama.sh" 2>/dev/null || log "WARN: Ollama warmup failed"
+# Inline warmup — non-blocking (10s max), uses hardcoded OLLAMA_URL
+{
+  curl -sf --max-time 10 "${OLLAMA_URL}/api/generate" \
+    -d "{\"model\":\"${OLLAMA_MODEL}\",\"prompt\":\"hi\",\"stream\":false,\"keep_alive\":\"5m\",\"options\":{\"num_predict\":1}}" >/dev/null 2>&1 \
+    && log "OLLAMA: ${OLLAMA_MODEL} warm" \
+    || log "OLLAMA: warmup skipped (will retry on first dispatch)"
+} &
 
 # Reset any panes stuck at 100% context
 bash "${PROJECT_ROOT}/scripts/reset-full-panes.sh" "${CTO_SESSION}" 2>/dev/null || true
@@ -777,37 +1244,77 @@ CYCLE=0
 LAST_DISPATCH_1=0
 LAST_DISPATCH_2=0
 LAST_DISPATCH_3=0
-DISPATCH_COOLDOWN=180
+DISPATCH_COOLDOWN=90  # FIX #13: reduced from 180s — less idle waste
+CRASH_COUNT=0
+
 while true; do
+  # Wrap entire cycle in error trap — never let one bad cycle kill daemon
+  {
   CYCLE=$((CYCLE + 1))
   NOW=$(date +%s)
-  _catalog_cache=""  # Clear catalog cache each cycle (pick up config changes)
-  _codebase_ctx=""   # Clear codebase context cache each cycle
+  _catalog_cache=""
+  _codebase_ctx=""
   log "--- CYCLE $CYCLE ---"
+
+  # FIX #15: log rotation (every 100 cycles, cap at 5MB)
+  if [[ $((CYCLE % 100)) -eq 0 ]] && [[ -f "$LOG_FILE" ]]; then
+    log_bytes=$(wc -c < "$LOG_FILE" 2>/dev/null || echo 0)
+    if [[ $log_bytes -gt 5000000 ]]; then
+      tail -2000 "$LOG_FILE" > "${LOG_FILE}.tmp" && mv "${LOG_FILE}.tmp" "$LOG_FILE"
+      log "LOG ROTATED (was ${log_bytes} bytes)"
+    fi
+  fi
 
   # Re-detect which project is in which pane (handles index shifts from respawns)
   refresh_worker_mapping
 
   # PHASE 3+4: For each worker, DELEGATE if idle or VERIFY if active
-  for pane_idx in 1 2 3; do
+  # FIX: max 1 dispatch per cycle (brain call takes 30s → prevents serial stuffing)
+  dispatched_this_cycle=false
+  for pane_idx in 0 1 2 3; do
     # Guard: any failure in per-pane logic must not kill the loop
     {
       output=$(capture_pane "$pane_idx") || output=""
       name="${WORKER_NAME[$pane_idx]:-Worker-${pane_idx}}"
 
       if [[ -z "$output" ]]; then
-        log "P${pane_idx} (${name}): NO OUTPUT (pane dead?) — respawning via mekong-wrapper ($CTO_TOOL)"
+        # Guard: limit respawns to prevent infinite restart loop
+        local respawn_count="${PANE_RESPAWN_COUNT[$pane_idx]:-0}"
+        if [[ $respawn_count -ge 3 ]]; then
+          log "P${pane_idx} (${name}): NO OUTPUT — respawn limit reached (${respawn_count}/3), skipping until next health cycle"
+          continue
+        fi
+        log "P${pane_idx} (${name}): NO OUTPUT (pane dead?) — respawning via mekong-wrapper ($CTO_TOOL) [${respawn_count}/3]"
         launch_pane_cc "$pane_idx" "$CTO_TOOL" || true
+        PANE_RESPAWN_COUNT[$pane_idx]=$((respawn_count + 1))
         continue
       fi
+      # Reset respawn counter on successful output
+      PANE_RESPAWN_COUNT[$pane_idx]=0
 
       # PHASE 4: VERIFY — check questions, errors, jidoka
       if verify_worker "$pane_idx" "$output"; then
         continue  # verify handled the worker
       fi
 
-      # If idle → check missions first (bypass cooldown), then dispatch with cooldown
+      # If idle → release lock + check missions/dispatch
       if is_idle "$output"; then
+        release_pane_lock "${CTO_SESSION}" "$pane_idx"
+
+        # FIX: skip dispatch if already dispatched another pane this cycle
+        if [[ "$dispatched_this_cycle" == true ]]; then
+          log "P${pane_idx} (${name}): IDLE (1-dispatch-per-cycle limit)"
+          continue
+        fi
+
+        # FIX: double-sample idle check (1s apart) to close race window
+        sleep 1
+        recheck_output=$(capture_pane "$pane_idx" 2>/dev/null || echo "")
+        if [[ -n "$recheck_output" ]] && ! is_idle "$recheck_output"; then
+          log "P${pane_idx} (${name}): IDLE→BUSY detected (double-sample), skipping"
+          continue
+        fi
+
         # Priority 0: mission files bypass cooldown entirely
         mission_dir="${MEKONG_DIR}/missions"
         has_mission=false
@@ -821,6 +1328,8 @@ while true; do
           WORKER_RETRIES[$pane_idx]=0
           dispatch_worker "$pane_idx" "$output"
           eval "LAST_DISPATCH_${pane_idx}=$NOW"
+          dispatched_this_cycle=true
+          sleep 2  # Let pane accept command before checking next pane
         else
           ld_var="LAST_DISPATCH_${pane_idx}"
           last_dispatch="${!ld_var:-0}"
@@ -830,6 +1339,8 @@ while true; do
             WORKER_RETRIES[$pane_idx]=0
             dispatch_worker "$pane_idx" "$output"
             eval "LAST_DISPATCH_${pane_idx}=$NOW"
+            dispatched_this_cycle=true
+            sleep 2  # Let pane accept command before checking next pane
           else
             log "P${pane_idx} (${name}): IDLE (cooldown ${elapsed}/${DISPATCH_COOLDOWN}s)"
           fi
@@ -845,9 +1356,20 @@ while true; do
   # PHASE 5: INTEGRATE — push, check conflicts
   phase_integrate || log "CYCLE $CYCLE: INTEGRATE ERROR (continuing)"
 
-  # Health check every 5 cycles
+  # Health check every 5 cycles (system + Ollama brain)
   if [[ $((CYCLE % 5)) -eq 0 ]]; then
     health_check || true
+    # Ollama brain health — auto-recover if down
+    # DISABLED: CC CLI workers use DashScope API (cloud), not local Ollama
+    # Ollama auto-recover was loading 31GB Qwen model on every health check cycle
+    # causing OOM kills on task-watcher. Local Ollama only used by CTO brain_think.py
+    # which handles its own model loading with keep_alive=5m
+    # if ! ollama_health_check; then
+    #   log "HEALTH: Ollama brain unhealthy — triggering auto-recovery"
+    #   ollama_auto_recover || true
+    # fi
+    # Reset pane respawn counters every 5 cycles (allow retry)
+    PANE_RESPAWN_COUNT[1]=0; PANE_RESPAWN_COUNT[2]=0; PANE_RESPAWN_COUNT[3]=0
   fi
 
   # Orphan node cleanup every 3 cycles (prevents RAM overflow)
@@ -859,6 +1381,16 @@ while true; do
   if [[ $((CYCLE % 20)) -eq 0 ]]; then
     phase_scan || true
   fi
+
+  CRASH_COUNT=0  # Reset on successful cycle
+  } || {
+    CRASH_COUNT=$((CRASH_COUNT + 1))
+    log "CYCLE $CYCLE CRASHED (attempt ${CRASH_COUNT}) — recovering"
+    if [[ $CRASH_COUNT -ge 10 ]]; then
+      log "FATAL: 10 consecutive crashes — daemon giving up"
+      exit 1
+    fi
+  }
 
   sleep "$POLL_INTERVAL"
 done

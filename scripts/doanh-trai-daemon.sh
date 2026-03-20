@@ -57,8 +57,38 @@ for name, dept in cfg.get('departments', {}).items():
 # ---- IDLE DETECTION ----
 is_pane_idle() {
   local output="$1"
-  # CC CLI idle: shows prompt character or ">" at end, no active tool use
-  echo "$output" | tail -5 | grep -qE '^\$|^>|^❯|waiting for input|^claude>' 2>/dev/null
+  # LOCK 1: NOT idle if tool actively running
+  if echo "$output" | tail -15 | grep -qE "⏺|✳|Quantumizing|Scurrying|Writing|Reading|Thinking|Searching|Running|Brewing|Cooked|Cogitating|Crunching"; then
+    return 1
+  fi
+  # LOCK 1b: NOT idle if dialog/queued state
+  if echo "$output" | tail -10 | grep -qiE "queued messages|Press up to edit|Exit plan mode|Enter to select|Yes.*No|arrow keys"; then
+    return 1
+  fi
+  # CC CLI idle: shows prompt character or ">" at end
+  echo "$output" | tail -5 | grep -qE '^\$|^>|^❯|waiting for input|^claude>|⏵⏵ bypass' 2>/dev/null
+}
+
+# ---- PANE LOCK (2-way dispatch protection) ----
+PANE_LOCK_DIR="${MEKONG_DIR}/pane-lock"
+mkdir -p "$PANE_LOCK_DIR"
+LOCK_TIMEOUT=600
+
+acquire_pane_lock() {
+  local session=$1 pane=$2
+  local lock_file="${PANE_LOCK_DIR}/${session}-${pane}.lock"
+  if [[ -f "$lock_file" ]]; then
+    local age=$(( $(date +%s) - $(stat -f %m "$lock_file" 2>/dev/null || echo 0) ))
+    [[ $age -lt $LOCK_TIMEOUT ]] && return 1
+    rm -f "$lock_file"
+  fi
+  touch "$lock_file"
+  return 0
+}
+
+release_pane_lock() {
+  local session=$1 pane=$2
+  rm -f "${PANE_LOCK_DIR}/${session}-${pane}.lock"
 }
 
 # ---- CAPTURE PANE ----
@@ -172,6 +202,15 @@ while true; do
         continue
       fi
 
+      # Release lock if truly idle
+      release_pane_lock "$session" "$pane_idx"
+
+      # Acquire lock before dispatch
+      if ! acquire_pane_lock "$session" "$pane_idx"; then
+        log "${dept_name} P${pane_idx}: LOCKED — skip"
+        continue
+      fi
+
       # Check API budget — if over limit, force local-only for ALL depts
       daily_usage=0
       today=$(date '+%Y-%m-%d')
@@ -188,6 +227,7 @@ while true; do
         if [[ ${#task_arr[@]} -gt 0 ]]; then
           tidx=${DEPT_TASK_IDX[$dept_name]:-0}
           task="${task_arr[$tidx]}"
+          if [[ -z "$task" || "$task" == "|||" ]]; then continue; fi
           # Strip /cook prefix — task runner takes raw description
           task_desc=$(echo "$task" | sed 's|^/[a-z_:-]* *"*||; s|"*$||')
           DEPT_TASK_IDX[$dept_name]=$(( (tidx + 1) % ${#task_arr[@]} ))
@@ -215,6 +255,10 @@ while true; do
         tidx=${DEPT_TASK_IDX[$dept_name]:-0}
         task="${task_arr[$tidx]}"
         DEPT_TASK_IDX[$dept_name]=$(( (tidx + 1) % ${#task_arr[@]} ))
+        if [[ -z "$task" || "$task" == "|||" ]]; then
+          log "${dept_name} P${pane_idx}: SKIP empty task"
+          continue
+        fi
         log "${dept_name} P${pane_idx}: CC-CLI[${tidx}] → ${task}"
         send_to_pane "$session" "$pane_idx" "$task"
       else

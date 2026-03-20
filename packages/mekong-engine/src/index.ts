@@ -1,5 +1,8 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { z } from 'zod'
+import { payloadSizeLimit } from './raas/payload-limiter'
+import { createError } from './types/error'
 import { taskRoutes } from './routes/tasks'
 import { agentRoutes } from './routes/agents'
 import { billingRoutes } from './routes/billing'
@@ -15,6 +18,15 @@ import { ledgerRoutes } from './routes/ledger'
 import { equityRoutes } from './routes/equity'
 import { revenueRoutes } from './routes/revenue'
 import { fundingRoutes } from './routes/funding'
+import { matchingRoutes } from './routes/matching'
+import { conflictRoutes } from './routes/conflicts'
+import { decentralRoutes } from './routes/decentralization'
+import { rbacRoutes } from './routes/rbac'
+import { constitutionRoutes } from './routes/constitution'
+import { marketplaceRoutes } from './routes/marketplace'
+import { raasRoutes, webhookRoutes } from './routes/raas'
+import { formatPrometheusMetrics, getMetrics, requestLoggingMiddleware, metricsMiddleware } from './lib/monitoring'
+import { handleAsync } from './types/error'
 import type { D1Database, KVNamespace, R2Bucket, Ai, AiModels, ScheduledEvent, ExecutionContext } from '@cloudflare/workers-types'
 
 // Cloudflare bindings — all optional until resources created in dashboard
@@ -36,12 +48,23 @@ export type Bindings = {
   MOMO_SECRET_KEY?: string
   MOMO_ACCESS_KEY?: string
   VNPAY_HASH_SECRET?: string
+  PAYMENT_METADATA_SECRET?: string
 }
 
 // Track server start time for uptime calculation
 const START_TIME = Date.now()
 
 const app = new Hono<{ Bindings: Bindings }>()
+
+// Zod schema for /cmd endpoint validation
+const cmdSchema = z.object({
+  goal: z.string()
+    .min(1, 'Goal is required')
+    .max(5000, 'Goal must be 5000 characters or less'),
+  params: z.record(z.unknown())
+    .optional()
+    .describe('Optional parameters for the command'),
+})
 
 // Global error handler — catch JSON parse errors, unexpected crashes
 app.onError((err, c) => {
@@ -52,7 +75,10 @@ app.onError((err, c) => {
 })
 
 // Middleware
+app.use('*', payloadSizeLimit())
 app.use('*', cors())
+app.use('*', metricsMiddleware)
+app.use('*', requestLoggingMiddleware)
 
 // Root — service info
 app.get('/', (c) => c.json({
@@ -127,9 +153,19 @@ app.get('/health', async (c) => {
 app.post('/cmd', async (c) => {
   if (!c.env.AI && !c.env.LLM_API_KEY) return c.json({ error: 'No LLM provider configured (need AI binding or LLM_API_KEY)' }, 503)
 
+  // Validate request body with Zod schema
+  let body: z.infer<typeof cmdSchema>
+  try {
+    const json = await c.req.json()
+    body = cmdSchema.parse(json)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json(createError('VALIDATION_ERROR', 'Validation failed', error.errors), 400)
+    }
+    return c.json(createError('BAD_REQUEST', 'Invalid JSON'), 400)
+  }
+
   const { MekongEngineAdapter } = await import('./core/mekong-engine-adapter')
-  const body = await c.req.json<{ goal: string }>()
-  if (!body.goal) return c.json({ error: 'Missing goal' }, 400)
 
   // BYOK fallback chain: tenant settings → global env → Workers AI
   let llmApiKey = c.env.LLM_API_KEY
@@ -193,6 +229,28 @@ app.route('/v1/ledger', ledgerRoutes)
 app.route('/v1/equity', equityRoutes)
 app.route('/v1/revenue', revenueRoutes)
 app.route('/v1/funding', fundingRoutes)
+app.route('/v1/matching', matchingRoutes)
+app.route('/v1/conflicts', conflictRoutes)
+app.route('/v1/decentralization', decentralRoutes)
+app.route('/v1/rbac', rbacRoutes)
+app.route('/v1/constitution', constitutionRoutes)
+app.route('/v1/marketplace', marketplaceRoutes)
+app.route('/v1/raas', raasRoutes)
+app.route('/', webhookRoutes)
+
+// Metrics endpoint for Prometheus scraping (protected by SERVICE_TOKEN)
+app.get('/metrics', handleAsync(async (c) => {
+  // Require authentication via SERVICE_TOKEN
+  const authHeader = c.req.header('Authorization')
+  if (!authHeader?.startsWith('Bearer ') || authHeader.slice(7) !== c.env.SERVICE_TOKEN) {
+    return c.json({ error: 'Unauthorized - SERVICE_TOKEN required' }, 401)
+  }
+  const metrics = getMetrics()
+  const prometheusFormat = formatPrometheusMetrics(metrics)
+  return c.body(prometheusFormat, 200, {
+    'Content-Type': 'text/plain; version=0.0.4',
+  })
+}))
 
 // Cron Trigger — auto-publish approved content
 export default {
