@@ -1,14 +1,42 @@
-# F&B CAFFE CONTAINER — Sa Đéc
+# F&B CAFFE CONTAINER — Sa Đéc 🚀
 
-Chào mừng đến với **F&B CAFFE CONTAINER** — Quán cà phê container phong cách F&B hiện đại tại Sa Đéc, Đồng Tháp.
+> Hệ thống quản lý quán cafe container hiện đại — Đặt hàng online, thanh toán số, KDS realtime, Loyalty program
+
+**Target:** 500 đơn/ngày | 50M VND/tháng
+
+---
+
+## 🎯 Tổng quan
+
+**Container Caffe Sa Đéc** là mô hình quán cafe container kết hợp công nghệ 4.0:
+- 📱 **Online Menu & Order** — Đặt hàng qua QR code, không cần chờ
+- 💳 **Thanh Toán Số** — VNPay, MoMo, PayOS tích hợp đầy đủ
+- 🖥️ **KDS (Kitchen Display System)** — Bếp nhận order realtime
+- ⭐ **Loyalty Program** — Tích điểm đổi quà, tier system
+- 📅 **Table Reservation** — Đặt bàn trước
+- 🚚 **Delivery Tracking** — Theo dõi đơn giao hàng
+- 📊 **Analytics Dashboard** — Báo cáo doanh thu realtime
 
 > Forked từ VIBE CODING Café — thuộc hệ sinh thái **Mekong CLI / Sadec Marketing Hub**.
 
-## 🎯 Thông Tin Dự Án
-- **Mục tiêu:** Doanh thu F&B tối ưu từ mô hình container café.
-- **Concept:** F&B Container — Where Flavor Meets Design.
-- **Vị trí:** Sa Đéc, Đồng Tháp (Container Architecture).
-- **Trạng thái:** Khởi tạo & phát triển.
+## 📋 Business Blueprint
+
+Chi tiết kế hoạch kinh doanh 25 bước xem tại: `plans/company-blueprint/plan.md`
+
+**Stage:** Zero→PSF
+**ICP:** Khách hàng 18-35 tuổi tại Sa Đéc, Đồng Tháp
+**Moat:** Concept container độc đáo + Loyalty program gamification
+
+### Success Metrics
+
+| Metric | Target |
+|--------|--------|
+| Daily Orders | 500 |
+| Monthly Revenue | 50M VND |
+| Avg Order Value | 45K VND |
+| Loyalty Enrollment | 40% |
+| Online Order % | 40% |
+| Fulfillment Time | < 8 min |
 
 ## 💻 Open Source Arsenal (Tech Stack)
 F&B CAFFE CONTAINER sử dụng 100% phần mềm mã nguồn mở để tối ưu hóa 90% chi phí SaaS.
