@@ -299,6 +299,7 @@ docsops/
 # Lock files
 *.mission-active-*.lock
 uv.lock
+pnpm-lock.yaml
 
 # Misc internal
 apps/openclaw-worker/plans/
