@@ -160,3 +160,6 @@ jobs:
             exit 1
           fi
           echo "OK: No hardcoded secrets found"
+
+  # raas-gateway tests: run locally (apps/ is gitignored)
+  # cd apps/raas-gateway && pnpm test

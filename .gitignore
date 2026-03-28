@@ -67,6 +67,10 @@ htmlcov/
 # Turbo
 .turbo/
 
+# Vercel (not used — Cloudflare-only project)
+.vercel
+vercel
+
 # Project specific
 products/paid/*.zip
 !products/paid/README.md
@@ -160,7 +164,7 @@ claudekit-engineer-dna/
 *.pid
 dump.rdb
 local_db.json
-.vercel
+.wrangler
 repomix-output.xml
 release-manifest.json
 
@@ -268,7 +272,7 @@ Users/
 infrastructure/
 terraform/
 k8s/
-docker/
+!docker/
 monitoring/
 ops/
 automation/
@@ -594,7 +598,7 @@ i18next-scanner.config.js
 antigravity/
 /config/
 !config/cto-config.json
-docker/
+!docker/
 lib/
 locales/
 # mekong/commands and mekong/skills are duplicates of .claude/

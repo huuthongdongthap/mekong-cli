@@ -121,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `pnl-service.ts` — Real-time P&L calculations
 
 - **Billing & Dunning** (`src/billing/`):
-  - Polar.sh webhook integration
+  - NOWPayments webhook integration
   - Subscription management
   - Payment processing
   - Dunning workflow for failed payments
@@ -919,7 +919,7 @@ Comprehensive API usage billing system fully implemented. Includes CLI commands,
 - **Documentation**: Release readiness reports and core package documentation.
 
 ### Added
-- **Agency-in-a-Box**: Automated setup recipe (`recipes/agency-box-setup.md`) for scaffolding new client environments (Landing Page + Vercel Config).
+- **Agency-in-a-Box**: Automated setup recipe (`recipes/agency-box-setup.md`) for scaffolding new client environments (Landing Page + Cloudflare Pages Config).
 - **Genesis Supervisor**: Initial implementation of `genesis.py` and `vibe_manifest.yaml` for autonomous agency generation.
 - **Database Integration**: Implemented PostgreSQL persistence for the Engine Layer.
   - **Prisma ORM**: Added `schema.prisma` with `User` and `Job` models.

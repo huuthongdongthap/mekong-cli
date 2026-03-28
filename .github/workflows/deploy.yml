@@ -9,6 +9,7 @@ on:
       - 'packages/mekong-engine/**'
       - 'packages/raas-landing/**'
       - 'packages/mekong-cli-core/**'
+      # apps/raas-gateway deployed from local (apps/ is gitignored)
       - '.github/workflows/deploy.yml'
 
 concurrency:
@@ -140,3 +141,10 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: pages deploy dist --project-name=raas-landing
           workingDirectory: packages/raas-landing
+
+  # ------------------------------------------------------------------
+  # raas-gateway: deployed from LOCAL via `pnpm exec wrangler deploy`
+  # apps/ is gitignored (private). Deploy command:
+  #   cd apps/raas-gateway && pnpm exec wrangler deploy
+  # Live at: https://api.agencyos.network/health
+  # ------------------------------------------------------------------

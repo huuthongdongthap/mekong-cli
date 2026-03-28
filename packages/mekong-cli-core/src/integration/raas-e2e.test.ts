@@ -1,5 +1,5 @@
 /**
- * raas-e2e.test.ts — E2E integration tests for RaaS flow: CLI → Gateway → Polar
+ * raas-e2e.test.ts — E2E integration tests for RaaS flow: CLI → Gateway → NOWPayments
  * Tests: credential store, MekongClient factory, signup, mission submit, billing checkout
  */
 
@@ -194,11 +194,11 @@ describe('Billing Checkout Flow (mock fetch)', () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it('creates checkout and returns Polar checkout URL', async () => {
+  it('creates checkout and returns NOWPayments checkout URL', async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        checkout_url: 'https://polar.sh/checkout/session-abc123',
+        checkout_url: 'https://nowpayments.io/checkout/session-abc123',
         session_id: 'session-abc123',
         pack_id: 'pack-starter',
       }),
@@ -211,7 +211,7 @@ describe('Billing Checkout Flow (mock fetch)', () => {
       cancel_url: 'https://example.com/cancel',
     });
 
-    expect(result.checkout_url).toContain('polar.sh');
+    expect(result.checkout_url).toContain('nowpayments.io');
     expect(result.checkout_url).toContain('session-abc123');
   });
 });

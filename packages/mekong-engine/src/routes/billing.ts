@@ -65,8 +65,8 @@ billingRoutes.post('/tenants/regenerate-key', authRateLimit(), handleAsync(async
   })
 }))
 
-// Polar product -> credit mapping (match Polar.sh product names)
-const POLAR_PRODUCT_CREDITS: Record<string, number> = {
+// NOWPayments product -> credit mapping
+const NOWPAYMENTS_PRODUCT_CREDITS: Record<string, number> = {
   'agencyos-starter': 50,
   'agencyos-pro': 200,
   'agencyos-agency': 500,
@@ -76,8 +76,8 @@ const POLAR_PRODUCT_CREDITS: Record<string, number> = {
   'credits-100': 100,
 }
 
-// Polar tier -> tenant tier mapping
-const POLAR_TIER_MAP: Record<string, string> = {
+// NOWPayments tier -> tenant tier mapping
+const NOWPAYMENTS_TIER_MAP: Record<string, string> = {
   'agencyos-starter': 'pro',
   'agencyos-pro': 'pro',
   'agencyos-agency': 'enterprise',
@@ -88,7 +88,7 @@ billingRoutes.post('/webhook', webhookRateLimit(), handleAsync(async (c) => {
   if (!c.env.DB) return c.json({ error: 'D1 not configured', code: 'SERVICE_UNAVAILABLE' }, 503)
   const db = c.env.DB
   await ensureWebhookEventsTable(db)
-  const secret = c.env.POLAR_WEBHOOK_SECRET ?? ''
+  const secret = c.env.NOWPAYMENTS_WEBHOOK_SECRET ?? ''
   const signature = c.req.header('webhook-signature') ?? ''
   const rawBody = await c.req.text()
 
@@ -122,7 +122,7 @@ billingRoutes.post('/webhook', webhookRateLimit(), handleAsync(async (c) => {
   if (event.id) {
     const eventId: string = event.id // Type guard: narrow from string | undefined
     const isDuplicate = await handleDb(
-      () => isDuplicateWebhookEvent(db, 'polar', eventId),
+      () => isDuplicateWebhookEvent(db, 'nowpayments', eventId),
       'DATABASE_ERROR',
       'Failed to check for duplicate webhook event'
     ) as boolean
@@ -148,7 +148,7 @@ billingRoutes.post('/webhook', webhookRateLimit(), handleAsync(async (c) => {
   const data = event.data ?? {} as Record<string, any>
 
   if (event.type === 'order.paid') {
-    // Support both: direct tenant_id/credits OR Polar product mapping
+    // Support both: direct tenant_id/credits OR NOWPayments product mapping
     const typedData = data as { tenant_id?: string; metadata?: { tenant_id?: string }; customer?: { external_id?: string }; product_name?: string; product?: { name?: string }; credits?: number }
     const tenantId: string | undefined =
       typedData.tenant_id ?? typedData.metadata?.tenant_id ?? typedData.customer?.external_id
@@ -156,18 +156,18 @@ billingRoutes.post('/webhook', webhookRateLimit(), handleAsync(async (c) => {
 
     const productName: string = typedData.product_name ?? typedData.product?.name ?? ''
     const productKey = productName.toLowerCase().replace(/\s+/g, '-')
-    const mappedCredits = POLAR_PRODUCT_CREDITS[productKey]
+    const mappedCredits = NOWPAYMENTS_PRODUCT_CREDITS[productKey]
     const credits: number = mappedCredits ?? typedData.credits ?? 0
 
     if (credits > 0) {
       const reason = mappedCredits
-        ? `Polar.sh: ${productName} (${credits} credits)`
-        : `Polar.sh purchase: ${credits} credits`
+        ? `NOWPayments: ${productName} (${credits} credits)`
+        : `NOWPayments purchase: ${credits} credits`
       await addCredits(db, tenantId, credits, reason)
     }
 
     // Upgrade tenant tier if subscription product
-    const newTier = POLAR_TIER_MAP[productKey]
+    const newTier = NOWPAYMENTS_TIER_MAP[productKey]
     if (newTier) {
       await db.prepare('UPDATE tenants SET tier = ? WHERE id = ?').bind(newTier, tenantId).run()
     }
@@ -185,9 +185,9 @@ billingRoutes.post('/webhook', webhookRateLimit(), handleAsync(async (c) => {
   if (event.id) {
     const eventId: string = event.id // Type guard: narrow from string | undefined
     await handleDb(
-      () => recordWebhookEvent(db, 'polar', eventId, event.type),
+      () => recordWebhookEvent(db, 'nowpayments', eventId, event.type),
       'DATABASE_ERROR',
-      'Failed to record Polar webhook event'
+      'Failed to record NOWPayments webhook event'
     ) as void
   }
 

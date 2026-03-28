@@ -1,10 +1,10 @@
 /**
- * Payment types for Polar.sh webhook integration.
- * Phase 1 of v0.6 Payment Webhook.
+ * Payment types for NOWPayments webhook integration.
+ * NOWPayments webhook integration types.
  */
 import type { LicenseTier } from '../license/types.js';
 
-/** Polar.sh webhook event types */
+/** NOWPayments webhook event types */
 export type WebhookEventType =
   | 'checkout.created'
   | 'checkout.updated'
@@ -28,8 +28,8 @@ export type SubscriptionState =
   | 'trialing'
   | 'incomplete';
 
-/** Polar.sh product representation */
-export interface PolarProduct {
+/** NOWPayments product representation */
+export interface NowPaymentsProduct {
   id: string;
   name: string;
   description?: string;
@@ -40,7 +40,7 @@ export interface PolarProduct {
 }
 
 /** Checkout data in webhook payload */
-export interface PolarCheckout {
+export interface NowPaymentsCheckout {
   id: string;
   status: string;
   customer_email: string;
@@ -52,7 +52,7 @@ export interface PolarCheckout {
 }
 
 /** Subscription data in webhook payload */
-export interface PolarSubscription {
+export interface NowPaymentsSubscription {
   id: string;
   status: SubscriptionState;
   customer_id: string;
@@ -64,12 +64,12 @@ export interface PolarSubscription {
   metadata?: Record<string, string>;
 }
 
-/** Webhook event payload from Polar.sh */
+/** NOWPayments webhook event payload */
 export interface WebhookPayload {
   type: WebhookEventType;
   id: string;
   created_at: string;
-  data: PolarCheckout | PolarSubscription | Record<string, unknown>;
+  data: NowPaymentsCheckout | NowPaymentsSubscription | Record<string, unknown>;
 }
 
 /** Processed webhook event record */
@@ -87,13 +87,13 @@ export interface WebhookEvent {
 }
 
 /** Product ID → LicenseTier mapping */
-export const POLAR_PRODUCT_TIER_MAP: Record<string, LicenseTier> = {
-  // Override via POLAR_PRODUCT_MAP env var JSON: {"prod_xxx": "pro"}
+export const NOWPAYMENTS_PRODUCT_TIER_MAP: Record<string, LicenseTier> = {
+  // Override via NOWPAYMENTS_PRODUCT_MAP env var JSON: {"prod_xxx": "pro"}
 };
 
 /** Resolve tier from product ID, checking env override first */
 export function resolveTierFromProduct(productId: string): LicenseTier {
-  const envMap = process.env['POLAR_PRODUCT_MAP'];
+  const envMap = process.env['NOWPAYMENTS_PRODUCT_MAP'];
   if (envMap) {
     try {
       const parsed = JSON.parse(envMap) as Record<string, string>;
@@ -103,7 +103,7 @@ export function resolveTierFromProduct(productId: string): LicenseTier {
     }
   }
   // Fallback: embedded map
-  return POLAR_PRODUCT_TIER_MAP[productId] ?? inferTierFromProductId(productId);
+  return NOWPAYMENTS_PRODUCT_TIER_MAP[productId] ?? inferTierFromProductId(productId);
 }
 
 /** Infer tier from product ID naming convention */

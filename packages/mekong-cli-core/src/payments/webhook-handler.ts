@@ -1,7 +1,7 @@
 /**
- * WebhookHandler — process Polar.sh webhook events end-to-end.
+ * WebhookHandler — process NOWPayments webhook events end-to-end.
  * Verifies signature, parses payload, delegates to SubscriptionManager, persists receipt.
- * Phase 2 of v0.6 Payment Webhook.
+ * NOWPayments webhook event processing.
  */
 import type { Result } from '../types/common.js';
 import { ok, err } from '../types/common.js';
@@ -11,13 +11,13 @@ import { ReceiptStore } from './receipt-store.js';
 import type {
   WebhookEvent,
   WebhookPayload,
-  PolarCheckout,
-  PolarSubscription,
+  NowPaymentsCheckout,
+  NowPaymentsSubscription,
 } from './types.js';
 import { resolveTierFromProduct } from './types.js';
 
 export interface WebhookHandlerOptions {
-  /** POLAR_WEBHOOK_SECRET */
+  /** NOWPAYMENTS_IPN_SECRET */
   secret: string;
   registryPath?: string;
   auditLogPath?: string;
@@ -26,11 +26,11 @@ export interface WebhookHandlerOptions {
 
 export interface IncomingWebhook {
   rawBody: string;
-  /** Polar-Webhook-Signature header */
+  /** NOWPayments-Signature header */
   signature: string;
-  /** Polar-Webhook-ID header */
+  /** NOWPayments-Signature-Id header */
   webhookId?: string;
-  /** Polar-Webhook-Timestamp header */
+  /** NOWPayments-Timestamp header */
   timestamp?: string;
 }
 
@@ -103,7 +103,7 @@ export class WebhookHandler {
     try {
       switch (payload.type) {
         case 'checkout.completed': {
-          const checkout = payload.data as PolarCheckout;
+          const checkout = payload.data as NowPaymentsCheckout;
           const result = await this.subscriptions.handleCheckout(checkout);
           return {
             ...base,
@@ -119,7 +119,7 @@ export class WebhookHandler {
 
         case 'subscription.updated':
         case 'subscription.active': {
-          const sub = payload.data as PolarSubscription;
+          const sub = payload.data as NowPaymentsSubscription;
           const result = await this.subscriptions.handleUpdate(sub, sub.product_id);
           return {
             ...base,
@@ -135,7 +135,7 @@ export class WebhookHandler {
 
         case 'subscription.canceled':
         case 'subscription.revoked': {
-          const sub = payload.data as PolarSubscription;
+          const sub = payload.data as NowPaymentsSubscription;
           const result = await this.subscriptions.handleCancel(sub);
           return {
             ...base,
