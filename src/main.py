@@ -31,12 +31,15 @@ from rich.prompt import Prompt
 # Import BMAD CLI (using dash naming convention)
 import importlib.util
 
-spec = importlib.util.spec_from_file_location(
-    "bmad_commands", Path(__file__).parent / "cli" / "bmad-commands.py"
-)
-bmad_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(bmad_module)
-bmad_app = bmad_module.app
+try:
+    spec = importlib.util.spec_from_file_location(
+        "bmad_commands", Path(__file__).parent / "cli" / "bmad-commands.py"
+    )
+    bmad_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bmad_module)
+    bmad_app = bmad_module.app
+except Exception:
+    bmad_app = None
 
 app = typer.Typer(
     name="mekong",
@@ -45,7 +48,8 @@ app = typer.Typer(
 )
 
 # Register BMAD commands
-app.add_typer(bmad_app, name="bmad", help="BMAD workflow management")
+if bmad_app is not None:
+    app.add_typer(bmad_app, name="bmad", help="BMAD workflow management")
 
 # Swarm sub-commands
 swarm_app = typer.Typer(help="Swarm: multi-node orchestration")

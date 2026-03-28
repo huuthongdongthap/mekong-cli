@@ -19,29 +19,6 @@ providers:
     pros: ["200+ models", "auto-fallback", "pay-per-token", "free tier available"]
     cons: ["cần internet", "cần API key"]
 
-  ollama:
-    name: "Ollama (Local)"
-    description: "LLM chạy local, miễn phí, offline, privacy 100%"
-    base_url: "http://localhost:11434/v1"
-    env_key: "OLLAMA_BASE_URL"
-    default_model: "llama3.2"
-    recommended_models:
-      - model: "llama3.2"
-        ram: "8GB"
-        quality: "Good — general tasks"
-      - model: "qwen2.5-coder"
-        ram: "8GB"
-        quality: "Best — coding tasks"
-      - model: "deepseek-coder-v2"
-        ram: "16GB"
-        quality: "Excellent — complex coding"
-    setup_guide: |
-      1. curl -fsSL https://ollama.ai/install.sh | sh
-      2. ollama pull llama3.2
-      3. Ollama tự chạy trên port 11434
-    pros: ["miễn phí", "offline", "privacy", "không cần API key"]
-    cons: ["cần GPU/RAM", "chất lượng thấp hơn cloud"]
-
   direct:
     name: "Direct API"
     description: "Kết nối trực tiếp Anthropic, OpenAI, hoặc Google"
@@ -65,5 +42,5 @@ providers:
     cons: ["cần API key", "locked vào 1 provider"]
 
 # Hybrid mode: user có thể set NHIỀU provider
-# System sẽ failover: OpenRouter → Direct → Ollama
-failover_order: ["openrouter", "direct", "ollama"]
+# System sẽ failover: OpenRouter → Direct
+failover_order: ["openrouter", "direct"]

@@ -2,5 +2,7 @@
   "general": {
     "previewFeatures": true
   },
-  "mcpServers": {}
+  "agentSettings": {
+    "workingDirectories": ["/Users/mac/mekong-cli/src", "/Users/mac/mekong-cli/apps"]
+  }
 }
