@@ -4,6 +4,8 @@ export interface Env {
   DB: D1Database;
   ENVIRONMENT: string;
   ADMIN_TOKEN?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
 }
 
 // Database models
@@ -193,4 +195,22 @@ export interface AIConversation {
   role: 'user' | 'assistant';
   content: string;
   created_at: string;
+}
+
+export interface HumanTask {
+  id: string;
+  contact_id: string;
+  enrollment_id: string | null;
+  task_type: string;
+  priority: 'urgent' | 'normal' | 'low';
+  title: string;
+  description: string | null;
+  message_suggestion: string | null;
+  zalo_user_id: string | null;
+  contact_name: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+  assigned_to: string | null;
+  created_at: string;
+  completed_at: string | null;
+  notes: string | null;
 }

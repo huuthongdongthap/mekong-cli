@@ -7,7 +7,9 @@ import { TokenManager } from '../lib/token-manager';
 import { SequenceEngine } from '../lib/sequence-engine';
 import { TemplateEngine } from '../lib/template-engine';
 import { AIService } from '../lib/ai-service';
+import { TelegramNotifier } from '../lib/telegram-notifier';
 import { generateId } from '../lib/utils';
+import { HumanSender } from '../lib/human-sender';
 
 export const apiRouter = new Hono<{ Bindings: Env }>();
 
@@ -722,4 +724,137 @@ apiRouter.get('/funnel/:contactId', async (c) => {
   ]);
 
   return c.json<ApiResponse>({ success: true, data: { contact, events, enrollments, messages, conversions } });
+});
+
+// ─── Human Task Queue ─────────────────────────────────────────
+
+// GET /api/tasks — list tasks, filter by status, sorted by priority+created_at
+apiRouter.get('/tasks', async (c) => {
+  const statusFilter = c.req.query('status') || 'pending';
+  let query = `SELECT * FROM human_tasks`;
+  const params: any[] = [];
+
+  if (statusFilter !== 'all') {
+    query += ' WHERE status = ?';
+    params.push(statusFilter);
+  }
+  query += ` ORDER BY
+    CASE priority WHEN 'urgent' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END,
+    created_at ASC`;
+
+  const { results } = await c.env.DB.prepare(query).bind(...params).all();
+  return c.json<ApiResponse>({ success: true, data: results, meta: { total: results.length } });
+});
+
+// GET /api/tasks/stats — counts
+apiRouter.get('/tasks/stats', async (c) => {
+  const [pending, inProgress, completedToday] = await Promise.all([
+    c.env.DB.prepare("SELECT COUNT(*) as n FROM human_tasks WHERE status = 'pending'").first<{ n: number }>(),
+    c.env.DB.prepare("SELECT COUNT(*) as n FROM human_tasks WHERE status = 'in_progress'").first<{ n: number }>(),
+    c.env.DB.prepare("SELECT COUNT(*) as n FROM human_tasks WHERE status = 'completed' AND DATE(completed_at) = DATE('now')").first<{ n: number }>(),
+  ]);
+  return c.json<ApiResponse>({
+    success: true,
+    data: {
+      pending: pending?.n || 0,
+      in_progress: inProgress?.n || 0,
+      completed_today: completedToday?.n || 0,
+    },
+  });
+});
+
+// PATCH /api/tasks/:id/complete
+apiRouter.patch('/tasks/:id/complete', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<{ notes?: string }>().catch(() => ({} as { notes?: string }));
+  const task = await c.env.DB.prepare('SELECT * FROM human_tasks WHERE id = ?').bind(id).first();
+  if (!task) return c.json<ApiResponse>({ success: false, error: 'Task not found' }, 404);
+
+  await c.env.DB
+    .prepare(`UPDATE human_tasks SET status = 'completed', completed_at = datetime('now'), notes = COALESCE(?, notes) WHERE id = ?`)
+    .bind(body.notes ?? null, id)
+    .run();
+
+  const updated = await c.env.DB.prepare('SELECT * FROM human_tasks WHERE id = ?').bind(id).first();
+  return c.json<ApiResponse>({ success: true, data: updated });
+});
+
+// PATCH /api/tasks/:id/skip
+apiRouter.patch('/tasks/:id/skip', async (c) => {
+  const id = c.req.param('id');
+  const task = await c.env.DB.prepare('SELECT * FROM human_tasks WHERE id = ?').bind(id).first();
+  if (!task) return c.json<ApiResponse>({ success: false, error: 'Task not found' }, 404);
+
+  await c.env.DB
+    .prepare(`UPDATE human_tasks SET status = 'skipped', completed_at = datetime('now') WHERE id = ?`)
+    .bind(id)
+    .run();
+
+  const updated = await c.env.DB.prepare('SELECT * FROM human_tasks WHERE id = ?').bind(id).first();
+  return c.json<ApiResponse>({ success: true, data: updated });
+});
+
+// POST /api/tasks/:id/resume — complete task then resume linked enrollment
+apiRouter.post('/tasks/:id/resume', async (c) => {
+  const id = c.req.param('id');
+  const task = await c.env.DB
+    .prepare('SELECT * FROM human_tasks WHERE id = ?')
+    .bind(id)
+    .first<{ enrollment_id: string | null; status: string }>();
+  if (!task) return c.json<ApiResponse>({ success: false, error: 'Task not found' }, 404);
+  if (!task.enrollment_id) return c.json<ApiResponse>({ success: false, error: 'No enrollment linked to this task' }, 400);
+
+  const enrollment = await c.env.DB
+    .prepare('SELECT * FROM sequence_enrollments WHERE id = ?')
+    .bind(task.enrollment_id)
+    .first<{ id: string; sequence_id: string; current_step: number; status: string }>();
+  if (!enrollment) return c.json<ApiResponse>({ success: false, error: 'Enrollment not found' }, 404);
+
+  // Get next step delay to recalculate next_send_at
+  const nextStepOrder = enrollment.current_step + 1;
+  const nextStep = await c.env.DB
+    .prepare('SELECT delay_minutes FROM sequence_steps WHERE sequence_id = ? AND step_order = ? AND is_active = 1')
+    .bind(enrollment.sequence_id, nextStepOrder)
+    .first<{ delay_minutes: number }>();
+
+  const nextSendAt = nextStep ? HumanSender.calculateNextSendTime(nextStep.delay_minutes) : null;
+
+  await c.env.DB
+    .prepare(`UPDATE sequence_enrollments SET status = 'active', paused_at = NULL, next_send_at = ? WHERE id = ?`)
+    .bind(nextSendAt, enrollment.id)
+    .run();
+
+  return c.json<ApiResponse>({
+    success: true,
+    data: { enrollment_id: enrollment.id, next_send_at: nextSendAt },
+  });
+});
+
+// POST /api/tasks/test-telegram — send a test Telegram notification
+apiRouter.post('/tasks/test-telegram', async (c) => {
+  const body = await c.req.json<{ bot_token: string; chat_id: string }>().catch(() => ({ bot_token: '', chat_id: '' }));
+  const botToken = body.bot_token || c.env.TELEGRAM_BOT_TOKEN || '';
+  const chatId = body.chat_id || c.env.TELEGRAM_CHAT_ID || '';
+  if (!botToken || !chatId) {
+    return c.json<ApiResponse>({ success: false, error: 'bot_token và chat_id là bắt buộc' }, 400);
+  }
+  const notifier = new TelegramNotifier(botToken, chatId);
+  const ok = await notifier.sendNotification({
+    id: 'test',
+    contact_id: 'test',
+    enrollment_id: null,
+    task_type: 'send_message',
+    priority: 'normal',
+    title: 'Test notification từ Zalo Auto Sales',
+    description: null,
+    message_suggestion: 'Đây là test message. Nếu bạn nhận được, cấu hình Telegram đã đúng!',
+    zalo_user_id: '0123456789',
+    contact_name: 'Test Contact',
+    status: 'pending',
+    assigned_to: null,
+    created_at: new Date().toISOString(),
+    completed_at: null,
+    notes: null,
+  });
+  return c.json<ApiResponse>({ success: ok, data: { sent: ok } });
 });

@@ -51,9 +51,12 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 <nav class="bg-white border-b border-gray-200 px-6 flex gap-1 sticky top-12 z-10">
   <template x-for="tab in tabs" :key="tab.id">
     <button @click="switchTab(tab.id)"
-      class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px"
+      class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px flex items-center gap-1"
       :class="activeTab===tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
       <span x-text="tab.label"></span>
+      <span x-show="tab.badge && taskStats.pending > 0"
+        class="bg-red-500 text-white rounded-full text-xs px-1.5 py-0.5 font-bold leading-none"
+        x-text="taskStats.pending"></span>
     </button>
   </template>
 </nav>
@@ -806,6 +809,133 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB: TASKS
+════════════════════════════════════════════ -->
+<div x-show="activeTab==='tasks'" x-transition>
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+      Human Task Queue
+      <span x-show="taskStats.pending > 0"
+        class="ml-2 bg-red-500 text-white rounded-full text-xs px-2 py-0.5 font-bold"
+        x-text="taskStats.pending + ' pending'"></span>
+    </h2>
+    <div class="flex gap-2">
+      <template x-for="s in ['pending','all','completed']" :key="s">
+        <button @click="tasksFilter=s; loadTasks()"
+          class="text-xs px-3 py-1.5 rounded-lg border transition-colors"
+          :class="tasksFilter===s ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'"
+          x-text="s==='pending'?'Chờ xử lý':s==='all'?'Tất cả':'Hoàn thành'"></button>
+      </template>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="grid grid-cols-3 gap-3 mb-4">
+    <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 text-center">
+      <p class="text-2xl font-bold text-orange-600" x-text="taskStats.pending || 0"></p>
+      <p class="text-xs text-orange-500 mt-0.5">Chờ xử lý</p>
+    </div>
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+      <p class="text-2xl font-bold text-blue-600" x-text="taskStats.in_progress || 0"></p>
+      <p class="text-xs text-blue-500 mt-0.5">Đang xử lý</p>
+    </div>
+    <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+      <p class="text-2xl font-bold text-green-600" x-text="taskStats.completed_today || 0"></p>
+      <p class="text-xs text-green-500 mt-0.5">Xong hôm nay</p>
+    </div>
+  </div>
+
+  <!-- Task list -->
+  <div class="space-y-3">
+    <template x-for="task in tasks" :key="task.id">
+      <div class="bg-white rounded-xl border overflow-hidden"
+        :class="task.priority==='urgent' ? 'border-red-300' : 'border-gray-200'">
+        <div class="px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <!-- Priority badge + title -->
+              <div class="flex items-center gap-2 mb-1">
+                <span x-show="task.priority==='urgent'"
+                  class="badge bg-red-100 text-red-700">🔴 Urgent</span>
+                <span class="font-medium text-sm text-gray-900" x-text="task.title"></span>
+              </div>
+              <!-- Contact info -->
+              <div class="flex items-center gap-3 mb-2">
+                <button
+                  @click="navigator.clipboard.writeText(task.zalo_user_id||'').then(()=>alert('Đã copy Zalo ID'))"
+                  class="text-xs text-blue-600 hover:underline font-mono"
+                  x-text="'👤 ' + (task.contact_name||'(?)') + ' · ' + (task.zalo_user_id||'')">
+                </button>
+              </div>
+              <!-- Message suggestion -->
+              <div x-show="task.message_suggestion" class="bg-gray-50 rounded-lg px-3 py-2 mb-2 relative">
+                <p class="text-xs text-gray-700 whitespace-pre-wrap" x-text="task.message_suggestion"></p>
+                <button
+                  @click="navigator.clipboard.writeText(task.message_suggestion||'').then(()=>alert('Đã copy tin nhắn'))"
+                  class="absolute top-1.5 right-2 text-xs text-blue-500 hover:text-blue-700">📋 Copy</button>
+              </div>
+              <!-- Created at -->
+              <p class="text-xs text-gray-400" x-text="'Tạo lúc: ' + (task.created_at||'').slice(0,16).replace('T',' ')"></p>
+            </div>
+            <!-- Actions -->
+            <div x-show="task.status==='pending' || task.status==='in_progress'"
+              class="flex flex-col gap-2 shrink-0">
+              <button @click="completeTask(task)"
+                class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 whitespace-nowrap">
+                ✅ Đã gửi
+              </button>
+              <button @click="skipTask(task)"
+                class="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+                ⏭ Bỏ qua
+              </button>
+            </div>
+            <div x-show="task.status==='completed'" class="shrink-0">
+              <span class="badge bg-green-100 text-green-700">✓ Hoàn thành</span>
+            </div>
+            <div x-show="task.status==='skipped'" class="shrink-0">
+              <span class="badge bg-gray-100 text-gray-500">⏭ Bỏ qua</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+    <p x-show="tasks.length===0 && !loading" class="text-center text-sm text-gray-400 py-8">
+      Không có task nào.
+    </p>
+  </div>
+
+  <!-- Telegram Settings -->
+  <div class="mt-8 bg-white rounded-xl border border-gray-200 p-4">
+    <p class="text-sm font-semibold text-gray-700 mb-3">⚙ Cài đặt Telegram Notifications</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Bot Token</label>
+        <input x-model="telegramSettings.bot_token" type="password" placeholder="123456:ABC-DEF..."
+          class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Chat ID</label>
+        <input x-model="telegramSettings.chat_id" type="text" placeholder="-100123456789"
+          class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button @click="testTelegram()"
+        class="text-xs bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700">
+        📨 Test Notification
+      </button>
+      <span x-show="telegramTestStatus" class="text-xs"
+        :class="telegramTestStatus==='ok' ? 'text-green-600' : 'text-red-500'"
+        x-text="telegramTestStatus==='ok' ? '✓ Gửi thành công' : '✗ Gửi thất bại'"></span>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">
+      Lưu ý: token này chỉ dùng để test từ browser. Để kích hoạt tự động, thêm vào wrangler.toml:
+      <code class="bg-gray-100 px-1 rounded">TELEGRAM_BOT_TOKEN</code> và <code class="bg-gray-100 px-1 rounded">TELEGRAM_CHAT_ID</code>.
+    </p>
   </div>
 </div>
 
