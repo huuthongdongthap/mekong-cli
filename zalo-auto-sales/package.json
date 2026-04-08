@@ -1,0 +1,21 @@
+{
+  "name": "zalo-auto-sales",
+  "version": "1.0.0",
+  "description": "Zalo OA Auto Sales & Drip Sequence Platform",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create zalo-auto-sales",
+    "db:migrate": "wrangler d1 execute zalo-auto-sales --file=./src/db/schema.sql",
+    "db:migrate:local": "wrangler d1 execute zalo-auto-sales --local --file=./src/db/schema.sql"
+  },
+  "dependencies": {
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241230.0",
+    "typescript": "^5.7.0",
+    "wrangler": "^3.99.0"
+  }
+}
