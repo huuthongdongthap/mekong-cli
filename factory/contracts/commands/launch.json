@@ -4,20 +4,22 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
+    "name_vi": "Launch",
     "name_en": "Launch",
     "icon": "",
-    "description_en": "Product launch — checklist, channels, announcements"
+    "description_vi": "Execute Launch command",
+    "description_en": "Execute Launch command"
   },
   "execution": {
     "agents": [
-      "cmo",
-      "pm"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "business-hub",
+    "hub": "founder-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
     "credit_cost": 3,
-    "requires_approval": true
+    "requires_approval": false
   },
   "input": {
     "type": "object",
@@ -26,62 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "channels": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "launch_date": {
         "type": "string",
-        "format": "date"
+        "description": "Natural language task description"
+      },
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "checklist": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "task": {
-              "type": "string"
-            },
-            "status": {
-              "type": "string"
-            },
-            "owner": {
-              "type": "string"
-            }
-          }
-        }
+      "summary": {
+        "type": "string"
       },
-      "announcements": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "metrics_to_track": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "marketing",
-        "target_layer": "founder"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

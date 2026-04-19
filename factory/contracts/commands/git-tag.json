@@ -4,14 +4,16 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Git Tag",
     "name_en": "Git Tag",
     "icon": "",
-    "description_en": "Create release tag"
+    "description_vi": "Execute Git Tag command",
+    "description_en": "Execute Git Tag command"
   },
   "execution": {
     "agents": [
-      "fullstack-developer",
-      "code-reviewer"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "engineering-hub",
     "complexity": "standard",
@@ -29,16 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "file_paths": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Target files"
-      },
-      "language": {
+      "project": {
         "type": "string",
-        "description": "Programming language"
+        "description": "Target project path"
       }
     }
   },
@@ -54,15 +49,7 @@
           "type": "string"
         }
       },
-      "tests_status": {
-        "type": "string",
-        "enum": [
-          "passing",
-          "failing",
-          "skipped"
-        ]
-      },
-      "lines_changed": {
+      "credits_used": {
         "type": "integer"
       }
     }

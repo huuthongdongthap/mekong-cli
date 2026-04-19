@@ -4,19 +4,21 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Scope",
     "name_en": "Scope",
     "icon": "",
-    "description_en": "Scope definition — boundaries, requirements, acceptance criteria"
+    "description_vi": "Execute Scope command",
+    "description_en": "Execute Scope command"
   },
   "execution": {
     "agents": [
-      "pm",
-      "planner"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "product-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 1,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,52 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "scope_type": {
         "type": "string",
-        "enum": [
-          "feature",
-          "sprint",
-          "project"
-        ]
+        "description": "Natural language task description"
+      },
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "in_scope": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "out_of_scope": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "acceptance_criteria": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "effort_estimate": {
+      "summary": {
         "type": "string"
+      },
+      "files_modified": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "plan",
-        "target_layer": "product"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

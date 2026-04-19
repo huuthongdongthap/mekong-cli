@@ -4,19 +4,21 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Brainstorm",
     "name_en": "Brainstorm",
     "icon": "",
-    "description_en": "Brainstorm solutions with trade-off analysis"
+    "description_vi": "Execute Brainstorm command",
+    "description_en": "Execute Brainstorm command"
   },
   "execution": {
     "agents": [
       "planner",
-      "researcher"
+      "fullstack-developer"
     ],
     "hub": "product-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 1,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,70 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "constraints": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "max_options": {
-        "type": "integer",
-        "default": 5
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "options": {
+      "summary": {
+        "type": "string"
+      },
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "pros": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "cons": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "effort": {
-              "type": "string",
-              "enum": [
-                "low",
-                "medium",
-                "high"
-              ]
-            }
-          }
+          "type": "string"
         }
       },
-      "recommendation": {
-        "type": "string"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "plan",
-        "target_layer": "product"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

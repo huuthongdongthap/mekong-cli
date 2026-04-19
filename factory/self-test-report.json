@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-10T04:52:39.539069+00:00",
+  "generated_at": "2026-04-03T10:53:32.614809+00:00",
   "score": 100,
   "verdict": "HEALTHY",
   "checks": [
@@ -12,7 +12,7 @@
     {
       "name": "command_contracts",
       "passed": true,
-      "details": "567 contracts checked, 0 errors",
+      "details": "510 contracts checked, 0 errors",
       "errors": []
     },
     {
@@ -24,13 +24,13 @@
     {
       "name": "skills_registry",
       "passed": true,
-      "details": "241 skills, 0 missing files",
+      "details": "11 skills, 0 missing files",
       "errors": []
     },
     {
       "name": "agents_registry",
       "passed": true,
-      "details": "14 agents, 0 missing files",
+      "details": "0 agents, 0 missing files",
       "errors": []
     },
     {

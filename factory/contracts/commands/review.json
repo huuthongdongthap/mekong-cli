@@ -4,13 +4,16 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Review",
     "name_en": "Review",
     "icon": "",
-    "description_en": "Code review with security, quality, and performance checks"
+    "description_vi": "Execute Review command",
+    "description_en": "Execute Review command"
   },
   "execution": {
     "agents": [
-      "code-reviewer"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "engineering-hub",
     "complexity": "simple",
@@ -25,55 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "files": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "review_type": {
         "type": "string",
-        "enum": [
-          "security",
-          "quality",
-          "performance",
-          "full"
-        ]
+        "description": "Natural language task description"
+      },
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "score": {
-        "type": "number",
-        "minimum": 0,
-        "maximum": 10
+      "summary": {
+        "type": "string"
       },
-      "issues": {
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "severity": {
-              "type": "string"
-            },
-            "file": {
-              "type": "string"
-            },
-            "line": {
-              "type": "integer"
-            },
-            "message": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         }
       },
-      "approved": {
-        "type": "boolean"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

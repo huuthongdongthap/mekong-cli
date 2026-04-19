@@ -4,14 +4,16 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Hr Recruit",
     "name_en": "Hr Recruit",
     "icon": "",
+    "description_vi": "Recruiting pipeline — JD → sourcing → interview kit → offer template",
     "description_en": "Recruiting pipeline  JD  sourcing  interview kit  offer template"
   },
   "execution": {
     "agents": [
-      "cmo",
-      "sales"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "business-hub",
     "complexity": "standard",
@@ -29,13 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "target_audience": {
+      "project": {
         "type": "string",
-        "description": "Target customer segment"
-      },
-      "budget": {
-        "type": "number",
-        "description": "Budget allocation"
+        "description": "Target project path"
       }
     }
   },
@@ -45,19 +43,14 @@
       "summary": {
         "type": "string"
       },
-      "action_items": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "metrics": {
-        "type": "object",
-        "description": "Key metrics and KPIs"
-      },
-      "roi_estimate": {
-        "type": "number",
-        "description": "Expected ROI"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

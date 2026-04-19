@@ -4,13 +4,16 @@
   "layer": "ops",
   "chapter": "九變 — Nine Variations",
   "display": {
+    "name_vi": "Report",
     "name_en": "Report",
     "icon": "",
-    "description_en": "Generate report"
+    "description_vi": "Execute Report command",
+    "description_en": "Execute Report command"
   },
   "execution": {
     "agents": [
-      "devops"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "ops-hub",
     "complexity": "simple",
@@ -28,20 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "services": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Target services"
-      },
-      "environment": {
+      "project": {
         "type": "string",
-        "enum": [
-          "local",
-          "staging",
-          "production"
-        ]
+        "description": "Target project path"
       }
     }
   },
@@ -51,26 +43,14 @@
       "summary": {
         "type": "string"
       },
-      "status": {
-        "type": "string",
-        "enum": [
-          "healthy",
-          "degraded",
-          "down",
-          "completed"
-        ]
-      },
-      "findings": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "actions_taken": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

@@ -4,19 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Seo",
     "name_en": "Seo",
     "icon": "",
-    "description_en": "SEO analysis — keywords, rankings, optimization recommendations"
+    "description_vi": "Execute Seo command",
+    "description_en": "Execute Seo command"
   },
   "execution": {
     "agents": [
-      "researcher",
-      "cmo"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "marketing-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,50 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "url": {
-        "type": "string"
-      },
-      "target_keywords": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "score": {
-        "type": "number"
+      "summary": {
+        "type": "string"
       },
-      "keywords": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "keyword": {
-              "type": "string"
-            },
-            "volume": {
-              "type": "integer"
-            },
-            "difficulty": {
-              "type": "number"
-            },
-            "position": {
-              "type": "integer"
-            }
-          }
-        }
-      },
-      "recommendations": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

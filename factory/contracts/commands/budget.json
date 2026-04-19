@@ -4,18 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Budget",
     "name_en": "Budget",
     "icon": "",
-    "description_en": "Budget planning — allocation, forecasting, variance analysis"
+    "description_vi": "Execute Budget command",
+    "description_en": "Execute Budget command"
   },
   "execution": {
     "agents": [
-      "cfo"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "finance-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,49 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "period": {
         "type": "string",
-        "enum": [
-          "monthly",
-          "quarterly",
-          "annual"
-        ]
+        "description": "Natural language task description"
       },
-      "departments": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "total_budget": {
-        "type": "number"
+      "summary": {
+        "type": "string"
       },
-      "allocations": {
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "department": {
-              "type": "string"
-            },
-            "amount": {
-              "type": "number"
-            },
-            "percent": {
-              "type": "number"
-            }
-          }
+          "type": "string"
         }
       },
-      "forecast": {
-        "type": "object"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

@@ -4,19 +4,21 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Roadmap",
     "name_en": "Roadmap",
     "icon": "",
-    "description_en": "Product roadmap — quarters, milestones, feature timeline"
+    "description_vi": "Execute Roadmap command",
+    "description_en": "Execute Roadmap command"
   },
   "execution": {
     "agents": [
-      "pm",
-      "strategist"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "product-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,49 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "horizon": {
         "type": "string",
-        "enum": [
-          "quarterly",
-          "annual",
-          "multi-year"
-        ]
+        "description": "Natural language task description"
+      },
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "quarters": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "themes": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "features": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        }
+      "summary": {
+        "type": "string"
       },
-      "milestones": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

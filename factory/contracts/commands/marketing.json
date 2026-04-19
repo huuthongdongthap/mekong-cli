@@ -4,19 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Marketing",
     "name_en": "Marketing",
     "icon": "",
-    "description_en": "Marketing strategy — channels, content, campaigns"
+    "description_vi": "Execute Marketing command",
+    "description_en": "Execute Marketing command"
   },
   "execution": {
     "agents": [
-      "cmo",
-      "editor"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "marketing-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,68 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "channel": {
         "type": "string",
-        "enum": [
-          "seo",
-          "social",
-          "email",
-          "ads",
-          "content",
-          "all"
-        ]
+        "description": "Natural language task description"
       },
-      "budget": {
-        "type": "number"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "strategy": {
+      "summary": {
         "type": "string"
       },
-      "channels": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "action": {
-              "type": "string"
-            },
-            "expected_roi": {
-              "type": "number"
-            }
-          }
-        }
-      },
-      "content_plan": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "content",
-        "target_layer": "business"
-      },
-      {
-        "pattern": ".*",
-        "suggest": "launch",
-        "target_layer": "business"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

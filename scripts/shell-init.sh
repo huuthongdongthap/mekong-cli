@@ -24,9 +24,26 @@ alias mekong-local='python3 $MEKONG_ROOT/src/daemon/agent_loop.py'
 # RaaS Gateway bridge
 alias mekong-raas='bash $MEKONG_ROOT/scripts/raas-bridge.sh'
 
+# Qwopus Worker (Local M1 Max MLX — FREE, 24/7)
+alias claude-qwopus='CLAUDE_CONFIG_DIR=~/.claude-qwopus claude'
+alias mekong-qwopus='CLAUDE_CONFIG_DIR=~/.claude-qwopus MEKONG_TOOL=claude bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
+alias start-qwopus='bash $MEKONG_ROOT/scripts/start-qwopus-worker.sh'
+
+# DashScope Singapore (Qwen 3.6-Plus — FREE quota, 90 days)
+alias claude-dashscope='CLAUDE_CONFIG_DIR=~/.claude-dashscope claude'
+alias mekong-dashscope='CLAUDE_CONFIG_DIR=~/.claude-dashscope MEKONG_TOOL=claude bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
+
+# Multi-Profile Login Menu
+alias mekong-login='bash $MEKONG_ROOT/scripts/mekong-login.sh'
+
+# Claude Subscription Account Profiles
+alias claude-sub1='CLAUDE_CONFIG_DIR=~/.claude-sub1 claude'   # phanhuuthong.mekong@gmail.com
+alias claude-sub2='CLAUDE_CONFIG_DIR=~/.claude-sub2 claude'   # huuthong.dongthap@gmail.com
+
 # Quick
 alias mek='mekong' mkc='mekong-claude' mkg='mekong-gemini' mkq='mekong-qwen'
-alias mekong-cto='bash $MEKONG_ROOT/cto-daemon.sh'
+alias mekong-cto='bash $MEKONG_ROOT/scripts/cto-worker.sh'
+alias cto-worker='bash $MEKONG_ROOT/scripts/cto-worker.sh'
 alias mekong-health='bash $MEKONG_ROOT/scripts/cto-health-check.sh'
 
 # Completion

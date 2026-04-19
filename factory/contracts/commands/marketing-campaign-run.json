@@ -4,14 +4,16 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Marketing Campaign Run",
     "name_en": "Marketing Campaign Run",
     "icon": "",
+    "description_vi": "Audience targeting, ad creatives, channel strategy, campaign launch checklist. 4 commands, ~25 min.",
     "description_en": "Audience targeting, ad creatives, channel strategy, campaign launch checklist. 4 commands, ~25 min."
   },
   "execution": {
     "agents": [
-      "cmo",
-      "sales"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "business-hub",
     "complexity": "standard",
@@ -29,13 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "target_audience": {
+      "project": {
         "type": "string",
-        "description": "Target customer segment"
-      },
-      "budget": {
-        "type": "number",
-        "description": "Budget allocation"
+        "description": "Target project path"
       }
     }
   },
@@ -45,19 +43,14 @@
       "summary": {
         "type": "string"
       },
-      "action_items": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "metrics": {
-        "type": "object",
-        "description": "Key metrics and KPIs"
-      },
-      "roi_estimate": {
-        "type": "number",
-        "description": "Expected ROI"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

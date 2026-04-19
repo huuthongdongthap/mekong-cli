@@ -4,18 +4,21 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Test",
     "name_en": "Test",
     "icon": "",
-    "description_en": "Run test suite with coverage analysis and failure diagnosis"
+    "description_vi": "Execute Test command",
+    "description_en": "Execute Test command"
   },
   "execution": {
     "agents": [
-      "tester"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "engineering-hub",
-    "complexity": "simple",
+    "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 1,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,71 +29,36 @@
     "properties": {
       "goal": {
         "type": "string",
-        "description": "Test scope or specific file"
+        "description": "Natural language task description"
       },
-      "test_type": {
+      "project": {
         "type": "string",
-        "enum": [
-          "unit",
-          "integration",
-          "e2e",
-          "all"
-        ]
-      },
-      "coverage_threshold": {
-        "type": "number",
-        "default": 80
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "total_tests": {
-        "type": "integer"
+      "summary": {
+        "type": "string"
       },
-      "passed": {
-        "type": "integer"
-      },
-      "failed": {
-        "type": "integer"
-      },
-      "skipped": {
-        "type": "integer"
-      },
-      "coverage_percent": {
-        "type": "number"
-      },
-      "failures": {
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "test": {
-              "type": "string"
-            },
-            "error": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "deploy",
-        "target_layer": "engineering"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
-    "output_must_contain": [
-      "total_tests",
-      "passed"
-    ],
+    "output_must_contain": [],
     "min_output_length": 50,
     "max_credit_cost": 5
   }

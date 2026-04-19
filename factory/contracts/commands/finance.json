@@ -4,19 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Finance",
     "name_en": "Finance",
     "icon": "",
-    "description_en": "Financial analysis — P&L, cash flow, unit economics"
+    "description_vi": "Execute Finance command",
+    "description_en": "Execute Finance command"
   },
   "execution": {
     "agents": [
-      "cfo",
-      "data"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "finance-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,52 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "period": {
         "type": "string",
-        "enum": [
-          "monthly",
-          "quarterly",
-          "annual"
-        ]
+        "description": "Natural language task description"
       },
-      "metrics": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "mrr": {
-        "type": "number"
+      "summary": {
+        "type": "string"
       },
-      "arr": {
-        "type": "number"
-      },
-      "burn_rate": {
-        "type": "number"
-      },
-      "runway_months": {
-        "type": "number"
-      },
-      "unit_economics": {
-        "type": "object",
-        "properties": {
-          "ltv": {
-            "type": "number"
-          },
-          "cac": {
-            "type": "number"
-          },
-          "ltv_cac_ratio": {
-            "type": "number"
-          }
+      "files_modified": {
+        "type": "array",
+        "items": {
+          "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

@@ -4,18 +4,21 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
+    "name_vi": "Okr",
     "name_en": "Okr",
     "icon": "",
-    "description_en": "Set OKRs — objectives with measurable key results"
+    "description_vi": "Execute Okr command",
+    "description_en": "Execute Okr command"
   },
   "execution": {
     "agents": [
-      "strategist"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "founder-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,60 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "quarter": {
-        "type": "string"
-      },
-      "focus_areas": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "objectives": {
+      "summary": {
+        "type": "string"
+      },
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "objective": {
-              "type": "string"
-            },
-            "key_results": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "metric": {
-                    "type": "string"
-                  },
-                  "target": {
-                    "type": "number"
-                  },
-                  "current": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          }
+          "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "sprint",
-        "target_layer": "founder"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

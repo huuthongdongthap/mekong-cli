@@ -4,18 +4,21 @@
   "layer": "ops",
   "chapter": "九變 — Nine Variations",
   "display": {
+    "name_vi": "Security",
     "name_en": "Security",
     "icon": "",
-    "description_en": "Security scan — vulnerabilities, secrets, OWASP compliance"
+    "description_vi": "Execute Security command",
+    "description_en": "Execute Security command"
   },
   "execution": {
     "agents": [
-      "security-reviewer"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "ops-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,47 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "scan_type": {
         "type": "string",
-        "enum": [
-          "dependency",
-          "code",
-          "config",
-          "full"
-        ]
+        "description": "Natural language task description"
+      },
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "vulnerabilities": {
+      "summary": {
+        "type": "string"
+      },
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "severity": {
-              "type": "string"
-            },
-            "package": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "fix": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         }
       },
-      "secrets_found": {
+      "credits_used": {
         "type": "integer"
-      },
-      "owasp_score": {
-        "type": "number"
       }
     }
   },

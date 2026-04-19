@@ -4,19 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Content",
     "name_en": "Content",
     "icon": "",
-    "description_en": "Content creation — blog posts, social media, email sequences"
+    "description_vi": "Execute Content command",
+    "description_en": "Execute Content command"
   },
   "execution": {
     "agents": [
-      "editor",
-      "cmo"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "marketing-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,45 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "content_type": {
         "type": "string",
-        "enum": [
-          "blog",
-          "social",
-          "email",
-          "docs",
-          "newsletter"
-        ]
+        "description": "Natural language task description"
       },
-      "tone": {
+      "project": {
         "type": "string",
-        "enum": [
-          "professional",
-          "casual",
-          "technical"
-        ]
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "content": {
+      "summary": {
         "type": "string"
       },
-      "word_count": {
-        "type": "integer"
-      },
-      "seo_keywords": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "cta": {
-        "type": "string"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

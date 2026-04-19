@@ -4,18 +4,21 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Standup",
     "name_en": "Standup",
     "icon": "",
-    "description_en": "Daily standup — yesterday, today, blockers"
+    "description_vi": "Execute Standup command",
+    "description_en": "Execute Standup command"
   },
   "execution": {
     "agents": [
-      "pm"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "ops-hub",
-    "complexity": "simple",
+    "hub": "product-hub",
+    "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 0,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -28,23 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "scope": {
+      "project": {
         "type": "string",
-        "enum": [
-          "feature",
-          "module",
-          "system"
-        ],
-        "description": "Scope level"
-      },
-      "priority": {
-        "type": "string",
-        "enum": [
-          "critical",
-          "high",
-          "medium",
-          "low"
-        ]
+        "description": "Target project path"
       }
     }
   },
@@ -54,21 +43,14 @@
       "summary": {
         "type": "string"
       },
-      "requirements": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "effort_estimate": {
-        "type": "string",
-        "description": "Effort in hours/days"
-      },
-      "dependencies": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

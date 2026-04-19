@@ -4,14 +4,16 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Marketing Performance Report",
     "name_en": "Marketing Performance Report",
     "icon": "",
+    "description_vi": "Channel metrics, SEO health audit, ROI analysis, optimization recommendations. 3 commands, ~15 min.",
     "description_en": "Channel metrics, SEO health audit, ROI analysis, optimization recommendations. 3 commands, ~15 min."
   },
   "execution": {
     "agents": [
-      "cmo",
-      "sales"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "business-hub",
     "complexity": "standard",
@@ -29,13 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "target_audience": {
+      "project": {
         "type": "string",
-        "description": "Target customer segment"
-      },
-      "budget": {
-        "type": "number",
-        "description": "Budget allocation"
+        "description": "Target project path"
       }
     }
   },
@@ -45,19 +43,14 @@
       "summary": {
         "type": "string"
       },
-      "action_items": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "metrics": {
-        "type": "object",
-        "description": "Key metrics and KPIs"
-      },
-      "roi_estimate": {
-        "type": "number",
-        "description": "Expected ROI"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

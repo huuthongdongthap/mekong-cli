@@ -4,18 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Crm",
     "name_en": "Crm",
     "icon": "",
-    "description_en": "CRM operations — contacts, deals, pipeline management"
+    "description_vi": "Execute Crm command",
+    "description_en": "Execute Crm command"
   },
   "execution": {
     "agents": [
-      "sales"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "sales-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 1,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,36 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "action": {
         "type": "string",
-        "enum": [
-          "add-contact",
-          "update-deal",
-          "pipeline-report",
-          "segment"
-        ]
+        "description": "Natural language task description"
+      },
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "contacts_affected": {
-        "type": "integer"
+      "summary": {
+        "type": "string"
       },
-      "deals_updated": {
-        "type": "integer"
-      },
-      "pipeline_value": {
-        "type": "number"
-      },
-      "next_actions": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

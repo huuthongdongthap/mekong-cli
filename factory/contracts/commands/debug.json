@@ -4,18 +4,21 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Debug",
     "name_en": "Debug",
     "icon": "",
-    "description_en": "Systematic debugging with log analysis and root cause identification"
+    "description_vi": "Execute Debug command",
+    "description_en": "Execute Debug command"
   },
   "execution": {
     "agents": [
-      "debugger"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "ops-hub",
+    "hub": "engineering-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,56 +29,33 @@
     "properties": {
       "goal": {
         "type": "string",
-        "description": "Error or symptom description"
+        "description": "Natural language task description"
       },
-      "logs": {
-        "type": "string"
-      },
-      "stack_trace": {
-        "type": "string"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "root_cause": {
+      "summary": {
         "type": "string"
       },
-      "affected_files": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "severity": {
-        "type": "string",
-        "enum": [
-          "low",
-          "medium",
-          "high",
-          "critical"
-        ]
-      },
-      "fix_suggestion": {
-        "type": "string"
-      },
-      "related_issues": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "fix",
-        "target_layer": "engineering"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

@@ -4,14 +4,16 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Vibe Cook",
     "name_en": "Vibe Cook",
     "icon": "",
-    "description_en": "VIBE feature builder - Research  Plan  Implement  Test  Review"
+    "description_vi": "Execute Vibe Cook command",
+    "description_en": "Execute Vibe Cook command"
   },
   "execution": {
     "agents": [
-      "fullstack-developer",
-      "code-reviewer"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "engineering-hub",
     "complexity": "standard",
@@ -29,16 +31,9 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "file_paths": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Target files"
-      },
-      "language": {
+      "project": {
         "type": "string",
-        "description": "Programming language"
+        "description": "Target project path"
       }
     }
   },
@@ -54,15 +49,7 @@
           "type": "string"
         }
       },
-      "tests_status": {
-        "type": "string",
-        "enum": [
-          "passing",
-          "failing",
-          "skipped"
-        ]
-      },
-      "lines_changed": {
+      "credits_used": {
         "type": "integer"
       }
     }

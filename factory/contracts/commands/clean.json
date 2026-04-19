@@ -4,18 +4,21 @@
   "layer": "ops",
   "chapter": "九變 — Nine Variations",
   "display": {
+    "name_vi": "Clean",
     "name_en": "Clean",
     "icon": "",
-    "description_en": "Clean project — remove build artifacts, caches, temp files"
+    "description_vi": "Execute Clean command",
+    "description_en": "Execute Clean command"
   },
   "execution": {
     "agents": [
-      "devops"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "ops-hub",
-    "complexity": "simple",
+    "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 0,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,36 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "targets": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": [
-            "build",
-            "cache",
-            "deps",
-            "all"
-          ]
-        }
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "files_removed": {
-        "type": "integer"
+      "summary": {
+        "type": "string"
       },
-      "space_freed_mb": {
-        "type": "number"
-      },
-      "paths_cleaned": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

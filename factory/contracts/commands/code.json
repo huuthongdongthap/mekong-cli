@@ -4,18 +4,21 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Code",
     "name_en": "Code",
     "icon": "",
-    "description_en": "Write code for a specific task — focused implementation"
+    "description_vi": "Execute Code command",
+    "description_en": "Execute Code command"
   },
   "execution": {
     "agents": [
+      "planner",
       "fullstack-developer"
     ],
     "hub": "engineering-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,24 +28,20 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "language": {
-        "type": "string"
-      },
-      "file_path": {
-        "type": "string"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "files_created": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "summary": {
+        "type": "string"
       },
       "files_modified": {
         "type": "array",
@@ -50,27 +49,13 @@
           "type": "string"
         }
       },
-      "lines_added": {
-        "type": "integer"
-      },
-      "lines_removed": {
+      "credits_used": {
         "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "test",
-        "target_layer": "engineering"
-      },
-      {
-        "pattern": ".*",
-        "suggest": "review",
-        "target_layer": "engineering"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

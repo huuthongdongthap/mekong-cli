@@ -4,19 +4,22 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Migrate",
     "name_en": "Migrate",
     "icon": "",
-    "description_en": "Database migration — schema changes, data transforms"
+    "description_vi": "Execute Migrate command",
+    "description_en": "Execute Migrate command"
   },
   "execution": {
     "agents": [
+      "planner",
       "fullstack-developer"
     ],
     "hub": "engineering-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
-    "requires_approval": true
+    "credit_cost": 3,
+    "requires_approval": false
   },
   "input": {
     "type": "object",
@@ -25,39 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "database": {
         "type": "string",
-        "enum": [
-          "d1",
-          "postgres",
-          "supabase"
-        ]
+        "description": "Natural language task description"
       },
-      "direction": {
+      "project": {
         "type": "string",
-        "enum": [
-          "up",
-          "down"
-        ]
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "migration_file": {
+      "summary": {
         "type": "string"
       },
-      "tables_affected": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "rollback_available": {
-        "type": "boolean"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

@@ -4,20 +4,22 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
+    "name_vi": "Fundraise",
     "name_en": "Fundraise",
     "icon": "",
-    "description_en": "Fundraise preparation — pitch deck, financial model, investor targeting"
+    "description_vi": "Execute Fundraise command",
+    "description_en": "Execute Fundraise command"
   },
   "execution": {
     "agents": [
-      "strategist",
-      "cfo"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "founder-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 5,
-    "requires_approval": true
+    "credit_cost": 3,
+    "requires_approval": false
   },
   "input": {
     "type": "object",
@@ -26,55 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
-      },
-      "round": {
         "type": "string",
-        "enum": [
-          "pre-seed",
-          "seed",
-          "series-a",
-          "series-b"
-        ]
+        "description": "Natural language task description"
       },
-      "target_raise": {
-        "type": "number"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "pitch_deck_path": {
+      "summary": {
         "type": "string"
       },
-      "financial_model": {
-        "type": "object"
-      },
-      "investor_list": {
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "fit_score": {
-              "type": "number"
-            }
-          }
+          "type": "string"
         }
       },
-      "valuation_range": {
-        "type": "object",
-        "properties": {
-          "low": {
-            "type": "number"
-          },
-          "high": {
-            "type": "number"
-          }
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

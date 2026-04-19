@@ -4,19 +4,21 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Plan",
     "name_en": "Plan",
     "icon": "",
-    "description_en": "Create implementation plan with phases, dependencies, and estimates"
+    "description_vi": "Create implementation plan with research and analysis",
+    "description_en": "Create implementation plan with research and analysis"
   },
   "execution": {
     "agents": [
       "planner",
-      "researcher"
+      "fullstack-developer"
     ],
     "hub": "product-hub",
-    "complexity": "standard",
+    "complexity": "simple",
     "timeout_ms": 30000,
-    "credit_cost": 2,
+    "credit_cost": 1,
     "requires_approval": false
   },
   "input": {
@@ -27,77 +29,37 @@
     "properties": {
       "goal": {
         "type": "string",
-        "description": "Feature or system to plan"
+        "description": "Natural language task description"
       },
-      "constraints": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Technical/business constraints"
-      },
-      "deadline": {
+      "project": {
         "type": "string",
-        "format": "date",
-        "description": "Target completion date"
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "plan_path": {
-        "type": "string",
-        "description": "Path to plan.md file"
+      "summary": {
+        "type": "string"
       },
-      "phases": {
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "effort_hours": {
-              "type": "number"
-            },
-            "dependencies": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
+          "type": "string"
         }
       },
-      "total_effort_hours": {
-        "type": "number"
-      },
-      "risk_level": {
-        "type": "string",
-        "enum": [
-          "low",
-          "medium",
-          "high"
-        ]
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "cook",
-        "target_layer": "product"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
-    "output_must_contain": [
-      "plan_path",
-      "phases"
-    ],
-    "min_output_length": 100,
+    "output_must_contain": [],
+    "min_output_length": 50,
     "max_credit_cost": 3
   }
 }

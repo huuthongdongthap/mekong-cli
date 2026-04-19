@@ -4,14 +4,16 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
+    "name_vi": "Annual",
     "name_en": "Annual",
     "icon": "",
-    "description_en": "Annual business plan — vision, goals, financials, milestones"
+    "description_vi": "Execute Annual command",
+    "description_en": "Execute Annual command"
   },
   "execution": {
     "agents": [
-      "strategist",
-      "cfo"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "founder-hub",
     "complexity": "standard",
@@ -26,55 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "year": {
-        "type": "integer"
-      },
-      "current_mrr": {
-        "type": "number"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "vision": {
+      "summary": {
         "type": "string"
       },
-      "goals": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "revenue_target": {
-        "type": "number"
-      },
-      "milestones": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "quarter": {
-              "type": "string"
-            },
-            "target": {
-              "type": "string"
-            }
-          }
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "okr",
-        "target_layer": "founder"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

@@ -4,18 +4,21 @@
   "layer": "ops",
   "chapter": "九變 — Nine Variations",
   "display": {
+    "name_vi": "Benchmark",
     "name_en": "Benchmark",
     "icon": "",
-    "description_en": "Performance benchmark — latency, throughput, resource usage"
+    "description_vi": "Execute Benchmark command",
+    "description_en": "Execute Benchmark command"
   },
   "execution": {
     "agents": [
-      "devops"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "ops-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 1,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -25,37 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "target": {
-        "type": "string"
-      },
-      "iterations": {
-        "type": "integer",
-        "default": 100
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "p50_ms": {
-        "type": "number"
+      "summary": {
+        "type": "string"
       },
-      "p95_ms": {
-        "type": "number"
+      "files_modified": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       },
-      "p99_ms": {
-        "type": "number"
-      },
-      "throughput_rps": {
-        "type": "number"
-      },
-      "memory_mb": {
-        "type": "number"
-      },
-      "cpu_percent": {
-        "type": "number"
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

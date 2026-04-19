@@ -4,19 +4,21 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
+    "name_vi": "Fix",
     "name_en": "Fix",
     "icon": "",
-    "description_en": "Debug and fix bugs with root cause analysis"
+    "description_vi": "Execute Fix command",
+    "description_en": "Execute Fix command"
   },
   "execution": {
     "agents": [
-      "debugger",
+      "planner",
       "fullstack-developer"
     ],
     "hub": "engineering-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -27,23 +29,18 @@
     "properties": {
       "goal": {
         "type": "string",
-        "description": "Bug description or error message"
+        "description": "Natural language task description"
       },
-      "logs": {
-        "type": "string"
-      },
-      "file_path": {
-        "type": "string"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "root_cause": {
-        "type": "string"
-      },
-      "fix_description": {
+      "summary": {
         "type": "string"
       },
       "files_modified": {
@@ -52,28 +49,16 @@
           "type": "string"
         }
       },
-      "tests_added": {
+      "credits_used": {
         "type": "integer"
-      },
-      "verified": {
-        "type": "boolean"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "test",
-        "target_layer": "engineering"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
-    "output_must_contain": [
-      "root_cause",
-      "fix_description"
-    ],
+    "output_must_contain": [],
     "min_output_length": 50,
     "max_credit_cost": 5
   }

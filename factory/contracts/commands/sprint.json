@@ -4,19 +4,21 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Sprint",
     "name_en": "Sprint",
     "icon": "",
-    "description_en": "Sprint planning — backlog grooming, task breakdown, assignments"
+    "description_vi": "Execute Sprint command",
+    "description_en": "Execute Sprint command"
   },
   "execution": {
     "agents": [
-      "pm",
-      "planner"
+      "planner",
+      "fullstack-developer"
     ],
     "hub": "product-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,62 +28,34 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "sprint_duration_days": {
-        "type": "integer",
-        "default": 14
-      },
-      "team_capacity_hours": {
-        "type": "number"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "sprint_goal": {
+      "summary": {
         "type": "string"
       },
-      "tasks": {
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "title": {
-              "type": "string"
-            },
-            "assignee": {
-              "type": "string"
-            },
-            "estimate_hours": {
-              "type": "number"
-            },
-            "priority": {
-              "type": "string",
-              "enum": [
-                "critical",
-                "high",
-                "medium",
-                "low"
-              ]
-            }
-          }
+          "type": "string"
         }
       },
-      "total_points": {
+      "credits_used": {
         "type": "integer"
       }
     }
   },
   "cascade": {
-    "triggers": [
-      {
-        "pattern": ".*",
-        "suggest": "cook",
-        "target_layer": "product"
-      }
-    ]
+    "triggers": []
   },
   "validation": {
     "output_must_contain": [],

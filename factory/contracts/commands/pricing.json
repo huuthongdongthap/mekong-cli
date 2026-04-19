@@ -4,20 +4,22 @@
   "layer": "product",
   "chapter": "謀攻 — Attack by Stratagem",
   "display": {
+    "name_vi": "Pricing",
     "name_en": "Pricing",
     "icon": "",
-    "description_en": "Pricing strategy — competitive analysis, tier design, revenue modeling"
+    "description_vi": "Execute Pricing command",
+    "description_en": "Execute Pricing command"
   },
   "execution": {
     "agents": [
-      "strategist",
-      "cfo"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "business-hub",
+    "hub": "product-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
     "credit_cost": 3,
-    "requires_approval": true
+    "requires_approval": false
   },
   "input": {
     "type": "object",
@@ -26,52 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "current_pricing": {
-        "type": "object"
-      },
-      "competitors": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "tiers": {
+      "summary": {
+        "type": "string"
+      },
+      "files_modified": {
         "type": "array",
         "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "price": {
-              "type": "number"
-            },
-            "features": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
+          "type": "string"
         }
       },
-      "revenue_projection": {
-        "type": "object",
-        "properties": {
-          "monthly": {
-            "type": "number"
-          },
-          "annual": {
-            "type": "number"
-          }
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },

@@ -4,19 +4,21 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
+    "name_vi": "Sales",
     "name_en": "Sales",
     "icon": "",
-    "description_en": "Sales strategy — pipeline, outreach, closing"
+    "description_vi": "Execute Sales command",
+    "description_en": "Execute Sales command"
   },
   "execution": {
     "agents": [
-      "sales",
-      "cmo"
+      "planner",
+      "fullstack-developer"
     ],
-    "hub": "sales-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 2,
+    "credit_cost": 3,
     "requires_approval": false
   },
   "input": {
@@ -26,47 +28,29 @@
     ],
     "properties": {
       "goal": {
-        "type": "string"
+        "type": "string",
+        "description": "Natural language task description"
       },
-      "target_segment": {
-        "type": "string"
-      },
-      "deal_size": {
-        "type": "number"
+      "project": {
+        "type": "string",
+        "description": "Target project path"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "icp": {
-        "type": "object",
-        "properties": {
-          "industry": {
-            "type": "string"
-          },
-          "company_size": {
-            "type": "string"
-          },
-          "pain_points": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
+      "summary": {
+        "type": "string"
       },
-      "pipeline_stages": {
+      "files_modified": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "outreach_templates": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "credits_used": {
+        "type": "integer"
       }
     }
   },
