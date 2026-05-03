@@ -28,15 +28,23 @@ TOML
   echo "  ✅ Gemini: $count → .gemini/commands/"
 }
 
-# OpenCode (.md, $INPUT instead of $ARGUMENTS)
+# OpenCode (.md — $ARGUMENTS is native, preserve directory structure)
 sync_opencode() {
   local DEST="$MEKONG_ROOT/.opencode/commands" count=0
   mkdir -p "$DEST"
-  for md in "$SRC"/*.md; do
+  # Find all .md files recursively (root + subdirectories)
+  while IFS= read -r md; do
     [ -f "$md" ] || continue
-    sed 's/\$ARGUMENTS/\$INPUT/g' "$md" > "$DEST/$(basename "$md")"
+    # Get relative path from SRC directory
+    local rel="${md#$SRC/}"
+    # Preserve directory structure (OpenCode uses dirs for namespacing)
+    local dest_dir
+    dest_dir=$(dirname "$DEST/$rel")
+    mkdir -p "$dest_dir"
+    # Copy as-is (OpenCode uses $ARGUMENTS natively like Claude Code)
+    cp "$md" "$DEST/$rel"
     count=$((count + 1))
-  done
+  done < <(find "$SRC" -name "*.md" -type f | sort)
   echo "  ✅ OpenCode: $count → .opencode/commands/"
 }
 
