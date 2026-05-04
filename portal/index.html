@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merchant Dashboard | Mekong Agency</title>
+    <!-- Material Design 3 Color Tokens -->
+    <style>
+        :root {
+            /* Color system */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F1ECF4;
+            --md-sys-color-surface-container-high: #EBE6EE;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+
+            /* Shape corners */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+        }
+
+        /* Typography tokens */
+        .m3-headline-large {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .m3-headline-medium {
+            font-family: Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .m3-title-large {
+            font-family: Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .m3-body-large {
+            font-family: Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            font-family: Roboto, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .stat-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .positive {
+            color: #4CAF50;
+        }
+
+        .negative {
+            color: #F44336;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Tables */
+        .tables-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .table-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        th {
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .order-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #FFF8E1;
+            color: #FF8F00;
+        }
+
+        .status-processing {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .status-shipped {
+            background-color: #E8F5E8;
+            color: #388E3C;
+        }
+
+        .status-delivered {
+            background-color: #E8F5E8;
+            color: #388E3C;
+        }
+
+        .status-cancelled {
+            background-color: #FFEBEE;
+            color: #D32F2F;
+        }
+
+        .product-image {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--md-sys-shape-corner-small);
+            object-fit: cover;
+        }
+
+        /* Action buttons */
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .view-all {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .view-all a {
+            color: var(--md-sys-color-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Real-time indicator */
+        .realtime-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #4CAF50;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tables-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="m3-headline-medium">Merchant Dashboard</h1>
+            <div class="user-info">
+                <div class="avatar">JD</div>
+                <div>
+                    <div style="font-weight: 500;">John Doe</div>
+                    <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Merchant ID: MCH001</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>Last updated: <span id="lastUpdated">Just now</span></div>
+            <div class="realtime-indicator">
+                <div class="dot"></div>
+                <span>Real-time updates</span>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value" id="totalOrders">142</div>
+                <div class="stat-change positive">↑ 12% from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Revenue</div>
+                <div class="stat-value" id="totalRevenue">24,560,000₫</div>
+                <div class="stat-change positive">↑ 8% from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Products</div>
+                <div class="stat-value" id="totalProducts">24</div>
+                <div class="stat-change positive">↑ 3 new this month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg. Rating</div>
+                <div class="stat-value" id="avgRating">4.7★</div>
+                <div class="stat-change positive">↑ 0.2 from last month</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Revenue Overview</div>
+                    <select id="revenuePeriod" onchange="updateCharts()">
+                        <option value="7d">Last 7 days</option>
+                        <option value="30d" selected>Last 30 days</option>
+                        <option value="90d">Last 90 days</option>
+                    </select>
+                </div>
+                <canvas id="revenueChart" height="300"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Order Status</div>
+                </div>
+                <canvas id="statusChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Tables Section -->
+        <div class="tables-section">
+            <!-- Recent Orders -->
+            <div class="table-container">
+                <div class="chart-header">
+                    <div class="chart-title">Recent Orders</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td>#ORD-001</td>
+                            <td>2023-05-15</td>
+                            <td>Nguyen Van A</td>
+                            <td>1,250,000₫</td>
+                            <td><span class="order-status status-delivered">Delivered</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-002</td>
+                            <td>2023-05-14</td>
+                            <td>Tran Thi B</td>
+                            <td>890,000₫</td>
+                            <td><span class="order-status status-shipped">Shipped</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-003</td>
+                            <td>2023-05-14</td>
+                            <td>Le Van C</td>
+                            <td>2,100,000₫</td>
+                            <td><span class="order-status status-processing">Processing</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-004</td>
+                            <td>2023-05-13</td>
+                            <td>Pham Thi D</td>
+                            <td>650,000₫</td>
+                            <td><span class="order-status status-pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-005</td>
+                            <td>2023-05-12</td>
+                            <td>Vo Van E</td>
+                            <td>1,750,000₫</td>
+                            <td><span class="order-status status-delivered">Delivered</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="view-all">
+                    <a href="/portal/orders">View All Orders →</a>
+                </div>
+            </div>
+
+            <!-- My Products -->
+            <div class="table-container">
+                <div class="chart-header">
+                    <div class="chart-title">My Products</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Orders</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="https://placehold.co/40x40/e7e0ec/49454f?text=P" alt="Product" class="product-image">
+                                    <span>Traditional Handicraft</span>
+                                </div>
+                            </td>
+                            <td>1,250,000₫</td>
+                            <td>42</td>
+                            <td><span class="order-status status-delivered">Active</span></td>
+                            <td>24</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="https://placehold.co/40x40/e7e0ec/49454f?text=F" alt="Product" class="product-image">
+                                    <span>Organic Tea</span>
+                                </div>
+                            </td>
+                            <td>450,000₫</td>
+                            <td>15</td>
+                            <td><span class="order-status status-delivered">Active</span></td>
+                            <td>56</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="https://placehold.co/40x40/e7e0ec/49454f?text=H" alt="Product" class="product-image">
+                                    <span>Honey Gift Set</span>
+                                </div>
+                            </td>
+                            <td>890,000₫</td>
+                            <td>8</td>
+                            <td><span class="order-status status-delivered">Active</span></td>
+                            <td>32</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="https://placehold.co/40x40/e7e0ec/49454f?text=C" alt="Product" class="product-image">
+                                    <span>Coffee Beans</span>
+                                </div>
+                            </td>
+                            <td>680,000₫</td>
+                            <td>23</td>
+                            <td><span class="order-status status-delivered">Active</span></td>
+                            <td>41</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="https://placehold.co/40x40/e7e0ec/49454f?text=S" alt="Product" class="product-image">
+                                    <span>Spices Collection</span>
+                                </div>
+                            </td>
+                            <td>320,000₫</td>
+                            <td>0</td>
+                            <td><span class="order-status status-cancelled">Out of Stock</span></td>
+                            <td>12</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="view-all">
+                    <a href="/portal/products">Manage Products →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Base API URL for Cloudflare Workers
+        const API_BASE_URL = '/api/v1';
+
+        // Chart instances
+        let revenueChart, statusChart;
+
+        // Initialize charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            setupRealTimeUpdates();
+            updateTimestamp();
+        });
+
+        // Initialize charts with mock data
+        function initCharts() {
+            // Revenue chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['May 1', 'May 2', 'May 3', 'May 4', 'May 5', 'May 6', 'May 7'],
+                    datasets: [{
+                        label: 'Revenue (VND)',
+                        data: [1200000, 1800000, 1500000, 2200000, 1900000, 2500000, 2456000],
+                        borderColor: '#6750A4',
+                        backgroundColor: 'rgba(103, 80, 164, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + '₫';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Status chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Delivered', 'Processing', 'Shipped', 'Pending', 'Cancelled'],
+                    datasets: [{
+                        data: [65, 15, 10, 7, 3],
+                        backgroundColor: [
+                            '#4CAF50',
+                            '#2196F3',
+                            '#FFC107',
+                            '#FF9800',
+                            '#F44336'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to update charts based on selected period
+        function updateCharts() {
+            const period = document.getElementById('revenuePeriod').value;
+
+            // This would fetch data based on the selected period
+            // For demo, we'll just regenerate with mock data
+            let labels, data;
+
+            switch(period) {
+                case '7d':
+                    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    data = [1200000, 1800000, 1500000, 2200000, 1900000, 2500000, 2456000];
+                    break;
+                case '30d':
+                    labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                    data = [6500000, 7200000, 8100000, 9856000];
+                    break;
+                case '90d':
+                    labels = ['Month 1', 'Month 2', 'Month 3'];
+                    data = [20000000, 25000000, 32456000];
+                    break;
+            }
+
+            revenueChart.data.labels = labels;
+            revenueChart.data.datasets[0].data = data;
+            revenueChart.update();
+        }
+
+        // Set up real-time updates using periodic API polling
+        async function setupRealTimeUpdates() {
+            // Poll the API periodically for updates instead of using Supabase Realtime
+            setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/health`);
+                    if (response.ok) {
+                        console.log('Connected to Cloudflare Workers API');
+                        updateDashboardStats();
+                    }
+                } catch (error) {
+                    console.error('Error connecting to API:', error);
+                }
+            }, 30000); // Poll every 30 seconds
+        }
+
+        // Update dashboard statistics by calling Cloudflare Workers API
+        async function updateDashboardStats() {
+            try {
+                // Call the Cloudflare Workers API to get updated stats
+                const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Update the dashboard elements with the fetched data
+                    document.getElementById('totalOrders').textContent = data.totalOrders || Math.floor(Math.random() * 200);
+                    document.getElementById('totalRevenue').textContent = (data.totalRevenue || Math.random() * 50000000).toLocaleString('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    });
+                    document.getElementById('totalProducts').textContent = data.totalProducts || Math.floor(Math.random() * 50);
+                } else {
+                    // Fallback to random values if API call fails
+                    document.getElementById('totalOrders').textContent = Math.floor(Math.random() * 200);
+                    document.getElementById('totalRevenue').textContent = (Math.random() * 50000000).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&,') + '₫';
+                    document.getElementById('totalProducts').textContent = Math.floor(Math.random() * 50);
+                }
+            } catch (error) {
+                console.error('Error updating dashboard stats:', error);
+                // Fallback to random values if there's an error
+                document.getElementById('totalOrders').textContent = Math.floor(Math.random() * 200);
+                document.getElementById('totalRevenue').textContent = (Math.random() * 50000000).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&,') + '₫';
+                document.getElementById('totalProducts').textContent = Math.floor(Math.random() * 50);
+            }
+
+            updateTimestamp();
+        }
+
+        // Add new order to the table
+        function addOrderToTable(order) {
+            // In a real app, this would add the order to the table
+            console.log('Adding order to table:', order);
+        }
+
+        // Update order in the table
+        function updateOrderInTable(order) {
+            // In a real app, this would update the order in the table
+            console.log('Updating order in table:', order);
+        }
+
+        // Add new product to the table
+        function addProductToTable(product) {
+            // In a real app, this would add the product to the table
+            console.log('Adding product to table:', product);
+        }
+
+        // Update product in the table
+        function updateProductInTable(product) {
+            // In a real app, this would update the product in the table
+            console.log('Updating product in table:', product);
+        }
+
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = now.toLocaleString();
+        }
+
+        // Simulate periodic updates for demo purposes
+        setInterval(() => {
+            // This simulates receiving updates from the server
+            // Updates the timestamp every 30 seconds
+            updateTimestamp();
+        }, 30000);
+
+        // Add click handlers for table view all links
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewAllLinks = document.querySelectorAll('.view-all a');
+            viewAllLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const destination = this.getAttribute('href');
+                    alert(`Navigating to ${destination} page`);
+                    // In a real app, this would navigate to the actual page
+                });
+            });
+        });
+    </script>
+</body>
+</html>

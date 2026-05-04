@@ -1,0 +1,19 @@
+# Security and Performance Headers
+/*
+
+  # Security Headers
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+  # Content Security Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://ssl.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.openrouter.ai https://openrouter.ai; frame-ancestors 'none'; object-src 'none'
+
+  # Strict Transport Security
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Additional Security Headers
+  Cache-Control: public, max-age=31536000, immutable
+*/

@@ -1,0 +1,6 @@
+{
+  "model": "claude-sonnet",
+  "engine": "OpenClaw-v6.0-PEV",
+  "status": "operational",
+  "worker_id": "worker-001"
+}

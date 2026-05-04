@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Province KPI Dashboard | Mekong Agency</title>
+
+    <!-- Material Design 3 Color Tokens -->
+    <style>
+        :root {
+            /* Color system */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F1ECF4;
+            --md-sys-color-surface-container-high: #EBE6EE;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+
+            /* Shape corners */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+        }
+
+        /* Typography tokens */
+        .m3-headline-large {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .m3-headline-medium {
+            font-family: Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .m3-title-large {
+            font-family: Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .m3-body-large {
+            font-family: Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            font-family: Roboto, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* Charts container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Cards for KPIs */
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 500;
+            margin: 8px 0;
+            color: var(--md-sys-color-primary);
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* Buttons */
+        .button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .button-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="m3-headline-medium">Province KPI Dashboard</h1>
+            <button class="button button-filled" id="exportPdfBtn">
+                <span>Export to PDF</span>
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label" for="provinceFilter">Province</label>
+                <select class="button button-outlined" id="provinceFilter">
+                    <option value="all">All Provinces</option>
+                    <option value="hcm">Ho Chi Minh City</option>
+                    <option value="hn">Hanoi</option>
+                    <option value="dn">Da Nang</option>
+                    <option value="hue">Hue</option>
+                    <option value="hp">Hai Phong</option>
+                    <option value="bd">Binh Duong</option>
+                    <option value="kg">Kien Giang</option>
+                    <option value="ct">Can Tho</option>
+                    <option value="la">Lam Dong</option>
+                    <option value="qn">Quang Ninh</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="dateRangeFilter">Date Range</label>
+                <select class="button button-outlined" id="dateRangeFilter">
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d" selected>Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="1y">Last Year</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-cards">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Merchants</div>
+                <div class="kpi-value" id="totalMerchants">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">Active merchants across provinces</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">GMV (VND)</div>
+                <div class="kpi-value" id="totalGmv">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">Gross Merchandise Value</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">OCOP Certified</div>
+                <div class="kpi-value" id="totalOcop">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">One Commune One Product certified</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Active Products</div>
+                <div class="kpi-value" id="totalProducts">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">Products on marketplace</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <h2 class="chart-title">Merchants Count by Province</h2>
+                <div class="chart-container">
+                    <canvas id="merchantsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2 class="chart-title">GMV by Province</h2>
+                <div class="chart-container">
+                    <canvas id="gmvChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2 class="chart-title">OCOP Star Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="ocopChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2 class="chart-title">Orders Trend</h2>
+                <div class="chart-container">
+                    <canvas id="ordersChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        const sampleData = {
+            merchantsByProvince: [
+                { province: 'Ho Chi Minh City', count: 1245 },
+                { province: 'Hanoi', count: 987 },
+                { province: 'Da Nang', count: 543 },
+                { province: 'Hue', count: 321 },
+                { province: 'Hai Phong', count: 456 },
+                { province: 'Binh Duong', count: 678 },
+                { province: 'Kien Giang', count: 234 },
+                { province: 'Can Tho', count: 567 },
+                { province: 'Lam Dong', count: 345 },
+                { province: 'Quang Ninh', count: 432 }
+            ],
+            gmvByProvince: [
+                { province: 'Ho Chi Minh City', gmv: 25000000000 },
+                { province: 'Hanoi', gmv: 18000000000 },
+                { province: 'Da Nang', gmv: 8500000000 },
+                { province: 'Hue', gmv: 4500000000 },
+                { province: 'Hai Phong', gmv: 6200000000 },
+                { province: 'Binh Duong', gmv: 9800000000 },
+                { province: 'Kien Giang', gmv: 3800000000 },
+                { province: 'Can Tho', gmv: 7200000000 },
+                { province: 'Lam Dong', gmv: 5400000000 },
+                { province: 'Quang Ninh', gmv: 6100000000 }
+            ],
+            ocopDistribution: [
+                { stars: '5-star', count: 120 },
+                { stars: '4-star', count: 245 },
+                { stars: '3-star', count: 432 },
+                { stars: '2-star', count: 321 },
+                { stars: '1-star', count: 189 }
+            ],
+            ordersTrend: [
+                { date: '2023-01', orders: 1200 },
+                { date: '2023-02', orders: 1350 },
+                { date: '2023-03', orders: 1100 },
+                { date: '2023-04', orders: 1650 },
+                { date: '2023-05', orders: 1890 },
+                { date: '2023-06', orders: 2100 },
+                { date: '2023-07', orders: 1950 },
+                { date: '2023-08', orders: 2200 },
+                { date: '2023-09', orders: 2400 },
+                { date: '2023-10', orders: 2650 },
+                { date: '2023-11', orders: 2800 },
+                { date: '2023-12', orders: 3200 }
+            ]
+        };
+
+        // DOM elements
+        const totalMerchantsEl = document.getElementById('totalMerchants');
+        const totalGmvEl = document.getElementById('totalGmv');
+        const totalOcopEl = document.getElementById('totalOcop');
+        const totalProductsEl = document.getElementById('totalProducts');
+
+        // Charts
+        let merchantsChart, gmvChart, ocopChart, ordersChart;
+
+        // Initialize dashboard
+        function initDashboard() {
+            updateKpiCards();
+            renderCharts();
+            setupEventListeners();
+        }
+
+        // Update KPI cards
+        function updateKpiCards() {
+            // Calculate totals
+            const totalMerchants = sampleData.merchantsByProvince.reduce((sum, item) => sum + item.count, 0);
+            const totalGmv = sampleData.gmvByProvince.reduce((sum, item) => sum + item.gmv, 0);
+            const totalOcop = sampleData.ocopDistribution.reduce((sum, item) => sum + item.count, 0);
+            const totalProducts = Math.floor(totalMerchants * 2.3); // Estimate based on average
+
+            // Format and display values
+            totalMerchantsEl.textContent = totalMerchants.toLocaleString();
+            totalGmvEl.textContent = formatCurrency(totalGmv);
+            totalOcopEl.textContent = totalOcop.toLocaleString();
+            totalProductsEl.textContent = totalProducts.toLocaleString();
+        }
+
+        // Render all charts
+        function renderCharts() {
+            renderMerchantsChart();
+            renderGmvChart();
+            renderOcopChart();
+            renderOrdersChart();
+        }
+
+        // Render merchants chart
+        function renderMerchantsChart() {
+            const ctx = document.getElementById('merchantsChart').getContext('2d');
+
+            if (merchantsChart) {
+                merchantsChart.destroy();
+            }
+
+            merchantsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sampleData.merchantsByProvince.map(item => item.province),
+                    datasets: [{
+                        label: 'Merchants Count',
+                        data: sampleData.merchantsByProvince.map(item => item.count),
+                        backgroundColor: 'rgba(103, 80, 164, 0.7)',
+                        borderColor: 'rgba(103, 80, 164, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render GMV chart
+        function renderGmvChart() {
+            const ctx = document.getElementById('gmvChart').getContext('2d');
+
+            if (gmvChart) {
+                gmvChart.destroy();
+            }
+
+            gmvChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sampleData.gmvByProvince.map(item => item.province),
+                    datasets: [{
+                        label: 'GMV (VND)',
+                        data: sampleData.gmvByProvince.map(item => item.gmv),
+                        backgroundColor: 'rgba(98, 91, 113, 0.7)',
+                        borderColor: 'rgba(98, 91, 113, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render OCOP chart
+        function renderOcopChart() {
+            const ctx = document.getElementById('ocopChart').getContext('2d');
+
+            if (ocopChart) {
+                ocopChart.destroy();
+            }
+
+            ocopChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sampleData.ocopDistribution.map(item => item.stars),
+                    datasets: [{
+                        data: sampleData.ocopDistribution.map(item => item.count),
+                        backgroundColor: [
+                            'rgba(125, 82, 96, 0.7)',
+                            'rgba(125, 82, 96, 0.6)',
+                            'rgba(125, 82, 96, 0.5)',
+                            'rgba(125, 82, 96, 0.4)',
+                            'rgba(125, 82, 96, 0.3)'
+                        ],
+                        borderColor: [
+                            'rgba(125, 82, 96, 1)',
+                            'rgba(125, 82, 96, 1)',
+                            'rgba(125, 82, 96, 1)',
+                            'rgba(125, 82, 96, 1)',
+                            'rgba(125, 82, 96, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render orders trend chart
+        function renderOrdersChart() {
+            const ctx = document.getElementById('ordersChart').getContext('2d');
+
+            if (ordersChart) {
+                ordersChart.destroy();
+            }
+
+            ordersChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sampleData.ordersTrend.map(item => item.date),
+                    datasets: [{
+                        label: 'Order Volume',
+                        data: sampleData.ordersTrend.map(item => item.orders),
+                        fill: false,
+                        borderColor: 'rgb(103, 80, 164)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(value);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter change handlers
+            document.getElementById('provinceFilter').addEventListener('change', updateDashboard);
+            document.getElementById('dateRangeFilter').addEventListener('change', updateDashboard);
+
+            // Export to PDF button
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPdf);
+        }
+
+        // Update dashboard based on filters
+        function updateDashboard() {
+            // In a real implementation, this would fetch data from the API
+            // For demo, we'll just re-render the same data
+            updateKpiCards();
+            renderCharts();
+        }
+
+        // Export to PDF function
+        function exportToPdf() {
+            // In a real implementation, this would generate a PDF
+            // For demo, we'll show an alert
+            alert('PDF export would be generated here. This would include all charts and data as a downloadable PDF.');
+
+            // Alternative: Use jsPDF or similar library
+            // This is a placeholder implementation
+            /*
+            import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Add content to PDF
+                doc.text('Province KPI Dashboard', 20, 20);
+                doc.save('province-kpi-dashboard.pdf');
+            });
+            */
+        }
+
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>

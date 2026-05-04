@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mekong RaaS — OAuth Integration Hub</title>
+  <meta name="description" content="Connect your marketplace accounts to Mekong Agency RaaS platform">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.8);
+      --bg-card-hover: rgba(31, 41, 55, 0.9);
+      --border: rgba(75, 85, 99, 0.4);
+      --border-glow: rgba(99, 102, 241, 0.5);
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-indigo: #6366f1;
+      --accent-violet: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+      --gradient-main: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+      --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      --gradient-danger: linear-gradient(135deg, #dc2626 0%, #f43f5e 100%);
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* Header */
+    .header {
+      position: relative; z-index: 10;
+      padding: 24px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      background: rgba(10, 14, 26, 0.8);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: var(--gradient-main);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: white;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo-badge {
+      font-size: 10px; font-weight: 600;
+      padding: 2px 8px;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 100px;
+      color: var(--accent-indigo);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header-status {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Main content */
+    .main {
+      position: relative; z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .page-title h1 {
+      font-size: 36px; font-weight: 800;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .page-title p {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 600px; margin: 0 auto;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+    }
+    .stat-label {
+      font-size: 12px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .stat-value.connected { color: var(--accent-emerald); }
+    .stat-value.pending { color: var(--accent-amber); }
+    .stat-value.total { color: var(--accent-indigo); }
+    .stat-value.synced { color: var(--accent-cyan); }
+
+    /* Platform grid */
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .platform-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .platform-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--gradient-main));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .platform-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+    .platform-card:hover::before { opacity: 1; }
+    .platform-card.connected {
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .platform-card.connected::before {
+      background: var(--gradient-success);
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .platform-info {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .platform-logo {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .platform-name {
+      font-size: 20px; font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .platform-type {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .connection-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .connection-status.disconnected {
+      background: rgba(107, 114, 128, 0.15);
+      color: var(--text-muted);
+      border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+    .connection-status.connected {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .connection-status.connecting {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .card-body {
+      margin-bottom: 24px;
+    }
+    .scopes-label {
+      font-size: 11px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .scopes-list {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .scope-tag {
+      font-size: 11px; font-weight: 500;
+      padding: 4px 10px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 6px;
+      color: var(--accent-indigo);
+    }
+
+    .token-info {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 12px;
+      display: none;
+    }
+    .platform-card.connected .token-info { display: block; }
+    .token-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0;
+    }
+    .token-label { font-size: 12px; color: var(--text-muted); }
+    .token-value {
+      font-size: 12px; font-weight: 600; color: var(--accent-emerald);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-actions {
+      display: flex; gap: 12px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn:hover::after { opacity: 1; }
+    .btn-connect {
+      background: var(--gradient-main);
+      color: white;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    }
+    .btn-connect:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    }
+    .btn-disconnect {
+      background: rgba(244, 63, 94, 0.1);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+    }
+    .btn-disconnect:hover {
+      background: rgba(244, 63, 94, 0.2);
+    }
+    .btn-sync {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+    .btn-sync:hover {
+      background: rgba(6, 182, 212, 0.2);
+    }
+    .btn:disabled {
+      opacity: 0.5; cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Log console */
+    .log-console {
+      margin-top: 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .console-header {
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .console-title {
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-secondary);
+    }
+    .console-dots {
+      display: flex; gap: 6px;
+    }
+    .console-dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .console-dots span:nth-child(1) { background: #ff5f57; }
+    .console-dots span:nth-child(2) { background: #febc2e; }
+    .console-dots span:nth-child(3) { background: #28c840; }
+    .console-body {
+      padding: 20px 24px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .log-entry {
+      display: flex; gap: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .log-time { color: var(--text-muted); white-space: nowrap; }
+    .log-msg { color: var(--text-secondary); }
+    .log-msg.success { color: var(--accent-emerald); }
+    .log-msg.error { color: var(--accent-rose); }
+    .log-msg.info { color: var(--accent-indigo); }
+    .log-msg.warning { color: var(--accent-amber); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header { padding: 16px 20px; }
+      .main { padding: 24px 16px; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .platforms-grid { grid-template-columns: 1fr; }
+      .page-title h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">M</div>
+      <div>
+        <div class="logo-text">Mekong RaaS</div>
+      </div>
+      <span class="logo-badge">OAuth Hub</span>
+    </div>
+    <div class="header-status">
+      <span class="status-dot"></span>
+      <span>Demo Mode — Local Sandbox</span>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-title">
+      <h1>🔗 Marketplace Connections</h1>
+      <p>Kết nối tài khoản Marketplace của bạn để tự động đồng bộ sản phẩm, đơn hàng và phân tích doanh thu</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Đã kết nối</div>
+        <div class="stat-value connected" id="stat-connected">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Đang chờ</div>
+        <div class="stat-value pending" id="stat-pending">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tổng nền tảng</div>
+        <div class="stat-value total">6</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Đơn hàng đồng bộ</div>
+        <div class="stat-value synced" id="stat-orders">0</div>
+      </div>
+    </div>
+
+    <div class="platforms-grid" id="platforms-grid"></div>
+
+    <div class="log-console">
+      <div class="console-header">
+        <div class="console-dots"><span></span><span></span><span></span></div>
+        <div class="console-title">📡 OAuth Event Log</div>
+      </div>
+      <div class="console-body" id="log-body">
+        <div class="log-entry">
+          <span class="log-time">[system]</span>
+          <span class="log-msg info">OAuth Integration Hub initialized — Demo Mode Active</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Platform definitions
+    const platforms = [
+      {
+        id: 'shopee',
+        name: 'Shopee',
+        type: 'E-Commerce Marketplace',
+        emoji: '🛒',
+        color: '#EE4D2D',
+        gradient: 'linear-gradient(135deg, #EE4D2D 0%, #FF6633 100%)',
+        authUrl: 'https://partner.shopeemobile.com/api/v2/shop/auth_partner',
+        scopes: ['item.write', 'item.read', 'order.read', 'order.write', 'shop.read', 'logistics.read'],
+        hmac: true
+      },
+      {
+        id: 'tiktok',
+        name: 'TikTok Shop',
+        type: 'Social Commerce',
+        emoji: '🎵',
+        color: '#000000',
+        gradient: 'linear-gradient(135deg, #25F4EE 0%, #FE2C55 50%, #000000 100%)',
+        authUrl: 'https://auth.tiktok-shops.com/oauth/authorize',
+        scopes: ['product.read', 'product.write', 'order.read', 'order.write', 'fulfillment.write'],
+        hmac: false
+      },
+      {
+        id: 'lazada',
+        name: 'Lazada',
+        type: 'E-Commerce Marketplace',
+        emoji: '🏪',
+        color: '#0F146D',
+        gradient: 'linear-gradient(135deg, #0F146D 0%, #F57224 100%)',
+        authUrl: 'https://auth.lazada.com/oauth/authorize',
+        scopes: ['products', 'orders', 'logistics', 'seller_center', 'finance'],
+        hmac: false
+      },
+      {
+        id: 'amazon',
+        name: 'Amazon SP-API',
+        type: 'Global Marketplace',
+        emoji: '📦',
+        color: '#FF9900',
+        gradient: 'linear-gradient(135deg, #232F3E 0%, #FF9900 100%)',
+        authUrl: 'https://sellercentral.amazon.com/apps/authorize/consent',
+        scopes: ['catalog_items', 'orders', 'feeds', 'reports', 'fulfillment_inbound'],
+        hmac: true
+      },
+      {
+        id: 'sendo',
+        name: 'Sendo',
+        type: 'Vietnam E-Commerce',
+        emoji: '🇻🇳',
+        color: '#E23939',
+        gradient: 'linear-gradient(135deg, #E23939 0%, #FF5E5E 100%)',
+        authUrl: 'https://open.sendo.vn/oauth/authorize',
+        scopes: ['product.manage', 'order.manage', 'shop.info', 'shipping.manage'],
+        hmac: false
+      },
+      {
+        id: 'zalo',
+        name: 'Zalo OA',
+        type: 'Messaging Commerce',
+        emoji: '💬',
+        color: '#0068FF',
+        gradient: 'linear-gradient(135deg, #0068FF 0%, #00C3FF 100%)',
+        authUrl: 'https://oauth.zaloapp.com/v4/oa/permission',
+        scopes: ['send_message', 'manage_oa', 'follower.read', 'shop.read', 'order.manage'],
+        hmac: false
+      }
+    ];
+
+    // State
+    const state = {};
+    platforms.forEach(p => state[p.id] = { connected: false, token: null, syncing: false });
+
+    // Render platforms
+    function renderPlatforms() {
+      const grid = document.getElementById('platforms-grid');
+      grid.innerHTML = platforms.map(p => `
+        <div class="platform-card ${state[p.id].connected ? 'connected' : ''}" id="card-${p.id}" style="--card-accent: ${p.gradient}">
+          <div class="card-header">
+            <div class="platform-info">
+              <div class="platform-logo" style="background: ${p.gradient}">${p.emoji}</div>
+              <div>
+                <div class="platform-name">${p.name}</div>
+                <div class="platform-type">${p.type}${p.hmac ? ' · HMAC' : ' · OAuth 2.0'}</div>
+              </div>
+            </div>
+            <div class="connection-status ${state[p.id].connected ? 'connected' : state[p.id].syncing ? 'connecting' : 'disconnected'}">
+              <span class="status-dot" style="width:6px;height:6px;box-shadow:none;animation:${state[p.id].connected ? 'pulse 2s infinite' : 'none'};background:${state[p.id].connected ? 'var(--accent-emerald)' : state[p.id].syncing ? 'var(--accent-amber)' : 'var(--text-muted)'}"></span>
+              ${state[p.id].connected ? 'Connected' : state[p.id].syncing ? 'Connecting...' : 'Disconnected'}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="scopes-label">API Scopes</div>
+            <div class="scopes-list">
+              ${p.scopes.map(s => `<span class="scope-tag">${s}</span>`).join('')}
+            </div>
+            <div class="token-info">
+              <div class="token-row">
+                <span class="token-label">Access Token</span>
+                <span class="token-value">demo_${p.id}_at_••••••</span>
+              </div>
+              <div class="token-row">
+                <span class="token-label">Refresh Token</span>
+                <span class="token-value">demo_${p.id}_rt_••••••</span>
+              </div>
+              <div class="token-row">
+                <span class="token-label">Expires</span>
+                <span class="token-value">${new Date(Date.now() + 86400000).toLocaleString('vi-VN')}</span>
+              </div>
+              <div class="token-row">
+                <span class="token-label">Token Encryption</span>
+                <span class="token-value">AES-256-GCM ✓</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            ${state[p.id].connected ? `
+              <button class="btn btn-sync" onclick="syncPlatform('${p.id}')">
+                <span>⟳</span> Sync Now
+              </button>
+              <button class="btn btn-disconnect" onclick="disconnectPlatform('${p.id}')">
+                Disconnect
+              </button>
+            ` : `
+              <button class="btn btn-connect" onclick="connectPlatform('${p.id}')" ${state[p.id].syncing ? 'disabled' : ''}>
+                <div class="spinner" id="spinner-${p.id}"></div>
+                <span id="btn-text-${p.id}">${state[p.id].syncing ? 'Đang kết nối...' : '🔗 Kết nối ' + p.name}</span>
+              </button>
+            `}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Logging
+    function addLog(msg, type = '') {
+      const body = document.getElementById('log-body');
+      const time = new Date().toLocaleTimeString('vi-VN');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <span class="log-time">[${time}]</span>
+        <span class="log-msg ${type}">${msg}</span>
+      `;
+      body.appendChild(entry);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    // Update stats
+    function updateStats() {
+      const connected = Object.values(state).filter(s => s.connected).length;
+      const pending = Object.values(state).filter(s => s.syncing).length;
+      document.getElementById('stat-connected').textContent = connected;
+      document.getElementById('stat-pending').textContent = pending;
+      const orders = connected * Math.floor(Math.random() * 50 + 20);
+      document.getElementById('stat-orders').textContent = orders.toLocaleString();
+    }
+
+    // OAuth flow simulation
+    async function connectPlatform(id) {
+      const platform = platforms.find(p => p.id === id);
+      state[id].syncing = true;
+      renderPlatforms();
+      updateStats();
+
+      addLog(`Initiating OAuth 2.0 flow for ${platform.name}...`, 'info');
+
+      // Step 1: Generate state parameter
+      await delay(600);
+      const stateParam = 'mekong_' + Math.random().toString(36).substring(2, 10);
+      addLog(`Generated CSRF state parameter: ${stateParam}`, 'info');
+
+      // Step 2: Redirect to auth URL
+      await delay(800);
+      addLog(`Redirecting to ${platform.authUrl}`, 'info');
+
+      // Step 3: Simulate auth code callback
+      await delay(1200);
+      const authCode = 'auth_' + Math.random().toString(36).substring(2, 15);
+      addLog(`Received authorization code: ${authCode.substring(0, 8)}...`, 'success');
+
+      // Step 4: HMAC signature (if applicable)
+      if (platform.hmac) {
+        await delay(500);
+        addLog(`Computing HMAC-SHA256 signature for ${platform.name} API...`, 'info');
+        await delay(400);
+        const sig = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('');
+        addLog(`HMAC signature computed: ${sig.substring(0, 16)}...`, 'success');
+      }
+
+      // Step 5: Exchange code for tokens
+      await delay(1000);
+      addLog(`Exchanging auth code for access/refresh tokens...`, 'info');
+
+      await delay(800);
+      const accessToken = 'demo_' + id + '_at_' + Date.now();
+      const refreshToken = 'demo_' + id + '_rt_' + Date.now();
+      addLog(`Access token received: ${accessToken.substring(0, 20)}...`, 'success');
+
+      // Step 6: Encrypt and store tokens
+      await delay(600);
+      addLog(`Encrypting tokens with AES-256-GCM before storage...`, 'info');
+      await delay(400);
+      addLog(`Tokens stored in marketplace_accounts table (encrypted)`, 'success');
+
+      // Step 7: Verify connection
+      await delay(500);
+      addLog(`Verifying ${platform.name} API connection...`, 'info');
+      await delay(600);
+      addLog(`✅ ${platform.name} connected successfully! Scopes: ${platform.scopes.join(', ')}`, 'success');
+
+      state[id].connected = true;
+      state[id].syncing = false;
+      state[id].token = accessToken;
+      renderPlatforms();
+      updateStats();
+    }
+
+    async function disconnectPlatform(id) {
+      const platform = platforms.find(p => p.id === id);
+      addLog(`Revoking ${platform.name} OAuth tokens...`, 'warning');
+      await delay(800);
+      addLog(`Removing encrypted credentials from database...`, 'warning');
+      await delay(400);
+      addLog(`${platform.name} disconnected successfully`, 'info');
+      
+      state[id].connected = false;
+      state[id].token = null;
+      renderPlatforms();
+      updateStats();
+    }
+
+    async function syncPlatform(id) {
+      const platform = platforms.find(p => p.id === id);
+      addLog(`Starting marketplace sync for ${platform.name}...`, 'info');
+      await delay(500);
+      const products = Math.floor(Math.random() * 100 + 30);
+      addLog(`Synced ${products} products from ${platform.name}`, 'success');
+      await delay(300);
+      const orders = Math.floor(Math.random() * 50 + 10);
+      addLog(`Synced ${orders} new orders from ${platform.name}`, 'success');
+      updateStats();
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Init
+    renderPlatforms();
+    updateStats();
+    addLog('Awaiting marketplace connections...', 'info');
+  </script>
+</body>
+</html>

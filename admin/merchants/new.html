@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merchant Onboarding Wizard | Mekong Agency</title>
+    <!-- Material Design 3 Color Tokens -->
+    <style>
+        :root {
+            /* Color system */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F1ECF4;
+            --md-sys-color-surface-container-high: #EBE6EE;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+
+            /* Shape corners */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+        }
+
+        /* Typography tokens */
+        .m3-headline-large {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .m3-headline-medium {
+            font-family: Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .m3-title-large {
+            font-family: Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .m3-body-large {
+            font-family: Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            font-family: Roboto, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Stepper */
+        .stepper-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .stepper {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background-color: var(--md-sys-color-outline-variant);
+        }
+
+        .step.active .step-indicator {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .step.completed .step-indicator {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .step-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: bold;
+            z-index: 1;
+            position: relative;
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .step.active .step-label {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+
+        /* Form container */
+        .form-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Form sections */
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .section-title {
+            margin-bottom: 24px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Form elements */
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-medium);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+
+        /* Buttons */
+        .button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .button-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: 2px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--md-sys-color-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 16px;
+            }
+
+            .stepper {
+                flex-direction: column;
+            }
+
+            .step {
+                display: flex;
+                align-items: center;
+                margin-bottom: 16px;
+            }
+
+            .step:not(:last-child)::after {
+                display: none;
+            }
+
+            .step-indicator {
+                margin-right: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stepper-container">
+            <div class="stepper">
+                <div class="step active" id="step1">
+                    <div class="step-indicator">1</div>
+                    <div class="step-label">Basic Info</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-indicator">2</div>
+                    <div class="step-label">OCOP Profile</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-indicator">3</div>
+                    <div class="step-label">Product Upload</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-indicator">4</div>
+                    <div class="step-label">Media Upload</div>
+                </div>
+                <div class="step" id="step5">
+                    <div class="step-indicator">5</div>
+                    <div class="step-label">Platform Select</div>
+                </div>
+                <div class="step" id="step6">
+                    <div class="step-indicator">6</div>
+                    <div class="step-label">Plan Select</div>
+                </div>
+                <div class="step" id="step7">
+                    <div class="step-indicator">7</div>
+                    <div class="step-label">Review & Submit</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="form-container">
+            <!-- Step 1: Basic Information -->
+            <div class="form-section active" id="section1">
+                <h2 class="section-title m3-headline-medium">Basic Information</h2>
+
+                <div class="input-group">
+                    <label for="businessName">Business Name *</label>
+                    <input type="text" id="businessName" name="businessName" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="ownerName">Owner Name *</label>
+                    <input type="text" id="ownerName" name="ownerName" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="address">Business Address *</label>
+                    <textarea id="address" name="address" rows="3" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="province">Province/City *</label>
+                    <select id="province" name="province" required>
+                        <option value="">Select Province/City</option>
+                        <option value="hanoi">Hanoi</option>
+                        <option value="hcm">Ho Chi Minh City</option>
+                        <option value="danang">Da Nang</option>
+                        <option value="hue">Hue</option>
+                        <option value="cantho">Can Tho</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="button-container">
+                    <div></div> <!-- Empty div for spacing -->
+                    <button type="button" class="button button-filled" onclick="nextStep(1)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: OCOP Profile -->
+            <div class="form-section" id="section2">
+                <h2 class="section-title m3-headline-medium">OCOP Profile</h2>
+
+                <div class="input-group">
+                    <label for="isOcop">Participating in OCOP Program?</label>
+                    <select id="isOcop" name="isOcop" onchange="toggleOcopFields()">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+
+                <div id="ocopFields" style="display: none;">
+                    <div class="input-group">
+                        <label for="ocopLevel">OCOP Level</label>
+                        <select id="ocopLevel" name="ocopLevel">
+                            <option value="">Select Level</option>
+                            <option value="5sao">5 Stars</option>
+                            <option value="4sao">4 Stars</option>
+                            <option value="3sao">3 Stars</option>
+                            <option value="2sao">2 Stars</option>
+                            <option value="1sao">1 Star</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="ocopProduct">OCOP Product Description</label>
+                        <textarea id="ocopProduct" name="ocopProduct" rows="3"></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="certificationDate">Certification Date</label>
+                        <input type="date" id="certificationDate" name="certificationDate">
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="button button-outlined" onclick="prevStep(2)">Back</button>
+                    <button type="button" class="button button-filled" onclick="nextStep(2)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Product Upload -->
+            <div class="form-section" id="section3">
+                <h2 class="section-title m3-headline-medium">Product Upload</h2>
+
+                <div class="input-group">
+                    <label for="productName">Product Name *</label>
+                    <input type="text" id="productName" name="productName" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="productDescription">Product Description *</label>
+                    <textarea id="productDescription" name="productDescription" rows="4" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="category">Category *</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="food">Food & Beverage</option>
+                        <option value="handicraft">Handicraft</option>
+                        <option value="agriculture">Agriculture</option>
+                        <option value="tech">Technology</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="price">Price (VND) *</label>
+                    <input type="number" id="price" name="price" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="stock">Stock Quantity *</label>
+                    <input type="number" id="stock" name="stock" required min="1">
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="button button-outlined" onclick="prevStep(3)">Back</button>
+                    <button type="button" class="button button-filled" onclick="nextStep(3)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Media Upload -->
+            <div class="form-section" id="section4">
+                <h2 class="section-title m3-headline-medium">Media Upload</h2>
+
+                <div class="input-group">
+                    <label for="productImage">Product Images</label>
+                    <div id="dropZone" class="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                        <p>Drag & drop images here or click to select</p>
+                        <input type="file" id="productImage" name="productImage" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(this.files)">
+                        <button type="button" class="button button-tonal" onclick="document.getElementById('productImage').click()">Choose Files</button>
+                    </div>
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="button button-outlined" onclick="prevStep(4)">Back</button>
+                    <button type="button" class="button button-filled" onclick="nextStep(4)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Platform Selection -->
+            <div class="form-section" id="section5">
+                <h2 class="section-title m3-headline-medium">Platform Selection</h2>
+
+                <div class="input-group">
+                    <label>Select Platforms to Integrate</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="platforms" value="shopee">
+                            Shopee
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="platforms" value="tiktok">
+                            TikTok Shop
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="platforms" value="lazada">
+                            Lazada
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="platforms" value="amazon">
+                            Amazon
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="platforms" value="facebook">
+                            Facebook Marketplace
+                        </label>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="button button-outlined" onclick="prevStep(5)">Back</button>
+                    <button type="button" class="button button-filled" onclick="nextStep(5)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Plan Selection -->
+            <div class="form-section" id="section6">
+                <h2 class="section-title m3-headline-medium">Plan Selection</h2>
+
+                <div class="plan-options">
+                    <div class="plan-card" onclick="selectPlan('starter')">
+                        <h3>Starter</h3>
+                        <p><strong>Free</strong></p>
+                        <ul>
+                            <li>Up to 5 products</li>
+                            <li>Basic analytics</li>
+                            <li>Email support</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-card" onclick="selectPlan('growth')">
+                        <h3>Growth</h3>
+                        <p><strong>$19/month</strong></p>
+                        <ul>
+                            <li>Up to 50 products</li>
+                            <li>Advanced analytics</li>
+                            <li>Priority support</li>
+                            <li>Marketing tools</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-card" onclick="selectPlan('export')">
+                        <h3>Export</h3>
+                        <p><strong>$49/month</strong></p>
+                        <ul>
+                            <li>Unlimited products</li>
+                            <li>Export tools</li>
+                            <li>Dedicated manager</li>
+                            <li>Custom integrations</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-card" onclick="selectPlan('province')">
+                        <h3>Province</h3>
+                        <p><strong>$99/month</strong></p>
+                        <ul>
+                            <li>All Export features</li>
+                            <li>Wholesale marketplace</li>
+                            <li>OCOP promotion</li>
+                            <li>Government partnerships</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="button button-outlined" onclick="prevStep(6)">Back</button>
+                    <button type="button" class="button button-filled" onclick="nextStep(6)">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 7: Review and Submit -->
+            <div class="form-section" id="section7">
+                <h2 class="section-title m3-headline-medium">Review & Submit</h2>
+
+                <div id="reviewSummary">
+                    <!-- Summary will be populated by JavaScript -->
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="button button-outlined" onclick="prevStep(7)">Back</button>
+                    <button type="button" class="button button-filled" onclick="submitForm()">Submit Application</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current step tracking
+        let currentStep = 1;
+        let selectedPlan = null;
+
+        // DOM Elements
+        const progressFill = document.getElementById('progressFill');
+        const steps = document.querySelectorAll('.step');
+        const sections = document.querySelectorAll('.form-section');
+
+        // Initialize
+        updateProgressBar();
+
+        // Navigation functions
+        function nextStep(stepNum) {
+            if (validateStep(stepNum)) {
+                document.getElementById('section' + stepNum).classList.remove('active');
+                document.getElementById('section' + (stepNum + 1)).classList.add('active');
+
+                steps[stepNum - 1].classList.remove('active');
+                if (stepNum < 7) {
+                    steps[stepNum].classList.add('active');
+                }
+
+                currentStep = stepNum + 1;
+                updateProgressBar();
+            }
+        }
+
+        function prevStep(stepNum) {
+            document.getElementById('section' + stepNum).classList.remove('active');
+            document.getElementById('section' + (stepNum - 1)).classList.add('active');
+
+            steps[stepNum - 1].classList.remove('active');
+            steps[stepNum - 2].classList.add('active');
+
+            currentStep = stepNum - 1;
+            updateProgressBar();
+        }
+
+        // Validation function for each step
+        function validateStep(stepNum) {
+            switch(stepNum) {
+                case 1:
+                    const businessName = document.getElementById('businessName').value.trim();
+                    const ownerName = document.getElementById('ownerName').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const phone = document.getElementById('phone').value.trim();
+                    const address = document.getElementById('address').value.trim();
+                    const province = document.getElementById('province').value.trim();
+
+                    if (!businessName || !ownerName || !email || !phone || !address || !province) {
+                        alert('Please fill in all required fields');
+                        return false;
+                    }
+                    return true;
+
+                case 2:
+                case 3:
+                    // For steps 2 and 3, just check required fields
+                    let isValid = true;
+                    document.querySelectorAll('#section' + stepNum + ' input[required], #section' + stepNum + ' select[required], #section' + stepNum + ' textarea[required]').forEach(field => {
+                        if (!field.value.trim()) {
+                            isValid = false;
+                        }
+                    });
+
+                    if (!isValid) {
+                        alert('Please fill in all required fields');
+                        return false;
+                    }
+                    return true;
+
+                default:
+                    return true;
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progressPercentage = ((currentStep - 1) / 6) * 100;
+            progressFill.style.width = progressPercentage + '%';
+
+            // Update step indicators
+            steps.forEach((step, index) => {
+                if (index < currentStep - 1) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (index === currentStep - 1) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+        }
+
+        // Toggle OCOP fields visibility
+        function toggleOcopFields() {
+            const isOcop = document.getElementById('isOcop').value;
+            const oCopFields = document.getElementById('ocopFields');
+            oCopFields.style.display = isOcop === 'yes' ? 'block' : 'none';
+        }
+
+        // Handle file selection for drag and drop
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const files = e.dataTransfer.files;
+            handleFileSelect(files);
+        }
+
+        function handleFileSelect(files) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.maxWidth = '100px';
+                        img.style.maxHeight = '100px';
+                        img.style.margin = '5px';
+                        imagePreview.appendChild(img);
+                    };
+                    reader.readAsDataURL(files[i]);
+                }
+            }
+        }
+
+        // Plan selection
+        function selectPlan(planId) {
+            selectedPlan = planId;
+
+            // Remove selected class from all cards
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selected class to clicked card
+            event.currentTarget.classList.add('selected');
+        }
+
+        // Submit form
+        function submitForm() {
+            // Prepare review summary
+            const reviewSummary = document.getElementById('reviewSummary');
+            reviewSummary.innerHTML = '<h3>Application Summary</h3>';
+
+            // Basic info summary
+            reviewSummary.innerHTML += `
+                <h4>Basic Information:</h4>
+                <p><strong>Business:</strong> ${document.getElementById('businessName').value}</p>
+                <p><strong>Owner:</strong> ${document.getElementById('ownerName').value}</p>
+                <p><strong>Email:</strong> ${document.getElementById('email').value}</p>
+                <p><strong>Phone:</strong> ${document.getElementById('phone').value}</p>
+                <p><strong>Address:</strong> ${document.getElementById('address').value}</p>
+            `;
+
+            // OCOP info summary
+            const isOcop = document.getElementById('isOcop').value;
+            if (isOcop === 'yes') {
+                reviewSummary.innerHTML += `
+                    <h4>OCOP Profile:</h4>
+                    <p><strong>OCOP Level:</strong> ${document.getElementById('ocopLevel').value}</p>
+                    <p><strong>Product:</strong> ${document.getElementById('ocopProduct').value}</p>
+                `;
+            }
+
+            // Product summary
+            reviewSummary.innerHTML += `
+                <h4>Product:</h4>
+                <p><strong>Name:</strong> ${document.getElementById('productName').value}</p>
+                <p><strong>Description:</strong> ${document.getElementById('productDescription').value}</p>
+                <p><strong>Category:</strong> ${document.getElementById('category').value}</p>
+                <p><strong>Price:</strong> ${document.getElementById('price').value} VND</p>
+                <p><strong>Stock:</strong> ${document.getElementById('stock').value}</p>
+            `;
+
+            // Platform selection summary
+            const platforms = [];
+            document.querySelectorAll('input[name="platforms"]:checked').forEach(checkbox => {
+                platforms.push(checkbox.value);
+            });
+            reviewSummary.innerHTML += `
+                <h4>Platforms:</h4>
+                <p>${platforms.length > 0 ? platforms.join(', ') : 'None selected'}</p>
+            `;
+
+            // Plan summary
+            reviewSummary.innerHTML += `
+                <h4>Selected Plan:</h4>
+                <p><strong>${selectedPlan ? selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1) : 'Not selected'}</strong></p>
+            `;
+
+            // Confirmation dialog
+            if (confirm('Are you sure you want to submit this application?')) {
+                // Here you would normally send the data to the backend
+                alert('Application submitted successfully!');
+                // Reset form or redirect
+                location.reload();
+            }
+        }
+
+        // Add checkbox styling
+        document.styleSheets[0].addRule ?
+            document.styleSheets[0].addRule('.checkbox-label', 'display: block; margin: 10px 0; cursor: pointer;') :
+            document.styleSheets[0].insertRule('.checkbox-label { display: block; margin: 10px 0; cursor: pointer; }', document.styleSheets[0].cssRules.length);
+
+        // Plan card styling
+        const style = document.createElement('style');
+        style.textContent = `
+            .checkbox-label {
+                display: block;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+
+            .plan-card {
+                border: 2px solid var(--md-sys-color-outline-variant);
+                border-radius: var(--md-sys-shape-corner-large);
+                padding: 16px;
+                margin: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .plan-card:hover {
+                border-color: var(--md-sys-color-primary);
+                background-color: var(--md-sys-color-surface-container-low);
+            }
+
+            .plan-card.selected {
+                border-color: var(--md-sys-color-primary);
+                background-color: var(--md-sys-color-primary-container);
+            }
+
+            .plan-options {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+
+            .drop-zone {
+                border: 2px dashed var(--md-sys-color-outline);
+                border-radius: var(--md-sys-shape-corner-large);
+                padding: 24px;
+                text-align: center;
+                margin-bottom: 16px;
+            }
+
+            .drop-zone.drag-over {
+                border-color: var(--md-sys-color-primary);
+                background-color: var(--md-sys-color-primary-container);
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add drag over effect
+        document.addEventListener('dragenter', (e) => {
+            if (e.target.closest('.drop-zone')) {
+                e.target.closest('.drop-zone').classList.add('drag-over');
+            }
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            if (e.target.closest('.drop-zone')) {
+                e.target.closest('.drop-zone').classList.remove('drag-over');
+            }
+        });
+    </script>
+</body>
+</html>

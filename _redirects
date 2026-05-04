@@ -1,0 +1,26 @@
+# Admin Panel Redirects
+/admin/* /admin/index.html 200
+/admin/merchants/* /admin/merchants/index.html 200
+/admin/merchants/new /admin/merchants/new.html 200
+/admin/merchants/products /admin/merchants/products.html 200
+/admin/finance/plans /admin/finance/plans.html 200
+/admin/finance/* /admin/finance/index.html 200
+
+# Portal Redirects (Merchant Dashboard)
+/portal/* /portal/index.html 200
+/portal/orders /portal/orders.html 200
+/portal/products /portal/products.html 200
+/portal/profile /portal/profile.html 200
+
+# Affiliate Redirects
+/affiliate/* /affiliate/index.html 200
+/affiliate/signup /affiliate/signup.html 200
+/affiliate/login /affiliate/login.html 200
+/affiliate/dashboard /affiliate/dashboard.html 200
+
+# API Routes (Proxy to backend functions)
+/api/* /functions/api 200
+/functions/v1/* /functions/api 200
+
+# Catch-all fallback for SPA routing
+/* /index.html 200

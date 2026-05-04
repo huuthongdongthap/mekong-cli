@@ -54,4 +54,27 @@ _mekong_comp() {
 }
 complete -F _mekong_comp mekong mekong-claude mekong-gemini mekong-opencode mekong-aider mek 2>/dev/null
 
+# OpenCode CLI — deep Mekong integration (global commands at ~/.config/opencode/)
+alias oc='opencode'
+alias oc-fnb='opencode ~/mekong-cli/FnB-Container-Caffe'
+alias oc-book='opencode ~/mekong-cli/BookScout'
+alias oc-sophia='opencode ~/mekong-cli/sophia-ai-factory'
+alias oc-mekong='opencode ~/mekong-cli'
+alias oc-sync='bash $MEKONG_ROOT/scripts/sync-commands.sh --all'
+
+# oc <project> — quick open any mekong sub-project in opencode
+oc-project() {
+  local proj="$1"
+  if [ -d "$MEKONG_ROOT/$proj" ]; then
+    opencode "$MEKONG_ROOT/$proj"
+  else
+    echo "❌ Project not found: $MEKONG_ROOT/$proj"
+    echo "Available:" && ls -d "$MEKONG_ROOT"/*/ 2>/dev/null | sed "s|$MEKONG_ROOT/||;s|/||" | grep -v node_modules | column
+  fi
+}
+
+# Auto-sync commands to global config on shell load (background, non-blocking)
+( bash "$MEKONG_ROOT/scripts/sync-commands.sh" --global >/dev/null 2>&1 & )
+
 echo "🏯 Mekong CLI loaded. $(source $MEKONG_ROOT/mekong/adapters/registry.sh 2>/dev/null && echo "Tools: $(list_available_tools)" || echo "")"
+

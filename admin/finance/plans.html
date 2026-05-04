@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing & Plans | Mekong Agency</title>
+    <!-- Material Design 3 Color Tokens -->
+    <style>
+        :root {
+            /* Color system */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F1ECF4;
+            --md-sys-color-surface-container-high: #EBE6EE;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+
+            /* Shape corners */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+        }
+
+        /* Typography tokens */
+        .m3-headline-large {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .m3-headline-medium {
+            font-family: Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .m3-title-large {
+            font-family: Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .m3-body-large {
+            font-family: Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            font-family: Roboto, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border-radius: var(--md-sys-shape-corner-large);
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Plan cards */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .plan-card {
+            border: 2px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .plan-card.popular {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 4px 12px rgba(103, 80, 164, 0.15);
+        }
+
+        .plan-card.popular::before {
+            content: 'Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .plan-name {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .plan-price {
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .plan-description {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        .plan-features li {
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-check {
+            color: #4CAF50;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-medium);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+
+        /* Buttons */
+        .button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .button-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        th {
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Invoices */
+        .invoice-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-paid {
+            background-color: #E8F5E8;
+            color: #388E3C;
+        }
+
+        .status-pending {
+            background-color: #FFF8E1;
+            color: #FF8F00;
+        }
+
+        .status-overdue {
+            background-color: #FFEBEE;
+            color: #D32F2F;
+        }
+
+        /* Utilities */
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .mt-16 {
+            margin-top: 16px;
+        }
+
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+
+        .align-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="m3-headline-medium">Billing & Plans</h1>
+            <button class="button button-filled" onclick="showModal('assignPlanModal')">
+                Assign Plan to Merchant
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('plans')">Plans</button>
+            <button class="tab" onclick="switchTab('merchants')">Merchants</button>
+            <button class="tab" onclick="switchTab('invoices')">Invoices</button>
+        </div>
+
+        <!-- Plans Tab Content -->
+        <div id="plansContent" class="tab-content">
+            <!-- Plan Tiers -->
+            <div class="card">
+                <h2 class="card-title">Plan Tiers</h2>
+                <p class="m3-body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
+                    Configure and manage subscription plans for merchants
+                </p>
+
+                <div class="plans-grid">
+                    <!-- Starter Plan -->
+                    <div class="plan-card">
+                        <div class="plan-name">Starter</div>
+                        <div class="plan-price">Free</div>
+                        <div class="plan-description">Perfect for small businesses getting started</div>
+
+                        <ul class="plan-features">
+                            <li><span class="feature-check">✓</span> Up to 5 products</li>
+                            <li><span class="feature-check">✓</span> Basic analytics</li>
+                            <li><span class="feature-check">✓</span> Email support</li>
+                            <li><span class="feature-check">✓</span> Access to marketplace</li>
+                        </ul>
+
+                        <button class="button button-outlined w-100">Edit Plan</button>
+                    </div>
+
+                    <!-- Growth Plan (Popular) -->
+                    <div class="plan-card popular">
+                        <div class="plan-name">Growth</div>
+                        <div class="plan-price">$19<span style="font-size: 16px; color: var(--md-sys-color-on-surface-variant);">/month</span></div>
+                        <div class="plan-description">For growing businesses with more features</div>
+
+                        <ul class="plan-features">
+                            <li><span class="feature-check">✓</span> Up to 50 products</li>
+                            <li><span class="feature-check">✓</span> Advanced analytics</li>
+                            <li><span class="feature-check">✓</span> Priority support</li>
+                            <li><span class="feature-check">✓</span> Marketing tools</li>
+                            <li><span class="feature-check">✓</span> Custom domain</li>
+                        </ul>
+
+                        <button class="button button-filled w-100">Edit Plan</button>
+                    </div>
+
+                    <!-- Export Plan -->
+                    <div class="plan-card">
+                        <div class="plan-name">Export</div>
+                        <div class="plan-price">$49<span style="font-size: 16px; color: var(--md-sys-color-on-surface-variant);">/month</span></div>
+                        <div class="plan-description">For businesses looking to expand internationally</div>
+
+                        <ul class="plan-features">
+                            <li><span class="feature-check">✓</span> Unlimited products</li>
+                            <li><span class="feature-check">✓</span> Export tools</li>
+                            <li><span class="feature-check">✓</span> Dedicated manager</li>
+                            <li><span class="feature-check">✓</span> Custom integrations</li>
+                            <li><span class="feature-check">✓</span> Multi-language support</li>
+                        </ul>
+
+                        <button class="button button-outlined w-100">Edit Plan</button>
+                    </div>
+
+                    <!-- Province Plan -->
+                    <div class="plan-card">
+                        <div class="plan-name">Province</div>
+                        <div class="plan-price">$99<span style="font-size: 16px; color: var(--md-sys-color-on-surface-variant);">/month</span></div>
+                        <div class="plan-description">For provincial businesses with wholesale features</div>
+
+                        <ul class="plan-features">
+                            <li><span class="feature-check">✓</span> All Export features</li>
+                            <li><span class="feature-check">✓</span> Wholesale marketplace</li>
+                            <li><span class="feature-check">✓</span> OCOP promotion</li>
+                            <li><span class="feature-check">✓</span> Government partnerships</li>
+                            <li><span class="feature-check">✓</span> Volume discounts</li>
+                        </ul>
+
+                        <button class="button button-outlined w-100">Edit Plan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Merchants Tab Content -->
+        <div id="merchantsContent" class="tab-content" style="display: none;">
+            <div class="card">
+                <h2 class="card-title">Merchants & Plans</h2>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Merchant</th>
+                                <th>Current Plan</th>
+                                <th>Expiration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <div style="font-weight: 500;">Nguyen Van A</div>
+                                        <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">ID: MCH001</div>
+                                    </div>
+                                </td>
+                                <td>Growth Plan</td>
+                                <td>2023-12-31</td>
+                                <td><span class="status-badge status-paid">Active</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined" onclick="showModal('assignPlanModal')">Change Plan</button>
+                                        <button class="button button-tonal">View Details</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <div style="font-weight: 500;">Tran Thi B</div>
+                                        <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">ID: MCH002</div>
+                                    </div>
+                                </td>
+                                <td>Starter Plan</td>
+                                <td>2023-11-15</td>
+                                <td><span class="status-badge status-pending">Expiring Soon</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined" onclick="showModal('assignPlanModal')">Upgrade</button>
+                                        <button class="button button-tonal">Renew</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <div style="font-weight: 500;">Le Van C</div>
+                                        <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">ID: MCH003</div>
+                                    </div>
+                                </td>
+                                <td>Export Plan</td>
+                                <td>2024-01-31</td>
+                                <td><span class="status-badge status-paid">Active</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined" onclick="showModal('assignPlanModal')">Change Plan</button>
+                                        <button class="button button-tonal">View Details</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <div style="font-weight: 500;">Pham Thi D</div>
+                                        <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">ID: MCH004</div>
+                                    </div>
+                                </td>
+                                <td>Province Plan</td>
+                                <td>2023-10-20</td>
+                                <td><span class="status-badge status-overdue">Expired</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined" onclick="showModal('assignPlanModal')">Renew Plan</button>
+                                        <button class="button button-tonal">Contact</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoices Tab Content -->
+        <div id="invoicesContent" class="tab-content" style="display: none;">
+            <div class="card">
+                <h2 class="card-title">Invoices</h2>
+
+                <div class="flex-row mb-16">
+                    <input type="text" placeholder="Search invoices..." style="max-width: 300px;">
+                    <select style="max-width: 200px;">
+                        <option>All Status</option>
+                        <option>Paid</option>
+                        <option>Pending</option>
+                        <option>Overdue</option>
+                    </select>
+                    <button class="button button-outlined" onclick="showModal('generateInvoiceModal')">Generate Invoice</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Merchant</th>
+                                <th>Issue Date</th>
+                                <th>Due Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>INV-001</td>
+                                <td>Nguyen Van A</td>
+                                <td>2023-10-01</td>
+                                <td>2023-10-31</td>
+                                <td>$19.00</td>
+                                <td><span class="status-badge status-paid">Paid</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined">View</button>
+                                        <button class="button button-tonal">Download</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>INV-002</td>
+                                <td>Tran Thi B</td>
+                                <td>2023-10-05</td>
+                                <td>2023-11-04</td>
+                                <td>$0.00</td>
+                                <td><span class="status-badge status-paid">Paid</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined">View</button>
+                                        <button class="button button-tonal">Download</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>INV-003</td>
+                                <td>Le Van C</td>
+                                <td>2023-10-10</td>
+                                <td>2023-11-09</td>
+                                <td>$49.00</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined">View</button>
+                                        <button class="button button-tonal">Download</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>INV-004</td>
+                                <td>Pham Thi D</td>
+                                <td>2023-09-15</td>
+                                <td>2023-10-15</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge status-overdue">Overdue</span></td>
+                                <td>
+                                    <div class="invoice-actions">
+                                        <button class="button button-outlined">View</button>
+                                        <button class="button button-tonal">Send Reminder</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <!-- Assign Plan Modal -->
+        <div id="assignPlanModal" class="modal">
+            <div class="modal-content">
+                <div class="flex-row justify-between align-center mb-16">
+                    <h2 class="m3-headline-medium">Assign Plan to Merchant</h2>
+                    <button class="button" onclick="closeModal('assignPlanModal')" style="padding: 4px 8px;">✕</button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="selectMerchant">Select Merchant *</label>
+                        <select id="selectMerchant" required>
+                            <option value="">Choose a merchant</option>
+                            <option value="MCH001">Nguyen Van A (MCH001)</option>
+                            <option value="MCH002">Tran Thi B (MCH002)</option>
+                            <option value="MCH003">Le Van C (MCH003)</option>
+                            <option value="MCH004">Pham Thi D (MCH004)</option>
+                            <option value="MCH005">Vo Van E (MCH005)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="selectPlan">Select Plan *</label>
+                        <select id="selectPlan" required>
+                            <option value="">Choose a plan</option>
+                            <option value="starter">Starter Plan (Free)</option>
+                            <option value="growth">Growth Plan ($19/month)</option>
+                            <option value="export">Export Plan ($49/month)</option>
+                            <option value="province">Province Plan ($99/month)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate" value="">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate" value="">
+                    </div>
+
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label for="billingNotes">Billing Notes</label>
+                        <textarea id="billingNotes" rows="3" placeholder="Additional notes for billing..."></textarea>
+                    </div>
+                </div>
+
+                <div class="flex-row mt-16">
+                    <button class="button button-outlined w-100" onclick="closeModal('assignPlanModal')">Cancel</button>
+                    <button class="button button-filled w-100" onclick="savePlanAssignment()">Assign Plan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Invoice Modal -->
+        <div id="generateInvoiceModal" class="modal">
+            <div class="modal-content">
+                <div class="flex-row justify-between align-center mb-16">
+                    <h2 class="m3-headline-medium">Generate Invoice</h2>
+                    <button class="button" onclick="closeModal('generateInvoiceModal')" style="padding: 4px 8px;">✕</button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="invoiceMerchant">Merchant *</label>
+                        <select id="invoiceMerchant" required>
+                            <option value="">Choose a merchant</option>
+                            <option value="MCH001">Nguyen Van A (MCH001)</option>
+                            <option value="MCH002">Tran Thi B (MCH002)</option>
+                            <option value="MCH003">Le Van C (MCH003)</option>
+                            <option value="MCH004">Pham Thi D (MCH004)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="invoiceType">Invoice Type *</label>
+                        <select id="invoiceType" required>
+                            <option value="subscription">Subscription</option>
+                            <option value="commission">Commission</option>
+                            <option value="addon">Add-on Service</option>
+                            <option value="custom">Custom Invoice</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="invoiceDate">Invoice Date</label>
+                        <input type="date" id="invoiceDate" value="">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate" value="">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="invoiceAmount">Amount (USD)</label>
+                        <input type="number" id="invoiceAmount" step="0.01" placeholder="0.00">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="currency">Currency</label>
+                        <select id="currency">
+                            <option value="USD">USD</option>
+                            <option value="VND">VND</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label for="invoiceDescription">Description</label>
+                        <textarea id="invoiceDescription" rows="3" placeholder="Describe what this invoice is for..."></textarea>
+                    </div>
+                </div>
+
+                <div class="flex-row mt-16">
+                    <button class="button button-outlined w-100" onclick="closeModal('generateInvoiceModal')">Cancel</button>
+                    <button class="button button-filled w-100" onclick="generateInvoice()">Generate Invoice</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab content
+            document.getElementById('plansContent').style.display = 'none';
+            document.getElementById('merchantsContent').style.display = 'none';
+            document.getElementById('invoicesContent').style.display = 'none';
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content and set active tab
+            if (tabName === 'plans') {
+                document.getElementById('plansContent').style.display = 'block';
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+            } else if (tabName === 'merchants') {
+                document.getElementById('merchantsContent').style.display = 'block';
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+            } else if (tabName === 'invoices') {
+                document.getElementById('invoicesContent').style.display = 'block';
+                document.querySelector('.tab:nth-child(3)').classList.add('active');
+            }
+        }
+
+        // Modal functionality
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+
+            // Reset form if needed
+            if (modalId === 'assignPlanModal') {
+                document.getElementById('assignPlanForm').reset();
+            } else if (modalId === 'generateInvoiceModal') {
+                document.getElementById('generateInvoiceForm').reset();
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Assign plan functionality
+        function savePlanAssignment() {
+            const merchant = document.getElementById('selectMerchant').value;
+            const plan = document.getElementById('selectPlan').value;
+
+            if (!merchant || !plan) {
+                alert('Please select both merchant and plan');
+                return;
+            }
+
+            // In a real app, this would call an API to save the assignment
+            alert(`Plan "${plan}" assigned to merchant "${merchant}" successfully!`);
+            closeModal('assignPlanModal');
+
+            // Refresh the merchants table
+            refreshMerchantsList();
+        }
+
+        // Generate invoice functionality
+        function generateInvoice() {
+            const merchant = document.getElementById('invoiceMerchant').value;
+            const invoiceType = document.getElementById('invoiceType').value;
+
+            if (!merchant || !invoiceType) {
+                alert('Please select merchant and invoice type');
+                return;
+            }
+
+            // In a real app, this would call an API to generate the invoice
+            alert(`Invoice generated for merchant "${merchant}" successfully!`);
+            closeModal('generateInvoiceModal');
+
+            // Refresh the invoices table
+            refreshInvoicesList();
+        }
+
+        // Refresh functions
+        function refreshMerchantsList() {
+            // In a real app, this would fetch updated data
+            console.log('Refreshing merchants list...');
+        }
+
+        function refreshInvoicesList() {
+            // In a real app, this would fetch updated data
+            console.log('Refreshing invoices list...');
+        }
+
+        // Set today's date as default for date inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            const invoiceDateInput = document.getElementById('invoiceDate');
+            const dueDateInput = document.getElementById('dueDate');
+
+            if(startDateInput) startDateInput.value = today;
+            if(endDateInput) endDateInput.value = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]; // 30 days from now
+            if(invoiceDateInput) invoiceDateInput.value = today;
+            if(dueDateInput) dueDateInput.value = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]; // 30 days from now
+        });
+    </script>
+</body>
+</html>

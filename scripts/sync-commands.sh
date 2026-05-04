@@ -83,8 +83,30 @@ EOF
   echo "  ✅ AGENTS.md generated ($CMD_COUNT commands)"
 }
 
+# OpenCode GLOBAL (~/.config/opencode/commands/ — available in ALL sessions)
+sync_opencode_global() {
+  local DEST="$HOME/.config/opencode/commands" count=0
+  mkdir -p "$DEST"
+  # Clean old commands first
+  find "$DEST" -name "*.md" -type f -delete 2>/dev/null
+  # Find all .md files recursively (root + subdirectories)
+  while IFS= read -r md; do
+    [ -f "$md" ] || continue
+    local rel="${md#$SRC/}"
+    local dest_dir
+    dest_dir=$(dirname "$DEST/$rel")
+    mkdir -p "$dest_dir"
+    cp "$md" "$DEST/$rel"
+    count=$((count + 1))
+  done < <(find "$SRC" -name "*.md" -type f | sort)
+  echo "  ✅ OpenCode Global: $count → ~/.config/opencode/commands/"
+}
+
 case "${1:---all}" in
   --gemini) sync_gemini;; --opencode) sync_opencode;; --agents) sync_agents;;
-  --all) sync_gemini; sync_opencode; sync_agents;; *) echo "Usage: $0 [--all|--gemini|--opencode|--agents]";;
+  --global) sync_opencode_global;;
+  --all) sync_gemini; sync_opencode; sync_agents; sync_opencode_global;;
+  *) echo "Usage: $0 [--all|--gemini|--opencode|--agents|--global]";;
 esac
 echo "✅ Sync complete."
+

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { width: 280px; padding: 14px; font-family: sans-serif; font-size: 13px; }
+  h3 { margin: 0 0 12px; font-size: 15px; }
+  .status { background: #f3f4f6; border-radius: 8px; padding: 10px; margin-bottom: 12px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .dot.on { background: #22c55e; }
+  .dot.off { background: #9ca3af; }
+  button {
+    width: 100%; padding: 8px; margin-top: 6px;
+    border: none; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 500;
+  }
+  .btn-primary { background: #7c3aed; color: white; }
+  .btn-danger  { background: #ef4444; color: white; }
+  .btn-gray    { background: #e5e7eb; color: #374151; }
+  .info { color: #6b7280; font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <h3>🔍 Claude Audit Injector</h3>
+
+  <div class="status">
+    <div>
+      <span class="dot" id="dot"></span>
+      <span id="statusText">Đang kiểm tra...</span>
+    </div>
+    <div style="margin-top:6px">
+      📋 Queue: <strong id="queueCount">0</strong> prompts
+    </div>
+    <div>
+      🎯 Tab đích: <strong id="targetInfo">Chưa set</strong>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="setTargetBtn">📌 Đặt tab này làm đích</button>
+  <button class="btn-danger"  id="clearBtn">🗑 Xóa queue</button>
+
+  <p class="info">
+    Mở tab claude.ai đích → bấm popup → "Đặt tab này làm đích".<br>
+    Sau đó chat với em ở tab chính, em sẽ tự động bắn prompts.
+  </p>
+
+  <script>
+    function refresh() {
+      chrome.runtime.sendMessage({ action: "getStatus" }, (res) => {
+        if (!res) return;
+        const dot = document.getElementById("dot");
+        dot.className = "dot " + (res.isRunning ? "on" : "off");
+        document.getElementById("statusText").textContent =
+          res.isRunning ? "Đang chạy..." : "Chờ prompts";
+        document.getElementById("queueCount").textContent = res.queue;
+        document.getElementById("targetInfo").textContent =
+          res.targetTabId ? `Tab #${res.targetTabId}` : "Chưa set";
+      });
+    }
+
+    document.getElementById("setTargetBtn").addEventListener("click", () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.runtime.sendMessage({ action: "setTargetTab", tabId: tabs[0].id }, () => {
+          refresh();
+        });
+      });
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      chrome.runtime.sendMessage({ action: "clearQueue" }, refresh);
+    });
+
+    chrome.runtime.onMessage.addListener((req) => {
+      if (req.action === "statusUpdate") refresh();
+    });
+
+    refresh();
+    setInterval(refresh, 2000);
+  </script>
+</body>
+</html>

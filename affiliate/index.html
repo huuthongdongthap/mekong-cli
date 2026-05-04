@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Portal | Mekong Agency</title>
+
+    <!-- Material Design 3 Color Tokens -->
+    <style>
+        :root {
+            /* Color system */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F1ECF4;
+            --md-sys-color-surface-container-high: #EBE6EE;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+
+            /* Shape corners */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+        }
+
+        /* Typography tokens */
+        .m3-headline-large {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .m3-headline-medium {
+            font-family: Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .m3-title-large {
+            font-family: Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .m3-body-large {
+            font-family: Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            font-family: Roboto, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        /* Stats overview */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 500;
+            margin: 8px 0;
+            color: var(--md-sys-color-primary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* Main content area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Referral link section */
+        .referral-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .referral-input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .referral-link-input {
+            flex: 1;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-medium);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        th {
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            margin-top: 16px;
+        }
+
+        /* Buttons */
+        .button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .button-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--md-sys-color-primary);
+            border-bottom: 2px solid var(--md-sys-color-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .referral-input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="m3-headline-medium">Affiliate Portal</h1>
+            <div class="user-info">
+                <span>Welcome, Affiliate Partner!</span>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-label">Total Referrals</div>
+                <div class="stat-value" id="totalReferrals">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">+12% from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Commission Earned</div>
+                <div class="stat-value" id="commissionEarned">$0.00</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">Pending: $0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Commissions</div>
+                <div class="stat-value" id="activeCommissions">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">Ready for payout</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Payout History</div>
+                <div class="stat-value" id="payoutHistory">0</div>
+                <div class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">Total paid out</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column: Referral Link & Referrals Table -->
+            <div class="left-column">
+                <div class="card">
+                    <h2 class="card-title">Your Referral Link</h2>
+                    <div class="referral-section">
+                        <div class="referral-input-group">
+                            <input type="text" class="referral-link-input" id="referralLinkInput" readonly value="Loading...">
+                            <button class="button button-tonal" id="copyReferralBtn">Copy</button>
+                        </div>
+                        <p class="m3-body-large" style="color: var(--md-sys-color-on-surface-variant);">
+                            Share this link with potential merchants. You'll earn commissions when they sign up and use Mekong AgencyOS.
+                        </p>
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button class="button button-filled" id="shareViaEmailBtn">Share via Email</button>
+                            <button class="button button-tonal" id="shareViaSocialBtn">Share via Social</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Recent Referrals</h2>
+                    <div class="table-container">
+                        <table id="referralsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Merchant</th>
+                                    <th>Status</th>
+                                    <th>Commission</th>
+                                </tr>
+                            </thead>
+                            <tbody id="referralsTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Commissions & Payouts -->
+            <div class="right-column">
+                <div class="card">
+                    <h2 class="card-title">Commission Tracking</h2>
+                    <div class="table-container">
+                        <table id="commissionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="commissionsTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Payout History</h2>
+                    <div class="table-container">
+                        <table id="payoutsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payoutsTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <button class="button button-filled" id="requestPayoutBtn">Request Payout</button>
+                        <p class="m3-body-large" style="margin-top: 12px; color: var(--md-sys-color-on-surface-variant);">
+                            Minimum payout amount: $50.00. Processing time: 5-7 business days.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Charts -->
+        <div class="card">
+            <h2 class="card-title">Performance Charts</h2>
+            <div class="tabs">
+                <div class="tab active" data-tab="referrals">Referrals</div>
+                <div class="tab" data-tab="commissions">Commissions</div>
+                <div class="tab" data-tab="revenue">Revenue</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demo
+        const sampleAffiliateData = {
+            totalReferrals: 24,
+            commissionEarned: 345.67,
+            activeCommissions: 185.50,
+            payoutHistory: 3,
+            referralLink: 'https://mekong.agency/refer?id=aff12345',
+            referrals: [
+                { id: 1, date: '2026-04-01', merchant: 'ABC Trading Co.', status: 'Active', commission: '$25.00' },
+                { id: 2, date: '2026-03-28', merchant: 'XYZ Handicrafts', status: 'Active', commission: '$30.00' },
+                { id: 3, date: '2026-03-25', merchant: 'MNO Agriculture', status: 'Active', commission: '$20.00' },
+                { id: 4, date: '2026-03-20', merchant: 'PQR Tech Solutions', status: 'Pending', commission: '$40.00' },
+                { id: 5, date: '2026-03-15', merchant: 'STU Fashion House', status: 'Paid', commission: '$15.00' }
+            ],
+            commissions: [
+                { id: 1, date: '2026-04-01', type: 'Signup Bonus', amount: '$25.00', status: 'Paid' },
+                { id: 2, date: '2026-03-28', type: 'Monthly Fee', amount: '$30.00', status: 'Paid' },
+                { id: 3, date: '2026-03-25', type: 'Monthly Fee', amount: '$20.00', status: 'Paid' },
+                { id: 4, date: '2026-03-20', type: 'Signup Bonus', amount: '$40.00', status: 'Pending' },
+                { id: 5, date: '2026-03-15', type: 'Monthly Fee', amount: '$15.00', status: 'Paid' }
+            ],
+            payouts: [
+                { id: 1, date: '2026-03-10', amount: '$120.50', method: 'PayPal', status: 'Completed' },
+                { id: 2, date: '2026-02-10', amount: '$95.75', method: 'Bank Transfer', status: 'Completed' },
+                { id: 3, date: '2026-01-10', amount: '$85.25', method: 'PayPal', status: 'Completed' }
+            ]
+        };
+
+        // DOM Elements
+        const totalReferralsEl = document.getElementById('totalReferrals');
+        const commissionEarnedEl = document.getElementById('commissionEarned');
+        const activeCommissionsEl = document.getElementById('activeCommissions');
+        const payoutHistoryEl = document.getElementById('payoutHistory');
+        const referralLinkInput = document.getElementById('referralLinkInput');
+        const copyReferralBtn = document.getElementById('copyReferralBtn');
+        const referralsTableBody = document.getElementById('referralsTableBody');
+        const commissionsTableBody = document.getElementById('commissionsTableBody');
+        const payoutsTableBody = document.getElementById('payoutsTableBody');
+        const requestPayoutBtn = document.getElementById('requestPayoutBtn');
+        const shareViaEmailBtn = document.getElementById('shareViaEmailBtn');
+        const shareViaSocialBtn = document.getElementById('shareViaSocialBtn');
+        const tabs = document.querySelectorAll('.tab');
+
+        // Initialize the affiliate portal
+        function initAffiliatePortal() {
+            updateDashboardStats();
+            populateTables();
+            initPerformanceChart();
+            setupEventListeners();
+        }
+
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            totalReferralsEl.textContent = sampleAffiliateData.totalReferrals;
+            commissionEarnedEl.textContent = `$${sampleAffiliateData.commissionEarned.toFixed(2)}`;
+            activeCommissionsEl.textContent = `$${sampleAffiliateData.activeCommissions.toFixed(2)}`;
+            payoutHistoryEl.textContent = sampleAffiliateData.payoutHistory;
+            referralLinkInput.value = sampleAffiliateData.referralLink;
+        }
+
+        // Populate tables with data
+        function populateTables() {
+            // Populate referrals table
+            referralsTableBody.innerHTML = '';
+            sampleAffiliateData.referrals.forEach(referral => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${referral.date}</td>
+                    <td>${referral.merchant}</td>
+                    <td><span style="color: ${getStatusColor(referral.status)}">${referral.status}</span></td>
+                    <td>${referral.commission}</td>
+                `;
+                referralsTableBody.appendChild(row);
+            });
+
+            // Populate commissions table
+            commissionsTableBody.innerHTML = '';
+            sampleAffiliateData.commissions.forEach(commission => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${commission.date}</td>
+                    <td>${commission.type}</td>
+                    <td>${commission.amount}</td>
+                    <td><span style="color: ${getStatusColor(commission.status)}">${commission.status}</span></td>
+                `;
+                commissionsTableBody.appendChild(row);
+            });
+
+            // Populate payouts table
+            payoutsTableBody.innerHTML = '';
+            sampleAffiliateData.payouts.forEach(payout => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payout.date}</td>
+                    <td>${payout.amount}</td>
+                    <td>${payout.method}</td>
+                    <td><span style="color: ${getStatusColor(payout.status)}">${payout.status}</span></td>
+                `;
+                payoutsTableBody.appendChild(row);
+            });
+        }
+
+        // Helper function to get status color
+        function getStatusColor(status) {
+            switch(status.toLowerCase()) {
+                case 'active':
+                case 'paid':
+                case 'completed':
+                    return '#4CAF50';
+                case 'pending':
+                    return '#FF9800';
+                case 'failed':
+                case 'cancelled':
+                    return '#F44336';
+                default:
+                    return '#79747E';
+            }
+        }
+
+        // Initialize performance chart
+        function initPerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            // Initial chart data for referrals
+            const chartData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+                datasets: [
+                    {
+                        label: 'Referrals',
+                        data: [8, 12, 15, 10], // Based on sample data
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Commission ($)',
+                        data: [120, 180, 220, 150], // Based on sample data
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        type: 'line',
+                        yAxisID: 'y1'
+                    }
+                ]
+            };
+
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Number of Referrals'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Commission ($)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+
+            // Tab switching for charts
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // In a real app, this would switch the chart data
+                    // For demo, we'll just keep the same chart
+                });
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Copy referral link
+            copyReferralBtn.addEventListener('click', () => {
+                referralLinkInput.select();
+                document.execCommand('copy');
+
+                // Visual feedback
+                const originalText = copyReferralBtn.textContent;
+                copyReferralBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyReferralBtn.textContent = originalText;
+                }, 2000);
+            });
+
+            // Request payout
+            requestPayoutBtn.addEventListener('click', () => {
+                if (sampleAffiliateData.activeCommissions < 50) {
+                    alert(`Minimum payout amount is $50.00. You currently have $${sampleAffiliateData.activeCommissions.toFixed(2)} available.`);
+                    return;
+                }
+
+                // In a real app, this would make an API call
+                alert('Payout request submitted successfully! You will be contacted shortly.');
+            });
+
+            // Share via email
+            shareViaEmailBtn.addEventListener('click', () => {
+                const subject = encodeURIComponent('Check out Mekong AgencyOS - The AI-powered business platform');
+                const body = encodeURIComponent(`I wanted to share this with you:\n\n${sampleAffiliateData.referralLink}\n\nMekong AgencyOS helps Southeast Asian merchants grow their businesses with AI-powered tools.`);
+                window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            });
+
+            // Share via social
+            shareViaSocialBtn.addEventListener('click', () => {
+                // In a real app, this would open social sharing dialogs
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Mekong AgencyOS - AI-powered business platform',
+                        text: 'Check out this platform for Southeast Asian merchants',
+                        url: sampleAffiliateData.referralLink
+                    }).catch(console.error);
+                } else {
+                    alert('Web Share API not supported. Here is your referral link: ' + sampleAffiliateData.referralLink);
+                }
+            });
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', initAffiliatePortal);
+    </script>
+</body>
+</html>

@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management | Mekong Agency</title>
+    <!-- Material Design 3 Color Tokens -->
+    <style>
+        :root {
+            /* Color system */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F1ECF4;
+            --md-sys-color-surface-container-high: #EBE6EE;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+
+            /* Shape corners */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+        }
+
+        /* Typography tokens */
+        .m3-headline-large {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .m3-headline-medium {
+            font-family: Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .m3-title-large {
+            font-family: Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .m3-body-large {
+            font-family: Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            font-family: Roboto, sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Form elements */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-medium);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+
+        /* Buttons */
+        .button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .button-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .button-icon {
+            background-color: transparent;
+            color: var(--md-sys-color-on-surface);
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .button-icon:hover {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Media upload zone */
+        .drop-zone {
+            border: 2px dashed var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-medium);
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-primary-container);
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: var(--md-sys-shape-corner-small);
+            overflow: hidden;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-actions {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            display: flex;
+            gap: 4px;
+        }
+
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        th {
+            color: var(--md-sys-color-on-surface-variant;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* AI Listing Generator */
+        .ai-generator {
+            background-color: var(--md-sys-color-tertiary-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Flex utilities */
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .w-50 {
+            width: 50%;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .mt-16 {
+            margin-top: 16px;
+        }
+
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flex-row {
+                flex-direction: column;
+            }
+
+            .w-50 {
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="m3-headline-medium">Product Management</h1>
+            <button class="button button-filled" onclick="showModal('addProductModal')">
+                <span>Add New Product</span>
+            </button>
+        </div>
+
+        <!-- Product List Section -->
+        <div class="card">
+            <h2 class="card-title">My Products</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Product rows will be dynamically added here -->
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="https://placehold.co/50x50/e7e0ec/49454f?text=P" alt="Product" style="width: 50px; height: 50px; border-radius: var(--md-sys-shape-corner-small);">
+                                    <div>
+                                        <div style="font-weight: 500;">Sample Product</div>
+                                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">ID: PROD001</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Food & Beverage</td>
+                            <td>150,000 VND</td>
+                            <td>50</td>
+                            <td><span style="color: #4CAF50; font-weight: 500;">Active</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="button button-icon" title="Edit" onclick="editProduct('PROD001')">
+                                        ✏️
+                                    </button>
+                                    <button class="button button-icon" title="Delete" onclick="deleteProduct('PROD001')">
+                                        🗑️
+                                    </button>
+                                    <button class="button button-tonal" title="Generate AI Listings" onclick="generateAIListing('PROD001')">
+                                        AI
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="https://placehold.co/50x50/e7e0ec/49454f?text=H" alt="Product" style="width: 50px; height: 50px; border-radius: var(--md-sys-shape-corner-small);">
+                                    <div>
+                                        <div style="font-weight: 500;">Handicraft Item</div>
+                                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">ID: PROD002</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Handicraft</td>
+                            <td>250,000 VND</td>
+                            <td>25</td>
+                            <td><span style="color: #4CAF50; font-weight: 500;">Active</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="button button-icon" title="Edit" onclick="editProduct('PROD002')">
+                                        ✏️
+                                    </button>
+                                    <button class="button button-icon" title="Delete" onclick="deleteProduct('PROD002')">
+                                        🗑️
+                                    </button>
+                                    <button class="button button-tonal" title="Generate AI Listings" onclick="generateAIListing('PROD002')">
+                                        AI
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <!-- Add Product Modal -->
+        <div id="addProductModal" class="modal">
+            <div class="modal-content">
+                <div class="flex-row" style="justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 class="m3-headline-medium">Add New Product</h2>
+                    <button class="button button-icon" onclick="closeModal('addProductModal')">✕</button>
+                </div>
+
+                <form id="productForm">
+                    <div class="input-group">
+                        <label for="productName">Product Name *</label>
+                        <input type="text" id="productName" name="productName" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="productDescription">Description *</label>
+                        <textarea id="productDescription" name="productDescription" rows="4" required></textarea>
+                    </div>
+
+                    <div class="flex-row">
+                        <div class="input-group w-50">
+                            <label for="category">Category *</label>
+                            <select id="category" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="food">Food & Beverage</option>
+                                <option value="handicraft">Handicraft</option>
+                                <option value="agriculture">Agriculture</option>
+                                <option value="tech">Technology</option>
+                                <option value="fashion">Fashion</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group w-50">
+                            <label for="subcategory">Subcategory</label>
+                            <select id="subcategory" name="subcategory">
+                                <option value="">Select Subcategory</option>
+                                <option value="traditional">Traditional Craft</option>
+                                <option value="modern">Modern Design</option>
+                                <option value="organic">Organic</option>
+                                <option value="processed">Processed</option>
+                                <option value="raw">Raw Materials</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex-row">
+                        <div class="input-group w-50">
+                            <label for="price">Price (VND) *</label>
+                            <input type="number" id="price" name="price" required min="0">
+                        </div>
+
+                        <div class="input-group w-50">
+                            <label for="cost">Cost (VND)</label>
+                            <input type="number" id="cost" name="cost" min="0">
+                        </div>
+                    </div>
+
+                    <div class="flex-row">
+                        <div class="input-group w-50">
+                            <label for="stock">Stock Quantity *</label>
+                            <input type="number" id="stock" name="stock" required min="0">
+                        </div>
+
+                        <div class="input-group w-50">
+                            <label for="sku">SKU/Code</label>
+                            <input type="text" id="sku" name="sku">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="certifications">Certifications</label>
+                        <select id="certifications" name="certifications" multiple>
+                            <option value="ocop">OCOP Certified</option>
+                            <option value="fairtrade">Fair Trade</option>
+                            <option value="organic">Organic Certified</option>
+                            <option value="halal">Halal</option>
+                            <option value="iso">ISO Certified</option>
+                        </select>
+                    </div>
+
+                    <!-- Media Upload Zone -->
+                    <div class="input-group">
+                        <label>Product Images</label>
+                        <div id="imageDropZone" class="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" onclick="document.getElementById('imageUpload').click()">
+                            <p>Drag & drop images here or click to select</p>
+                            <p style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">Supports JPG, PNG, WEBP (Max 5MB each)</p>
+                            <button type="button" class="button button-tonal" style="margin-top: 12px;">Choose Files</button>
+                            <input type="file" id="imageUpload" name="images" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(this.files)">
+                        </div>
+                        <div id="imagePreview" class="image-grid"></div>
+                    </div>
+
+                    <!-- AI Listing Generation -->
+                    <div class="ai-generator">
+                        <h3 style="margin-bottom: 12px;">AI Listing Generation</h3>
+                        <p class="m3-body-large" style="margin-bottom: 16px; color: var(--md-sys-color-on-surface-variant);">
+                            Automatically generate compelling product listings for various platforms using AI
+                        </p>
+
+                        <div class="flex-row">
+                            <div class="input-group w-50">
+                                <label for="targetPlatform">Target Platform</label>
+                                <select id="targetPlatform">
+                                    <option value="shopee">Shopee</option>
+                                    <option value="tiktok">TikTok Shop</option>
+                                    <option value="lazada">Lazada</option>
+                                    <option value="amazon">Amazon</option>
+                                    <option value="facebook">Facebook Marketplace</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group w-50">
+                                <label for="targetLanguage">Target Language</label>
+                                <select id="targetLanguage">
+                                    <option value="EN">English</option>
+                                    <option value="VI">Vietnamese</option>
+                                    <option value="ZH">Chinese</option>
+                                    <option value="JA">Japanese</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" class="button button-filled" onclick="generateAIListing(null)" style="width: 100%;">
+                            Generate AI Listings
+                        </button>
+                    </div>
+
+                    <div class="flex-row" style="margin-top: 24px;">
+                        <button type="button" class="button button-outlined w-50" onclick="closeModal('addProductModal')">Cancel</button>
+                        <button type="submit" class="button button-filled w-50">Save Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- AI Generated Listings Modal -->
+        <div id="aiListingModal" class="modal">
+            <div class="modal-content">
+                <div class="flex-row" style="justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 class="m3-headline-medium">AI-Generated Listings</h2>
+                    <button class="button button-icon" onclick="closeModal('aiListingModal')">✕</button>
+                </div>
+
+                <div id="aiListingContent">
+                    <!-- AI-generated content will appear here -->
+                </div>
+
+                <div class="flex-row mt-16">
+                    <button type="button" class="button button-outlined w-50" onclick="closeModal('aiListingModal')">Close</button>
+                    <button type="button" class="button button-filled w-50" onclick="applyAIListing()">Apply to Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentProductId = null;
+        let uploadedImages = [];
+
+        // Utility functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+
+            // Clear form if it's the add/edit modal
+            if (modalId === 'addProductModal') {
+                document.getElementById('productForm').reset();
+                document.getElementById('imagePreview').innerHTML = '';
+                uploadedImages = [];
+            }
+        }
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            handleFileSelect(files);
+        }
+
+        function handleFileSelect(files) {
+            const imagePreview = document.getElementById('imagePreview');
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.startsWith('image/')) {
+                    const file = files[i];
+
+                    // Create preview element
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+
+                    const img = document.createElement('img');
+                    img.file = file; // Store the file for later upload
+
+                    const reader = new FileReader();
+                    reader.onload = (function(aImg) {
+                        return function(e) {
+                            aImg.src = e.target.result;
+                        };
+                    })(img);
+                    reader.readAsDataURL(file);
+
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'button button-icon';
+                    removeBtn.innerHTML = '✕';
+                    removeBtn.onclick = function() {
+                        imageItem.remove();
+                        uploadedImages = uploadedImages.filter(f => f.name !== file.name);
+                    };
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'image-actions';
+                    actionsDiv.appendChild(removeBtn);
+
+                    imageItem.appendChild(img);
+                    imageItem.appendChild(actionsDiv);
+                    imagePreview.appendChild(imageItem);
+
+                    // Add to uploaded images array
+                    uploadedImages.push(file);
+                }
+            }
+        }
+
+        // Form submission handler
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form data
+            const formData = new FormData();
+            formData.append('name', document.getElementById('productName').value);
+            formData.append('description', document.getElementById('productDescription').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('subcategory', document.getElementById('subcategory').value);
+            formData.append('price', document.getElementById('price').value);
+            formData.append('cost', document.getElementById('cost').value);
+            formData.append('stock', document.getElementById('stock').value);
+            formData.append('sku', document.getElementById('sku').value);
+
+            // Handle certifications
+            const certSelect = document.getElementById('certifications');
+            for (let i = 0; i < certSelect.selectedOptions.length; i++) {
+                formData.append('certifications[]', certSelect.selectedOptions[i].value);
+            }
+
+            // Handle images
+            for (let i = 0; i < uploadedImages.length; i++) {
+                formData.append('images[]', uploadedImages[i]);
+            }
+
+            // Here you would typically send the data to your backend
+            // For now, we'll just show a success message
+            alert('Product saved successfully!');
+
+            // Close modal and reset form
+            closeModal('addProductModal');
+
+            // Refresh the product list (in a real app, you'd fetch updated data)
+            refreshProductList();
+        });
+
+        // Mock function to refresh product list
+        function refreshProductList() {
+            // In a real implementation, this would fetch updated data from the server
+            console.log('Refreshing product list...');
+        }
+
+        // Edit product function
+        function editProduct(productId) {
+            currentProductId = productId;
+            // In a real implementation, this would fetch the product data and populate the form
+            alert(`Editing product: ${productId}`);
+            showModal('addProductModal');
+        }
+
+        // Delete product function
+        function deleteProduct(productId) {
+            if (confirm(`Are you sure you want to delete product ${productId}?`)) {
+                // In a real implementation, this would call the API to delete the product
+                console.log(`Deleting product: ${productId}`);
+                // Refresh the list after deletion
+                refreshProductList();
+            }
+        }
+
+        // AI Listing Generation function
+        async function generateAIListing(productId) {
+            currentProductId = productId;
+
+            // Get product info from form or simulate if null (for new product)
+            let productInfo;
+            if (productId) {
+                // In a real app, this would fetch product details
+                productInfo = {
+                    name_vi: "Sample Product",
+                    description_vi: "This is a sample product description",
+                    category: "Food & Beverage",
+                    certifications: ["ocop"],
+                    weight: 500,
+                    province: "Ho Chi Minh City"
+                };
+            } else {
+                // Use form values for new product
+                productInfo = {
+                    name_vi: document.getElementById('productName').value || "New Product",
+                    description_vi: document.getElementById('productDescription').value || "Product description",
+                    category: document.getElementById('category').value || "Other",
+                    certifications: Array.from(document.getElementById('certifications').selectedOptions).map(opt => opt.value),
+                    weight: 500,
+                    province: "Vietnam"
+                };
+            }
+
+            const targetPlatform = document.getElementById('targetPlatform').value || 'shopee';
+            const targetLanguage = document.getElementById('targetLanguage').value || 'EN';
+
+            // Show loading state
+            const generateBtn = document.querySelector('button[onclick="generateAIListing(null)"]');
+            if (generateBtn) {
+                generateBtn.innerHTML = 'Generating...';
+                generateBtn.disabled = true;
+            }
+
+            try {
+                // Simulate AI listing generation (in real app, this would call MekongAI.generateListings)
+                console.log("Calling AI to generate listings...");
+
+                // Simulated response
+                const mockResponse = {
+                    title: `[${targetPlatform.toUpperCase()}] ${productInfo.name_vi} - Premium Quality`,
+                    description: `Discover the exceptional quality of ${productInfo.name_vi}. Our premium ${productInfo.category.toLowerCase()} product is crafted with attention to detail, featuring superior materials and outstanding craftsmanship. Perfect for discerning customers who appreciate excellence.`,
+                    bullet_points: [
+                        `High-quality ${productInfo.category.toLowerCase()} product`,
+                        'Premium materials and construction',
+                        'Designed for durability and performance',
+                        'Easy to use and maintain',
+                        'Satisfaction guaranteed'
+                    ],
+                    keywords: ['premium', 'quality', 'excellent', 'bestseller', 'top-rated'],
+                    hashtags: ['#PremiumProduct', '#QualityFirst', '#BestChoice', '#TopRated']
+                };
+
+                // Show AI listing modal with generated content
+                showAIListing(mockResponse);
+
+            } catch (error) {
+                console.error('Error generating AI listings:', error);
+                alert('Error generating AI listings. Please try again.');
+            } finally {
+                // Restore button state
+                if (generateBtn) {
+                    generateBtn.innerHTML = 'Generate AI Listings';
+                    generateBtn.disabled = false;
+                }
+            }
+        }
+
+        // Display AI-generated content
+        function showAIListing(aiContent) {
+            const contentDiv = document.getElementById('aiListingContent');
+
+            contentDiv.innerHTML = `
+                <div class="input-group">
+                    <label>Generated Title</label>
+                    <input type="text" value="${aiContent.title}" readonly style="background-color: var(--md-sys-color-surface-variant);">
+                </div>
+
+                <div class="input-group">
+                    <label>Generated Description</label>
+                    <textarea rows="6" readonly style="background-color: var(--md-sys-color-surface-variant);">${aiContent.description}</textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Bullet Points</label>
+                    <ul style="padding-left: 20px;">
+                        ${aiContent.bullet_points.map(point => `<li>${point}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="input-group">
+                    <label>Keywords</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${aiContent.keywords.map(keyword => `<span style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); padding: 4px 8px; border-radius: 12px; font-size: 12px;">${keyword}</span>`).join('')}
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Hashtags</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${aiContent.hashtags.map(hashtag => `<span style="background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); padding: 4px 8px; border-radius: 12px; font-size: 12px;">${hashtag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            showModal('aiListingModal');
+        }
+
+        // Apply AI listing to product
+        function applyAIListing() {
+            // In a real app, this would apply the AI-generated content to the product
+            alert('AI listing applied to product!');
+            closeModal('aiListingModal');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize MekongAI if available
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if MekongAI is available (from assets/js/ai.js)
+            if (typeof window.MekongAI !== 'undefined') {
+                console.log('MekongAI is available for AI listing generation');
+            } else {
+                console.warn('MekongAI not found. Make sure assets/js/ai.js is loaded.');
+            }
+        });
+    </script>
+</body>
+</html>
