@@ -11,7 +11,10 @@ import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .verifier import ExecutionResult
 
 import requests  # type: ignore[import-untyped]
 
@@ -48,12 +51,20 @@ class SwarmRegistry:
         self._load()
 
     def register_node(
-        self, name: str, host: str, port: int, token: str,
+        self,
+        name: str,
+        host: str,
+        port: int,
+        token: str,
     ) -> SwarmNode:
         """Register a new node in the swarm."""
         node_id = uuid.uuid4().hex[:8]
         node = SwarmNode(
-            id=node_id, name=name, host=host, port=port, token=token,
+            id=node_id,
+            name=name,
+            host=host,
+            port=port,
+            token=token,
         )
         self._nodes[node_id] = node
         self._save()
@@ -98,7 +109,10 @@ class SwarmRegistry:
         return results
 
     def dispatch_goal(
-        self, node_id: str, goal: str, timeout: float = 60.0,
+        self,
+        node_id: str,
+        goal: str,
+        timeout: float = 60.0,
     ) -> dict[str, Any]:
         """Send a goal to a remote node via POST /cmd."""
         node = self.get_node(node_id)
@@ -194,6 +208,7 @@ class SwarmDispatcher:
             from src.agents.file_agent import FileAgent
             from src.agents.git_agent import GitAgent
             from src.agents.shell_agent import ShellAgent
+
             self._local_agents = {
                 "git": GitAgent(),
                 "file": FileAgent(),
@@ -206,7 +221,7 @@ class SwarmDispatcher:
         """Return all nodes with status='healthy'."""
         return [n for n in self.registry.list_nodes() if n.status == "healthy"]
 
-    def _route_step(self, step: Any) -> str:
+    def _route_step(self, step: object) -> str:
         """Determine agent type from step params or description.
 
         Returns one of: 'git', 'file', 'shell'
@@ -224,15 +239,17 @@ class SwarmDispatcher:
             return "file"
         return "shell"
 
-    def _dispatch_local(self, step: Any, agent_type: str) -> Any:
+    def _dispatch_local(self, step: object, agent_type: str) -> "ExecutionResult":
         """Execute step using local agent. Returns ExecutionResult."""
         agent = self._local_agents.get(agent_type) or self._local_agents.get("shell")
         if agent is None:
             # No agents available — return minimal failure result
             from .verifier import ExecutionResult
+
             return ExecutionResult(exit_code=1, stdout="", stderr="No local agent available")
 
         from .agent_base import Task
+
         description = getattr(step, "description", "")
         params = getattr(step, "params", None) or {}
         # ShellAgent reads command from input["command"]
@@ -248,15 +265,17 @@ class SwarmDispatcher:
 
         # Convert Result -> ExecutionResult
         from .verifier import ExecutionResult
+
         return ExecutionResult(
             exit_code=0 if result.success else 1,
             stdout=result.output or "",
             stderr=result.error or "",
         )
 
-    def _dispatch_remote(self, step: Any, node: SwarmNode) -> Any:
+    def _dispatch_remote(self, step: object, node: SwarmNode) -> "ExecutionResult":
         """Send step to remote node via POST /cmd. Returns ExecutionResult."""
         from .verifier import ExecutionResult
+
         url = f"http://{node.host}:{node.port}/cmd"
         try:
             resp = requests.post(
@@ -273,7 +292,7 @@ class SwarmDispatcher:
         except requests.RequestException as e:
             return ExecutionResult(exit_code=1, stdout="", stderr=str(e))
 
-    def dispatch(self, step: Any) -> Any:
+    def dispatch(self, step: object) -> "ExecutionResult":
         """Dispatch a single RecipeStep. Returns ExecutionResult.
 
         Priority: healthy remote node -> local agent fallback.

@@ -26,6 +26,7 @@ class TurboQuantKVCache:
     Shape convention (mlx-lm standard):
         keys/values: (B, n_kv_heads, seq_len, head_dim)
     """
+
     step = 256
 
     def __init__(
@@ -39,10 +40,7 @@ class TurboQuantKVCache:
     ):
         self.layer_idx = layer_idx
         self.bit_width = bit_width
-        self.is_boundary = (
-            layer_idx < boundary_layers or
-            layer_idx >= num_layers - boundary_layers
-        )
+        self.is_boundary = layer_idx < boundary_layers or layer_idx >= num_layers - boundary_layers
         self.head_dim = head_dim
         self.offset = 0
 
@@ -53,11 +51,13 @@ class TurboQuantKVCache:
         else:
             # Compressed storage: lists of (indices, norms) per token
             self._k_indices = []  # list of (B, n_heads, head_dim) int arrays
-            self._k_norms = []    # list of (B, n_heads) float arrays
+            self._k_norms = []  # list of (B, n_heads) float arrays
             self._v_indices = []
             self._v_norms = []
             self._k_quantizer = MLXPolarQuant(head_dim, bit_width=bit_width, seed=seed + layer_idx)
-            self._v_quantizer = MLXPolarQuant(head_dim, bit_width=bit_width, seed=seed + layer_idx + 1000)
+            self._v_quantizer = MLXPolarQuant(
+                head_dim, bit_width=bit_width, seed=seed + layer_idx + 1000
+            )
 
     def update_and_fetch(self, keys, values):
         """Update cache and return full (potentially dequantized) cache.
@@ -94,9 +94,9 @@ class TurboQuantKVCache:
                 self.keys, self.values = new_k, new_v
 
         self.offset += keys.shape[2]
-        self.keys[..., prev:self.offset, :] = keys
-        self.values[..., prev:self.offset, :] = values
-        return self.keys[..., :self.offset, :], self.values[..., :self.offset, :]
+        self.keys[..., prev : self.offset, :] = keys
+        self.values[..., prev : self.offset, :] = values
+        return self.keys[..., : self.offset, :], self.values[..., : self.offset, :]
 
     def _update_compressed(self, keys, values):
         """TurboQuant-compressed update for middle layers."""
@@ -158,7 +158,10 @@ class TurboQuantKVCache:
     def make_mask(self, N, return_array=False, window_size=None):
         """Create attention mask (delegates to standard implementation)."""
         from mlx_lm.models.cache import create_attention_mask
-        return create_attention_mask(N, self.offset, return_array=return_array, window_size=window_size)
+
+        return create_attention_mask(
+            N, self.offset, return_array=return_array, window_size=window_size
+        )
 
     def is_trimmable(self):
         return True
@@ -191,7 +194,7 @@ class TurboQuantKVCache:
         if self.is_boundary:
             if self.keys is None:
                 return []
-            return self.keys[..., :self.offset, :], self.values[..., :self.offset, :]
+            return self.keys[..., : self.offset, :], self.values[..., : self.offset, :]
         # For compressed layers, return dequantized state
         k, v = self._dequantize_all()
         if k is None:
@@ -226,7 +229,9 @@ class TurboQuantKVCache:
         if self.is_boundary:
             if self.keys is None:
                 return 0
-            return self.keys[..., :self.offset, :].nbytes + self.values[..., :self.offset, :].nbytes
+            return (
+                self.keys[..., : self.offset, :].nbytes + self.values[..., : self.offset, :].nbytes
+            )
         n = len(self._k_indices)
         if n == 0:
             return 0
@@ -256,9 +261,9 @@ def make_turbo_prompt_cache(model, bit_width=4, boundary_layers=2, seed=42):
 
     # Detect head_dim from model config
     head_dim = 128  # default
-    if hasattr(model, 'args') and hasattr(model.args, 'head_dim'):
+    if hasattr(model, "args") and hasattr(model.args, "head_dim"):
         head_dim = model.args.head_dim
-    elif hasattr(model, 'config') and hasattr(model.config, 'head_dim'):
+    elif hasattr(model, "config") and hasattr(model.config, "head_dim"):
         head_dim = model.config.head_dim
 
     return [

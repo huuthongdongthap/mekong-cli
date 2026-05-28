@@ -4,21 +4,19 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
-    "name_vi": "Email",
     "name_en": "Email",
     "icon": "",
-    "description_vi": "Execute Email command",
-    "description_en": "Execute Email command"
+    "description_en": "Email sequences — drip campaigns, newsletters, transactional"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "editor",
+      "cmo"
     ],
-    "hub": "business-hub",
+    "hub": "marketing-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 3,
+    "credit_cost": 2,
     "requires_approval": false
   },
   "input": {
@@ -28,29 +26,44 @@
     ],
     "properties": {
       "goal": {
-        "type": "string",
-        "description": "Natural language task description"
+        "type": "string"
       },
-      "project": {
+      "email_type": {
         "type": "string",
-        "description": "Target project path"
+        "enum": [
+          "drip",
+          "newsletter",
+          "transactional",
+          "cold"
+        ]
+      },
+      "sequence_length": {
+        "type": "integer"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "summary": {
-        "type": "string"
-      },
-      "files_modified": {
+      "emails": {
         "type": "array",
         "items": {
-          "type": "string"
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "send_day": {
+              "type": "integer"
+            },
+            "cta": {
+              "type": "string"
+            }
+          }
         }
-      },
-      "credits_used": {
-        "type": "integer"
       }
     }
   },

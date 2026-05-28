@@ -298,7 +298,8 @@ def build_negotiation_prep(
 ) -> NegotiationPrep:
     """Build complete negotiation preparation package."""
     batna = assess_batna(
-        current_mrr, mom_growth_pct,
+        current_mrr,
+        mom_growth_pct,
         competing_terms=competing_terms,
         runway_months=runway_months,
     )
@@ -308,7 +309,10 @@ def build_negotiation_prep(
 
     walk_lines = build_walk_away_lines(min_valuation, max_dilution_pct)
     counters = generate_counter_scripts(
-        their_valuation, your_valuation, current_mrr, mom_growth_pct,
+        their_valuation,
+        your_valuation,
+        current_mrr,
+        mom_growth_pct,
     )
 
     return NegotiationPrep(
@@ -334,15 +338,21 @@ def save_negotiation_prep(output_dir: str, prep: NegotiationPrep) -> list[str]:
     saved.append(str(path))
 
     walk_path = base / "walk-away-lines.json"
-    walk_path.write_text(json.dumps(
-        [asdict(w) for w in prep.walk_away_lines], indent=2,
-    ))
+    walk_path.write_text(
+        json.dumps(
+            [asdict(w) for w in prep.walk_away_lines],
+            indent=2,
+        )
+    )
     saved.append(str(walk_path))
 
     scripts_path = base / "counter-scripts.json"
-    scripts_path.write_text(json.dumps(
-        [asdict(s) for s in prep.counter_scripts], indent=2,
-    ))
+    scripts_path.write_text(
+        json.dumps(
+            [asdict(s) for s in prep.counter_scripts],
+            indent=2,
+        )
+    )
     saved.append(str(scripts_path))
 
     return saved

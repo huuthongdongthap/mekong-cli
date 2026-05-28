@@ -12,7 +12,12 @@ from rich.panel import Panel
 from rich.table import Table
 from typing import Optional
 
-from src.lib.license_generator import generate_license, validate_license, get_tier_limits, TIER_LIMITS
+from src.lib.license_generator import (
+    generate_license,
+    validate_license,
+    get_tier_limits,
+    TIER_LIMITS,
+)
 from src.lib.usage_meter import get_usage_summary, get_meter
 from src.core.raas_auth import get_auth_client
 from src.core.gateway_client import get_gateway_client
@@ -23,7 +28,9 @@ app = typer.Typer(help="🔑 License key management with RaaS Gateway integratio
 
 @app.command()
 def generate(
-    tier: str = typer.Option("trial", "--tier", "-t", help="License tier (free/trial/pro/enterprise)"),
+    tier: str = typer.Option(
+        "trial", "--tier", "-t", help="License tier (free/trial/pro/enterprise)"
+    ),
     email: str = typer.Option(..., "--email", "-e", help="User email for license"),
     days: int = typer.Option(None, "--days", "-d", help="Expiry in days (for trial tier)"),
 ) -> None:
@@ -34,11 +41,15 @@ def generate(
 
         console.print(
             Panel(
-                f"[bold green]{key}[/bold green]\n\n"
-                f"[dim]Tier: {tier}[/dim]\n"
-                f"[dim]Email: {email}[/dim]\n"
-                f"[dim]Daily Limit: {limits['commands_per_day'] if limits['commands_per_day'] >= 0 else 'unlimited'} commands[/dim]\n"
-                f"[dim]Expiry: {days} days[/dim]" if days else "[dim]Expiry: None[/dim]",
+                (
+                    f"[bold green]{key}[/bold green]\n\n"
+                    f"[dim]Tier: {tier}[/dim]\n"
+                    f"[dim]Email: {email}[/dim]\n"
+                    f"[dim]Daily Limit: {limits['commands_per_day'] if limits['commands_per_day'] >= 0 else 'unlimited'} commands[/dim]\n"
+                    f"[dim]Expiry: {days} days[/dim]"
+                    if days
+                    else "[dim]Expiry: None[/dim]"
+                ),
                 title="🔑 License Key Generated",
                 border_style="green",
             )
@@ -51,12 +62,14 @@ def generate(
 @app.command()
 def validate(
     key: Optional[str] = typer.Argument(None, help="License key to validate"),
-    gateway: bool = typer.Option(False, "--gateway", "-g", help="Validate against RaaS Gateway (Phase 6)"),
+    gateway: bool = typer.Option(
+        False, "--gateway", "-g", help="Validate against RaaS Gateway (Phase 6)"
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed validation info"),
 ) -> None:
     """Validate a license key (local or gateway-based).
 
-    Phase 6: Use --gateway flag to validate against RaaS Gateway at raas.agencyos.network.
+    Phase 6: Use --gateway flag to validate against RaaS Gateway at api.cashclaw.cc.
     """
     # Get license key from argument or environment
     license_key = key or os.getenv("RAAS_LICENSE_KEY")
@@ -90,7 +103,9 @@ def _validate_local(key: str, verbose: bool, gateway_mode: bool = False) -> None
 
         if result.valid and result.tenant:
             tenant = result.tenant
-            console.print(f"[green]✓ Valid {tenant.tier.upper()} license (Local Test Mode)[/green]\n")
+            console.print(
+                f"[green]✓ Valid {tenant.tier.upper()} license (Local Test Mode)[/green]\n"
+            )
 
             table = Table(title="License Details", show_header=True)
             table.add_column("Property", style="cyan")
@@ -137,7 +152,9 @@ def _validate_local(key: str, verbose: bool, gateway_mode: bool = False) -> None
         )
 
         if gateway_mode:
-            panel_content += "\n\n[yellow]⚠ Gateway validation unavailable - using local fallback[/yellow]"
+            panel_content += (
+                "\n\n[yellow]⚠ Gateway validation unavailable - using local fallback[/yellow]"
+            )
 
         console.print(
             Panel(
@@ -225,16 +242,18 @@ def _validate_with_gateway(key: str, verbose: bool) -> None:
 
 def _show_dashboard_link(tenant_id: str, tier: str) -> None:
     """Phase 6.4: Show dashboard handoff link."""
-    dashboard_url = f"https://agencyos.network/dashboard/{tenant_id}/license"
+    dashboard_url = f"https://www.mekongmind.com/dashboard/{tenant_id}/license"
 
     console.print()
-    console.print(Panel(
-        f"[bold]Manage your license:[/bold]\n"
-        f"[cyan]{dashboard_url}[/cyan]\n\n"
-        f"[dim]Tier: {tier.upper()} | Tenant: {tenant_id}[/dim]",
-        title="🌐 AgencyOS Dashboard",
-        border_style="blue",
-    ))
+    console.print(
+        Panel(
+            f"[bold]Manage your license:[/bold]\n"
+            f"[cyan]{dashboard_url}[/cyan]\n\n"
+            f"[dim]Tier: {tier.upper()} | Tenant: {tenant_id}[/dim]",
+            title="🌐 AgencyOS Dashboard",
+            border_style="blue",
+        )
+    )
 
 
 @app.command()
@@ -308,7 +327,10 @@ def status(
     table.add_row("Status", "✅ Valid" if is_valid else "❌ Invalid")
     table.add_row("Tier", tier)
     table.add_row("Key ID", key_id)
-    table.add_row("Daily Limit", str(limits["commands_per_day"]) if limits["commands_per_day"] >= 0 else "Unlimited")
+    table.add_row(
+        "Daily Limit",
+        str(limits["commands_per_day"]) if limits["commands_per_day"] >= 0 else "Unlimited",
+    )
     table.add_row("Commands Today", str(usage.get("commands_today", 0)))
     table.add_row("Total Commands", str(usage.get("total_commands", 0)))
     table.add_row("Remaining", str(usage.get("remaining", "N/A")))
@@ -378,16 +400,18 @@ def usage(
             if "error" in usage:
                 console.print(f"[bold yellow]⚠️  {usage['error']}[/bold yellow]")
             else:
-                console.print(Panel(
-                    f"[bold]Key ID:[/bold] {usage.get('key_id', 'N/A')}\n"
-                    f"[bold]Tier:[/bold] {usage.get('tier', 'N/A')}\n"
-                    f"[bold]Commands Today:[/bold] {usage.get('commands_today', 0)}\n"
-                    f"[bold]Daily Limit:[/bold] {usage.get('daily_limit', 'N/A')}\n"
-                    f"[bold]Remaining:[/bold] {usage.get('remaining', 'N/A')}\n"
-                    f"[bold]Total Commands:[/bold] {usage.get('total_commands', 0)}",
-                    title="📊 Usage Statistics",
-                    border_style="blue",
-                ))
+                console.print(
+                    Panel(
+                        f"[bold]Key ID:[/bold] {usage.get('key_id', 'N/A')}\n"
+                        f"[bold]Tier:[/bold] {usage.get('tier', 'N/A')}\n"
+                        f"[bold]Commands Today:[/bold] {usage.get('commands_today', 0)}\n"
+                        f"[bold]Daily Limit:[/bold] {usage.get('daily_limit', 'N/A')}\n"
+                        f"[bold]Remaining:[/bold] {usage.get('remaining', 'N/A')}\n"
+                        f"[bold]Total Commands:[/bold] {usage.get('total_commands', 0)}",
+                        title="📊 Usage Statistics",
+                        border_style="blue",
+                    )
+                )
         except Exception as e:
             console.print(f"[bold red]Error:[/bold red] {e}")
             raise typer.Exit(code=1)
@@ -431,16 +455,21 @@ def report(
         console.print("[dim]Fetching usage report from RaaS Gateway...[/dim]\n")
 
         # Get usage from gateway
-        response = gateway_client.get("/v1/usage", params={
-            "limit": days * 24,  # Hourly buckets
-            "offset": 0,
-        })
+        response = gateway_client.get(
+            "/v1/usage",
+            params={
+                "limit": days * 24,  # Hourly buckets
+                "offset": 0,
+            },
+        )
 
         if response.status_code == 200:
             data = response.data
             _display_gateway_usage_report(data, days)
         else:
-            console.print(f"[yellow]⚠ Gateway returned {response.status_code} - showing local data[/yellow]")
+            console.print(
+                f"[yellow]⚠ Gateway returned {response.status_code} - showing local data[/yellow]"
+            )
             _show_local_usage_report(license_key, days)
 
     except Exception as e:
@@ -473,7 +502,9 @@ def _display_gateway_usage_report(data: dict, days: int) -> None:
         endpoint_counts: dict = {}
         for metric in metrics:
             endpoint = metric.get("endpoint", "unknown")
-            endpoint_counts[endpoint] = endpoint_counts.get(endpoint, 0) + metric.get("request_count", 0)
+            endpoint_counts[endpoint] = endpoint_counts.get(endpoint, 0) + metric.get(
+                "request_count", 0
+            )
 
         if endpoint_counts:
             console.print("\n[bold]Endpoint Breakdown:[/bold]")
@@ -481,7 +512,9 @@ def _display_gateway_usage_report(data: dict, days: int) -> None:
             endpoint_table.add_column("Endpoint", style="cyan")
             endpoint_table.add_column("Requests", style="green")
 
-            for endpoint, count in sorted(endpoint_counts.items(), key=lambda x: x[1], reverse=True)[:10]:
+            for endpoint, count in sorted(
+                endpoint_counts.items(), key=lambda x: x[1], reverse=True
+            )[:10]:
                 endpoint_table.add_row(endpoint, f"{count:,}")
 
             console.print(endpoint_table)
@@ -492,7 +525,9 @@ def _display_gateway_usage_report(data: dict, days: int) -> None:
 
     # Pagination info
     if pagination.get("has_more"):
-        console.print(f"\n[dim]Showing {pagination.get('limit', 0)} of {pagination.get('total', 0)} records[/dim]")
+        console.print(
+            f"\n[dim]Showing {pagination.get('limit', 0)} of {pagination.get('total', 0)} records[/dim]"
+        )
 
 
 def _show_local_usage_report(key: str, days: int) -> None:
@@ -517,8 +552,8 @@ def _show_local_usage_report(key: str, days: int) -> None:
         table.add_row("Tier", tier)
         table.add_row("Commands Today", f"{usage.get('commands_today', 0):,}")
         table.add_row("Total Commands", f"{usage.get('total_commands', 0):,}")
-        table.add_row("Daily Limit", str(usage.get('daily_limit', 'N/A')))
-        table.add_row("Remaining", str(usage.get('remaining', 'N/A')))
+        table.add_row("Daily Limit", str(usage.get("daily_limit", "N/A")))
+        table.add_row("Remaining", str(usage.get("remaining", "N/A")))
 
         console.print(table)
 
@@ -549,7 +584,9 @@ def _show_mock_usage_report(key: str, days: int) -> None:
 
     console.print(table)
 
-    console.print("\n[yellow]⚠ This is mock data. Set RAAS_LOCAL_TEST=false for real data.[/yellow]")
+    console.print(
+        "\n[yellow]⚠ This is mock data. Set RAAS_LOCAL_TEST=false for real data.[/yellow]"
+    )
 
 
 @app.command("features")

@@ -111,7 +111,9 @@ class EntitlementEnforcer:
                 message = "Usage cap reached (100%). Commands blocked."
             elif usage_percent >= self.WARNING_THRESHOLD:
                 status = EntitlementStatus.WARNING
-                message = f"Warning: {usage_percent * 100:.0f}% usage. {remaining} commands remaining."
+                message = (
+                    f"Warning: {usage_percent * 100:.0f}% usage. {remaining} commands remaining."
+                )
             else:
                 status = EntitlementStatus.ALLOWED
                 message = f"{remaining} commands remaining today."
@@ -122,9 +124,7 @@ class EntitlementEnforcer:
                 remaining=remaining,
                 limit=daily_limit,
                 usage_percent=usage_percent,
-                reset_at=datetime.now(timezone.utc).replace(
-                    hour=23, minute=59, second=59
-                ),
+                reset_at=datetime.now(timezone.utc).replace(hour=23, minute=59, second=59),
             )
 
             self._last_check = result
@@ -184,9 +184,7 @@ class EntitlementEnforcer:
                 message=f"{state.remaining} commands remaining",
                 remaining=state.remaining,
                 limit=state.limit,
-                usage_percent=1.0 - (state.remaining / state.limit)
-                if state.limit > 0
-                else 0.0,
+                usage_percent=1.0 - (state.remaining / state.limit) if state.limit > 0 else 0.0,
                 reset_at=state.reset_at,
             )
 

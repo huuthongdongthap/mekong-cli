@@ -131,7 +131,9 @@ class RecipeParser:
         # Get description (content between title and first step)
         # We use [^\n]+ for title to avoid matching newlines even if DOTALL was used (though we control flags)
         desc_match = re.search(
-            r"^#\s+[^\n]+\n+(.*?)(?=^##|\Z)", clean_content, re.MULTILINE | re.DOTALL,
+            r"^#\s+[^\n]+\n+(.*?)(?=^##|\Z)",
+            clean_content,
+            re.MULTILINE | re.DOTALL,
         )
         description = desc_match.group(1).strip() if desc_match else ""
 

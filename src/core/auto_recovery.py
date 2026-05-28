@@ -58,6 +58,7 @@ class RecoveryAttempt:
         duration_ms: Duration of the recovery attempt in milliseconds
         metadata: Additional recovery metadata
     """
+
     recovery_id: str
     recovery_type: RecoveryType
     timestamp: float
@@ -109,6 +110,7 @@ class RecoveryConfig:
         max_delay_seconds: Maximum delay cap (default: 10s)
         backoff_multiplier: Exponential backoff multiplier (default: 2x)
     """
+
     max_attempts: int = 3
     base_delay_seconds: float = 1.0
     max_delay_seconds: float = 10.0
@@ -191,7 +193,9 @@ class AutoRecovery:
             storage_path: Path to persist recovery history
         """
         self._config = config or RecoveryConfig()
-        self._storage_path = Path(storage_path) if storage_path else Path(".mekong/recovery_history.json")
+        self._storage_path = (
+            Path(storage_path) if storage_path else Path(".mekong/recovery_history.json")
+        )
         self._event_bus = get_event_bus()
 
         # Recovery registry: recovery_id -> list of attempts
@@ -389,7 +393,8 @@ class AutoRecovery:
 
         self._emit_recovery_event(
             "recovery:failed",
-            last_attempt or self._create_attempt(
+            last_attempt
+            or self._create_attempt(
                 recovery_id=recovery_id,
                 recovery_type=recovery_type,
                 status=RecoveryStatus.EXHAUSTED,
@@ -672,7 +677,9 @@ class AutoRecovery:
 
         # Calculate statistics
         successful = sum(1 for a in all_attempts if a.status == RecoveryStatus.SUCCESS)
-        failed = sum(1 for a in all_attempts if a.status in [RecoveryStatus.FAILED, RecoveryStatus.EXHAUSTED])
+        failed = sum(
+            1 for a in all_attempts if a.status in [RecoveryStatus.FAILED, RecoveryStatus.EXHAUSTED]
+        )
 
         # Group by type
         by_type: Dict[str, Dict[str, Any]] = {}

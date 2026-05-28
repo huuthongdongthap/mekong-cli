@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExecutionResult:
     """Result of executing a prediction signal."""
+
     signal: Signal
     order_id: Optional[str] = None
     status: str = "skipped"

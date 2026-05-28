@@ -15,9 +15,7 @@ class TestUsageMeterQuotaValidation:
     async def test_record_usage_with_valid_quota(self) -> None:
         """Test that usage within quota is accepted."""
         with patch("src.lib.usage_meter.get_repository") as mock_repo:
-            mock_repo.return_value.get_usage = AsyncMock(
-                return_value={"commands_count": 5}
-            )
+            mock_repo.return_value.get_usage = AsyncMock(return_value={"commands_count": 5})
             mock_repo.return_value.record_usage = AsyncMock()
 
             meter = UsageMeter()
@@ -55,9 +53,7 @@ class TestUsageMeterQuotaValidation:
     async def test_record_usage_multiple_commands(self) -> None:
         """Test recording multiple commands at once."""
         with patch("src.lib.usage_meter.get_repository") as mock_repo:
-            mock_repo.return_value.get_usage = AsyncMock(
-                return_value={"commands_count": 10}
-            )
+            mock_repo.return_value.get_usage = AsyncMock(return_value={"commands_count": 10})
             mock_repo.return_value.record_usage = AsyncMock()
 
             meter = UsageMeter()
@@ -78,9 +74,7 @@ class TestUsageMeterQuotaValidation:
             mock_repo.return_value.get_license_by_key_id = AsyncMock(
                 return_value={"tier": "pro", "key_id": "test-key"}
             )
-            mock_repo.return_value.get_usage = AsyncMock(
-                return_value={"commands_count": 50}
-            )
+            mock_repo.return_value.get_usage = AsyncMock(return_value={"commands_count": 50})
             mock_repo.return_value.get_usage_summary = AsyncMock(
                 return_value={"commands_count": 50, "limit": 1000}
             )

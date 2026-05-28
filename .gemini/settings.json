@@ -3,6 +3,17 @@
     "previewFeatures": true
   },
   "agentSettings": {
-    "workingDirectories": ["/Users/mac/mekong-cli/src", "/Users/mac/mekong-cli/apps"]
+    "workingDirectories": [
+      "/Users/mac/mekong-cli/src",
+      "/Users/mac/mekong-cli/apps",
+      "/Users/mac/mekong-cli/packages",
+      "/Users/mac/mekong-cli/mekong",
+      "/Users/mac/mekong-cli/scripts",
+      "/Users/mac/mekong-cli/.claude/commands",
+      "/Users/mac/mekong-cli/.agent",
+      "/Users/mac/mekong-cli/.agents",
+      "/Users/mac/mekong-cli/tools",
+      "/Users/mac/mekong-cli/config"
+    ]
   }
 }

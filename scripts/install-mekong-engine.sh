@@ -3,9 +3,10 @@
 # User runs: curl -fsSL https://mekongmind.com/install.sh | bash
 set -e
 
-echo "╔════════════════════════════════════════╗"
-echo "║  Mekong Engine — Installing...         ║"
-echo "╚════════════════════════════════════════╝"
+echo "╔════════════════════════════════════════════╗"
+echo "║  Mekong Engine — Your One-Person Company ║"
+echo "║  22 departments. Zero cloud cost.        ║"
+echo "╚════════════════════════════════════════════╝"
 
 MEKONG_HOME="$HOME/.mekong"
 MEKONG_PORT=18900
@@ -19,11 +20,26 @@ else
   echo "[1/4] Local inference engine: already installed"
 fi
 
-# Step 2: Pull default model
-echo "[2/4] Downloading default model (qwen2.5-coder:7b)..."
+# Step 2: Pull model based on hardware
 ollama serve &>/dev/null &
 sleep 5
-ollama pull qwen2.5-coder:7b 2>/dev/null || true
+CHIP=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "unknown")
+RAM_GB=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 ))
+if echo "$CHIP" | grep -qi "Ultra"; then
+  MODEL="qwen2.5-coder:32b"
+  echo "[2/4] M1 Ultra detected (${RAM_GB}GB RAM) — downloading premium model ($MODEL)..."
+elif [ "$RAM_GB" -ge 32 ]; then
+  MODEL="qwen2.5-coder:14b"
+  echo "[2/4] ${RAM_GB}GB RAM detected — downloading optimized model ($MODEL)..."
+else
+  MODEL="qwen2.5-coder:7b"
+  echo "[2/4] Downloading default model ($MODEL)..."
+fi
+if ollama pull "$MODEL" 2>/dev/null; then
+  echo "  ✅ Model downloaded: $MODEL"
+else
+  echo "  ⚠️  Model download failed (will retry on first use)"
+fi
 
 # Step 3: Install OpenCode (rebranded as mekong engine)
 if ! command -v opencode &>/dev/null; then
@@ -31,7 +47,15 @@ if ! command -v opencode &>/dev/null; then
   if command -v brew &>/dev/null; then
     brew install anomalyco/tap/opencode 2>/dev/null || npm install -g opencode 2>/dev/null
   else
-    npm install -g opencode 2>/dev/null || echo "Please install Node.js first: https://nodejs.org"
+    if command -v npm &>/dev/null; then
+      npm install -g opencode 2>/dev/null
+    elif command -v apt-get &>/dev/null; then
+      echo "    Installing Node.js..."
+      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs
+      npm install -g opencode 2>/dev/null
+    else
+      echo "    Please install Node.js first: https://nodejs.org"
+    fi
   fi
 else
   echo "[3/4] Mekong Engine: already installed"
@@ -48,7 +72,7 @@ cat > "$MEKONG_HOME/config.json" << EOF
 {
   "port": $MEKONG_PORT,
   "ollama_url": "http://localhost:11434",
-  "model": "qwen2.5-coder:7b",
+  "model": "$MODEL",
   "commands_dir": "$HOME/.config/opencode/commands"
 }
 EOF
@@ -105,15 +129,16 @@ LAUNCH
 chmod +x "$MEKONG_HOME/start.sh"
 
 echo ""
-echo "╔════════════════════════════════════════╗"
-echo "║  ✅ Mekong Engine installed!           ║"
-echo "║                                        ║"
-echo "║  Start:  ~/.mekong/start.sh            ║"
-echo "║  IDE:    https://www.mekongmind.com/ide║"
-echo "║                                        ║"
-echo "║  Everything runs on YOUR machine.      ║"
-echo "║  Zero cloud cost. Your data stays local║"
-echo "╚════════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════════╗"
+echo "║  ✅ Mekong Engine installed!                ║"
+echo "║                                             ║"
+echo "║  Start:  ~/.mekong/start.sh                 ║"
+echo "║  IDE:    https://www.mekongmind.com/ide     ║"
+echo "║                                             ║"
+echo "║  You are now a one-person company.          ║"
+echo "║  22 departments running on YOUR machine.    ║"
+echo "║  Zero cloud cost. Your data stays local.    ║"
+echo "╚══════════════════════════════════════════════╝"
 
 # Auto-start
 bash "$MEKONG_HOME/start.sh" &

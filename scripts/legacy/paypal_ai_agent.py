@@ -74,20 +74,14 @@ class PayPalAIAgent:
 
     def _get_access_token(self) -> Optional[str]:
         """Get OAuth access token with caching."""
-        if (
-            self._access_token
-            and self._token_expiry
-            and datetime.now() < self._token_expiry
-        ):
+        if self._access_token and self._token_expiry and datetime.now() < self._token_expiry:
             return self._access_token
 
         if not self.client_id or not self.client_secret:
             print("❌ PayPal credentials not configured")
             return None
 
-        auth = base64.b64encode(
-            f"{self.client_id}:{self.client_secret}".encode()
-        ).decode()
+        auth = base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
 
         response = requests.post(
             f"{self.base_url}/v1/oauth2/token",
@@ -104,9 +98,7 @@ class PayPalAIAgent:
 
         data = response.json()
         self._access_token = data["access_token"]
-        self._token_expiry = datetime.now() + timedelta(
-            seconds=data.get("expires_in", 3600) - 60
-        )
+        self._token_expiry = datetime.now() + timedelta(seconds=data.get("expires_in", 3600) - 60)
 
         return self._access_token
 
@@ -166,9 +158,7 @@ class PayPalAIAgent:
 
     def catalog_list_products(self, page: int = 1, page_size: int = 10):
         """List all products."""
-        result = self._api(
-            "GET", f"/v1/catalogs/products?page={page}&page_size={page_size}"
-        )
+        result = self._api("GET", f"/v1/catalogs/products?page={page}&page_size={page_size}")
 
         print("\n📦 PRODUCTS CATALOG")
         print("=" * 60)
@@ -221,9 +211,7 @@ class PayPalAIAgent:
 
     # ========== INVOICES ==========
 
-    def invoice_create(
-        self, recipient_email: str, amount: float, description: str = "Services"
-    ):
+    def invoice_create(self, recipient_email: str, amount: float, description: str = "Services"):
         """Create a draft invoice."""
         data = {
             "detail": {
@@ -233,13 +221,9 @@ class PayPalAIAgent:
                 "payment_term": {"term_type": "DUE_ON_RECEIPT"},
             },
             "invoicer": {
-                "email_address": os.environ.get(
-                    "PAYPAL_MERCHANT_EMAIL", "merchant@example.com"
-                ),
+                "email_address": os.environ.get("PAYPAL_MERCHANT_EMAIL", "merchant@example.com"),
             },
-            "primary_recipients": [
-                {"billing_info": {"email_address": recipient_email}}
-            ],
+            "primary_recipients": [{"billing_info": {"email_address": recipient_email}}],
             "items": [
                 {
                     "name": description,
@@ -276,9 +260,7 @@ class PayPalAIAgent:
                 status = inv.get("status", "DRAFT")
                 amount = inv.get("amount", {}).get("value", "0.00")
                 emoji = "✅" if status == "PAID" else "📤" if status == "SENT" else "📝"
-                print(
-                    f"  {emoji} {inv.get('id', 'N/A')[:25]:<25} ${amount:<10} {status}"
-                )
+                print(f"  {emoji} {inv.get('id', 'N/A')[:25]:<25} ${amount:<10} {status}")
 
         print("=" * 60 + "\n")
         return result
@@ -304,15 +286,11 @@ class PayPalAIAgent:
 
     def invoice_qr(self, invoice_id: str):
         """Generate QR code for invoice."""
-        return self._api(
-            "POST", f"/v2/invoicing/invoices/{invoice_id}/generate-qr-code", {}
-        )
+        return self._api("POST", f"/v2/invoicing/invoices/{invoice_id}/generate-qr-code", {})
 
     # ========== PAYMENTS ==========
 
-    def payment_create_order(
-        self, item_name: str, amount: float, currency: str = "USD"
-    ):
+    def payment_create_order(self, item_name: str, amount: float, currency: str = "USD"):
         """Create a payment order."""
         data = {
             "intent": "CAPTURE",
@@ -330,11 +308,7 @@ class PayPalAIAgent:
         result = self._api("POST", "/v2/checkout/orders", data)
         if result:
             approval_url = next(
-                (
-                    link["href"]
-                    for link in result.get("links", [])
-                    if link["rel"] == "approve"
-                ),
+                (link["href"] for link in result.get("links", []) if link["rel"] == "approve"),
                 None,
             )
             print("\n✅ Order Created!")
@@ -361,9 +335,7 @@ class PayPalAIAgent:
         """Capture/pay an approved order."""
         return self._api("POST", f"/v2/checkout/orders/{order_id}/capture", {})
 
-    def payment_refund(
-        self, capture_id: str, amount: float = None, currency: str = "USD"
-    ):
+    def payment_refund(self, capture_id: str, amount: float = None, currency: str = "USD"):
         """Create a refund."""
         data = {}
         if amount:
@@ -491,9 +463,7 @@ class PayPalAIAgent:
             for plan in result.get("plans", []):
                 status = plan.get("status", "INACTIVE")
                 emoji = "✅" if status == "ACTIVE" else "⏸️"
-                print(
-                    f"  {emoji} {plan.get('id', 'N/A')[:25]:<25} {plan.get('name', 'N/A')}"
-                )
+                print(f"  {emoji} {plan.get('id', 'N/A')[:25]:<25} {plan.get('name', 'N/A')}")
 
         print("=" * 60 + "\n")
         return result
@@ -507,9 +477,9 @@ class PayPalAIAgent:
             "subscriber": {
                 "name": {
                     "given_name": subscriber_name.split()[0],
-                    "surname": subscriber_name.split()[-1]
-                    if len(subscriber_name.split()) > 1
-                    else "",
+                    "surname": (
+                        subscriber_name.split()[-1] if len(subscriber_name.split()) > 1 else ""
+                    ),
                 },
                 "email_address": subscriber_email,
             },
@@ -532,9 +502,7 @@ class PayPalAIAgent:
         """Get subscription details."""
         return self._api("GET", f"/v1/billing/subscriptions/{subscription_id}")
 
-    def subscription_cancel(
-        self, subscription_id: str, reason: str = "Customer requested"
-    ):
+    def subscription_cancel(self, subscription_id: str, reason: str = "Customer requested"):
         """Cancel subscription."""
         result = self._api(
             "POST",
@@ -681,9 +649,7 @@ class PayPalAIAgent:
             base_url: Your server URL (e.g., https://api.example.com)
         """
         if not base_url:
-            base_url = os.environ.get("PAYPAL_WEBHOOK_URL") or os.environ.get(
-                "API_BASE_URL"
-            )
+            base_url = os.environ.get("PAYPAL_WEBHOOK_URL") or os.environ.get("API_BASE_URL")
 
         if not base_url:
             print("\n❌ No base URL provided!")
@@ -758,9 +724,7 @@ class PayPalAIAgent:
         print("  catalog   list | create <name> <type>")
         print("  dispute   list | get <id> | accept <id>")
         print("  invoice   list | create <email> <amount> | send <id>")
-        print(
-            "  payment   create-order <name> <amount> | get <id> | refund <capture_id>"
-        )
+        print("  payment   create-order <name> <amount> | get <id> | refund <capture_id>")
         print("  report    transactions [--days=N]")
         print("  shipment  create <order_id> <tracking> <carrier>")
         print("  subscription  plans | create-plan <product_id> <name> <price>")
@@ -789,9 +753,7 @@ def main():
         if action == "list":
             agent.catalog_list_products()
         elif action == "create" and len(args) >= 1:
-            agent.catalog_create_product(
-                args[0], args[1] if len(args) > 1 else "SERVICE"
-            )
+            agent.catalog_create_product(args[0], args[1] if len(args) > 1 else "SERVICE")
         else:
             print("Usage: catalog list | create <name> [type]")
 
@@ -811,9 +773,7 @@ def main():
         if action == "list":
             agent.invoice_list()
         elif action == "create" and len(args) >= 2:
-            agent.invoice_create(
-                args[0], float(args[1]), " ".join(args[2:]) or "Services"
-            )
+            agent.invoice_create(args[0], float(args[1]), " ".join(args[2:]) or "Services")
         elif action == "send" and args:
             agent.invoice_send(args[0])
         elif action == "get" and args:
@@ -865,9 +825,7 @@ def main():
         elif action == "create-plan" and len(args) >= 3:
             agent.subscription_create_plan(args[0], args[1], float(args[2]))
         elif action == "create" and len(args) >= 2:
-            agent.subscription_create(
-                args[0], args[1], args[2] if len(args) > 2 else "Customer"
-            )
+            agent.subscription_create(args[0], args[1], args[2] if len(args) > 2 else "Customer")
         elif action == "get" and args:
             agent.subscription_get(args[0])
         elif action == "cancel" and args:
@@ -893,9 +851,7 @@ def main():
             event = args[0] if args else "PAYMENT.CAPTURE.COMPLETED"
             agent.webhook_simulate(event)
         else:
-            print(
-                "Usage: webhook list | setup <https://url> | delete <id> | simulate [event_type]"
-            )
+            print("Usage: webhook list | setup <https://url> | delete <id> | simulate [event_type]")
 
     else:
         print(f"Unknown category: {category}")

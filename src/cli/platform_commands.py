@@ -37,12 +37,16 @@ def platform_up(
     if only:
         result = subprocess.run(
             ["pm2", "start", str(ECOSYSTEM), "--only", only],
-            env=env, capture_output=True, text=True,
+            env=env,
+            capture_output=True,
+            text=True,
         )
     else:
         result = subprocess.run(
             ["pm2", "start", str(ECOSYSTEM)],
-            env=env, capture_output=True, text=True,
+            env=env,
+            capture_output=True,
+            text=True,
         )
 
     if result.returncode == 0:
@@ -99,7 +103,14 @@ def platform_ps() -> None:
         restarts = p.get("pm2_env", {}).get("restart_time", 0)
 
         status_style = "green" if status == "online" else "red" if status == "errored" else "yellow"
-        table.add_row(name, f"[{status_style}]{status}[/{status_style}]", cpu, mem, str(uptime_ms), str(restarts))
+        table.add_row(
+            name,
+            f"[{status_style}]{status}[/{status_style}]",
+            cpu,
+            mem,
+            str(uptime_ms),
+            str(restarts),
+        )
 
     console.print(table)
 

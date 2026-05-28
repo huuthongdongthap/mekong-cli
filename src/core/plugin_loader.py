@@ -56,9 +56,7 @@ def _validate_local_plugin(fpath: Path) -> tuple[bool, str]:
         return False, f"Cannot stat plugin file: {exc}"
 
     if size > _MAX_PLUGIN_FILE_BYTES:
-        return False, (
-            f"Plugin file too large: {size} bytes (limit {_MAX_PLUGIN_FILE_BYTES})"
-        )
+        return False, (f"Plugin file too large: {size} bytes (limit {_MAX_PLUGIN_FILE_BYTES})")
 
     return True, ""
 
@@ -104,11 +102,13 @@ class PluginLoader:
                         self._agent_registry.register(ep.name, cls)
                     elif plugin_type == "provider":
                         self._providers.append(cls)
-                    self._loaded.append({
-                        "name": ep.name,
-                        "source": "entrypoint",
-                        "type": plugin_type,
-                    })
+                    self._loaded.append(
+                        {
+                            "name": ep.name,
+                            "source": "entrypoint",
+                            "type": plugin_type,
+                        }
+                    )
                     logger.info("Loaded %s plugin: %s", plugin_type, ep.name)
                 except Exception as e:
                     logger.warning("Failed to load %s plugin '%s': %s", plugin_type, ep.name, e)
@@ -132,7 +132,9 @@ class PluginLoader:
             is_valid, reason = _validate_local_plugin(fpath)
             if not is_valid:
                 logger.warning(
-                    "Skipping plugin '%s' — validation failed: %s", fpath.name, reason,
+                    "Skipping plugin '%s' — validation failed: %s",
+                    fpath.name,
+                    reason,
                 )
                 continue
 
@@ -145,11 +147,13 @@ class PluginLoader:
 
                 if hasattr(mod, "register") and self._agent_registry is not None:
                     mod.register(self._agent_registry)
-                    self._loaded.append({
-                        "name": fpath.stem,
-                        "source": "local",
-                        "type": "agent",
-                    })
+                    self._loaded.append(
+                        {
+                            "name": fpath.stem,
+                            "source": "local",
+                            "type": "agent",
+                        }
+                    )
                     logger.info("Loaded local plugin: %s", fpath.stem)
                 else:
                     logger.debug("Plugin %s has no register() function, skipped", fpath.stem)

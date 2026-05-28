@@ -24,6 +24,7 @@ class TestSmartRouter(unittest.TestCase):
 
     def tearDown(self):
         import shutil
+
         shutil.rmtree(self._tmpdir, ignore_errors=True)
         _eb._default_bus = None
 
@@ -93,6 +94,7 @@ class TestSwarmDispatcher(unittest.TestCase):
 
     def setUp(self):
         from src.core.swarm import SwarmRegistry, SwarmDispatcher
+
         # Use temp config so no disk persistence
         self._tmpdir = tempfile.mkdtemp()
         config_path = str(Path(self._tmpdir) / "swarm.yaml")
@@ -101,14 +103,17 @@ class TestSwarmDispatcher(unittest.TestCase):
 
     def tearDown(self):
         import shutil
+
         shutil.rmtree(self._tmpdir, ignore_errors=True)
 
     # --- Route step type ---
 
     def _make_step(self, description="echo hello", step_type=None):
         """Helper: create minimal step-like object."""
+
         class FakeStep:
             pass
+
         step = FakeStep()
         step.description = description
         step.params = {"type": step_type} if step_type else {}
@@ -161,6 +166,7 @@ class TestSwarmDispatcher(unittest.TestCase):
     def test_dispatch_fallback_local_no_nodes(self):
         """No remote nodes -> dispatch_local returns ExecutionResult."""
         from src.core.verifier import ExecutionResult
+
         step = self._make_step(description="echo test")
         result = self.dispatcher.dispatch(step)
         self.assertIsInstance(result, ExecutionResult)
@@ -176,6 +182,7 @@ class TestSwarmDispatcher(unittest.TestCase):
     def test_orchestrator_use_swarm_false_no_dispatcher(self):
         """use_swarm=False -> dispatcher is None."""
         from src.core.orchestrator import RecipeOrchestrator
+
         orch = RecipeOrchestrator(use_swarm=False)
         self.assertIsNone(orch.dispatcher)
 
@@ -183,6 +190,7 @@ class TestSwarmDispatcher(unittest.TestCase):
         """use_swarm=True -> dispatcher is SwarmDispatcher."""
         from src.core.orchestrator import RecipeOrchestrator
         from src.core.swarm import SwarmDispatcher
+
         orch = RecipeOrchestrator(use_swarm=True)
         self.assertIsInstance(orch.dispatcher, SwarmDispatcher)
 

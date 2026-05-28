@@ -74,6 +74,7 @@ class MCUGate:
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL")
+        self._conn.execute("PRAGMA busy_timeout=5000")
         self._conn.executescript(SCHEMA_SQL)
 
     def close(self) -> None:
@@ -115,9 +116,7 @@ class MCUGate:
             "available": row["balance"] - row["locked"],
         }
 
-    def check_and_lock(
-        self, tenant_id: str, mission_id: str, mcu_amount: int
-    ) -> MCULockResult:
+    def check_and_lock(self, tenant_id: str, mission_id: str, mcu_amount: int) -> MCULockResult:
         """Atomically check balance and lock MCU credits.
 
         Uses BEGIN IMMEDIATE to prevent race conditions.
@@ -139,7 +138,7 @@ class MCUGate:
                     error="tenant_not_found",
                     available=0,
                     required=mcu_amount,
-                    recharge_url=f"https://agencyos.network/billing?tenant={tenant_id}",
+                    recharge_url=f"https://www.mekongmind.com/billing?tenant={tenant_id}",
                 )
 
             available = row["balance"] - row["locked"]
@@ -151,7 +150,7 @@ class MCUGate:
                     error="insufficient_mcu",
                     available=available,
                     required=mcu_amount,
-                    recharge_url=f"https://agencyos.network/billing?tenant={tenant_id}",
+                    recharge_url=f"https://www.mekongmind.com/billing?tenant={tenant_id}",
                 )
 
             # Lock MCU
@@ -166,9 +165,7 @@ class MCUGate:
             )
             self._conn.execute("COMMIT")
 
-            return MCULockResult(
-                success=True, lock_id=lock_id, locked_amount=mcu_amount
-            )
+            return MCULockResult(success=True, lock_id=lock_id, locked_amount=mcu_amount)
 
         except sqlite3.Error as e:
             try:

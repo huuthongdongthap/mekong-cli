@@ -17,10 +17,10 @@ from src.core.task_queue import (
     TaskPriority,
 )
 
-
 # ---------------------------------------------------------------------------
 # Basic Queue Operations
 # ---------------------------------------------------------------------------
+
 
 class TestBasicOperations:
     def test_empty_queue(self):
@@ -69,6 +69,7 @@ class TestBasicOperations:
 # Priority Ordering
 # ---------------------------------------------------------------------------
 
+
 class TestPriorityOrdering:
     def test_critical_before_normal(self):
         q = PriorityTaskQueue()
@@ -99,6 +100,7 @@ class TestPriorityOrdering:
 # Backpressure
 # ---------------------------------------------------------------------------
 
+
 class TestBackpressure:
     def test_max_size_enforced(self):
         q = PriorityTaskQueue(max_size=2)
@@ -120,6 +122,7 @@ class TestBackpressure:
 # ---------------------------------------------------------------------------
 # Task Completion & Failure
 # ---------------------------------------------------------------------------
+
 
 class TestCompletionAndFailure:
     def test_mark_completed(self):
@@ -157,6 +160,7 @@ class TestCompletionAndFailure:
 # ---------------------------------------------------------------------------
 # Dead Letter Queue
 # ---------------------------------------------------------------------------
+
 
 class TestDeadLetterQueue:
     def test_get_dlq_empty(self):
@@ -201,6 +205,7 @@ class TestDeadLetterQueue:
 # Statistics
 # ---------------------------------------------------------------------------
 
+
 class TestStatistics:
     def test_initial_stats(self):
         q = PriorityTaskQueue()
@@ -229,6 +234,7 @@ class TestStatistics:
 # Clear
 # ---------------------------------------------------------------------------
 
+
 class TestClear:
     def test_clear_removes_all(self):
         q = PriorityTaskQueue()
@@ -246,6 +252,7 @@ class TestClear:
 # ---------------------------------------------------------------------------
 # QueuedTask Dataclass
 # ---------------------------------------------------------------------------
+
 
 class TestQueuedTask:
     def test_default_values(self):

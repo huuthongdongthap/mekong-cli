@@ -148,7 +148,9 @@ class BillingReconciliationService:
             config: Optional ReconciliationConfig instance
         """
         self.config = config or ReconciliationConfig()
-        self.api_key = self.config.api_key or os.getenv("MEKONG_API_KEY") or os.getenv("RAAS_LICENSE_KEY")
+        self.api_key = (
+            self.config.api_key or os.getenv("MEKONG_API_KEY") or os.getenv("RAAS_LICENSE_KEY")
+        )
         self._sync_service: Optional[BillingSyncService] = None
         self._logger = get_logger(__name__)
         self._event_emitter = get_emitter()
@@ -203,7 +205,9 @@ class BillingReconciliationService:
             "period_end": period_end.isoformat(),
         }
 
-    def fetch_remote_summary(self, license_key: str, period_start: datetime, period_end: datetime) -> Tuple[bool, Optional[Dict], Optional[str]]:
+    def fetch_remote_summary(
+        self, license_key: str, period_start: datetime, period_end: datetime
+    ) -> Tuple[bool, Optional[Dict], Optional[str]]:
         """
         Fetch remote usage summary from RaaS Gateway.
 
@@ -256,7 +260,9 @@ class BillingReconciliationService:
         except Exception as e:
             return False, None, f"Unexpected error: {str(e)}"
 
-    def compare_records(self, local_summary: Dict, remote_summary: Optional[Dict]) -> ReconciliationRecord:
+    def compare_records(
+        self, local_summary: Dict, remote_summary: Optional[Dict]
+    ) -> ReconciliationRecord:
         """
         Compare local and remote summaries.
 
@@ -308,19 +314,23 @@ class BillingReconciliationService:
         else:
             status = ReconciliationStatus.VARIANCE
             if variance > 0:
-                discrepancies.append({
-                    "type": "over_billing",
-                    "description": f"Remote (${remote_amount}) exceeds local (${local_amount})",
-                    "variance": str(variance),
-                    "variance_percent": variance_percent,
-                })
+                discrepancies.append(
+                    {
+                        "type": "over_billing",
+                        "description": f"Remote (${remote_amount}) exceeds local (${local_amount})",
+                        "variance": str(variance),
+                        "variance_percent": variance_percent,
+                    }
+                )
             else:
-                discrepancies.append({
-                    "type": "under_billing",
-                    "description": f"Local (${local_amount}) exceeds remote (${remote_amount})",
-                    "variance": str(variance),
-                    "variance_percent": variance_percent,
-                })
+                discrepancies.append(
+                    {
+                        "type": "under_billing",
+                        "description": f"Local (${local_amount}) exceeds remote (${remote_amount})",
+                        "variance": str(variance),
+                        "variance_percent": variance_percent,
+                    }
+                )
 
         return ReconciliationRecord(
             record_id=self.generate_record_id(license_key, datetime.now()),
@@ -385,15 +395,23 @@ class BillingReconciliationService:
             expected_amount=result.total_local_amount,
             actual_amount=result.total_remote_amount,
             variance=result.total_variance,
-            variance_percent=float(result.total_variance / result.total_local_amount * 100) if result.total_local_amount > 0 else 0.0,
+            variance_percent=(
+                float(result.total_variance / result.total_local_amount * 100)
+                if result.total_local_amount > 0
+                else 0.0
+            ),
             status="completed" if result.success else "failed",
-            discrepancies=[r.to_dict() for r in result.records if r.status != ReconciliationStatus.MATCHED],
+            discrepancies=[
+                r.to_dict() for r in result.records if r.status != ReconciliationStatus.MATCHED
+            ],
         )
 
         # Also emit raw event
         self._event_bus.emit(EventType.BILLING_RECONCILIATION, event_data)
 
-    def reconcile_batch(self, license_key: Optional[str] = None, period_days: int = 1) -> ReconciliationResult:
+    def reconcile_batch(
+        self, license_key: Optional[str] = None, period_days: int = 1
+    ) -> ReconciliationResult:
         """
         Main reconciliation workflow - fetch, compare, resolve.
 
@@ -438,7 +456,9 @@ class BillingReconciliationService:
         local_summary = self.fetch_local_summary(period_start, period_end)
 
         # Step 2: Fetch remote summary
-        success, remote_summary, error = self.fetch_remote_summary(license_key, period_start, period_end)
+        success, remote_summary, error = self.fetch_remote_summary(
+            license_key, period_start, period_end
+        )
 
         if not success and error:
             self._logger.error("reconciliation.remote_fetch_failed", error=error)

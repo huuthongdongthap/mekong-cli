@@ -1,4 +1,5 @@
 """SSE infrastructure and EventBus adapter for RaaS dashboard streaming."""
+
 from __future__ import annotations
 
 import asyncio

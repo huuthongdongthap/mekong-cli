@@ -55,20 +55,24 @@ class TestInputValidationHook(unittest.TestCase):
 
     def test_too_many_messages_fail(self):
         hook = InputValidationHook({"max_messages": 2})
-        ctx = HookContext(messages=[
-            {"role": "user", "content": "a"},
-            {"role": "assistant", "content": "b"},
-            {"role": "user", "content": "c"},
-        ])
+        ctx = HookContext(
+            messages=[
+                {"role": "user", "content": "a"},
+                {"role": "assistant", "content": "b"},
+                {"role": "user", "content": "c"},
+            ]
+        )
         result = hook.execute(ctx)
         self.assertFalse(result.passed)
         self.assertIn("Too many", result.error_message)
 
     def test_message_too_long_fail(self):
         hook = InputValidationHook({"max_message_length": 10})
-        ctx = HookContext(messages=[
-            {"role": "user", "content": "x" * 20},
-        ])
+        ctx = HookContext(
+            messages=[
+                {"role": "user", "content": "x" * 20},
+            ]
+        )
         result = hook.execute(ctx)
         self.assertFalse(result.passed)
         self.assertIn("too long", result.error_message)

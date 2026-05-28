@@ -86,9 +86,9 @@ def publish_summary() -> dict:
                     "id": product_id,
                     "url": f"{GUMROAD_STORE}/{gumroad_path}",
                     "zip": latest_zip.name if latest_zip else None,
-                    "size": f"{latest_zip.stat().st_size / 1024 / 1024:.1f} MB"
-                    if latest_zip
-                    else "N/A",
+                    "size": (
+                        f"{latest_zip.stat().st_size / 1024 / 1024:.1f} MB" if latest_zip else "N/A"
+                    ),
                 }
             )
 

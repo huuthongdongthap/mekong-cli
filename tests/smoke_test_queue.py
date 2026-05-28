@@ -5,7 +5,7 @@ import threading
 import time
 
 # Add root directory to path to allow imports from backend and antigravity
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from backend.services.queue_service import QueueService
 from backend.workers.worker_base import BaseWorker
@@ -14,6 +14,7 @@ from backend.workers.worker_base import BaseWorker
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("smoke_test")
 
+
 def mock_email_handler(payload):
     logger.info(f"Sending email to {payload.get('to')}...")
     time.sleep(0.5)
@@ -21,9 +22,11 @@ def mock_email_handler(payload):
         raise ValueError("Simulated failure")
     return {"status": "sent"}
 
+
 def run_worker_thread(worker):
     logger.info("Starting worker thread...")
     worker.start()
+
 
 def test_job_flow():
     queue_service = QueueService()
@@ -39,7 +42,7 @@ def test_job_flow():
     job_id = queue_service.enqueue_job(
         job_type="test_email",
         payload={"to": "test@example.com", "subject": "Hello"},
-        priority="high"
+        priority="high",
     )
     logger.info(f"Job enqueued: {job_id}")
 
@@ -76,7 +79,7 @@ def test_job_flow():
         payload={"to": "fail@example.com", "fail": True},
         priority="normal",
         max_retries=2,
-        retry_delay_seconds=[1, 2] # Short delays for testing
+        retry_delay_seconds=[1, 2],  # Short delays for testing
     )
 
     # Worker should pick it up, fail, and schedule retry
@@ -85,18 +88,20 @@ def test_job_flow():
     fail_job = queue_service.get_job(fail_job_id)
     logger.info(f"Failed job status: {fail_job.status}, attempts: {fail_job.attempts}")
 
-    assert fail_job.status == "scheduled" or fail_job.status == "failed" # Depends on timing
+    assert fail_job.status == "scheduled" or fail_job.status == "failed"  # Depends on timing
     assert fail_job.attempts >= 1
 
     # If scheduled, we need to wait for the scheduler (built into worker) to pick it up
     logger.info("Waiting for retry...")
-    time.sleep(2) # Wait for retry delay
+    time.sleep(2)  # Wait for retry delay
 
     # Worker checks schedule every poll_interval
     time.sleep(2)
 
     fail_job = queue_service.get_job(fail_job_id)
-    logger.info(f"Failed job status after retry wait: {fail_job.status}, attempts: {fail_job.attempts}")
+    logger.info(
+        f"Failed job status after retry wait: {fail_job.status}, attempts: {fail_job.attempts}"
+    )
 
     # 5. Stop Worker
     logger.info("5. Stopping Worker...")
@@ -104,6 +109,7 @@ def test_job_flow():
     worker_thread.join(timeout=5)
 
     logger.info("Smoke test passed!")
+
 
 if __name__ == "__main__":
     test_job_flow()

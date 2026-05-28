@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PipelineConfig:
     """Full pipeline configuration."""
+
     initial_capital: float = 200.0
     paper_trading: bool = True
     cycle_interval_sec: float = 60.0
@@ -117,7 +118,10 @@ class TradingPipeline:
 
         logger.info(
             "Pipeline cycle %d: %d signals → %d executed, %d blocked",
-            self.cycle_count, len(signals), len(executed), len(blocked),
+            self.cycle_count,
+            len(signals),
+            len(executed),
+            len(blocked),
         )
         return results
 
@@ -127,7 +131,8 @@ class TradingPipeline:
         mode = "PAPER" if self.config.paper_trading else "LIVE"
         logger.info(
             "TradingPipeline started [%s] capital=$%.2f",
-            mode, self.config.initial_capital,
+            mode,
+            self.config.initial_capital,
         )
 
         while self._running:

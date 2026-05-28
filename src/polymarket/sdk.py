@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # Optional httpx for API calls
 try:
     import httpx
+
     HAS_HTTPX = True
 except ImportError:
     HAS_HTTPX = False
@@ -29,6 +30,7 @@ except ImportError:
 
 class Tier(Enum):
     """Subscription tiers with feature gating."""
+
     STARTER = "starter"
     PRO = "pro"
     ELITE = "elite"
@@ -37,6 +39,7 @@ class Tier(Enum):
 @dataclass
 class TierLimits:
     """Feature limits per tier."""
+
     signals_per_day: int
     ensemble_n: int
     dark_edge: bool
@@ -45,9 +48,15 @@ class TierLimits:
     @classmethod
     def for_tier(cls, tier: Tier) -> TierLimits:
         limits = {
-            Tier.STARTER: cls(signals_per_day=5, ensemble_n=1, dark_edge=False, custom_strategies=False),
-            Tier.PRO: cls(signals_per_day=20, ensemble_n=3, dark_edge=True, custom_strategies=False),
-            Tier.ELITE: cls(signals_per_day=999, ensemble_n=5, dark_edge=True, custom_strategies=True),
+            Tier.STARTER: cls(
+                signals_per_day=5, ensemble_n=1, dark_edge=False, custom_strategies=False
+            ),
+            Tier.PRO: cls(
+                signals_per_day=20, ensemble_n=3, dark_edge=True, custom_strategies=False
+            ),
+            Tier.ELITE: cls(
+                signals_per_day=999, ensemble_n=5, dark_edge=True, custom_strategies=True
+            ),
         }
         return limits.get(tier, limits[Tier.STARTER])
 
@@ -55,6 +64,7 @@ class TierLimits:
 @dataclass
 class SDKSignal:
     """A trading signal returned by the SDK."""
+
     market_id: str
     question: str
     direction: str
@@ -70,6 +80,7 @@ class SDKSignal:
 @dataclass
 class SDKMarket:
     """A market opportunity returned by the SDK."""
+
     market_id: str
     question: str
     volume_24h: float
@@ -81,6 +92,7 @@ class SDKMarket:
 @dataclass
 class PaperStatus:
     """Paper trading status."""
+
     running: bool
     trades: int
     pnl: float
@@ -101,9 +113,7 @@ class CashClaw:
         self.api_key = api_key
         self.tier = Tier(tier.lower())
         self.limits = TierLimits.for_tier(self.tier)
-        self.base_url = base_url or os.getenv(
-            "CASHCLAW_API_URL", "https://api.cashclaw.io"
-        )
+        self.base_url = base_url or os.getenv("CASHCLAW_API_URL", "https://api.cashclaw.io")
         self._signals_today = 0
         self._http: Optional[Any] = None
 
@@ -130,9 +140,7 @@ class CashClaw:
         """
         key = api_key or os.getenv("CASHCLAW_API_KEY", "")
         if not key:
-            raise ValueError(
-                "API key required. Set CASHCLAW_API_KEY or pass api_key parameter."
-            )
+            raise ValueError("API key required. Set CASHCLAW_API_KEY or pass api_key parameter.")
         return cls(api_key=key, tier=tier, base_url=base_url)
 
     def scan(self) -> list[SDKMarket]:
@@ -175,7 +183,8 @@ class CashClaw:
         if remaining <= 0:
             logger.warning(
                 "Signal limit reached (%d/%d). Upgrade tier for more.",
-                self._signals_today, self.limits.signals_per_day,
+                self._signals_today,
+                self.limits.signals_per_day,
             )
             return []
 

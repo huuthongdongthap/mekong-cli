@@ -7,7 +7,6 @@ as MCP tools callable by the Rust Orchestrator.
 Transport: stdio (default) or HTTP via --http flag
 """
 
-import sys
 import json
 import argparse
 from typing import Any
@@ -19,6 +18,7 @@ from mcp.server.models import InitializationOptions
 
 try:
     from vnstock3 import Vnstock
+
     VNSTOCK_AVAILABLE = True
 except ImportError:
     VNSTOCK_AVAILABLE = False
@@ -34,6 +34,7 @@ app = Server("vnstock-oracle")
 # ---------------------------------------------------------------------------
 # Helper utilities
 # ---------------------------------------------------------------------------
+
 
 def _df_to_records(df) -> list[dict]:
     """Convert a pandas DataFrame to a list of plain dicts."""
@@ -69,6 +70,7 @@ def _ok_response(data: Any) -> list[types.TextContent]:
 # ---------------------------------------------------------------------------
 # Tool definitions
 # ---------------------------------------------------------------------------
+
 
 @app.list_tools()
 async def list_tools() -> list[types.Tool]:
@@ -148,10 +150,9 @@ async def list_tools() -> list[types.Tool]:
 # Tool handlers
 # ---------------------------------------------------------------------------
 
+
 @app.call_tool()
-async def call_tool(
-    name: str, arguments: dict
-) -> list[types.TextContent]:
+async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
     if not VNSTOCK_AVAILABLE:
         return _error_response("vnstock3 library is not installed. Run: pip install vnstock3")
 
@@ -165,9 +166,7 @@ async def call_tool(
         return _error_response(f"Unknown tool: {name}")
 
 
-async def _get_financial_report(
-    ticker: str, year: int, quarter: int
-) -> list[types.TextContent]:
+async def _get_financial_report(ticker: str, year: int, quarter: int) -> list[types.TextContent]:
     """Fetch income statement, balance sheet, and cash flow for the given ticker/period."""
     try:
         ticker = _validate_ticker(ticker)
@@ -181,9 +180,9 @@ async def _get_financial_report(
         def _filter(df):
             records = _df_to_records(df)
             filtered = [
-                r for r in records
-                if str(r.get("year", "")) == str(year)
-                and str(r.get("quarter", "")) == str(quarter)
+                r
+                for r in records
+                if str(r.get("year", "")) == str(year) and str(r.get("quarter", "")) == str(quarter)
             ]
             # Fall back to all records if filtering produces nothing
             return filtered if filtered else records
@@ -199,9 +198,7 @@ async def _get_financial_report(
         return _ok_response(result)
 
     except Exception as exc:
-        return _error_response(
-            f"Failed to fetch financial report for {ticker}: {exc}"
-        )
+        return _error_response(f"Failed to fetch financial report for {ticker}: {exc}")
 
 
 async def _get_credit_score_data(ticker: str) -> list[types.TextContent]:
@@ -217,14 +214,21 @@ async def _get_credit_score_data(ticker: str) -> list[types.TextContent]:
 
         # Surface the ratios most relevant for credit scoring
         CREDIT_KEYS = {
-            "roe", "roa", "debt_on_equity", "debt_on_asset",
-            "current_ratio", "quick_ratio", "interest_coverage",
-            "gross_profit_margin", "net_profit_margin",
-            "asset_turnover", "revenue", "net_income",
+            "roe",
+            "roa",
+            "debt_on_equity",
+            "debt_on_asset",
+            "current_ratio",
+            "quick_ratio",
+            "interest_coverage",
+            "gross_profit_margin",
+            "net_profit_margin",
+            "asset_turnover",
+            "revenue",
+            "net_income",
         }
         credit_view = {
-            k: v for k, v in latest.items()
-            if any(ck in k.lower() for ck in CREDIT_KEYS)
+            k: v for k, v in latest.items() if any(ck in k.lower() for ck in CREDIT_KEYS)
         }
 
         result = {
@@ -236,14 +240,10 @@ async def _get_credit_score_data(ticker: str) -> list[types.TextContent]:
         return _ok_response(result)
 
     except Exception as exc:
-        return _error_response(
-            f"Failed to fetch credit score data for {ticker}: {exc}"
-        )
+        return _error_response(f"Failed to fetch credit score data for {ticker}: {exc}")
 
 
-async def _get_stock_price(
-    ticker: str, start_date: str, end_date: str
-) -> list[types.TextContent]:
+async def _get_stock_price(ticker: str, start_date: str, end_date: str) -> list[types.TextContent]:
     """Fetch OHLCV price history for the given ticker and date range."""
     try:
         ticker = _validate_ticker(ticker)
@@ -263,14 +263,13 @@ async def _get_stock_price(
         return _ok_response(result)
 
     except Exception as exc:
-        return _error_response(
-            f"Failed to fetch price history for {ticker}: {exc}"
-        )
+        return _error_response(f"Failed to fetch price history for {ticker}: {exc}")
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 async def _run_stdio():
     """Run the MCP server over stdio (default for IDE integration)."""

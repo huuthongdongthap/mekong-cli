@@ -330,8 +330,7 @@ def generate_contractor_brief(
 
     if deliverables:
         default_deliverables = [
-            {"deliverable": d, "deadline": f"Week {i + 1}"}
-            for i, d in enumerate(deliverables)
+            {"deliverable": d, "deadline": f"Week {i + 1}"} for i, d in enumerate(deliverables)
         ]
 
     return ContractorBrief(

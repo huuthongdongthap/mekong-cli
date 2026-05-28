@@ -46,14 +46,17 @@ _TENANT = TenantContext(
 
 def _make_require_tenant_override(tenant: TenantContext = _TENANT):
     """Return a dependency override that always resolves to *tenant*."""
+
     def _override():
         return tenant
+
     return _override
 
 
 # ---------------------------------------------------------------------------
 # RaaS Router app fixture
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def raas_client():
@@ -72,6 +75,7 @@ def raas_client():
 # License server fixture
 # ---------------------------------------------------------------------------
 
+
 class _MockClientMiddleware(BaseHTTPMiddleware):
     """Inject a fake client IP so endpoints that read request.client.host work."""
 
@@ -82,18 +86,16 @@ class _MockClientMiddleware(BaseHTTPMiddleware):
 
 @pytest.fixture()
 def license_client():
-    """TestClient for the license server, with client-IP middleware injected."""
+    """TestClient for the license server. TestClient default client=('testclient', 50000)."""
     from src.api.license_server import app as _license_app
-    # Wrap the existing app so request.client.host is always available
-    wrapper = FastAPI()
-    wrapper.add_middleware(_MockClientMiddleware)
-    wrapper.mount("/", _license_app)
-    return TestClient(wrapper, raise_server_exceptions=False)
+
+    return TestClient(_license_app, raise_server_exceptions=False)
 
 
 # ---------------------------------------------------------------------------
 # Quota endpoints fixture
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def quota_client():
@@ -112,6 +114,7 @@ def quota_client():
 # Billing endpoints fixture
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def billing_client():
     """TestClient for billing_router mounted on a bare FastAPI app."""
@@ -126,6 +129,7 @@ def billing_client():
 # ===========================================================================
 # Tests: POST /v1/tasks
 # ===========================================================================
+
 
 class TestSubmitTask:
     """POST /v1/tasks — submit a goal for execution."""
@@ -160,6 +164,7 @@ class TestSubmitTask:
         mock_result.status.name = "SUCCESS"
 
         from src.core import orchestrator as orch_mod
+
         mock_result.status = orch_mod.OrchestrationStatus.SUCCESS
         mock_result.total_steps = 2
         mock_result.completed_steps = 2
@@ -205,6 +210,7 @@ class TestSubmitTask:
 # Tests: GET /v1/tasks/{task_id}
 # ===========================================================================
 
+
 class TestGetTaskStatus:
     """GET /v1/tasks/{task_id} — poll task status."""
 
@@ -214,6 +220,7 @@ class TestGetTaskStatus:
 
     def test_no_auth_returns_401(self):
         from src.api.raas_router import router
+
         app = FastAPI()
         app.include_router(router)
         client = TestClient(app, raise_server_exceptions=False)
@@ -224,6 +231,7 @@ class TestGetTaskStatus:
         """Submit a task then poll for status — should return full status response."""
         mock_result = MagicMock()
         from src.core import orchestrator as orch_mod
+
         mock_result.status = orch_mod.OrchestrationStatus.SUCCESS
         mock_result.total_steps = 1
         mock_result.completed_steps = 1
@@ -232,6 +240,7 @@ class TestGetTaskStatus:
         mock_result.errors = []
         mock_result.warnings = []
         mock_result.step_results = []
+        mock_result.structured_output = {"result": "success"}
 
         with patch("src.api.raas_router._build_orchestrator") as mock_orch:
             instance = MagicMock()
@@ -254,6 +263,7 @@ class TestGetTaskStatus:
         """A task created by one tenant must not be visible to another tenant."""
         mock_result = MagicMock()
         from src.core import orchestrator as orch_mod
+
         mock_result.status = orch_mod.OrchestrationStatus.SUCCESS
         mock_result.total_steps = 0
         mock_result.completed_steps = 0
@@ -274,6 +284,7 @@ class TestGetTaskStatus:
         # Create a client for a different tenant
         from src.api.raas_router import router
         from src.api.raas_auth_middleware import require_tenant
+
         other_tenant = TenantContext(
             tenant_id="tenant-other-999",
             tenant_name="Other Tenant",
@@ -292,6 +303,7 @@ class TestGetTaskStatus:
 # Tests: GET /v1/agents
 # ===========================================================================
 
+
 class TestListAgents:
     """GET /v1/agents — list registered agents."""
 
@@ -309,6 +321,7 @@ class TestListAgents:
 
     def test_no_auth_returns_401(self):
         from src.api.raas_router import router
+
         app = FastAPI()
         app.include_router(router)
         client = TestClient(app, raise_server_exceptions=False)
@@ -327,6 +340,7 @@ class TestListAgents:
 # ===========================================================================
 # Tests: POST /v1/agents/{name}/run
 # ===========================================================================
+
 
 class TestRunAgent:
     """POST /v1/agents/{name}/run — run a named agent."""
@@ -363,6 +377,7 @@ class TestRunAgent:
 
     def test_no_auth_returns_401(self):
         from src.api.raas_router import router
+
         app = FastAPI()
         app.include_router(router)
         client = TestClient(app, raise_server_exceptions=False)
@@ -419,6 +434,7 @@ class TestRunAgent:
 # Tests: License Server
 # ===========================================================================
 
+
 class TestLicenseServerHealth:
     """GET /health — license server health check."""
 
@@ -450,8 +466,11 @@ class TestLicenseValidate:
 
     def test_invalid_license_returns_valid_false(self, license_client):
         import src.api.license_server as _ls
+
         with patch.object(_ls, "check_rate_limit", return_value=True):
-            with patch.object(_ls, "validate_license", return_value=(False, None, "Invalid signature")):
+            with patch.object(
+                _ls, "validate_license", return_value=(False, None, "Invalid signature")
+            ):
                 resp = license_client.post(
                     "/api/v1/license/validate",
                     json={"license_key": "INVALID-KEY"},
@@ -463,10 +482,15 @@ class TestLicenseValidate:
 
     def test_valid_license_returns_tier_info(self, license_client):
         import src.api.license_server as _ls
+
         with patch.object(_ls, "check_rate_limit", return_value=True):
-            with patch.object(_ls, "validate_license", return_value=(True, {"tier": "pro", "key_id": "k1"}, None)):
+            with patch.object(
+                _ls, "validate_license", return_value=(True, {"tier": "pro", "key_id": "k1"}, None)
+            ):
                 with patch.object(_ls, "get_revoked_keys", return_value=set()):
-                    with patch.object(_ls, "get_tier_limits", return_value={"commands_per_day": 1000}):
+                    with patch.object(
+                        _ls, "get_tier_limits", return_value={"commands_per_day": 1000}
+                    ):
                         resp = license_client.post(
                             "/api/v1/license/validate",
                             json={"license_key": "MK-PRO-123"},
@@ -480,8 +504,13 @@ class TestLicenseValidate:
 
     def test_revoked_license_returns_valid_false(self, license_client):
         import src.api.license_server as _ls
+
         with patch.object(_ls, "check_rate_limit", return_value=True):
-            with patch.object(_ls, "validate_license", return_value=(True, {"tier": "pro", "key_id": "revoked-k"}, None)):
+            with patch.object(
+                _ls,
+                "validate_license",
+                return_value=(True, {"tier": "pro", "key_id": "revoked-k"}, None),
+            ):
                 with patch.object(_ls, "get_revoked_keys", return_value={"revoked-k"}):
                     resp = license_client.post(
                         "/api/v1/license/validate",
@@ -495,6 +524,7 @@ class TestLicenseValidate:
     def test_wrong_api_token_returns_401(self, license_client):
         import os
         import src.api.license_server as _ls
+
         with patch.object(_ls, "check_rate_limit", return_value=True):
             with patch.dict(os.environ, {"RAAS_API_TOKEN": "secret-token"}):
                 resp = license_client.post(
@@ -506,6 +536,7 @@ class TestLicenseValidate:
 
     def test_rate_limit_exceeded_returns_429(self, license_client):
         import src.api.license_server as _ls
+
         with patch.object(_ls, "check_rate_limit", return_value=False):
             resp = license_client.post(
                 "/api/v1/license/validate",
@@ -517,6 +548,7 @@ class TestLicenseValidate:
 # ===========================================================================
 # Tests: Quota Endpoints
 # ===========================================================================
+
 
 class TestQuotaStatus:
     """GET /v1/quota/status — real-time quota for authenticated tenant."""
@@ -638,6 +670,7 @@ class TestQuotaHistory:
 # ===========================================================================
 # Tests: Billing Endpoints
 # ===========================================================================
+
 
 class TestBillingHealth:
     """GET /billing/health — billing service health check."""

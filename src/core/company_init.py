@@ -55,7 +55,9 @@ def _resolve_model(scenario: str, role: str, tier: str) -> str:
 
     routing: dict[str, dict[str, str]] = {
         "cto": {
-            "complex": "claude-opus-4-6" if scenario != "local_first" else "ollama:deepseek-coder-v2:33b",
+            "complex": (
+                "claude-opus-4-6" if scenario != "local_first" else "ollama:deepseek-coder-v2:33b"
+            ),
             "standard": "claude-sonnet-4-6",
             "simple": "claude-haiku-4-5",
         },
@@ -198,9 +200,7 @@ def generate_config_files(
     }
     # Build per-role routing
     for role in AGENT_ROLES:
-        openclaw_config["routing_rules"][role] = _resolve_model(
-            config.scenario, role, ""
-        )
+        openclaw_config["routing_rules"][role] = _resolve_model(config.scenario, role, "")
     files[".openclaw/config.json"] = json.dumps(openclaw_config, indent=2, ensure_ascii=False)
 
     # Files 3-10: .mekong/agents/{role}.md
@@ -241,9 +241,7 @@ def generate_config_files(
     return files
 
 
-def write_config_files(
-    files: dict[str, str], base_dir: str | Path = "."
-) -> list[str]:
+def write_config_files(files: dict[str, str], base_dir: str | Path = ".") -> list[str]:
     """Write generated config files to disk.
 
     Returns list of written file paths.

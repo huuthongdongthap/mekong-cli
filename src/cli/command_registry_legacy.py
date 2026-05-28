@@ -54,10 +54,18 @@ from src.commands.analytics_commands import app as analytics_app
 
 def register_legacy_commands(app: typer.Typer) -> None:
     """Register all legacy command modules with the main app."""
-    app.add_typer(binh_phap_app, name="binh-phap", help="Binh Pháp Strategy")
-    app.add_typer(agi_app, name="agi", help="Tom Hum AGI daemon")
-    app.add_typer(status_app, name="status", help="System health")
-    app.add_typer(config_app, name="config", help="Environment config")
+    registered_names = {
+        group.name for group in app.registered_groups if getattr(group, "name", None)
+    }
+
+    if "binh-phap" not in registered_names:
+        app.add_typer(binh_phap_app, name="binh-phap", help="Binh Pháp Strategy")
+    if "agi" not in registered_names:
+        app.add_typer(agi_app, name="agi", help="Tom Hum AGI daemon")
+    if "status" not in registered_names:
+        app.add_typer(status_app, name="status", help="System health")
+    if "config" not in registered_names:
+        app.add_typer(config_app, name="config", help="Environment config")
     app.add_typer(doctor_app, name="doctor", help="Diagnostics")
     app.add_typer(clean_app, name="clean", help="Clean artifacts")
     app.add_typer(test_app, name="test", help="Run tests")

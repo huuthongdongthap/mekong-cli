@@ -151,6 +151,7 @@ class TestSingleton:
     def test_get_collector_registry_returns_same_instance(self):
         # Reset singleton
         import src.core.collector_registry as mod
+
         mod._default_registry = None
         r1 = get_collector_registry()
         r2 = get_collector_registry()

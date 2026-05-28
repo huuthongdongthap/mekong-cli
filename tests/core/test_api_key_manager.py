@@ -313,6 +313,7 @@ class TestGlobalFunctions:
 
     def test_generate_api_key_function(self, temp_config_dir, monkeypatch):
         from src.core import api_key_manager
+
         monkeypatch.setattr(api_key_manager, "_api_key_manager", None)
         api_key_manager._api_key_manager = ApiKeyManager(config_dir=temp_config_dir)
 
@@ -321,6 +322,7 @@ class TestGlobalFunctions:
 
     def test_validate_api_key_function(self, temp_config_dir, monkeypatch):
         from src.core import api_key_manager
+
         manager = ApiKeyManager(config_dir=temp_config_dir)
         monkeypatch.setattr(api_key_manager, "_api_key_manager", manager)
 
@@ -330,6 +332,7 @@ class TestGlobalFunctions:
 
     def test_revoke_api_key_function(self, temp_config_dir, monkeypatch):
         from src.core import api_key_manager
+
         manager = ApiKeyManager(config_dir=temp_config_dir)
         monkeypatch.setattr(api_key_manager, "_api_key_manager", manager)
 
@@ -350,6 +353,7 @@ class TestGatewayIntegration:
 
         # Monkeypatch the global instance to use our test manager
         import src.core.api_key_manager as api_key_mgr
+
         original_manager = api_key_mgr._api_key_manager
         api_key_mgr._api_key_manager = manager
 

@@ -181,9 +181,7 @@ class WebhookBridge:
 
         # Clean old entries (older than 24 hours)
         cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
-        self._idempotency_cache = {
-            k: v for k, v in self._idempotency_cache.items() if v > cutoff
-        }
+        self._idempotency_cache = {k: v for k, v in self._idempotency_cache.items() if v > cutoff}
 
         return idempotency_key in self._idempotency_cache
 
@@ -379,9 +377,7 @@ class WebhookBridge:
         """
         import requests
 
-        gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", "https://raas.mekongmind.com"
-        )
+        gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", "https://raas.mekongmind.com")
         url = f"{gateway_url}/v1/billing/webhook-relay"
 
         # Get auth token

@@ -13,7 +13,9 @@ from typing import Any
 class StepTimeoutError(Exception):
     """Raised when a single step exceeds its timeout limit."""
 
-    def __init__(self, message: str, step_order: int = 0, elapsed: float = 0.0, limit: float = 0.0) -> None:
+    def __init__(
+        self, message: str, step_order: int = 0, elapsed: float = 0.0, limit: float = 0.0
+    ) -> None:
         """Initialize with structured timeout context.
 
         Args:

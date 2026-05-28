@@ -38,6 +38,7 @@ def _check_telemetry_consent(ctx: typer.Context) -> None:
         return
 
     from src.core.telemetry_consent import ConsentManager
+
     manager = ConsentManager()
 
     if not manager.load_consent():
@@ -62,6 +63,7 @@ def register_core_commands(app: typer.Typer) -> None:
     def version() -> None:
         """Show version information."""
         from importlib.metadata import version as pkg_version, PackageNotFoundError
+
         try:
             ver = pkg_version("mekong-cli")
         except PackageNotFoundError:
@@ -91,6 +93,7 @@ def register_core_commands(app: typer.Typer) -> None:
         if not os.getenv("MEKONG_NO_UPDATE_CHECK"):
             try:
                 import asyncio
+
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 loop.create_task(check_for_updates_async())

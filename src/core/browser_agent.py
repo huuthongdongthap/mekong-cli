@@ -129,7 +129,9 @@ class BrowserAgent:
         try:
             proc = subprocess.run(
                 ["curl", "-sL", "-o", "/dev/null", "-w", "%{http_code}", url],
-                capture_output=True, text=True, timeout=15,
+                capture_output=True,
+                text=True,
+                timeout=15,
             )
             result.status_code = int(proc.stdout.strip())
             result.success = 200 <= result.status_code < 400
@@ -222,10 +224,7 @@ class BrowserAgent:
             "total_actions": len(self._history),
             "success_rate": successes / len(self._history),
             "playwright_available": self._playwright_available,
-            "unique_domains": len(set(
-                urlparse(r.url).netloc
-                for r in self._history if r.url
-            )),
+            "unique_domains": len(set(urlparse(r.url).netloc for r in self._history if r.url)),
         }
 
     # --- Internal helpers ---
@@ -234,11 +233,15 @@ class BrowserAgent:
         """Fetch URL using curl."""
         proc = subprocess.run(
             [
-                "curl", "-sL", "-w",
+                "curl",
+                "-sL",
+                "-w",
                 "\n---HTTP_CODE:%{http_code}---\n---CONTENT_TYPE:%{content_type}---",
                 url,
             ],
-            capture_output=True, text=True, timeout=20,
+            capture_output=True,
+            text=True,
+            timeout=20,
         )
 
         body = proc.stdout
@@ -306,7 +309,8 @@ class BrowserAgent:
         meta: Dict[str, str] = {}
         for match in re.finditer(
             r'<meta\s+(?:name|property)=["\']([^"\']+)["\']\s+content=["\']([^"\']*)["\']',
-            html, re.IGNORECASE,
+            html,
+            re.IGNORECASE,
         ):
             meta[match.group(1)] = match.group(2)
         return meta
@@ -316,7 +320,8 @@ class BrowserAgent:
         try:
             result = subprocess.run(
                 ["python3", "-c", "import playwright"],
-                capture_output=True, timeout=5,
+                capture_output=True,
+                timeout=5,
             )
             return result.returncode == 0
         except Exception:

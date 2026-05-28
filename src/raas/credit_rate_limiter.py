@@ -3,6 +3,7 @@
 Implements a sliding window rate limiter backed by SQLite.
 Daily = last 24 hours, monthly = last 30 days.
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -15,17 +16,18 @@ from typing import Optional
 DB_PATH = Path.home() / ".mekong" / "raas" / "tenants.db"
 
 TIER_LIMITS: dict[str, dict[str, int]] = {
-    "free":       {"daily": 10,  "monthly": 100},
-    "starter":    {"daily": 50,  "monthly": 500},
-    "growth":     {"daily": 200, "monthly": 2000},
-    "pro":        {"daily": 500, "monthly": 5000},
-    "enterprise": {"daily": 0,   "monthly": 0},   # 0 = unlimited
+    "free": {"daily": 10, "monthly": 100},
+    "starter": {"daily": 50, "monthly": 500},
+    "growth": {"daily": 200, "monthly": 2000},
+    "pro": {"daily": 500, "monthly": 5000},
+    "enterprise": {"daily": 0, "monthly": 0},  # 0 = unlimited
 }
 
 
 @dataclass
 class OverageConfig:
     """Per-tier overage billing configuration."""
+
     allow_overage: bool
     overage_rate_per_credit: float
     warning_threshold_pct: int
@@ -33,11 +35,36 @@ class OverageConfig:
 
 
 OVERAGE_TIERS: dict[str, OverageConfig] = {
-    "free":       OverageConfig(allow_overage=False, overage_rate_per_credit=0.0, warning_threshold_pct=80, max_overage_credits=0),
-    "starter":    OverageConfig(allow_overage=False, overage_rate_per_credit=0.0, warning_threshold_pct=80, max_overage_credits=0),
-    "growth":     OverageConfig(allow_overage=True,  overage_rate_per_credit=0.02, warning_threshold_pct=80, max_overage_credits=500),
-    "pro":        OverageConfig(allow_overage=True,  overage_rate_per_credit=0.01, warning_threshold_pct=80, max_overage_credits=2000),
-    "enterprise": OverageConfig(allow_overage=True,  overage_rate_per_credit=0.005, warning_threshold_pct=90, max_overage_credits=0),
+    "free": OverageConfig(
+        allow_overage=False,
+        overage_rate_per_credit=0.0,
+        warning_threshold_pct=80,
+        max_overage_credits=0,
+    ),
+    "starter": OverageConfig(
+        allow_overage=False,
+        overage_rate_per_credit=0.0,
+        warning_threshold_pct=80,
+        max_overage_credits=0,
+    ),
+    "growth": OverageConfig(
+        allow_overage=True,
+        overage_rate_per_credit=0.02,
+        warning_threshold_pct=80,
+        max_overage_credits=500,
+    ),
+    "pro": OverageConfig(
+        allow_overage=True,
+        overage_rate_per_credit=0.01,
+        warning_threshold_pct=80,
+        max_overage_credits=2000,
+    ),
+    "enterprise": OverageConfig(
+        allow_overage=True,
+        overage_rate_per_credit=0.005,
+        warning_threshold_pct=90,
+        max_overage_credits=0,
+    ),
 }
 
 
@@ -147,9 +174,7 @@ class CreditRateLimiter:
         """Serialise a datetime to ISO-8601 string."""
         return dt.isoformat()
 
-    def _sum_credits(
-        self, conn: sqlite3.Connection, tenant_id: str, since: datetime
-    ) -> int:
+    def _sum_credits(self, conn: sqlite3.Connection, tenant_id: str, since: datetime) -> int:
         """Sum credits_used for *tenant_id* from *since* until now."""
         row = conn.execute(
             "SELECT COALESCE(SUM(credits_used), 0) AS total "
@@ -199,20 +224,14 @@ class CreditRateLimiter:
                 monthly_used = self._sum_credits(conn, tenant_id, monthly_since)
 
                 # 0 limit = unlimited
-                daily_exceeded = (
-                    self.daily_limit > 0 and daily_used >= self.daily_limit
-                )
-                monthly_exceeded = (
-                    self.monthly_limit > 0 and monthly_used >= self.monthly_limit
-                )
+                daily_exceeded = self.daily_limit > 0 and daily_used >= self.daily_limit
+                monthly_exceeded = self.monthly_limit > 0 and monthly_used >= self.monthly_limit
 
                 if daily_exceeded or monthly_exceeded:
                     # Calculate retry_after: time until oldest event leaves window
                     window_since = daily_since if daily_exceeded else monthly_since
                     window_hours = 24 if daily_exceeded else 24 * 30
-                    oldest = self._oldest_timestamp_in_window(
-                        conn, tenant_id, window_since
-                    )
+                    oldest = self._oldest_timestamp_in_window(conn, tenant_id, window_since)
                     retry_after: Optional[int] = None
                     if oldest is not None:
                         expires_at = oldest + timedelta(hours=window_hours)
@@ -260,9 +279,7 @@ class CreditRateLimiter:
                     (str(uuid.uuid4()), tenant_id, credits_used, self._iso(self._now())),
                 )
         except sqlite3.Error as exc:
-            raise RuntimeError(
-                f"CreditRateLimiter.record_request failed: {exc}"
-            ) from exc
+            raise RuntimeError(f"CreditRateLimiter.record_request failed: {exc}") from exc
 
     def get_limits(self, tenant_id: str) -> dict:
         """Return current usage versus configured limits for *tenant_id*.
@@ -278,25 +295,15 @@ class CreditRateLimiter:
         now = self._now()
         try:
             with self._connect() as conn:
-                daily_used = self._sum_credits(
-                    conn, tenant_id, now - timedelta(hours=24)
-                )
-                monthly_used = self._sum_credits(
-                    conn, tenant_id, now - timedelta(days=30)
-                )
+                daily_used = self._sum_credits(conn, tenant_id, now - timedelta(hours=24))
+                monthly_used = self._sum_credits(conn, tenant_id, now - timedelta(days=30))
 
         except sqlite3.Error as exc:
-            raise RuntimeError(
-                f"CreditRateLimiter.get_limits failed: {exc}"
-            ) from exc
+            raise RuntimeError(f"CreditRateLimiter.get_limits failed: {exc}") from exc
 
-        daily_remaining = (
-            max(0, self.daily_limit - daily_used) if self.daily_limit > 0 else None
-        )
+        daily_remaining = max(0, self.daily_limit - daily_used) if self.daily_limit > 0 else None
         monthly_remaining = (
-            max(0, self.monthly_limit - monthly_used)
-            if self.monthly_limit > 0
-            else None
+            max(0, self.monthly_limit - monthly_used) if self.monthly_limit > 0 else None
         )
 
         return {

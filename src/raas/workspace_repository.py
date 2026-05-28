@@ -1,4 +1,5 @@
 """Workspace repository for multi-tenant isolation (SQLite version)."""
+
 from __future__ import annotations
 
 import json
@@ -159,9 +160,7 @@ class WorkspaceRepository:
         """Get workspace by slug."""
         try:
             with self._connect() as conn:
-                row = conn.execute(
-                    "SELECT * FROM workspaces WHERE slug = ?", (slug,)
-                ).fetchone()
+                row = conn.execute("SELECT * FROM workspaces WHERE slug = ?", (slug,)).fetchone()
         except sqlite3.Error as exc:
             raise RuntimeError(f"Failed to get workspace: {exc}") from exc
 
@@ -245,9 +244,7 @@ class WorkspaceRepository:
         except sqlite3.Error as exc:
             raise RuntimeError(f"Failed to deactivate workspace: {exc}") from exc
 
-    def add_member(
-        self, workspace_id: str, user_email: str, role: str = "member"
-    ) -> bool:
+    def add_member(self, workspace_id: str, user_email: str, role: str = "member") -> bool:
         """Add a member to a workspace."""
         now = datetime.now(timezone.utc).isoformat()
         try:
@@ -323,9 +320,7 @@ class WorkspaceRepository:
         except sqlite3.Error as exc:
             raise RuntimeError(f"Failed to get state: {exc}") from exc
 
-    def set_state(
-        self, workspace_id: str, state_key: str, state_value: Any
-    ) -> None:
+    def set_state(self, workspace_id: str, state_key: str, state_value: Any) -> None:
         """Set workspace state value."""
         now = datetime.now(timezone.utc).isoformat()
         try:

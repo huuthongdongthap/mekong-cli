@@ -51,9 +51,7 @@ class PaperExchange:
         )
         return trade
 
-    def resolve_trade(
-        self, trade_id: str, outcome: float
-    ) -> Optional[Trade]:
+    def resolve_trade(self, trade_id: str, outcome: float) -> Optional[Trade]:
         """Resolve a paper trade with the actual outcome (0 or 1)."""
         for trade in self.portfolio.open_positions:
             if trade.trade_id == trade_id:
@@ -72,7 +70,9 @@ class PaperExchange:
                 self.portfolio.open_positions.remove(trade)
                 logger.info(
                     "Resolved: %s P&L=$%.2f (total=$%.2f)",
-                    trade.trade_id, trade.pnl, self.portfolio.total_pnl,
+                    trade.trade_id,
+                    trade.pnl,
+                    self.portfolio.total_pnl,
                 )
                 return trade
         return None

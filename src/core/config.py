@@ -2,8 +2,10 @@
 Minimal config module to satisfy imports in status.py
 """
 
+
 class Config:
     """Placeholder configuration class"""
+
     pass
 
 

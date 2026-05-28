@@ -40,10 +40,20 @@ class LicenseRepository:
                 $1, $2, $3, $4, $5, $6, 'active', $7, $8, $9
             ) RETURNING id, created_at
         """
-        result = await self._db.fetch_one(query, (
-            license_key, key_id, tier, email, subscription_id,
-            customer_id, daily_limit, expires_at, metadata or {}
-        ))
+        result = await self._db.fetch_one(
+            query,
+            (
+                license_key,
+                key_id,
+                tier,
+                email,
+                subscription_id,
+                customer_id,
+                daily_limit,
+                expires_at,
+                metadata or {},
+            ),
+        )
         return dict(result) if result else {}
 
     async def get_license_by_key(self, license_key: str) -> Optional[Dict]:
@@ -89,7 +99,7 @@ class LicenseRepository:
         await self._db.execute(
             """INSERT INTO revocations (key_id, license_key, reason, revoked_by)
                VALUES ($1, $2, $3, $4)""",
-            (key_id, license_info["license_key"], reason, revoked_by)
+            (key_id, license_info["license_key"], reason, revoked_by),
         )
 
         # Update license status
@@ -155,12 +165,16 @@ class LicenseRepository:
             WHERE key_id = $1 AND date >= CURRENT_DATE - INTERVAL '%s days'
         """ % days
         result = await self._db.fetch_one(query, (key_id,))
-        return dict(result) if result else {
-            "days_with_usage": 0,
-            "total_commands": 0,
-            "max_daily_commands": 0,
-            "avg_daily_commands": 0,
-        }
+        return (
+            dict(result)
+            if result
+            else {
+                "days_with_usage": 0,
+                "total_commands": 0,
+                "max_daily_commands": 0,
+                "avg_daily_commands": 0,
+            }
+        )
 
     # ========== WEBHOOK EVENTS ==========
 
@@ -242,9 +256,9 @@ class LicenseRepository:
             ) VALUES ($1, $2, $3, $4, 'open', $5, $6, $6)
             RETURNING *
         """
-        result = await self._db.fetch_one(query, (
-            license_key, key_id, start_date, end_date, plan_tier, base_fee
-        ))
+        result = await self._db.fetch_one(
+            query, (license_key, key_id, start_date, end_date, plan_tier, base_fee)
+        )
         return dict(result) if result else {}
 
     async def get_billing_period(
@@ -278,10 +292,18 @@ class LicenseRepository:
             ) VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         """
-        result = await self._db.fetch_one(query, (
-            billing_period_id, license_key, key_id, record_type,
-            str(amount), description, metadata or {}
-        ))
+        result = await self._db.fetch_one(
+            query,
+            (
+                billing_period_id,
+                license_key,
+                key_id,
+                record_type,
+                str(amount),
+                description,
+                metadata or {},
+            ),
+        )
         return dict(result) if result else {}
 
     async def create_billing_line_item(
@@ -306,11 +328,21 @@ class LicenseRepository:
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8, $9, $10)
             RETURNING *
         """
-        result = await self._db.fetch_one(query, (
-            billing_record_id, event_type, model_name, str(quantity),
-            unit, str(unit_price), str(subtotal), timestamp,
-            usage_batch_id, metadata or {}
-        ))
+        result = await self._db.fetch_one(
+            query,
+            (
+                billing_record_id,
+                event_type,
+                model_name,
+                str(quantity),
+                unit,
+                str(unit_price),
+                str(subtotal),
+                timestamp,
+                usage_batch_id,
+                metadata or {},
+            ),
+        )
         return dict(result) if result else {}
 
     async def check_batch_idempotency(self, batch_id: str) -> Optional[Dict]:
@@ -393,11 +425,21 @@ class LicenseRepository:
             RETURNING *
         """
         import json
-        result = await self._db.fetch_one(query, (
-            audit_date, license_key, key_id, str(expected_amount),
-            str(actual_amount), str(variance),
-            json.dumps(discrepancies or []), status, notes
-        ))
+
+        result = await self._db.fetch_one(
+            query,
+            (
+                audit_date,
+                license_key,
+                key_id,
+                str(expected_amount),
+                str(actual_amount),
+                str(variance),
+                json.dumps(discrepancies or []),
+                status,
+                notes,
+            ),
+        )
         return dict(result) if result else {}
 
 
@@ -416,6 +458,7 @@ def get_repository() -> LicenseRepository:
 async def init_repository() -> LicenseRepository:
     """Initialize repository with database connection."""
     from src.db.database import init_database
+
     await init_database()
     return get_repository()
 

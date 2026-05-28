@@ -7,6 +7,7 @@ from packages.memory.memory_facade import get_memory_facade
 from datetime import datetime
 import json
 
+
 class MemoryChat:
     """
     A simple chat interface that uses the memory system to remember conversation context
@@ -29,17 +30,14 @@ class MemoryChat:
             "timestamp": datetime.now().isoformat(),
             "user_input": user_input,
             "bot_response": bot_response,
-            "type": "chat_interaction"
+            "type": "chat_interaction",
         }
 
         memory_entry = json.dumps(interaction)
         success = self.memory_facade.add(
             content=memory_entry,
             user_id=self.user_id,
-            metadata={
-                "interaction_type": "chat",
-                "timestamp": interaction["timestamp"]
-            }
+            metadata={"interaction_type": "chat", "timestamp": interaction["timestamp"]},
         )
 
         if success:
@@ -73,10 +71,10 @@ class MemoryChat:
             past_topics = []
             for memory in relevant_memories[:3]:  # Limit to recent memories
                 try:
-                    content = memory.get('memory', str(memory))
-                    parsed = json.loads(content) if content.startswith('{') else {}
-                    if parsed.get('type') == 'chat_interaction':
-                        past_topics.append(parsed.get('user_input', ''))
+                    content = memory.get("memory", str(memory))
+                    parsed = json.loads(content) if content.startswith("{") else {}
+                    if parsed.get("type") == "chat_interaction":
+                        past_topics.append(parsed.get("user_input", ""))
                 except Exception:
                     continue
 
@@ -127,20 +125,22 @@ def main():
     # Create a chat instance
     chat = MemoryChat(user_id="demo:chat_session")
 
-    print("\nCommands: Type 'quit' to exit, 'status' to see memory info, 'history' to see all memories")
+    print(
+        "\nCommands: Type 'quit' to exit, 'status' to see memory info, 'history' to see all memories"
+    )
     print("Try mentioning topics like 'memory', 'hello', 'name' to see contextual responses\n")
 
     while True:
         try:
             user_input = input("Your message: ").strip()
 
-            if user_input.lower() in ['quit', 'exit', 'bye']:
+            if user_input.lower() in ["quit", "exit", "bye"]:
                 print("Bot: Goodbye! Thanks for chatting.")
                 break
-            elif user_input.lower() == 'status':
+            elif user_input.lower() == "status":
                 chat.show_memory_status()
                 continue
-            elif user_input.lower() == 'history':
+            elif user_input.lower() == "history":
                 memories = chat.recall_context()
                 print(f"Found {len(memories)} memories:")
                 for i, memory in enumerate(memories):

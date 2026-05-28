@@ -111,8 +111,4 @@ class DurableStepStore:
         """List all recipe IDs with incomplete step results."""
         if not self.store_dir.exists():
             return []
-        return [
-            d.name
-            for d in self.store_dir.iterdir()
-            if d.is_dir() and list(d.glob("*.json"))
-        ]
+        return [d.name for d in self.store_dir.iterdir() if d.is_dir() and list(d.glob("*.json"))]

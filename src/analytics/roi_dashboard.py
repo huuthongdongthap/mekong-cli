@@ -21,20 +21,19 @@ from typing import Dict, List, Any, Optional
 
 from src.metering.usage_tracker import UsageTracker, get_tracker
 
-
 # Time estimates (minutes) for manual vs CLI
 TIME_ESTIMATES: Dict[str, Dict[str, int]] = {
     # Commands
-    "cook": {"manual": 120, "cli": 5},      # 2h → 5min = 24x faster
-    "plan": {"manual": 60, "cli": 2},        # 1h → 2min = 30x faster
-    "fix": {"manual": 90, "cli": 10},        # 1.5h → 10min = 9x faster
-    "code": {"manual": 180, "cli": 15},      # 3h → 15min = 12x faster
-    "test": {"manual": 60, "cli": 5},        # 1h → 5min = 12x faster
-    "review": {"manual": 45, "cli": 3},      # 45min → 3min = 15x faster
-    "deploy": {"manual": 30, "cli": 2},      # 30min → 2min = 15x faster
-    "debug": {"manual": 120, "cli": 15},      # 2h → 15min = 8x faster
+    "cook": {"manual": 120, "cli": 5},  # 2h → 5min = 24x faster
+    "plan": {"manual": 60, "cli": 2},  # 1h → 2min = 30x faster
+    "fix": {"manual": 90, "cli": 10},  # 1.5h → 10min = 9x faster
+    "code": {"manual": 180, "cli": 15},  # 3h → 15min = 12x faster
+    "test": {"manual": 60, "cli": 5},  # 1h → 5min = 12x faster
+    "review": {"manual": 45, "cli": 3},  # 45min → 3min = 15x faster
+    "deploy": {"manual": 30, "cli": 2},  # 30min → 2min = 15x faster
+    "debug": {"manual": 120, "cli": 15},  # 2h → 15min = 8x faster
     # Agents
-    "planner": {"manual": 90, "cli": 3},      # 1.5h → 3min = 30x faster
+    "planner": {"manual": 90, "cli": 3},  # 1.5h → 3min = 30x faster
     "researcher": {"manual": 180, "cli": 5},  # 3h → 5min = 36x faster
     "fullstack-developer": {"manual": 240, "cli": 10},
     "tester": {"manual": 60, "cli": 3},
@@ -65,6 +64,7 @@ DEVELOPER_HOURLY_RATE = 75  # USD/hour
 @dataclass
 class ROIMetrics:
     """ROI metrics dataclass."""
+
     total_minutes_saved: int = 0
     total_hours_saved: float = 0.0
     labor_cost_saved: float = 0.0
@@ -103,6 +103,7 @@ class ROIMetrics:
 @dataclass
 class DailyROI:
     """Daily ROI metrics."""
+
     date: str
     minutes_saved: int = 0
     cost_saved: float = 0.0

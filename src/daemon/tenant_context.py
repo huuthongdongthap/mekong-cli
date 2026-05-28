@@ -1,4 +1,5 @@
 """Tenant context propagation for daemon isolation."""
+
 from __future__ import annotations
 
 import logging

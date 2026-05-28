@@ -221,9 +221,7 @@ def build_bootstrap_plan(
     milestones = []
     for m in BOOTSTRAP_MILESTONES:
         users = max(1, int(m.mrr_target / avg_price)) if avg_price > 0 else 0
-        milestones.append(
-            MilestoneTarget(m.month, m.mrr_target, users, m.focus)
-        )
+        milestones.append(MilestoneTarget(m.month, m.mrr_target, users, m.focus))
     return BootstrapPlan(
         company_name=company_name,
         ramen=ramen,

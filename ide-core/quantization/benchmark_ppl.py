@@ -10,7 +10,6 @@ Tests:
 import mlx.core as mx
 import sys
 import time
-import math
 
 
 def test_flash_attention_compatibility():
@@ -18,16 +17,18 @@ def test_flash_attention_compatibility():
     from quantization.mlx_flash_attention import verify_flash_attention_compatible
 
     configs = [
-        (128, 32, 8, 100),   # Qwen 7B: head_dim=128, 32 heads, 8 KV heads
+        (128, 32, 8, 100),  # Qwen 7B: head_dim=128, 32 heads, 8 KV heads
         (128, 32, 32, 100),  # Standard: equal heads
-        (64, 16, 4, 200),    # Smaller model
+        (64, 16, 4, 200),  # Smaller model
     ]
 
     for head_dim, n_heads, n_kv_heads, seq_len in configs:
         result = verify_flash_attention_compatible(head_dim, n_heads, n_kv_heads, seq_len)
         status = "OK" if result["compatible"] else "FAIL"
-        print(f"  Flash Attn [{head_dim}d, {n_heads}h, {n_kv_heads}kv, {seq_len}seq]: "
-              f"{status} (err: {result['max_error']:.2e})")
+        print(
+            f"  Flash Attn [{head_dim}d, {n_heads}h, {n_kv_heads}kv, {seq_len}seq]: "
+            f"{status} (err: {result['max_error']:.2e})"
+        )
         assert result["compatible"], f"Flash Attention failed: {result['notes']}"
     print("  PASS")
 
@@ -39,8 +40,10 @@ def test_outlier_35bit():
     d = 128
     oq = MLXOutlierPolarQuant(d=d, target_bits=3.5, seed=42)
 
-    print(f"  Config: {oq.n_outlier} outlier@{oq.high_bits}b + "
-          f"{oq.n_normal} normal@{oq.low_bits}b = {oq.effective_bits:.2f} avg bits")
+    print(
+        f"  Config: {oq.n_outlier} outlier@{oq.high_bits}b + "
+        f"{oq.n_normal} normal@{oq.low_bits}b = {oq.effective_bits:.2f} avg bits"
+    )
     print(f"  Compression ratio: {oq.compression_ratio():.2f}x")
 
     # Round-trip test
@@ -71,15 +74,17 @@ def test_mlx_lm_hook_interface():
 
     # Test boundary layer (full precision)
     boundary_cache = TurboQuantKVCache(
-        layer_idx=0, num_layers=num_layers,
-        bit_width=4, boundary_layers=boundary, head_dim=head_dim
+        layer_idx=0, num_layers=num_layers, bit_width=4, boundary_layers=boundary, head_dim=head_dim
     )
     assert boundary_cache.is_boundary, "Layer 0 should be boundary"
 
     # Test middle layer (compressed)
     middle_cache = TurboQuantKVCache(
-        layer_idx=16, num_layers=num_layers,
-        bit_width=4, boundary_layers=boundary, head_dim=head_dim
+        layer_idx=16,
+        num_layers=num_layers,
+        bit_width=4,
+        boundary_layers=boundary,
+        head_dim=head_dim,
     )
     assert not middle_cache.is_boundary, "Layer 16 should be compressed"
 
@@ -91,10 +96,18 @@ def test_mlx_lm_hook_interface():
         k_b, v_b = boundary_cache.update_and_fetch(keys, values)
         k_m, v_m = middle_cache.update_and_fetch(keys, values)
 
-        assert k_b.shape == (B, n_kv_heads, step + 1, head_dim), \
-            f"Boundary shape: {k_b.shape}, expected seq={step+1}"
-        assert k_m.shape == (B, n_kv_heads, step + 1, head_dim), \
-            f"Compressed shape: {k_m.shape}, expected seq={step+1}"
+        assert k_b.shape == (
+            B,
+            n_kv_heads,
+            step + 1,
+            head_dim,
+        ), f"Boundary shape: {k_b.shape}, expected seq={step+1}"
+        assert k_m.shape == (
+            B,
+            n_kv_heads,
+            step + 1,
+            head_dim,
+        ), f"Compressed shape: {k_m.shape}, expected seq={step+1}"
 
     # Memory comparison
     print(f"  Boundary cache (10 tokens): {boundary_cache.nbytes / 1024:.1f} KB")
@@ -115,8 +128,11 @@ def test_turbo_cache_memory_at_scale():
 
     caches = [
         TurboQuantKVCache(
-            layer_idx=i, num_layers=num_layers,
-            bit_width=4, boundary_layers=boundary, head_dim=head_dim
+            layer_idx=i,
+            num_layers=num_layers,
+            bit_width=4,
+            boundary_layers=boundary,
+            head_dim=head_dim,
         )
         for i in range(num_layers)
     ]
@@ -141,8 +157,12 @@ def test_turbo_cache_memory_at_scale():
     print(f"  {num_layers} layers, {n_tokens} tokens, {n_kv_heads} KV heads, {head_dim} dim")
     print(f"  FP16 baseline: {fp16_bytes / 1024:.1f} KB")
     print(f"  TurboQuant total: {total_bytes / 1024:.1f} KB")
-    print(f"    Boundary: {boundary_bytes / 1024:.1f} KB ({len([c for c in caches if c.is_boundary])} layers)")
-    print(f"    Compressed: {compressed_bytes / 1024:.1f} KB ({len([c for c in caches if not c.is_boundary])} layers)")
+    print(
+        f"    Boundary: {boundary_bytes / 1024:.1f} KB ({len([c for c in caches if c.is_boundary])} layers)"
+    )
+    print(
+        f"    Compressed: {compressed_bytes / 1024:.1f} KB ({len([c for c in caches if not c.is_boundary])} layers)"
+    )
     print(f"  Compression ratio: {ratio:.2f}x")
     print(f"  Time: {elapsed:.2f}s ({elapsed/n_tokens*1000:.1f} ms/token)")
 
@@ -168,6 +188,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

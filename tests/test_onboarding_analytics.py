@@ -1,4 +1,5 @@
 """Tests for OnboardingAnalytics — conversion rates, drop-offs, time metrics, cohorts."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -38,11 +39,14 @@ class TestConversionRates:
     def test_conversion_between_steps(
         self, store: OnboardingFunnelStore, analytics: OnboardingAnalytics
     ) -> None:
-        _seed_funnel(store, {
-            "signup_started": ["u1", "u2", "u3", "u4"],
-            "workspace_created": ["u1", "u2", "u3"],
-            "llm_configured": ["u1", "u2"],
-        })
+        _seed_funnel(
+            store,
+            {
+                "signup_started": ["u1", "u2", "u3", "u4"],
+                "workspace_created": ["u1", "u2", "u3"],
+                "llm_configured": ["u1", "u2"],
+            },
+        )
         rates = analytics.get_conversion_rates(days=30)
         assert len(rates) >= 2
 
@@ -71,11 +75,14 @@ class TestDropOffPoints:
     def test_identifies_drop_offs(
         self, store: OnboardingFunnelStore, analytics: OnboardingAnalytics
     ) -> None:
-        _seed_funnel(store, {
-            "signup_started": ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8", "u9", "u10"],
-            "workspace_created": ["u1", "u2", "u3", "u4", "u5"],
-            "llm_configured": ["u1", "u2", "u3", "u4"],
-        })
+        _seed_funnel(
+            store,
+            {
+                "signup_started": ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8", "u9", "u10"],
+                "workspace_created": ["u1", "u2", "u3", "u4", "u5"],
+                "llm_configured": ["u1", "u2", "u3", "u4"],
+            },
+        )
         drops = analytics.get_drop_off_points(days=30)
         assert len(drops) > 0
         # Biggest drop-off should be signup -> workspace (5 users, 50%)
@@ -115,10 +122,13 @@ class TestCohortData:
     def test_daily_cohorts(
         self, store: OnboardingFunnelStore, analytics: OnboardingAnalytics
     ) -> None:
-        _seed_funnel(store, {
-            "signup_started": ["u1", "u2"],
-            "first_mission_completed": ["u1"],
-        })
+        _seed_funnel(
+            store,
+            {
+                "signup_started": ["u1", "u2"],
+                "first_mission_completed": ["u1"],
+            },
+        )
         cohorts = analytics.get_cohort_data(period="daily", days=30)
         assert len(cohorts) >= 1
         assert cohorts[0].users_started == 2
@@ -130,10 +140,13 @@ class TestSummary:
     def test_summary_structure(
         self, store: OnboardingFunnelStore, analytics: OnboardingAnalytics
     ) -> None:
-        _seed_funnel(store, {
-            "signup_started": ["u1", "u2"],
-            "workspace_created": ["u1"],
-        })
+        _seed_funnel(
+            store,
+            {
+                "signup_started": ["u1", "u2"],
+                "workspace_created": ["u1"],
+            },
+        )
         summary = analytics.get_summary(days=30)
         assert "period_days" in summary
         assert "conversion_rates" in summary

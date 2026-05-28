@@ -30,9 +30,7 @@ app = typer.Typer(help="OCOP: AI-powered agricultural export tools")
 @app.command("analyze")
 def analyze(
     file: str = typer.Argument(..., help="Product image or JSON file to analyze"),
-    output: str = typer.Option(
-        None, "--output", "-o", help="Output file path (default: stdout)"
-    ),
+    output: str = typer.Option(None, "--output", "-o", help="Output file path (default: stdout)"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed analysis"),
 ):
     """
@@ -98,9 +96,7 @@ def analyze(
     # Write output if requested
     if output:
         output_path = Path(output)
-        output_path.write_text(
-            json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        output_path.write_text(json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8")
         console.print(f"\n[green]✓ Results saved to {output}[/green]")
 
 
@@ -112,7 +108,9 @@ def export_listing(
     product_file: str = typer.Option(
         None, "--product", "-p", help="Product analysis JSON (from 'ocop analyze')"
     ),
-    dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Preview listing without submitting"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", "-n", help="Preview listing without submitting"
+    ),
 ):
     """
     Generate B2B export listings from analyzed product data.
@@ -196,7 +194,9 @@ def list_platforms():
     ]
 
     for name, region, status, api in platforms:
-        status_styled = f"[green]{status}[/green]" if status == "Ready" else f"[yellow]{status}[/yellow]"
+        status_styled = (
+            f"[green]{status}[/green]" if status == "Ready" else f"[yellow]{status}[/yellow]"
+        )
         table.add_row(name, region, status_styled, api)
 
     console.print(table)
@@ -377,7 +377,9 @@ Respond ONLY with valid JSON containing:
 
 Respond ONLY with valid JSON, no markdown."""
 
-    product_info = json.dumps(product_data, indent=2) if product_data else "No product data provided"
+    product_info = (
+        json.dumps(product_data, indent=2) if product_data else "No product data provided"
+    )
 
     user_content = f"""Create a {target.upper()} export listing for this agricultural product:
 

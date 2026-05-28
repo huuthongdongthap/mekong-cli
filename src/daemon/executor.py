@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class MissionResult:
     """Result of a mission execution."""
+
     success: bool
     output: str = ""
     error: str = ""
@@ -49,8 +50,11 @@ class MissionExecutor:
         start = time.time()
         try:
             proc = subprocess.run(
-                shlex.split(command), capture_output=True, text=True,
-                cwd=self._cwd, timeout=t,
+                shlex.split(command),
+                capture_output=True,
+                text=True,
+                cwd=self._cwd,
+                timeout=t,
             )
             return MissionResult(
                 success=proc.returncode == 0,
@@ -61,12 +65,14 @@ class MissionExecutor:
             )
         except subprocess.TimeoutExpired:
             return MissionResult(
-                success=False, error=f"Timeout after {t}s",
+                success=False,
+                error=f"Timeout after {t}s",
                 duration=round(time.time() - start, 2),
             )
         except Exception as e:
             return MissionResult(
-                success=False, error=str(e),
+                success=False,
+                error=str(e),
                 duration=round(time.time() - start, 2),
             )
 
@@ -96,12 +102,14 @@ class MissionExecutor:
             and success=False on any HTTP or parse error.
         """
         start = time.time()
-        payload = json.dumps({
-            "model": model_config.model_id,
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": model_config.max_tokens,
-            "temperature": model_config.temperature,
-        }).encode("utf-8")
+        payload = json.dumps(
+            {
+                "model": model_config.model_id,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": model_config.max_tokens,
+                "temperature": model_config.temperature,
+            }
+        ).encode("utf-8")
 
         req = urllib.request.Request(
             model_config.chat_url,

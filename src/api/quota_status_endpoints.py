@@ -2,6 +2,7 @@
 
 Provides real-time quota consumption, overage status, and tier info.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
@@ -56,8 +57,7 @@ def get_quota_status(
             "quota_exceeded": used >= limit,
             "overage_cap_reached": (
                 overage_cfg.max_overage_credits > 0
-                and balance.get("overage_credits", 0)
-                >= overage_cfg.max_overage_credits
+                and balance.get("overage_credits", 0) >= overage_cfg.max_overage_credits
             ),
         },
     }

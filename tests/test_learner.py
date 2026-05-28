@@ -27,6 +27,7 @@ class TestPatternAnalyzer(unittest.TestCase):
 
     def tearDown(self):
         import shutil
+
         shutil.rmtree(self._tmpdir, ignore_errors=True)
         _eb._default_bus = None
 
@@ -75,10 +76,13 @@ class TestPatternAnalyzer(unittest.TestCase):
         # Create entries with known timestamps
         base_time = time.time()
         for i in range(5):
-            self.store.record(MemoryEntry(
-                goal=f"task{i}", status="success",
-                timestamp=base_time + i,
-            ))
+            self.store.record(
+                MemoryEntry(
+                    goal=f"task{i}",
+                    status="success",
+                    timestamp=base_time + i,
+                )
+            )
 
         patterns = self.analyzer.get_time_patterns()
         # May or may not find patterns depending on time — just verify no crash

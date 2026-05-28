@@ -1,0 +1,42 @@
+{
+  "portfolio": [
+    {
+      "name": "PTP Solar Platform",
+      "type": "core_product",
+      "status": "building",
+      "stage": "MVP",
+      "created": "2026-05-20",
+      "stack": ["Next.js", "Cloudflare Workers", "D1", "MQTT", "Time-series DB"],
+      "metrics": {
+        "customers": 0,
+        "mrr": 0,
+        "avg_energy_savings": "0%",
+        "launch_date": null
+      }
+    },
+    {
+      "name": "Solar Assessment Tool",
+      "type": "lead_gen",
+      "status": "planned",
+      "stage": "design",
+      "description": "Free ROI calculator to attract manufacturing customers",
+      "metrics": {
+        "assessments_completed": 0,
+        "conversion_rate": "0%",
+        "leads_generated": 0
+      }
+    },
+    {
+      "name": "Energy Trading Platform",
+      "type": "future_product",
+      "status": "research",
+      "stage": "concept",
+      "description": "P2P energy trading for solar producers",
+      "target_launch": "2027-Q1"
+    }
+  ],
+  "total_companies": 1,
+  "total_products": 3,
+  "total_mrr": 0,
+  "total_customers": 0
+}

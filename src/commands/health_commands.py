@@ -27,8 +27,10 @@ def health(
 
     def check_license() -> dict:
         from src.core.health_endpoint import ComponentStatus
+
         try:
             from src.lib.raas_gate_validator import RaasGateValidator
+
             validator = RaasGateValidator()
             is_valid, _ = validator.validate()
             return ComponentStatus(
@@ -40,6 +42,7 @@ def health(
 
     def check_usage() -> dict:
         from src.core.health_endpoint import ComponentStatus
+
         try:
             return ComponentStatus(status="healthy", message="Usage tracking ready")
         except Exception as e:
@@ -47,6 +50,7 @@ def health(
 
     def check_crash_detector() -> dict:
         from src.core.health_endpoint import ComponentStatus
+
         try:
             detector = get_crash_detector()
             freq = detector.get_frequency()
@@ -64,8 +68,10 @@ def health(
 
     def check_telegram() -> dict:
         from src.core.health_endpoint import ComponentStatus
+
         try:
             import os
+
             if os.getenv("TELEGRAM_BOT_TOKEN"):
                 return ComponentStatus(status="healthy", message="Telegram configured")
             return ComponentStatus(status="degraded", message="Telegram not configured")
@@ -74,8 +80,10 @@ def health(
 
     def check_proxy() -> dict:
         from src.core.health_endpoint import ComponentStatus
+
         try:
             import os
+
             proxy_url = os.getenv("LLM_BASE_URL", os.getenv("ANTHROPIC_BASE_URL", ""))
             return ComponentStatus(
                 status="healthy",
@@ -103,5 +111,6 @@ def health(
             time.sleep(1)
     except KeyboardInterrupt:
         from src.core.health_endpoint import stop_health_server
+
         stop_health_server()
         console.print("\n[yellow]Health endpoint stopped[/yellow]")

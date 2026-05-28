@@ -32,7 +32,7 @@ PRODUCTS = [
     },
     {
         "name": "Vietnamese Agency Kit - Binh Pháp Business Framework",
-        "price": 6700, # $67
+        "price": 6700,  # $67
         "description": """🇻🇳 Vietnamese Agency Kit
 
 ✨ Local Market Presets:
@@ -57,7 +57,7 @@ PRODUCTS = [
     },
     {
         "name": "AgencyOS Pro - Complete Agency Bundle",
-        "price": 19700, # $197
+        "price": 19700,  # $197
         "description": """🏯 AgencyOS Pro - Complete Agency Platform
 
 ✨ Everything You Need:
@@ -79,7 +79,7 @@ PRODUCTS = [
     },
     {
         "name": "AgencyOS Enterprise - Multi-Team Platform",
-        "price": 49700, # $497
+        "price": 49700,  # $497
         "description": """🏛️ AgencyOS Enterprise - White-Label Platform
 
 ✨ Enterprise Features:
@@ -102,14 +102,15 @@ PRODUCTS = [
     },
 ]
 
+
 class GumroadPublisher:
     """Handles interaction with Gumroad API for product publishing."""
-    
+
     API_URL = "https://api.gumroad.com/v2"
-    
+
     def __init__(self):
         self.token = os.environ.get("GUMROAD_ACCESS_TOKEN")
-    
+
     def check_files(self) -> List[str]:
         """Verify existence of all product files."""
         missing = []
@@ -125,21 +126,21 @@ class GumroadPublisher:
         """Preview publishing process."""
         missing = self.check_files()
         total_value = sum(p["price"] for p in PRODUCTS) / 100
-        
+
         return {
             "products": PRODUCTS,
             "missing_files": missing,
             "total_value": total_value,
-            "has_token": bool(self.token)
+            "has_token": bool(self.token),
         }
 
     def publish_all(self) -> List[Dict[str, Any]]:
         """Publish all products to Gumroad."""
         if not self.token:
             raise ValueError("GUMROAD_ACCESS_TOKEN not set")
-            
+
         import requests  # Import here to avoid dependency if just doing dry run
-        
+
         results = []
         for product in PRODUCTS:
             try:
@@ -151,19 +152,21 @@ class GumroadPublisher:
                     "currency": "usd",
                     "access_token": self.token,
                 }
-                
+
                 resp = requests.post(f"{self.API_URL}/products", data=data)
                 resp.raise_for_status()
                 result = resp.json()
-                
+
                 if not result.get("success"):
-                    results.append({"name": product["name"], "status": "error", "error": str(result)})
+                    results.append(
+                        {"name": product["name"], "status": "error", "error": str(result)}
+                    )
                     continue
-                    
+
                 prod_data = result.get("product", {})
                 pid = prod_data.get("id")
                 url = prod_data.get("short_url")
-                
+
                 # 2. Upload File
                 zip_path = Path(product["zip_path"])
                 if zip_path.exists():
@@ -172,20 +175,19 @@ class GumroadPublisher:
                         resp = requests.post(
                             f"{self.API_URL}/products/{pid}/files",
                             data={"access_token": self.token},
-                            files=files
+                            files=files,
                         )
-                
+
                 # 3. Enable Product
-                requests.put(f"{self.API_URL}/products/{pid}/enable", data={"access_token": self.token})
-                
-                results.append({
-                    "name": product["name"],
-                    "status": "success",
-                    "url": url,
-                    "id": pid
-                })
-                
+                requests.put(
+                    f"{self.API_URL}/products/{pid}/enable", data={"access_token": self.token}
+                )
+
+                results.append(
+                    {"name": product["name"], "status": "success", "url": url, "id": pid}
+                )
+
             except Exception as e:
                 results.append({"name": product["name"], "status": "error", "error": str(e)})
-                
+
         return results

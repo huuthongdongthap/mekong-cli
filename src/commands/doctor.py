@@ -71,7 +71,13 @@ def diagnose() -> None:
         console.print(f"  [dim]pip3 install {' '.join(packages_missing)}[/dim]")
         all_passed = False
 
-    checks.append(("Required Packages", "PASS" if not packages_missing else "FAIL", f"{len(packages_installed)}/{len(required_packages)}"))
+    checks.append(
+        (
+            "Required Packages",
+            "PASS" if not packages_missing else "FAIL",
+            f"{len(packages_installed)}/{len(required_packages)}",
+        )
+    )
 
     # Check 3: Directory structure
     console.print("\n[bold]3. Directory Structure[/bold]")
@@ -90,7 +96,13 @@ def diagnose() -> None:
             dirs_missing.append(dir_name)
             console.print(f"  [yellow]⚠[/yellow] {dir_name}/ (missing)")
 
-    checks.append(("Directory Structure", "PASS" if not dirs_missing else "WARN", f"{len(dirs_exist)}/{len(required_dirs)}"))
+    checks.append(
+        (
+            "Directory Structure",
+            "PASS" if not dirs_missing else "WARN",
+            f"{len(dirs_exist)}/{len(required_dirs)}",
+        )
+    )
 
     # Check 4: Config files
     console.print("\n[bold]4. Configuration Files[/bold]")
@@ -112,12 +124,19 @@ def diagnose() -> None:
             configs_missing.append(config_file)
             console.print(f"  [yellow]⚠[/yellow] {config_file} (missing)")
 
-    checks.append(("Config Files", "PASS" if not configs_missing else "WARN", f"{len(configs_found)}/{len(config_files)}"))
+    checks.append(
+        (
+            "Config Files",
+            "PASS" if not configs_missing else "WARN",
+            f"{len(configs_found)}/{len(config_files)}",
+        )
+    )
 
     # Check 5: Environment variables
     console.print("\n[bold]5. Environment Variables[/bold]")
     import os
     from dotenv import load_dotenv
+
     load_dotenv()
 
     required_env_vars = ["ANTHROPIC_BASE_URL", "ANTHROPIC_MODEL"]
@@ -133,7 +152,13 @@ def diagnose() -> None:
             env_vars_missing.append(env_var)
             console.print(f"  [red]✗[/red] {env_var} (not set)")
 
-    checks.append(("Environment Variables", "PASS" if not env_vars_missing else "FAIL", f"{len(env_vars_set)}/{len(required_env_vars)}"))
+    checks.append(
+        (
+            "Environment Variables",
+            "PASS" if not env_vars_missing else "FAIL",
+            f"{len(env_vars_set)}/{len(required_env_vars)}",
+        )
+    )
 
     if env_vars_missing:
         console.print("\n  [yellow]Set missing env vars:[/yellow]")
@@ -143,6 +168,7 @@ def diagnose() -> None:
     # Check 6: Network connectivity (API endpoint)
     console.print("\n[bold]6. API Endpoint Connectivity[/bold]")
     import httpx
+
     base_url = os.getenv("ANTHROPIC_BASE_URL", "")
 
     if base_url:
@@ -210,7 +236,10 @@ def info() -> None:
     table.add_column("Value", style="white")
 
     table.add_row("Platform", platform.platform())
-    table.add_row("Python Version", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+    table.add_row(
+        "Python Version",
+        f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+    )
     table.add_row("Python Executable", sys.executable)
     table.add_row("Working Directory", os.getcwd())
     table.add_row("System Encoding", sys.getdefaultencoding())
@@ -237,6 +266,7 @@ def deps() -> None:
         )
 
         import json
+
         packages = json.loads(result.stdout)
 
         table = Table(title=f"Python Packages ({len(packages)} installed)")

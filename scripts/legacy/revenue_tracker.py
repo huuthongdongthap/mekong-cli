@@ -80,9 +80,7 @@ def show_dashboard():
     if history:
         print("\n📜 Recent:")
         for entry in reversed(history):
-            print(
-                f"  ${entry['amount']} - {entry['platform']} - {entry.get('note', '')}"
-            )
+            print(f"  ${entry['amount']} - {entry['platform']} - {entry.get('note', '')}")
 
     print("\n" + "=" * 50 + "\n")
 

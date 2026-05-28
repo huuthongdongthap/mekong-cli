@@ -4,6 +4,7 @@ Usage:
   export POLAR_ACCESS_TOKEN=polar_oat_xxx
   python3 scripts/create-polar-products.py [--sandbox]
 """
+
 import os
 import sys
 
@@ -35,9 +36,7 @@ def main():
                 "200 credits/month. Run your business with AI agents."
             ),
             "recurring_interval": "month",
-            "prices": [
-                {"amount_type": "fixed", "price_amount": 4900, "price_currency": "usd"}
-            ],
+            "prices": [{"amount_type": "fixed", "price_amount": 4900, "price_currency": "usd"}],
         },
         {
             "name": "Mekong IDE Growth",
@@ -46,9 +45,7 @@ def main():
                 "1000 credits/month. Priority execution + webhooks."
             ),
             "recurring_interval": "month",
-            "prices": [
-                {"amount_type": "fixed", "price_amount": 14900, "price_currency": "usd"}
-            ],
+            "prices": [{"amount_type": "fixed", "price_amount": 14900, "price_currency": "usd"}],
         },
         {
             "name": "Mekong IDE Pro",
@@ -57,9 +54,7 @@ def main():
                 "5000 credits/month. Dedicated support + SLA."
             ),
             "recurring_interval": "month",
-            "prices": [
-                {"amount_type": "fixed", "price_amount": 49900, "price_currency": "usd"}
-            ],
+            "prices": [{"amount_type": "fixed", "price_amount": 49900, "price_currency": "usd"}],
         },
     ]
 

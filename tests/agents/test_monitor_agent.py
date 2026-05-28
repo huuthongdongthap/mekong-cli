@@ -75,10 +75,12 @@ class TestMonitorAgentExecute:
         assert result.success is False
         assert "Unknown task type" in result.error
 
-    @patch.object(MonitorAgent, '_execute_http_health', side_effect=Exception("Test error"))
+    @patch.object(MonitorAgent, "_execute_http_health", side_effect=Exception("Test error"))
     def test_execute_exception_handling(self, mock_method):
         agent = MonitorAgent()
-        task = Task(id="test", description="Test exception", input={"type": "http_health", "query": ""})
+        task = Task(
+            id="test", description="Test exception", input={"type": "http_health", "query": ""}
+        )
         result = agent.execute(task)
         assert result.success is False
         assert "Test error" in result.error
@@ -87,43 +89,63 @@ class TestMonitorAgentExecute:
 class TestMonitorAgentHttpHealth:
     """Test HTTP health check execution"""
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_http_health_success(self, mock_run):
         mock_run.return_value = MagicMock(stdout="200 0.250", returncode=0)
         agent = MonitorAgent()
-        task = Task(id="health", description="HTTP health check", input={"type": "http_health", "query": "check http://localhost:8080"})
+        task = Task(
+            id="health",
+            description="HTTP health check",
+            input={"type": "http_health", "query": "check http://localhost:8080"},
+        )
         result = agent._execute_http_health(task)
         assert result.success is True
         assert result.output["status"] == "healthy"
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_http_health_server_error(self, mock_run):
         mock_run.return_value = MagicMock(stdout="500 0.500", returncode=0)
         agent = MonitorAgent()
-        task = Task(id="health", description="HTTP health check", input={"type": "http_health", "query": "check http://localhost:8080"})
+        task = Task(
+            id="health",
+            description="HTTP health check",
+            input={"type": "http_health", "query": "check http://localhost:8080"},
+        )
         result = agent._execute_http_health(task)
         assert result.success is False
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_http_health_slow_response(self, mock_run):
         mock_run.return_value = MagicMock(stdout="200 2.500", returncode=0)
         agent = MonitorAgent()
-        task = Task(id="health", description="HTTP health check", input={"type": "http_health", "query": "check http://localhost:8080"})
+        task = Task(
+            id="health",
+            description="HTTP health check",
+            input={"type": "http_health", "query": "check http://localhost:8080"},
+        )
         result = agent._execute_http_health(task)
         assert "SLOW" in result.output["alert"]
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_http_health_no_url(self, mock_run):
         agent = MonitorAgent()
-        task = Task(id="health", description="HTTP health check", input={"type": "http_health", "query": "check health now"})
+        task = Task(
+            id="health",
+            description="HTTP health check",
+            input={"type": "http_health", "query": "check health now"},
+        )
         result = agent._execute_http_health(task)
         assert result.success is False
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_http_health_timeout(self, mock_run):
         mock_run.side_effect = subprocess.TimeoutExpired(cmd="curl", timeout=15)
         agent = MonitorAgent()
-        task = Task(id="health", description="HTTP health check", input={"type": "http_health", "query": "check http://localhost:8080"})
+        task = Task(
+            id="health",
+            description="HTTP health check",
+            input={"type": "http_health", "query": "check http://localhost:8080"},
+        )
         result = agent._execute_http_health(task)
         assert result.success is False
         assert "timeout" in result.error
@@ -132,35 +154,51 @@ class TestMonitorAgentHttpHealth:
 class TestMonitorAgentPortCheck:
     """Test port check execution"""
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_port_open(self, mock_run):
         mock_run.return_value = MagicMock(stdout="", stderr="", returncode=0)
         agent = MonitorAgent()
-        task = Task(id="port", description="Port check", input={"type": "port_check", "query": "check port 5432"})
+        task = Task(
+            id="port",
+            description="Port check",
+            input={"type": "port_check", "query": "check port 5432"},
+        )
         result = agent._execute_port_check(task)
         assert result.success is True
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_port_closed(self, mock_run):
         # nc returns exit code 1 when port is closed
         mock_run.return_value = MagicMock(stdout="", stderr="", returncode=1)
         agent = MonitorAgent()
-        task = Task(id="port", description="Port check", input={"type": "port_check", "query": "check port 9999"})
+        task = Task(
+            id="port",
+            description="Port check",
+            input={"type": "port_check", "query": "check port 9999"},
+        )
         result = agent._execute_port_check(task)
         assert result.success is False
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_port_invalid_low(self, mock_run):
         agent = MonitorAgent()
-        task = Task(id="port", description="Port check", input={"type": "port_check", "query": "check port 00"})
+        task = Task(
+            id="port",
+            description="Port check",
+            input={"type": "port_check", "query": "check port 00"},
+        )
         result = agent._execute_port_check(task)
         assert result.success is False
         assert "Invalid port" in result.error
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_port_invalid_high(self, mock_run):
         agent = MonitorAgent()
-        task = Task(id="port", description="Port check", input={"type": "port_check", "query": "check port 70000"})
+        task = Task(
+            id="port",
+            description="Port check",
+            input={"type": "port_check", "query": "check port 70000"},
+        )
         result = agent._execute_port_check(task)
         assert result.success is False
         assert "Invalid port" in result.error
@@ -169,52 +207,83 @@ class TestMonitorAgentPortCheck:
 class TestMonitorAgentSystemResources:
     """Test system resources monitoring"""
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_system_resources_healthy(self, mock_run):
         mock_run.side_effect = [
             MagicMock(stdout="CPU usage: 25.5% user", returncode=0),
-            MagicMock(stdout="Pages active:      12345.\nPages inactive:     4321.\n", returncode=0),
+            MagicMock(
+                stdout="Pages active:      12345.\nPages inactive:     4321.\n", returncode=0
+            ),
             MagicMock(stdout="17179869184", returncode=0),
-            MagicMock(stdout="Filesystem  Size  Used Avail Use% Mounted\n/dev/disk1  500G  275G  225G  45% /\n", returncode=0),
+            MagicMock(
+                stdout="Filesystem  Size  Used Avail Use% Mounted\n/dev/disk1  500G  275G  225G  45% /\n",
+                returncode=0,
+            ),
         ]
         agent = MonitorAgent()
-        task = Task(id="system", description="System check", input={"type": "system_resources", "query": "check system"})
+        task = Task(
+            id="system",
+            description="System check",
+            input={"type": "system_resources", "query": "check system"},
+        )
         result = agent._execute_system_resources(task)
         assert result.success is True
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_system_resources_high_cpu(self, mock_run):
         mock_run.side_effect = [
             MagicMock(stdout="CPU usage: 95.0% user", returncode=0),
-            MagicMock(stdout="Pages active:      12345.\nPages inactive:     4321.\n", returncode=0),
+            MagicMock(
+                stdout="Pages active:      12345.\nPages inactive:     4321.\n", returncode=0
+            ),
             MagicMock(stdout="17179869184", returncode=0),
-            MagicMock(stdout="Filesystem  Size  Used Avail Use% Mounted\n/dev/disk1  500G  275G  225G  45% /\n", returncode=0),
+            MagicMock(
+                stdout="Filesystem  Size  Used Avail Use% Mounted\n/dev/disk1  500G  275G  225G  45% /\n",
+                returncode=0,
+            ),
         ]
         agent = MonitorAgent()
-        task = Task(id="system", description="System check", input={"type": "system_resources", "query": "check system"})
+        task = Task(
+            id="system",
+            description="System check",
+            input={"type": "system_resources", "query": "check system"},
+        )
         result = agent._execute_system_resources(task)
         assert result.success is False
         assert any("CPU HIGH" in alert for alert in result.output["alerts"])
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_system_resources_high_disk(self, mock_run):
         mock_run.side_effect = [
             MagicMock(stdout="CPU usage: 25.0% user", returncode=0),
-            MagicMock(stdout="Pages active:      12345.\nPages inactive:     4321.\n", returncode=0),
+            MagicMock(
+                stdout="Pages active:      12345.\nPages inactive:     4321.\n", returncode=0
+            ),
             MagicMock(stdout="17179869184", returncode=0),
-            MagicMock(stdout="Filesystem  Size  Used Avail Use% Mounted\n/dev/disk1  500G  475G   25G  95% /\n", returncode=0),
+            MagicMock(
+                stdout="Filesystem  Size  Used Avail Use% Mounted\n/dev/disk1  500G  475G   25G  95% /\n",
+                returncode=0,
+            ),
         ]
         agent = MonitorAgent()
-        task = Task(id="system", description="System check", input={"type": "system_resources", "query": "check system"})
+        task = Task(
+            id="system",
+            description="System check",
+            input={"type": "system_resources", "query": "check system"},
+        )
         result = agent._execute_system_resources(task)
         assert result.success is False
         assert any("DISK HIGH" in alert for alert in result.output["alerts"])
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_system_resources_timeout(self, mock_run):
         mock_run.side_effect = subprocess.TimeoutExpired(cmd="top", timeout=5)
         agent = MonitorAgent()
-        task = Task(id="system", description="System check", input={"type": "system_resources", "query": "check system"})
+        task = Task(
+            id="system",
+            description="System check",
+            input={"type": "system_resources", "query": "check system"},
+        )
         result = agent._execute_system_resources(task)
         assert result.success is False
 
@@ -222,11 +291,17 @@ class TestMonitorAgentSystemResources:
 class TestMonitorAgentFullHealth:
     """Test full health check"""
 
-    @patch.object(MonitorAgent, '_execute_system_resources')
+    @patch.object(MonitorAgent, "_execute_system_resources")
     def test_full_health_check(self, mock_system):
-        mock_system.return_value = Result(task_id="system", success=True, output={"metrics": {"cpu": 50}})
+        mock_system.return_value = Result(
+            task_id="system", success=True, output={"metrics": {"cpu": 50}}
+        )
         agent = MonitorAgent()
-        task = Task(id="full", description="Full health check", input={"type": "full_health", "query": "full check"})
+        task = Task(
+            id="full",
+            description="Full health check",
+            input={"type": "full_health", "query": "full check"},
+        )
         result = agent._execute_full_health(task)
         assert "system" in result.output
         assert "timestamp" in result.output

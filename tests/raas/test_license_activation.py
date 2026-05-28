@@ -123,10 +123,12 @@ class TestLicenseManager:
     @pytest.fixture
     def license_manager(self, temp_config_dir):
         """Create LicenseManager with temp directory."""
-        with patch('src.core.license_manager.get_secure_storage') as mock_storage_factory:
+        with patch("src.core.license_manager.get_secure_storage") as mock_storage_factory:
             mock_storage = MagicMock()
             mock_storage.encrypt.side_effect = lambda x: f"enc_{x}"
-            mock_storage.decrypt.side_effect = lambda x: x.replace("enc_", "") if x.startswith("enc_") else x
+            mock_storage.decrypt.side_effect = lambda x: (
+                x.replace("enc_", "") if x.startswith("enc_") else x
+            )
             mock_storage_factory.return_value = mock_storage
             return LicenseManager(config_dir=temp_config_dir)
 
@@ -295,7 +297,7 @@ class TestLicenseManagerEncryption:
 class TestGlobalFunctions:
     """Test global convenience functions."""
 
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.license_manager.get_license_manager")
     def test_is_license_valid(self, mock_get_manager):
         """Test is_license_valid function."""
         mock_manager = MagicMock()
@@ -305,7 +307,7 @@ class TestGlobalFunctions:
         assert is_license_valid() is True
         mock_manager.is_valid.assert_called_once()
 
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.license_manager.get_license_manager")
     def test_has_feature(self, mock_get_manager):
         """Test has_feature function."""
         mock_manager = MagicMock()
@@ -315,7 +317,7 @@ class TestGlobalFunctions:
         assert has_feature("cli:premium") is True
         mock_manager.has_feature.assert_called_once_with("cli:premium")
 
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.license_manager.get_license_manager")
     def test_get_license_tier(self, mock_get_manager):
         """Test get_license_tier function."""
         mock_manager = MagicMock()
@@ -334,10 +336,11 @@ class TestLicenseActivationCLI:
     def runner(self):
         """Create Typer CliRunner."""
         from typer.testing import CliRunner
+
         return CliRunner()
 
-    @patch('src.core.raas_auth.RaaSAuthClient')
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.raas_auth.RaaSAuthClient")
+    @patch("src.core.license_manager.get_license_manager")
     def test_activate_license_success(self, mock_get_manager, mock_auth_client, runner):
         """Test successful license activation."""
         # Mock auth client
@@ -367,8 +370,8 @@ class TestLicenseActivationCLI:
         assert "License stored" in result.output
         assert "Activation complete" in result.output
 
-    @patch('src.core.raas_auth.RaaSAuthClient')
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.raas_auth.RaaSAuthClient")
+    @patch("src.core.license_manager.get_license_manager")
     def test_activate_license_invalid(self, mock_get_manager, mock_auth_client, runner):
         """Test activation with invalid license."""
         mock_auth = MagicMock()
@@ -404,7 +407,7 @@ class TestLicenseActivationCLI:
             # Should read from env
             assert result.exit_code == 0 or "No license key" not in result.output
 
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.license_manager.get_license_manager")
     def test_license_status_no_license(self, mock_get_manager, runner):
         """Test status when no license."""
         mock_manager = MagicMock()
@@ -418,7 +421,7 @@ class TestLicenseActivationCLI:
         assert result.exit_code == 0
         assert "No license activated" in result.output
 
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.license_manager.get_license_manager")
     def test_license_status_with_license(self, mock_get_manager, runner):
         """Test status with valid license."""
         mock_manager = MagicMock()
@@ -438,7 +441,7 @@ class TestLicenseActivationCLI:
         assert "tenant_123" in result.output
         assert "PRO" in result.output
 
-    @patch('src.core.license_manager.get_license_manager')
+    @patch("src.core.license_manager.get_license_manager")
     def test_deactivate_license(self, mock_get_manager, runner):
         """Test license deactivation."""
         mock_manager = MagicMock()

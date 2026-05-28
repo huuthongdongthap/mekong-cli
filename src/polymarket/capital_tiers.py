@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CapitalTier:
     """A capital tier with progression requirements."""
+
     level: int
     max_capital: float
     min_dry_run_days: int
@@ -30,6 +31,7 @@ TIERS: list[CapitalTier] = [
 @dataclass
 class TierProgress:
     """Progress report for current tier."""
+
     tier: CapitalTier
     days_completed: int
     profitable_days: int

@@ -156,17 +156,18 @@ def cmd_campaign(args):
         return
     run("campaign_manager.py", args)
 
+
 def cmd_test():
     """Run test suite."""
     print(f"{BLUE}▶ Running tests...{RESET}")
     # Run pytest directly via subprocess to avoid shell/pipe issues
     result = subprocess.run(
-        [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short"], 
-        capture_output=True, 
+        [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short"],
+        capture_output=True,
         text=True,
-        cwd=PROJECT_DIR
+        cwd=PROJECT_DIR,
     )
-    
+
     if result.returncode == 0:
         print(f"{GREEN}✅ Tests passed{RESET}")
     else:
@@ -175,6 +176,7 @@ def cmd_test():
         print(result.stdout)
         print(result.stderr)
     return result.returncode == 0
+
 
 def cmd_ship():
     """Full ship pipeline: test → commit → push."""

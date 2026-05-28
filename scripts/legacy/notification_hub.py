@@ -24,9 +24,9 @@ EVENTS_FILE = CONFIG_DIR / "events.json"
 # Notification methods
 def notify_macos(title, message, sound="default"):
     """Send macOS notification via osascript."""
-    script = f'''
+    script = f"""
     display notification "{message}" with title "{title}" sound name "{sound}"
-    '''
+    """
     try:
         subprocess.run(["osascript", "-e", script], capture_output=True)
         return True
@@ -135,9 +135,7 @@ def event_alert(title, message):
 def cmd_test():
     """Test notification system."""
     print("🔔 Testing notification system...")
-    send_notification(
-        "info", "Test Notification", "If you see this, notifications work!"
-    )
+    send_notification("info", "Test Notification", "If you see this, notifications work!")
     print("✅ Check your notification center")
 
 

@@ -96,9 +96,7 @@ def _verify_jwt_token(token: str, secret: str) -> TenantContext:
 
         # Verify signature (HS256)
         signing_input = f"{header_b64}.{payload_b64}".encode()
-        expected_sig = hmac.new(
-            secret.encode(), signing_input, hashlib.sha256
-        ).digest()
+        expected_sig = hmac.new(secret.encode(), signing_input, hashlib.sha256).digest()
         # Pad base64url to standard base64
 
         def _b64_decode(s: str) -> bytes:
@@ -118,9 +116,7 @@ def _verify_jwt_token(token: str, secret: str) -> TenantContext:
 
         tenant_id: Optional[str] = payload.get("sub") or payload.get("tenant_id")
         if not tenant_id:
-            raise HTTPException(
-                status_code=401, detail="JWT missing 'sub' or 'tenant_id' claim."
-            )
+            raise HTTPException(status_code=401, detail="JWT missing 'sub' or 'tenant_id' claim.")
 
         tenant_name: str = payload.get("tenant_name", tenant_id)
 
@@ -133,9 +129,7 @@ def _verify_jwt_token(token: str, secret: str) -> TenantContext:
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(
-            status_code=401, detail=f"JWT decode error: {exc}"
-        ) from exc
+        raise HTTPException(status_code=401, detail=f"JWT decode error: {exc}") from exc
 
 
 __all__ = ["require_tenant"]

@@ -134,11 +134,7 @@ class LicenseKeyGenerator:
         """Create HMAC signature for payload."""
         # self._secret_key is never None due to default in __init__
         secret_key: str = self._secret_key if self._secret_key else ""
-        signature = hmac.new(
-            secret_key.encode(),
-            payload.encode(),
-            hashlib.sha256
-        ).digest()
+        signature = hmac.new(secret_key.encode(), payload.encode(), hashlib.sha256).digest()
         return base64.urlsafe_b64encode(signature).decode().rstrip("=")
 
     def verify_signature(self, key: str, email: str) -> bool:
@@ -179,6 +175,7 @@ TIER_LIMITS = {
 def get_tier_limits(tier: str) -> dict[str, Any]:
     """Get usage limits for a tier."""
     from typing import cast
+
     return cast(dict[str, Any], TIER_LIMITS.get(tier, TIER_LIMITS["free"]))
 
 

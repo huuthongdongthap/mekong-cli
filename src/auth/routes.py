@@ -28,7 +28,6 @@ from src.auth.rate_limit_decorator import (
     rate_limit_auth_refresh,
 )
 
-
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 # Templates configuration
@@ -99,25 +98,29 @@ async def dev_login(request: Request):
         email=test_email,
         provider="local",
         oauth_id="dev-local-user",
-        defaults={"name": "Dev User", "role": "owner"}  # Full access for testing
+        defaults={"name": "Dev User", "role": "owner"},  # Full access for testing
     )
 
     # Create session with owner role for full access testing
-    session, jwt_token, refresh_token = await session_manager.create_session(  # noqa: F841 (session/refresh_token unused in dev login)
-        user=user,
-        role="owner",
+    session, jwt_token, refresh_token = (
+        await session_manager.create_session(  # noqa: F841 (session/refresh_token unused in dev login)
+            user=user,
+            role="owner",
+        )
     )
 
     # Create response with session cookie
-    response = JSONResponse({
-        "success": True,
-        "message": "Dev login successful",
-        "user": {
-            "id": str(user.id),
-            "email": user.email,
-            "role": "owner",
-        },
-    })
+    response = JSONResponse(
+        {
+            "success": True,
+            "message": "Dev login successful",
+            "user": {
+                "id": str(user.id),
+                "email": user.email,
+                "role": "owner",
+            },
+        }
+    )
 
     session_manager.set_session_cookie(response, jwt_token)
     return response
@@ -181,7 +184,9 @@ async def google_callback(
     client = OAuth2Client()
     try:
         # Handle callback and get user info
-        user_info, access_token = await client.handle_google_callback(code)  # noqa: F841 (access_token unused)
+        user_info, access_token = await client.handle_google_callback(
+            code
+        )  # noqa: F841 (access_token unused)
 
         # Find or create user
         user_repo = UserRepository()
@@ -193,9 +198,11 @@ async def google_callback(
 
         # Create session
         session_manager = SessionManager(user_repo)
-        session, jwt_token, refresh_token = await session_manager.create_session(  # noqa: F841 (session/refresh_token unused)
-            user=user,
-            role="member",  # Default role, can be updated from license
+        session, jwt_token, refresh_token = (
+            await session_manager.create_session(  # noqa: F841 (session/refresh_token unused)
+                user=user,
+                role="member",  # Default role, can be updated from license
+            )
         )
 
         # Create response with session cookie
@@ -271,7 +278,9 @@ async def github_callback(
     client = OAuth2Client()
     try:
         # Handle callback and get user info
-        user_info, access_token = await client.handle_github_callback(code)  # noqa: F841 (access_token unused)
+        user_info, access_token = await client.handle_github_callback(
+            code
+        )  # noqa: F841 (access_token unused)
 
         # Find or create user
         user_repo = UserRepository()
@@ -283,9 +292,11 @@ async def github_callback(
 
         # Create session
         session_manager = SessionManager(user_repo)
-        session, jwt_token, refresh_token = await session_manager.create_session(  # noqa: F841 (session/refresh_token unused)
-            user=user,
-            role="member",
+        session, jwt_token, refresh_token = (
+            await session_manager.create_session(  # noqa: F841 (session/refresh_token unused)
+                user=user,
+                role="member",
+            )
         )
 
         # Create response with session cookie
@@ -376,12 +387,17 @@ async def refresh_token(request: Request):
         )
 
     # Generate new tokens
-    new_access, _ = session_manager.create_access_token(user), None  # new_refresh intentionally unused
+    new_access, _ = (
+        session_manager.create_access_token(user),
+        None,
+    )  # new_refresh intentionally unused
 
-    response = JSONResponse({
-        "success": True,
-        "message": "Token refreshed",
-    })
+    response = JSONResponse(
+        {
+            "success": True,
+            "message": "Token refreshed",
+        }
+    )
     session_manager.set_session_cookie(response, new_access)
     return response
 
@@ -426,6 +442,7 @@ async def stripe_webhook(request: Request):
     # Parse event
     try:
         import json
+
         event = json.loads(payload.decode("utf-8"))
         event_type = event.get("type")
         event_data = event.get("data", {})
@@ -441,13 +458,11 @@ async def stripe_webhook(request: Request):
 
         if result.get("success"):
             return JSONResponse(
-                status_code=200,
-                content={"received": True, "message": result.get("message")}
+                status_code=200, content={"received": True, "message": result.get("message")}
             )
         else:
             return JSONResponse(
-                status_code=400,
-                content={"received": True, "error": result.get("message")}
+                status_code=400, content={"received": True, "error": result.get("message")}
             )
 
     except json.JSONDecodeError:
@@ -460,6 +475,5 @@ async def stripe_webhook(request: Request):
     except Exception as e:
         # Still return 200 to prevent Stripe retries for handled errors
         return JSONResponse(
-            status_code=200,
-            content={"received": True, "error": f"Processing error: {str(e)}"}
+            status_code=200, content={"received": True, "error": f"Processing error: {str(e)}"}
         )

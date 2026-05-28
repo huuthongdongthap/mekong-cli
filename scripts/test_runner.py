@@ -73,21 +73,21 @@ class TestRunner:
 
 def main():
     """CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="RỪNG Test Runner - Optimized test execution"
-    )
+    parser = argparse.ArgumentParser(description="RỪNG Test Runner - Optimized test execution")
     parser.add_argument(
         "paths",
         nargs="*",
         help="Test paths to run (default: tests/)",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Verbose output",
     )
     parser.add_argument(
-        "-x", "--fail-fast",
+        "-x",
+        "--fail-fast",
         action="store_true",
         help="Stop on first failure",
     )

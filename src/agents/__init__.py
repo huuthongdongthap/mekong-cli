@@ -31,6 +31,7 @@ AGENT_REGISTRY = registry._agents
 # Auto-discover community plugins (never crashes CLI)
 try:
     from src.core.plugin_loader import PluginLoader
+
     _plugin_loader = PluginLoader(agent_registry=registry)
     _plugin_loader.discover_all()
 except Exception:

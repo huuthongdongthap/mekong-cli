@@ -64,6 +64,7 @@ class TestActivateCommand:
     def mock_tenant_context(self):
         """Create mock tenant context."""
         from src.core.raas_auth import TenantContext
+
         return TenantContext(
             tenant_id="test_tenant_123",
             tier="pro",
@@ -77,6 +78,7 @@ class TestActivateCommand:
     def mock_auth_result(self, mock_tenant_context):
         """Create mock auth result."""
         from src.core.raas_auth import AuthResult
+
         return AuthResult(
             valid=True,
             tenant=mock_tenant_context,
@@ -84,9 +86,7 @@ class TestActivateCommand:
             error_code=None,
         )
 
-    def test_activate_with_valid_key(
-        self, mock_auth_result, mock_tenant_context, tmp_path
-    ):
+    def test_activate_with_valid_key(self, mock_auth_result, mock_tenant_context, tmp_path):
         """Test activation with valid license key."""
         from src.core.raas_auth import RaaSAuthClient
         from src.auth import secure_storage
@@ -139,12 +139,16 @@ class TestActivateCommand:
             tier="free",
             role="user",
         )
-        mock_client.gateway_url = "https://raas.agencyos.network"
+        mock_client.gateway_url = "https://api.cashclaw.cc"
 
         with patch.object(RaaSAuthClient, "__init__", return_value=None):
-            with patch.object(RaaSAuthClient, "validate_credentials", side_effect=Exception("Network error")):
+            with patch.object(
+                RaaSAuthClient, "validate_credentials", side_effect=Exception("Network error")
+            ):
                 with patch.object(RaaSAuthClient, "_load_session_cache", return_value=cache):
-                    with patch.object(RaaSAuthClient, "_session_cache_to_tenant_context") as mock_convert:
+                    with patch.object(
+                        RaaSAuthClient, "_session_cache_to_tenant_context"
+                    ) as mock_convert:
                         mock_convert.return_value = TenantContext(
                             tenant_id="cached_tenant",
                             tier="free",
@@ -219,7 +223,10 @@ class TestActivateGatewayValidation:
         from src.core.raas_auth import RaaSAuthClient
         import requests
 
-        with patch("src.core.raas_auth.requests.post", side_effect=requests.exceptions.ConnectionError("Network error")):
+        with patch(
+            "src.core.raas_auth.requests.post",
+            side_effect=requests.exceptions.ConnectionError("Network error"),
+        ):
             client = RaaSAuthClient(use_secure_storage=False)
             result = client.validate_credentials("mk_test_key", use_v2=False)
 
@@ -304,13 +311,17 @@ class TestSessionCaching:
         cache_file = tmp_path / "session.json"
         # Create expired cache (6 minutes ago)
         past_time = (datetime.now(timezone.utc) - timedelta(minutes=6)).isoformat()
-        cache_file.write_text(json.dumps({
-            "tenant_id": "expired_tenant",
-            "tier": "free",
-            "role": "user",
-            "cached_at": past_time,
-            "ttl_seconds": 300,
-        }))
+        cache_file.write_text(
+            json.dumps(
+                {
+                    "tenant_id": "expired_tenant",
+                    "tier": "free",
+                    "role": "user",
+                    "cached_at": past_time,
+                    "ttl_seconds": 300,
+                }
+            )
+        )
 
         client = RaaSAuthClient(use_secure_storage=False)
         client.session_cache_path = cache_file

@@ -20,9 +20,8 @@ from src.core.verifier import ExecutionResult, RecipeVerifier
 # it's a fork-bomb literal). Re-escape all patterns so re.search doesn't crash.
 import re as _re
 import src.core.executor as _executor_mod
-_executor_mod.DANGEROUS_PATTERNS = [
-    _re.escape(p) for p in _executor_mod.DANGEROUS_PATTERNS
-]
+
+_executor_mod.DANGEROUS_PATTERNS = [_re.escape(p) for p in _executor_mod.DANGEROUS_PATTERNS]
 
 SEP = "-" * 60
 
@@ -31,14 +30,20 @@ SEP = "-" * 60
 # 1. Basic Recipe Creation
 # ---------------------------------------------------------------------------
 
+
 def example_recipe_creation():
     """Create RecipeStep/Recipe manually and parse from markdown."""
     print(f"\n{SEP}\n1. Basic Recipe Creation\n{SEP}")
 
     # Manual construction
     step1 = RecipeStep(order=1, title="Install deps", description="pip install requests")
-    step2 = RecipeStep(order=2, title="Run tests", description="python3 -m pytest tests/",
-                       dependencies=[1], params={"type": "shell"})
+    step2 = RecipeStep(
+        order=2,
+        title="Run tests",
+        description="python3 -m pytest tests/",
+        dependencies=[1],
+        params={"type": "shell"},
+    )
     recipe = Recipe(name="CI Pipeline", description="Install then test", steps=[step1, step2])
     print(f"Recipe: {recipe.name!r} | {len(recipe.steps)} steps")
     for s in recipe.steps:
@@ -68,6 +73,7 @@ echo bye
 # 2. Planning Phase
 # ---------------------------------------------------------------------------
 
+
 def example_planning():
     """Rule-based decomposition with PlanningContext."""
     print(f"\n{SEP}\n2. Planning Phase\n{SEP}")
@@ -94,15 +100,21 @@ def example_planning():
 # 3. Execution Phase
 # ---------------------------------------------------------------------------
 
+
 def example_execution():
     """Execute a real shell step and inspect ExecutionResult."""
     print(f"\n{SEP}\n3. Execution Phase\n{SEP}")
     from src.core.executor import RecipeExecutor
 
-    recipe = Recipe(name="Shell Demo", description="", steps=[
-        RecipeStep(order=1, title="List files", description="ls /tmp",
-                   params={"type": "shell"}),
-    ])
+    recipe = Recipe(
+        name="Shell Demo",
+        description="",
+        steps=[
+            RecipeStep(
+                order=1, title="List files", description="ls /tmp", params={"type": "shell"}
+            ),
+        ],
+    )
     executor = RecipeExecutor(recipe)
     result = executor.execute_step(recipe.steps[0])
 
@@ -118,12 +130,14 @@ def example_execution():
     mock_client.chat.return_value = mock_resp
     mock_client.is_available = True
 
-    llm_step = RecipeStep(order=2, title="Generate code", description="Write hello world",
-                          params={"type": "llm"})
+    llm_step = RecipeStep(
+        order=2, title="Generate code", description="Write hello world", params={"type": "llm"}
+    )
 
     # Patch get_client inside executor module
     import src.core.executor as _exec_mod
     import src.core.llm_client as _llm_mod
+
     original = _llm_mod.get_client
     _llm_mod.get_client = lambda: mock_client
     _exec_mod.get_client = lambda: mock_client  # executor imports directly
@@ -139,6 +153,7 @@ def example_execution():
 # 4. Verification Phase
 # ---------------------------------------------------------------------------
 
+
 def example_verification():
     """Verify exit code, file existence, output patterns, custom checks."""
     print(f"\n{SEP}\n4. Verification Phase\n{SEP}")
@@ -146,7 +161,9 @@ def example_verification():
     verifier = RecipeVerifier(strict_mode=False)
 
     ok_result = ExecutionResult(exit_code=0, stdout="3 tests passed", stderr="")
-    _fail_result = ExecutionResult(exit_code=1, stdout="", stderr="Error: module not found")  # noqa: F841
+    _fail_result = ExecutionResult(
+        exit_code=1, stdout="", stderr="Error: module not found"
+    )  # noqa: F841
 
     # Exit code
     c = verifier.verify_exit_code(ok_result, 0)
@@ -182,6 +199,7 @@ def example_verification():
 # ---------------------------------------------------------------------------
 # 5. DAG Scheduling
 # ---------------------------------------------------------------------------
+
 
 def example_dag_scheduling():
     """Build DAG steps, validate, execute with mock, show cancellation."""
@@ -224,15 +242,15 @@ def example_dag_scheduling():
     # Failure propagation — Step 1 fails → Step 3 and 4 cancelled
     steps2 = [
         RecipeStep(order=1, title="Fail", description="fail", dependencies=[]),
-        RecipeStep(order=2, title="OK",   description="ok",   dependencies=[]),
-        RecipeStep(order=3, title="Dep",  description="dep",  dependencies=[1]),
+        RecipeStep(order=2, title="OK", description="ok", dependencies=[]),
+        RecipeStep(order=3, title="Dep", description="dep", dependencies=[1]),
         RecipeStep(order=4, title="Deep", description="deep", dependencies=[3]),
     ]
 
     def failing_executor(step):
         result = MagicMock()
         result.verification = MagicMock()
-        result.verification.passed = (step.order != 1)  # Step 1 fails
+        result.verification.passed = step.order != 1  # Step 1 fails
         return result
 
     scheduler2 = DAGScheduler(steps2, max_workers=2)
@@ -244,6 +262,7 @@ def example_dag_scheduling():
 # ---------------------------------------------------------------------------
 # 6. Full Orchestration (E2E)
 # ---------------------------------------------------------------------------
+
 
 def example_full_orchestration():
     """Wire planner + executor + verifier via planner.plan() directly."""
@@ -276,6 +295,7 @@ def example_full_orchestration():
 # ---------------------------------------------------------------------------
 # 7. Self-Healing Demo
 # ---------------------------------------------------------------------------
+
 
 def example_self_healing():
     """Show self-healing: mock LLM corrects a bad command."""
@@ -322,6 +342,7 @@ def example_self_healing():
 # 8. Rollback Demo
 # ---------------------------------------------------------------------------
 
+
 def example_rollback():
     """Show rollback: completed steps run rollback commands on failure.
 
@@ -348,7 +369,12 @@ def example_rollback():
     ]
     recipe = Recipe(name="Rollback Demo", description="", steps=steps)
     from src.core.executor import RecipeExecutor
-    from src.core.orchestrator import OrchestrationResult, OrchestrationStatus, RollbackHandler, StepResult
+    from src.core.orchestrator import (
+        OrchestrationResult,
+        OrchestrationStatus,
+        RollbackHandler,
+        StepResult,
+    )
 
     executor = RecipeExecutor(recipe)
     verifier = RecipeVerifier(strict_mode=False)

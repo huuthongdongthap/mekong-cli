@@ -19,9 +19,12 @@ collab_app = typer.Typer(help="Collab: multi-agent collaboration & debate")
 # Tools commands
 # ---------------------------------------------------------------------------
 
+
 @tools_app.command(name="list")
 def tools_list(
-    tool_type: str = typer.Option("", "--type", "-t", help="Filter by type: builtin|cli|api|mcp|custom"),
+    tool_type: str = typer.Option(
+        "", "--type", "-t", help="Filter by type: builtin|cli|api|mcp|custom"
+    ),
 ) -> None:
     """List all registered tools."""
     from src.core.tool_registry import ToolRegistry, ToolType
@@ -50,15 +53,20 @@ def tools_list(
         rel_style = {"high": "green", "medium": "yellow", "low": "red"}.get(t.reliability, "dim")
         uses = t.success_count + t.failure_count
         table.add_row(
-            t.name, t.tool_type.value, t.description[:50],
-            f"[{rel_style}]{t.reliability}[/{rel_style}]", str(uses),
+            t.name,
+            t.tool_type.value,
+            t.description[:50],
+            f"[{rel_style}]{t.reliability}[/{rel_style}]",
+            str(uses),
         )
     console.print(table)
 
 
 @tools_app.command(name="discover")
 def tools_discover(
-    command: str = typer.Argument(..., help="CLI command to discover tools from (e.g. git, docker)"),
+    command: str = typer.Argument(
+        ..., help="CLI command to discover tools from (e.g. git, docker)"
+    ),
 ) -> None:
     """Auto-discover tools from a CLI's --help output."""
     from src.core.tool_registry import ToolRegistry
@@ -117,6 +125,7 @@ def tools_stats() -> None:
 # Browse commands
 # ---------------------------------------------------------------------------
 
+
 @browse_app.command(name="check")
 def browse_check(url: str = typer.Argument(..., help="URL to check status")) -> None:
     """Check HTTP status of a URL."""
@@ -174,6 +183,7 @@ def browse_links(url: str = typer.Argument(..., help="URL to extract links from"
 # ---------------------------------------------------------------------------
 # Collab commands
 # ---------------------------------------------------------------------------
+
 
 @collab_app.command(name="agents")
 def collab_agents() -> None:

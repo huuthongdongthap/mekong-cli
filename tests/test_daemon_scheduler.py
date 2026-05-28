@@ -18,10 +18,10 @@ from src.daemon.classifier import ComplexityClassifier
 from src.daemon.dlq import DeadLetterQueue
 from src.daemon.gate import PostGate
 
-
 # ---------------------------------------------------------------------------
 # ComplexityClassifier
 # ---------------------------------------------------------------------------
+
 
 class TestComplexityClassifier:
     """Keyword-based mission classification."""
@@ -102,6 +102,7 @@ class TestComplexityClassifier:
 # ---------------------------------------------------------------------------
 # TaskWatcher
 # ---------------------------------------------------------------------------
+
 
 class TestTaskWatcher:
     """Directory polling for mission files."""
@@ -184,6 +185,7 @@ class TestTaskWatcher:
 # DeadLetterQueue
 # ---------------------------------------------------------------------------
 
+
 class TestDeadLetterQueue:
     """Failed mission file storage."""
 
@@ -242,6 +244,7 @@ class TestDeadLetterQueue:
 # ---------------------------------------------------------------------------
 # DaemonScheduler
 # ---------------------------------------------------------------------------
+
 
 class TestDaemonScheduler:
     """Scheduler orchestrates watcher → classify → execute → gate → journal flow."""
@@ -375,6 +378,7 @@ class TestDaemonScheduler:
 # ---------------------------------------------------------------------------
 # PostGate
 # ---------------------------------------------------------------------------
+
 
 class TestPostGate:
     """Gate verifies commands pass after mission."""

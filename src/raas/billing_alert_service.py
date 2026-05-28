@@ -1,4 +1,5 @@
 """Billing alert service for workspace usage notifications (SQLite version)."""
+
 from __future__ import annotations
 
 import logging
@@ -293,7 +294,16 @@ class BillingAlertService:
                     (id, workspace_id, alert_type, threshold_pct, current_pct, triggered_at, is_read, metadata, billing_cycle)
                     VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)
                     """,
-                    (alert_id, workspace_id, alert_type, threshold_pct, current_pct, now, meta_json, cycle),
+                    (
+                        alert_id,
+                        workspace_id,
+                        alert_type,
+                        threshold_pct,
+                        current_pct,
+                        now,
+                        meta_json,
+                        cycle,
+                    ),
                 )
                 conn.commit()
         except sqlite3.Error as exc:

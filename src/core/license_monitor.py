@@ -35,6 +35,7 @@ class LicenseFailure:
         command: Command that triggered validation
         error_message: Human-readable error message
     """
+
     error_code: str
     timestamp: float
     retry_count: int = 0
@@ -73,6 +74,7 @@ class FailureThreshold:
 
     Default: >3 failures in 5 minutes triggers critical alert.
     """
+
     max_failures: int = 3
     window_seconds: int = 300  # 5 minutes
 
@@ -109,7 +111,9 @@ class LicenseMonitor:
             threshold: Failure threshold configuration.
             grace_period_hours: Grace period for new installations.
         """
-        self._storage_path = Path(storage_path) if storage_path else Path(".mekong/license_failures.json")
+        self._storage_path = (
+            Path(storage_path) if storage_path else Path(".mekong/license_failures.json")
+        )
         self._threshold = threshold or FailureThreshold()
         self._grace_period_hours = grace_period_hours
         self._failures: List[LicenseFailure] = []
@@ -254,9 +258,7 @@ class LicenseMonitor:
                 },
             )
             if result.status.value == "success":
-                logger.info(
-                    f"License recovery succeeded after {result.attempt_number} attempt(s)"
-                )
+                logger.info(f"License recovery succeeded after {result.attempt_number} attempt(s)")
             else:
                 logger.error(
                     f"License recovery failed after {result.attempt_number} attempt(s): "

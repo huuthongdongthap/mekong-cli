@@ -213,6 +213,7 @@ class TestRAASAuditLogger:
     def test_log_event_network_error(self, mock_post, logger):
         """Test event logging with network error."""
         import requests
+
         mock_post.side_effect = requests.RequestException("Connection refused")
 
         result = logger.log_event(event="test_network_error")
@@ -301,6 +302,7 @@ class TestRAASAuditLogger:
         assert output_file.exists()
 
         import json
+
         with open(output_file) as f:
             data = json.load(f)
         assert len(data) == 1
@@ -313,6 +315,7 @@ class TestAuditLoggerSingleton:
     def teardown_method(self):
         """Reset singleton after each test."""
         import src.core.raas_audit_logger as module
+
         module._audit_logger = None
 
     def test_get_audit_logger(self):

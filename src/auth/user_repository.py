@@ -12,7 +12,6 @@ from typing import Optional, Dict, Any, List
 from src.db.database import DatabaseConnection, get_database
 from src.models.user import User, UserSession
 
-
 # Session configuration
 SESSION_EXPIRY_HOURS = 24
 SESSION_MAX_AGE = SESSION_EXPIRY_HOURS * 60 * 60  # seconds
@@ -273,6 +272,7 @@ class UserRepository:
 
 
 # Convenience functions for simple usage
+
 
 async def find_or_create_user(
     email: str,

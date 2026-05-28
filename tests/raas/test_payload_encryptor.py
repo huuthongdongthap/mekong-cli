@@ -104,6 +104,7 @@ class TestPayloadEncryptor:
         tampered_ciphertext = encrypted.ciphertext[:-1] + "X"
 
         from src.raas.usage_event_schema import EncryptedPayload
+
         tampered = EncryptedPayload(
             nonce=tampered_nonce,
             ciphertext=tampered_ciphertext,
@@ -208,11 +209,28 @@ class TestPayloadBuilder:
         builder = PayloadBuilder(tenant_id="tenant", license_key="mk_key")
 
         # Add events with timestamps
-        builder.add_events([
-            {"event_type": "cli:command", "timestamp": "2024-01-01T10:00:00Z", "input_tokens": 100, "output_tokens": 50},
-            {"event_type": "llm:call", "timestamp": "2024-01-01T10:30:00Z", "input_tokens": 200, "output_tokens": 100},
-            {"event_type": "cli:command", "timestamp": "2024-01-01T11:00:00Z", "input_tokens": 150, "output_tokens": 75},
-        ])
+        builder.add_events(
+            [
+                {
+                    "event_type": "cli:command",
+                    "timestamp": "2024-01-01T10:00:00Z",
+                    "input_tokens": 100,
+                    "output_tokens": 50,
+                },
+                {
+                    "event_type": "llm:call",
+                    "timestamp": "2024-01-01T10:30:00Z",
+                    "input_tokens": 200,
+                    "output_tokens": 100,
+                },
+                {
+                    "event_type": "cli:command",
+                    "timestamp": "2024-01-01T11:00:00Z",
+                    "input_tokens": 150,
+                    "output_tokens": 75,
+                },
+            ]
+        )
 
         buckets = builder.build_hourly_buckets()
 

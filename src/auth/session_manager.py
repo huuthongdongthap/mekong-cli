@@ -17,7 +17,6 @@ from starlette.responses import RedirectResponse
 from src.models.user import User, UserSession
 from src.auth.user_repository import UserRepository
 
-
 # JWT Configuration
 # JWT_SECRET starts as None and is resolved lazily via get_jwt_secret().
 # Keeping it as a module attribute allows tests to patch it directly:
@@ -54,8 +53,21 @@ def get_jwt_secret() -> str:
             else:
                 raise RuntimeError(
                     "JWT_SECRET environment variable is required. "
-                    "Generate one with: secrets.token_urlsafe(32) "
+                    "Generate one with: python3 -c 'import secrets; print(secrets.token_urlsafe(32))' "
                     "and add to your .env file."
+                )
+        else:
+            # Enforce minimum 32-byte secret in non-test environments
+            _is_test = (
+                os.getenv("CI") == "true"
+                or os.getenv("PYTEST_CURRENT_TEST")
+                or os.getenv("TESTING")
+            )
+            if not _is_test and len(JWT_SECRET.encode()) < 32:
+                raise RuntimeError(
+                    f"JWT_SECRET is too short: {len(JWT_SECRET.encode())} bytes. "
+                    "Minimum 32 bytes required for production security. "
+                    "Generate with: python3 -c 'import secrets; print(secrets.token_urlsafe(32))'"
                 )
     return JWT_SECRET
 
@@ -186,6 +198,7 @@ class SessionManager:
 
         # Store session in database (hash the token)
         import hashlib
+
         _ = hashlib.sha256(access_token.encode()).hexdigest()  # token_hash intentionally unused
         _ = datetime.now(timezone.utc) + timedelta(days=7)  # expires_at intentionally unused
 
@@ -378,6 +391,7 @@ class SessionManager:
 
 
 # Convenience functions for simple usage
+
 
 async def create_session(user: User, role: str = "member") -> Tuple[UserSession, str, str]:
     """Create new session for user."""

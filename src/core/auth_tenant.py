@@ -33,7 +33,13 @@ class TenantManager:
         "free": ["cli_commands", "local_testing"],
         "trial": ["cli_commands", "local_testing", "gateway_mock", "limited_raas"],
         "pro": ["cli_commands", "local_testing", "gateway_mock", "raas_basic"],
-        "enterprise": ["cli_commands", "local_testing", "gateway_mock", "raas_full", "priority_support"],
+        "enterprise": [
+            "cli_commands",
+            "local_testing",
+            "gateway_mock",
+            "raas_full",
+            "priority_support",
+        ],
     }
 
     def __init__(self, local_test_mode: bool = False):
@@ -254,9 +260,7 @@ class TenantManager:
             "tier": tenant.tier,
             "is_active": not self.is_license_expired(tenant),
             "expires_at": tenant.expires_at.isoformat() if tenant.expires_at else None,
-            "days_until_expiry": (
-                (tenant.expires_at - now).days if tenant.expires_at else None
-            ),
+            "days_until_expiry": ((tenant.expires_at - now).days if tenant.expires_at else None),
             "features": tenant.features,
             "has_license_key": tenant.license_key is not None,
         }

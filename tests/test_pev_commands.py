@@ -317,7 +317,8 @@ class TestPevHistoryDisplay(unittest.TestCase):
         from src.core.execution_history import EventKind, ExecutionEvent
 
         event = ExecutionEvent.create(
-            EventKind.WORKFLOW_STARTED, "wf-json",
+            EventKind.WORKFLOW_STARTED,
+            "wf-json",
             data={"recipe": "test", "steps": 3},
         )
         serialized = json.dumps([asdict(event)], default=str)

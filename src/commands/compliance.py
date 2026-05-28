@@ -46,53 +46,28 @@ def parse_date_range(date_range: str) -> tuple[datetime, datetime]:
 
 @app.command()
 def export(
-    format: str = typer.Option(
-        "json",
-        "--format",
-        "-f",
-        help="Export format: json, csv, pdf"
-    ),
+    format: str = typer.Option("json", "--format", "-f", help="Export format: json, csv, pdf"),
     output: str = typer.Option(
         "audit_report",
         "--output",
         "-o",
-        help="Output file path (without extension for CSV, with extension for JSON/PDF)"
+        help="Output file path (without extension for CSV, with extension for JSON/PDF)",
     ),
     date_range: str = typer.Option(
         None,
         "--date-range",
         "-d",
-        help="Date range: YYYY-MM-DD,YYYY-MM-DD or YYYY-MM-DD (for from-date to now)"
+        help="Date range: YYYY-MM-DD,YYYY-MM-DD or YYYY-MM-DD (for from-date to now)",
     ),
-    license_key: str = typer.Option(
-        None,
-        "--license-key",
-        "-k",
-        help="Filter by license key ID"
-    ),
+    license_key: str = typer.Option(None, "--license-key", "-k", help="Filter by license key ID"),
     event_type: str = typer.Option(
-        None,
-        "--event-type",
-        "-e",
-        help="Filter by event type: violation, rate_limit, validation"
+        None, "--event-type", "-e", help="Filter by event type: violation, rate_limit, validation"
     ),
-    limit: int = typer.Option(
-        10000,
-        "--limit",
-        "-l",
-        help="Maximum records to export"
-    ),
+    limit: int = typer.Option(10000, "--limit", "-l", help="Maximum records to export"),
     include_summary: bool = typer.Option(
-        True,
-        "--include-summary/--no-summary",
-        help="Include summary statistics"
+        True, "--include-summary/--no-summary", help="Include summary statistics"
     ),
-    sign: bool = typer.Option(
-        False,
-        "--sign",
-        "-s",
-        help="Sign the exported report"
-    ),
+    sign: bool = typer.Option(False, "--sign", "-s", help="Sign the exported report"),
 ) -> None:
     """Export audit logs to CSV, JSON, or PDF format."""
     try:
@@ -156,7 +131,9 @@ def export(
                 console.print("[yellow]No signing key found. Generating new key pair...[/yellow]")
                 priv_path, pub_path = signer.generate_key_pair(
                     private_key_path=private_key,
-                    public_key_path=private_key.replace("audit_signing.pem", "audit_signing_pub.pem")
+                    public_key_path=private_key.replace(
+                        "audit_signing.pem", "audit_signing_pub.pem"
+                    ),
                 )
                 console.print("[green]✓ Generated keys:[/green]")
                 console.print(f"  Private: {priv_path}")
@@ -175,7 +152,9 @@ def export(
         if format_lower == "json" and include_summary:
             events = asyncio.run(exporter.query_events(filters))
             summary = exporter._generate_summary(events)
-            console.print(f"\n[dim]Summary: {summary['total_records']} total records exported[/dim]")
+            console.print(
+                f"\n[dim]Summary: {summary['total_records']} total records exported[/dim]"
+            )
 
         # Success message
         console.print(
@@ -200,22 +179,11 @@ def export(
 
 @app.command()
 def verify(
-    signature_file: str = typer.Argument(
-        ...,
-        help="Path to signature file (.sig)"
-    ),
+    signature_file: str = typer.Argument(..., help="Path to signature file (.sig)"),
     report_file: str = typer.Option(
-        None,
-        "--report",
-        "-r",
-        help="Path to report file (auto-detected if not provided)"
+        None, "--report", "-r", help="Path to report file (auto-detected if not provided)"
     ),
-    public_key: str = typer.Option(
-        None,
-        "--public-key",
-        "-k",
-        help="Path to public key file"
-    ),
+    public_key: str = typer.Option(None, "--public-key", "-k", help="Path to public key file"),
 ) -> None:
     """Verify a signed audit report."""
     try:
@@ -226,6 +194,7 @@ def verify(
             raise typer.Exit(code=1)
 
         import json
+
         with open(sig_path, "r", encoding="utf-8") as f:
             signature_data = json.load(f)
 
@@ -295,23 +264,10 @@ def verify(
 @app.command()
 def summary(
     date_range: str = typer.Option(
-        None,
-        "--date-range",
-        "-d",
-        help="Date range: YYYY-MM-DD,YYYY-MM-DD"
+        None, "--date-range", "-d", help="Date range: YYYY-MM-DD,YYYY-MM-DD"
     ),
-    license_key: str = typer.Option(
-        None,
-        "--license-key",
-        "-k",
-        help="Filter by license key ID"
-    ),
-    output: str = typer.Option(
-        None,
-        "--output",
-        "-o",
-        help="Save summary to file"
-    ),
+    license_key: str = typer.Option(None, "--license-key", "-k", help="Filter by license key ID"),
+    output: str = typer.Option(None, "--output", "-o", help="Save summary to file"),
 ) -> None:
     """Show audit log summary statistics."""
     try:
@@ -385,17 +341,23 @@ def summary(
         # Save to file if requested
         if output:
             import json
+
             with open(output, "w", encoding="utf-8") as f:
-                json.dump({
-                    "summary": summary,
-                    "date_range": {
-                        "from": date_from.isoformat(),
-                        "to": date_to.isoformat(),
+                json.dump(
+                    {
+                        "summary": summary,
+                        "date_range": {
+                            "from": date_from.isoformat(),
+                            "to": date_to.isoformat(),
+                        },
+                        "filters": {
+                            "license_key": license_key,
+                        },
                     },
-                    "filters": {
-                        "license_key": license_key,
-                    },
-                }, f, indent=2, default=str)
+                    f,
+                    indent=2,
+                    default=str,
+                )
             console.print(f"\n[green]✓ Summary saved to:[/green] {output}")
 
     except Exception as e:
@@ -405,17 +367,9 @@ def summary(
 
 @app.command()
 def init_keys(
-    key_size: int = typer.Option(
-        2048,
-        "--key-size",
-        "-k",
-        help="RSA key size in bits"
-    ),
+    key_size: int = typer.Option(2048, "--key-size", "-k", help="RSA key size in bits"),
     output_dir: str = typer.Option(
-        "~/.mekong/keys",
-        "--output",
-        "-o",
-        help="Output directory for keys"
+        "~/.mekong/keys", "--output", "-o", help="Output directory for keys"
     ),
 ) -> None:
     """Generate signing key pair for report signatures."""
@@ -457,15 +411,9 @@ def init_keys(
 
 @app.command()
 def chain(
-    input_file: str = typer.Argument(
-        ...,
-        help="Input file with events (JSON format)"
-    ),
+    input_file: str = typer.Argument(..., help="Input file with events (JSON format)"),
     previous_hash: str = typer.Option(
-        "0" * 64,
-        "--previous-hash",
-        "-p",
-        help="Previous block hash (for chaining)"
+        "0" * 64, "--previous-hash", "-p", help="Previous block hash (for chaining)"
     ),
 ) -> None:
     """Compute hash chain for event integrity."""

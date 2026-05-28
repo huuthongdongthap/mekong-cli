@@ -2,7 +2,8 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.core.founder_secondary import (
     get_mechanisms,
@@ -39,7 +40,7 @@ def test_calculate_tax_scenarios_us():
     scenarios = calculate_tax_scenarios(1_000_000.0, "us")
     assert len(scenarios) == 3
     rates = [s.tax_rate_pct for s in scenarios]
-    assert 0.0 in rates   # QSBS
+    assert 0.0 in rates  # QSBS
     assert 20.0 in rates  # LTCG
     assert 37.0 in rates  # Short-term
 

@@ -144,10 +144,7 @@ class FingerprintGenerator:
             mac_addresses = [str(uuid.getnode())]
 
         # Filter out empty and loopback addresses
-        mac_addresses = [
-            mac for mac in mac_addresses
-            if mac and mac != "00:00:00:00:00:00"
-        ]
+        mac_addresses = [mac for mac in mac_addresses if mac and mac != "00:00:00:00:00:00"]
 
         return sorted(set(mac_addresses))
 
@@ -161,7 +158,7 @@ class FingerprintGenerator:
                 ["networksetup", "-listallhardwareports"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -175,10 +172,7 @@ class FingerprintGenerator:
         if not mac_addresses:
             try:
                 result = subprocess.run(
-                    ["ifconfig", "-a"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    ["ifconfig", "-a"], capture_output=True, text=True, timeout=10
                 )
 
                 for line in result.stdout.split("\n"):
@@ -211,12 +205,7 @@ class FingerprintGenerator:
             logger.debug("Linux /sys/class/net MAC address detection failed: %s", e)
         if not mac_addresses:
             try:
-                result = subprocess.run(
-                    ["ip", "link"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
+                result = subprocess.run(["ip", "link"], capture_output=True, text=True, timeout=10)
 
                 for line in result.stdout.split("\n"):
                     if "link/ether" in line:
@@ -234,12 +223,15 @@ class FingerprintGenerator:
         try:
             # Use PowerShell to get MAC addresses
             result = subprocess.run(
-                ["powershell", "-Command",
-                 "Get-NetAdapter -Physical | Select-Object -ExpandProperty MacAddress"],
+                [
+                    "powershell",
+                    "-Command",
+                    "Get-NetAdapter -Physical | Select-Object -ExpandProperty MacAddress",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=10,
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NO_WINDOW,
             )
 
             if result.returncode == 0:
@@ -256,7 +248,7 @@ class FingerprintGenerator:
                     capture_output=True,
                     text=True,
                     timeout=10,
-                    creationflags=subprocess.CREATE_NO_WINDOW
+                    creationflags=subprocess.CREATE_NO_WINDOW,
                 )
 
                 for line in result.stdout.split("\n"):
@@ -287,10 +279,7 @@ class FingerprintGenerator:
         """Get disk serial on macOS."""
         try:
             result = subprocess.run(
-                ["diskutil", "info", "/"],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["diskutil", "info", "/"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0:
@@ -318,10 +307,7 @@ class FingerprintGenerator:
 
             # Fallback: use hdparm
             result = subprocess.run(
-                ["hdparm", "-I", "/dev/sda"],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["hdparm", "-I", "/dev/sda"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0:
@@ -346,12 +332,15 @@ class FingerprintGenerator:
         """Get disk serial on Windows."""
         try:
             result = subprocess.run(
-                ["powershell", "-Command",
-                 "Get-PhysicalDisk | Select-Object -First 1 -ExpandProperty SerialNumber"],
+                [
+                    "powershell",
+                    "-Command",
+                    "Get-PhysicalDisk | Select-Object -First 1 -ExpandProperty SerialNumber",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=10,
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NO_WINDOW,
             )
 
             if result.returncode == 0 and result.stdout.strip():
@@ -364,7 +353,7 @@ class FingerprintGenerator:
                 capture_output=True,
                 text=True,
                 timeout=10,
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NO_WINDOW,
             )
 
             if result.returncode == 0:
@@ -397,7 +386,7 @@ class FingerprintGenerator:
                 ["ioreg", "-rd1", "-c", "IOPlatformExpertDevice"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -433,13 +422,16 @@ class FingerprintGenerator:
         """Get machine ID on Windows (registry)."""
         try:
             result = subprocess.run(
-                ["powershell", "-Command",
-                 "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Cryptography' | "
-                 "Select-Object -ExpandProperty MachineGuid"],
+                [
+                    "powershell",
+                    "-Command",
+                    "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Cryptography' | "
+                    "Select-Object -ExpandProperty MachineGuid",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=10,
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NO_WINDOW,
             )
 
             if result.returncode == 0 and result.stdout.strip():

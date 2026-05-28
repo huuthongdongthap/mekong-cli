@@ -131,9 +131,7 @@ class MCUBilling:
             self._tenants[tenant_id] = TenantBalance(tenant_id=tenant_id)
         return self._tenants[tenant_id]
 
-    def add_credits(
-        self, tenant_id: str, amount: int, description: str = ""
-    ) -> TenantBalance:
+    def add_credits(self, tenant_id: str, amount: int, description: str = "") -> TenantBalance:
         """Add MCU credits to a tenant's balance.
 
         Args:

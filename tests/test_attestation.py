@@ -16,8 +16,8 @@ from unittest.mock import patch, MagicMock
 
 from src.security.attestation_generator import SecurityAttestationGenerator
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def _make_generator(tmp_path: str) -> SecurityAttestationGenerator:
     return SecurityAttestationGenerator(repo_path=tmp_path)
@@ -33,6 +33,7 @@ def _mock_run(returncode: int = 0, stdout: str = "") -> MagicMock:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  get_commit_info
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestGetCommitInfo:
     """Verify git info extraction."""
@@ -69,6 +70,7 @@ class TestGetCommitInfo:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  check_hardcoded_secrets
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestCheckHardcodedSecrets:
     """Verify secret scanning logic."""
@@ -114,8 +116,7 @@ class TestCheckHardcodedSecrets:
 
     def test_multiple_secrets_all_returned(self):
         raw_output = (
-            "src/a.py:SECRET = 'abcdef1234567890'\n"
-            "src/b.py:PASSWORD = 'xyzxyz1234567890'\n"
+            "src/a.py:SECRET = 'abcdef1234567890'\n" "src/b.py:PASSWORD = 'xyzxyz1234567890'\n"
         )
         with patch("subprocess.run", return_value=_mock_run(returncode=0, stdout=raw_output)):
             ok, findings = self.gen.check_hardcoded_secrets()
@@ -126,6 +127,7 @@ class TestCheckHardcodedSecrets:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  check_env_file_exposure
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestCheckEnvFileExposure:
     """Verify .env file scan scoped to src/ only."""
@@ -179,6 +181,7 @@ class TestCheckEnvFileExposure:
 #  check_command_sanitizer
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class TestCheckCommandSanitizer:
     """Verify sanitizer file-presence check."""
 
@@ -200,6 +203,7 @@ class TestCheckCommandSanitizer:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  generate_attestation
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestGenerateAttestation:
     """Verify attestation report structure and status logic."""
@@ -314,6 +318,7 @@ class TestGenerateAttestation:
 #  sign_attestation
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class TestSignAttestation:
     """Verify SHA256 signature generation."""
 
@@ -359,6 +364,7 @@ class TestSignAttestation:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  save_report
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestSaveReport:
     """Verify report persistence."""
@@ -427,6 +433,7 @@ class TestSaveReport:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  run_security_checks (integration-style)
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestRunSecurityChecks:
     """run_security_checks orchestrates all three checks."""

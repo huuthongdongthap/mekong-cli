@@ -176,7 +176,9 @@ def report_usage(
         )
 
         usage_data = usage_response.json() if usage_response.status_code == 200 else None
-        entitlements_data = entitlements_response.json() if entitlements_response.status_code == 200 else None
+        entitlements_data = (
+            entitlements_response.json() if entitlements_response.status_code == 200 else None
+        )
 
         rate_limit_remaining = int(usage_response.headers.get("X-RateLimit-Remaining", 0))
         rate_limit_limit = int(usage_response.headers.get("X-RateLimit-Limit", 0))
@@ -370,8 +372,7 @@ def export_usage(
     else:
         console.print(
             Panel(
-                "[bold red]✗ Export failed[/bold red]\n"
-                "Check file permissions and try again.",
+                "[bold red]✗ Export failed[/bold red]\n" "Check file permissions and try again.",
                 title="Export Error",
                 border_style="red",
             )

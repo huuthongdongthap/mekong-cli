@@ -154,7 +154,8 @@ class CollaborationProtocol:
         )
         self._agents[name] = profile
         self._broadcast(
-            name, MessageType.STATUS_UPDATE,
+            name,
+            MessageType.STATUS_UPDATE,
             f"Agent '{name}' joined as {role.value}",
         )
         return profile
@@ -199,15 +200,18 @@ class CollaborationProtocol:
         )
         self._messages.append(msg)
         if len(self._messages) > self.MAX_MESSAGES:
-            self._messages = self._messages[-self.MAX_MESSAGES:]
+            self._messages = self._messages[-self.MAX_MESSAGES :]
 
         bus = get_event_bus()
-        bus.emit(EventType.AUTONOMOUS_CYCLE, {
-            "event": "agent_message",
-            "sender": sender,
-            "receiver": receiver,
-            "type": message_type.value,
-        })
+        bus.emit(
+            EventType.AUTONOMOUS_CYCLE,
+            {
+                "event": "agent_message",
+                "sender": sender,
+                "receiver": receiver,
+                "type": message_type.value,
+            },
+        )
 
         return msg
 
@@ -228,15 +232,10 @@ class CollaborationProtocol:
         Returns:
             Name of assigned agent, or None if no suitable agent found.
         """
-        candidates = [
-            a for a in self._agents.values()
-            if a.active and a.name != requester
-        ]
+        candidates = [a for a in self._agents.values() if a.active and a.name != requester]
 
         if preferred_role:
-            role_candidates = [
-                a for a in candidates if a.role == preferred_role
-            ]
+            role_candidates = [a for a in candidates if a.role == preferred_role]
             if role_candidates:
                 candidates = role_candidates
 
@@ -248,7 +247,8 @@ class CollaborationProtocol:
         assignee = candidates[0]
 
         self.send_message(
-            requester, assignee.name,
+            requester,
+            assignee.name,
             MessageType.TASK_REQUEST,
             task_description,
         )
@@ -289,7 +289,8 @@ class CollaborationProtocol:
         self._reviews.append(review)
 
         self._broadcast(
-            reviewer, MessageType.REVIEW_RESPONSE,
+            reviewer,
+            MessageType.REVIEW_RESPONSE,
             f"Review of '{target}': {'APPROVED' if approved else 'REJECTED'} "
             f"(score: {score:.1f})",
             {"review_approved": approved, "review_score": score},
@@ -310,7 +311,8 @@ class CollaborationProtocol:
         debate_id = uuid.uuid4().hex[:8]
         self._debates[debate_id] = []
         self._broadcast(
-            "system", MessageType.STATUS_UPDATE,
+            "system",
+            MessageType.STATUS_UPDATE,
             f"Debate started: {topic} (id: {debate_id})",
             {"debate_id": debate_id, "topic": topic},
         )
@@ -349,7 +351,8 @@ class CollaborationProtocol:
         self._debates[debate_id].append(proposal)
 
         self._broadcast(
-            proposer, MessageType.PROPOSAL,
+            proposer,
+            MessageType.PROPOSAL,
             f"Proposal by {proposer}: {approach[:100]}",
             {"debate_id": debate_id, "proposal_id": proposal.id},
         )
@@ -418,7 +421,8 @@ class CollaborationProtocol:
 
         winner = proposals[0]
         self._broadcast(
-            "system", MessageType.STATUS_UPDATE,
+            "system",
+            MessageType.STATUS_UPDATE,
             f"Debate resolved: Winner is {winner.proposer}'s proposal "
             f"(score: {winner.vote_score})",
         )
@@ -426,7 +430,8 @@ class CollaborationProtocol:
         return winner
 
     def assign_roles(
-        self, goal: str,
+        self,
+        goal: str,
     ) -> Dict[AgentRole, str]:
         """
         Auto-assign roles to agents based on the goal and their track records.
@@ -504,9 +509,9 @@ class CollaborationProtocol:
         """Get messages, optionally filtered to an agent."""
         if agent_name:
             msgs = [
-                m for m in self._messages
-                if m.receiver == agent_name or m.sender == agent_name
-                or m.receiver == ""
+                m
+                for m in self._messages
+                if m.receiver == agent_name or m.sender == agent_name or m.receiver == ""
             ]
         else:
             msgs = list(self._messages)
@@ -522,12 +527,11 @@ class CollaborationProtocol:
             "total_reviews": len(self._reviews),
             "active_debates": len(self._debates),
             "review_approval_rate": (
-                sum(1 for r in self._reviews if r.approved) /
-                len(self._reviews) if self._reviews else 0.0
+                sum(1 for r in self._reviews if r.approved) / len(self._reviews)
+                if self._reviews
+                else 0.0
             ),
-            "agent_roles": {
-                a.name: a.role.value for a in self._agents.values()
-            },
+            "agent_roles": {a.name: a.role.value for a in self._agents.values()},
         }
 
     # --- Internal helpers ---

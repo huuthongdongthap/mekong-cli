@@ -111,9 +111,7 @@ class TestUsageMeter:
         repo = MagicMock()
         repo.get_usage = AsyncMock(return_value={"commands_count": 5})
         repo.record_usage = AsyncMock(return_value={})
-        repo.get_license_by_key_id = AsyncMock(
-            return_value={"tier": "pro", "id": 1}
-        )
+        repo.get_license_by_key_id = AsyncMock(return_value={"tier": "pro", "id": 1})
         repo.get_usage_summary = AsyncMock(
             return_value={
                 "total_commands": 100,

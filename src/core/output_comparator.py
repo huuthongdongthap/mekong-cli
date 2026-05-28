@@ -126,7 +126,9 @@ class OutputComparator:
         )
 
     def _compare_json_subset(
-        self, actual: str, expected: Any,
+        self,
+        actual: str,
+        expected: Any,
     ) -> ComparisonResult:
         """Check that actual JSON contains all key/value pairs from expected.
 
@@ -203,7 +205,9 @@ class OutputComparator:
                 mismatched.append(f"{full_key}: expected={exp_val!r}, actual={actual[key]!r}")
 
     def _compare_line_by_line(
-        self, actual: str, expected: str,
+        self,
+        actual: str,
+        expected: str,
     ) -> ComparisonResult:
         actual_lines = actual.splitlines()
         expected_lines = str(expected).splitlines()

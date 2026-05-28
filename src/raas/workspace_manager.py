@@ -1,4 +1,5 @@
 """Workspace Manager — Multi-tenant workspace isolation."""
+
 from __future__ import annotations
 
 import logging
@@ -174,9 +175,7 @@ class WorkspaceManager:
         """Set workspace state value."""
         self.repo.set_state(workspace_id, key, value)
 
-    def add_member(
-        self, workspace_id: str, user_email: str, role: str = "member"
-    ) -> bool:
+    def add_member(self, workspace_id: str, user_email: str, role: str = "member") -> bool:
         """Add a member to a workspace."""
         return self.repo.add_member(workspace_id, user_email, role)
 

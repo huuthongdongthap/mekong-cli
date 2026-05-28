@@ -102,17 +102,25 @@ class TestCrossMarketArbitrage:
 
     def test_is_profitable_property(self) -> None:
         opp = ArbitrageOpportunity(
-            polymarket_id="p1", kalshi_ticker="k1",
-            question="Q", poly_yes_price=0.50, kalshi_yes_price=0.58,
-            spread=0.08, direction="buy_poly_sell_kalshi",
+            polymarket_id="p1",
+            kalshi_ticker="k1",
+            question="Q",
+            poly_yes_price=0.50,
+            kalshi_yes_price=0.58,
+            spread=0.08,
+            direction="buy_poly_sell_kalshi",
             expected_profit_pct=0.08,
         )
         assert opp.is_profitable is True
 
         small = ArbitrageOpportunity(
-            polymarket_id="p1", kalshi_ticker="k1",
-            question="Q", poly_yes_price=0.50, kalshi_yes_price=0.51,
-            spread=0.01, direction="buy_poly_sell_kalshi",
+            polymarket_id="p1",
+            kalshi_ticker="k1",
+            question="Q",
+            poly_yes_price=0.50,
+            kalshi_yes_price=0.51,
+            spread=0.01,
+            direction="buy_poly_sell_kalshi",
             expected_profit_pct=0.01,
         )
         assert small.is_profitable is False

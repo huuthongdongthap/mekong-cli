@@ -8,6 +8,7 @@ Covers:
 - Edge cases: zero balance deduction, negative credit rejection, duplicate events
 - Atomicity: deduct returns False on insufficient funds (never goes negative)
 """
+
 from __future__ import annotations
 
 import sys
@@ -24,10 +25,10 @@ from src.raas.credit_account_repository import (
 )
 from src.raas.credits import CreditStore
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def repo(tmp_path) -> CreditAccountRepository:
@@ -46,6 +47,7 @@ def store(tmp_path) -> CreditStore:
 # ---------------------------------------------------------------------------
 # CreditAccountRepository: create_account
 # ---------------------------------------------------------------------------
+
 
 class TestCreateAccount:
     def test_creates_account_with_zero_balance(self, repo):
@@ -83,6 +85,7 @@ class TestCreateAccount:
 # ---------------------------------------------------------------------------
 # CreditAccountRepository: add_credits
 # ---------------------------------------------------------------------------
+
 
 class TestAddCredits:
     def test_add_credits_happy_path(self, repo):
@@ -129,6 +132,7 @@ class TestAddCredits:
 # ---------------------------------------------------------------------------
 # CreditAccountRepository: deduct_credits
 # ---------------------------------------------------------------------------
+
 
 class TestDeductCredits:
     def test_deduct_happy_path(self, repo):
@@ -197,6 +201,7 @@ class TestDeductCredits:
 # CreditAccountRepository: get_history
 # ---------------------------------------------------------------------------
 
+
 class TestGetHistory:
     def test_history_empty_on_new_account(self, repo):
         repo.create_account("ws_hist_new")
@@ -247,6 +252,7 @@ class TestGetHistory:
 # CreditAccountRepository: idempotency (webhook dedup)
 # ---------------------------------------------------------------------------
 
+
 class TestIdempotency:
     def test_mark_event_processed_returns_true(self, repo):
         repo.create_account("ws_idem")
@@ -280,6 +286,7 @@ class TestIdempotency:
 # ---------------------------------------------------------------------------
 # CreditStore (tenant-level credits, raas/credits.py)
 # ---------------------------------------------------------------------------
+
 
 class TestCreditStoreAdd:
     def test_add_creates_account(self, store):
@@ -398,6 +405,7 @@ class TestCreditStoreHistory:
 # Edge cases: multi-workspace isolation
 # ---------------------------------------------------------------------------
 
+
 class TestWorkspaceIsolation:
     def test_credits_isolated_per_workspace(self, repo):
         repo.create_account("ws_alice")
@@ -434,6 +442,7 @@ class TestWorkspaceIsolation:
 # ---------------------------------------------------------------------------
 # Large value edge cases
 # ---------------------------------------------------------------------------
+
 
 class TestLargeValues:
     def test_add_large_credit_amount(self, repo):

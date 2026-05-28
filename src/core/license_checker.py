@@ -32,8 +32,14 @@ TIER_ALLOWED_PROFILES: dict[LicenseTier, set[str]] = {
     LicenseTier.FREE: {"simple"},
     LicenseTier.PRO: {"simple", "standard", "complex", "parallel", "dag"},
     LicenseTier.ENTERPRISE: {
-        "simple", "standard", "complex", "parallel", "dag",
-        "custom_agent", "priority", "swarm",
+        "simple",
+        "standard",
+        "complex",
+        "parallel",
+        "dag",
+        "custom_agent",
+        "priority",
+        "swarm",
     },
 }
 

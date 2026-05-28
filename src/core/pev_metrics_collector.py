@@ -93,12 +93,16 @@ class PipelineMetrics:
             "success_rate": round(self.success_rate, 4),
             "total_retries": self.total_retries,
             "self_heal_count": self.self_heal_count,
-            "start_time": datetime.fromtimestamp(
-                self.start_time, tz=timezone.utc
-            ).isoformat() if self.start_time > 0 else None,
-            "end_time": datetime.fromtimestamp(
-                self.end_time, tz=timezone.utc
-            ).isoformat() if self.end_time > 0 else None,
+            "start_time": (
+                datetime.fromtimestamp(self.start_time, tz=timezone.utc).isoformat()
+                if self.start_time > 0
+                else None
+            ),
+            "end_time": (
+                datetime.fromtimestamp(self.end_time, tz=timezone.utc).isoformat()
+                if self.end_time > 0
+                else None
+            ),
         }
 
 
@@ -114,8 +118,7 @@ class PEVMetricsCollector:
         self._pipelines: dict[str, PipelineMetrics] = {}
         self._history: list[str] = []  # pipeline_id ordered by completion
         self._storage_dir = (
-            Path(storage_dir) if storage_dir
-            else Path.home() / ".mekong" / "metrics"
+            Path(storage_dir) if storage_dir else Path.home() / ".mekong" / "metrics"
         )
         # Global counters
         self._total_pipelines = 0
@@ -198,8 +201,7 @@ class PEVMetricsCollector:
             "total_successful": self._total_successful,
             "total_failed": self._total_failed,
             "overall_success_rate": (
-                self._total_successful / self._total_pipelines
-                if self._total_pipelines > 0 else 0.0
+                self._total_successful / self._total_pipelines if self._total_pipelines > 0 else 0.0
             ),
             "active_pipelines": len(active),
             "avg_duration_ms": round(avg_duration, 2),

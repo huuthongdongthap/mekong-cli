@@ -3,6 +3,7 @@
 Tracks daily usage streaks with 1 grace day.
 Awards milestone badges at 7, 14, 30, 60, 100, 365 days.
 """
+
 from __future__ import annotations
 
 import logging

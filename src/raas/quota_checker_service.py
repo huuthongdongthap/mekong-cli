@@ -1,4 +1,5 @@
 """Quota checker service for workspace usage limits (SQLite version)."""
+
 from __future__ import annotations
 
 import logging
@@ -145,8 +146,16 @@ class QuotaCheckerService:
                     VALUES (?, 0, 0, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(workspace_id) DO NOTHING
                     """,
-                    (workspace_id, tier, limits["daily"], limits["monthly"],
-                     today, month, 1 if overage else 0, now),
+                    (
+                        workspace_id,
+                        tier,
+                        limits["daily"],
+                        limits["monthly"],
+                        today,
+                        month,
+                        1 if overage else 0,
+                        now,
+                    ),
                 )
                 conn.commit()
         except sqlite3.Error as exc:
@@ -238,7 +247,8 @@ class QuotaCheckerService:
                 daily_remaining=0,
                 monthly_remaining=monthly_remaining,
                 retry_after=self._next_reset_time(quota, "daily"),
-                reason="Daily quota exhausted" + (" (overage allowed)" if quota.overage_allowed else ""),
+                reason="Daily quota exhausted"
+                + (" (overage allowed)" if quota.overage_allowed else ""),
             )
 
         if monthly_remaining < credits:
@@ -247,7 +257,8 @@ class QuotaCheckerService:
                 daily_remaining=daily_remaining,
                 monthly_remaining=0,
                 retry_after=self._next_reset_time(quota, "monthly"),
-                reason="Monthly quota exhausted" + (" (overage allowed)" if quota.overage_allowed else ""),
+                reason="Monthly quota exhausted"
+                + (" (overage allowed)" if quota.overage_allowed else ""),
             )
 
         # Allowed
@@ -297,10 +308,14 @@ class QuotaCheckerService:
                         updated_at = ?
                     WHERE workspace_id = ?
                     """,
-                    (new_daily, new_monthly,
-                     today if quota.last_reset_daily != today else None,
-                     month if quota.last_reset_monthly != month else None,
-                     now, quota.workspace_id),
+                    (
+                        new_daily,
+                        new_monthly,
+                        today if quota.last_reset_daily != today else None,
+                        month if quota.last_reset_monthly != month else None,
+                        now,
+                        quota.workspace_id,
+                    ),
                 )
                 conn.commit()
         except sqlite3.Error as exc:
@@ -315,7 +330,9 @@ class QuotaCheckerService:
             daily_limit=quota.daily_limit,
             monthly_limit=quota.monthly_limit,
             last_reset_daily=today if quota.last_reset_daily != today else quota.last_reset_daily,
-            last_reset_monthly=month if quota.last_reset_monthly != month else quota.last_reset_monthly,
+            last_reset_monthly=(
+                month if quota.last_reset_monthly != month else quota.last_reset_monthly
+            ),
             overage_allowed=quota.overage_allowed,
         )
 
@@ -393,9 +410,7 @@ class QuotaCheckerService:
                 "monthly_percent": 0,
             }
 
-        daily_percent = (
-            (quota.daily_used / quota.daily_limit * 100) if quota.daily_limit > 0 else 0
-        )
+        daily_percent = (quota.daily_used / quota.daily_limit * 100) if quota.daily_limit > 0 else 0
         monthly_percent = (
             (quota.monthly_used / quota.monthly_limit * 100) if quota.monthly_limit > 0 else 0
         )
@@ -448,7 +463,14 @@ class QuotaCheckerService:
                             overage_allowed = ?, updated_at = ?
                         WHERE workspace_id = ?
                         """,
-                        (tier, limits["daily"], limits["monthly"], 1 if overage else 0, now, workspace_id),
+                        (
+                            tier,
+                            limits["daily"],
+                            limits["monthly"],
+                            1 if overage else 0,
+                            now,
+                            workspace_id,
+                        ),
                     )
                 else:
                     # Create new quota with new tier
@@ -461,8 +483,16 @@ class QuotaCheckerService:
                          last_reset_daily, last_reset_monthly, overage_allowed, updated_at)
                         VALUES (?, 0, 0, ?, ?, ?, ?, ?, ?, ?)
                         """,
-                        (workspace_id, tier, limits["daily"], limits["monthly"],
-                         today, month, 1 if overage else 0, now),
+                        (
+                            workspace_id,
+                            tier,
+                            limits["daily"],
+                            limits["monthly"],
+                            today,
+                            month,
+                            1 if overage else 0,
+                            now,
+                        ),
                     )
 
                 conn.commit()

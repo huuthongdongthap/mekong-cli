@@ -1,14 +1,21 @@
-# Mekong automation OS — Strategy
+# Mekong IDE — The One-Person Company Platform
 
-> XONG = Mekong tự bán Mekong, có $ vào tài khoản.
-> PR merged, self-test pass, HTTP 200 đều CHƯA XONG.
+> XONG = $49 vào ACB Bank. PR merged, self-test pass, HTTP 200 đều CHƯA XONG.
+
+## a16z Doctrine: One-Person Billion-Dollar Company
+
+Marc Andreessen predicts single-person billion-dollar startups enabled by autonomous agents.
+Mekong IDE IS this — one subscription replaces a 50-person team with 22 autonomous departments.
+
+**Target customer:** Solo founder / solopreneur ONLY. Not teams. Not enterprise.
+**Revenue model:** 1 subscription = 1 person = all departments.
 
 ## The Product: Mekong IDE
 
-Mekong IDE is ONE product. Not 13. Not 22. ONE.
+ONE product. ONE subscription. ONE person runs everything.
 
-1 subscription → 22 automation departments → 290 operational commands
-→ runs on M1 Max via Ollama (zero cloud cost)
+1 subscription → 22 autonomous departments → 290 operational commands
+→ runs on YOUR machine via Ollama (zero cloud cost)
 → or via RaaS API (pay-per-mission)
 
 ### What the customer gets
@@ -83,14 +90,18 @@ Each "use case" = same IDE subscription + different landing page.
 3. ✅ Create Polar.sh products (Starter/Growth/Pro) — approved
 4. ✅ Wire checkout links (Polar URLs verified in /v1/pricing)
 5. ✅ Deploy gateway (api.cashclaw.cc → M1 Max:8000 via CF Tunnel)
-6. ⬜ First customer pays → XONG
+6. ✅ Resolve dashboard merge conflicts (page.tsx, .env.example, next.config) — required for #7
+7. ⬜ Deploy `ide.mekongmind.com` (Cloudflare Pages — see GO_LIVE_PLAYBOOK §3)
+8. ⬜ Run `scripts/smoke-test-payment.sh` — green before announcing
+9. ⬜ Founder dry-run: buy Starter $49 yourself, verify webhook → credit deduct → 402 on quota
+10. ⬜ First external customer pays → XONG
 
 ### Production URLs (2026-04-12)
 
 | Service | URL | Status |
 |---------|-----|--------|
 | Gateway API | https://api.cashclaw.cc | ✅ LIVE |
-| Landing Pages | https://mekongmind.pages.dev | ✅ LIVE (13/13 pages) |
+| Landing Pages | https://www.mekongmind.com | ✅ LIVE (13/13 pages) |
 | Starter Checkout | https://buy.polar.sh/a09a5fa0-63db-42a4-a547-3b1523ffc263 | ✅ 302 |
 | Growth Checkout | https://buy.polar.sh/c06a03a3-25cd-4cd3-a13d-e795ee592a4e | ✅ 302 |
 | Pro Checkout | https://buy.polar.sh/52b7404c-b420-48cc-a382-ab4b5979f766 | ✅ 302 |

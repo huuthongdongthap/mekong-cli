@@ -4,16 +4,14 @@
   "layer": "engineering",
   "chapter": "軍爭 — Military Contention",
   "display": {
-    "name_vi": "Docs",
     "name_en": "Docs",
     "icon": "",
-    "description_vi": "Execute Docs command",
     "description_en": "Execute Docs command"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "fullstack-developer",
+      "code-reviewer"
     ],
     "hub": "engineering-hub",
     "complexity": "standard",
@@ -31,9 +29,16 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "project": {
+      "file_paths": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Target files"
+      },
+      "language": {
         "type": "string",
-        "description": "Target project path"
+        "description": "Programming language"
       }
     }
   },
@@ -49,7 +54,15 @@
           "type": "string"
         }
       },
-      "credits_used": {
+      "tests_status": {
+        "type": "string",
+        "enum": [
+          "passing",
+          "failing",
+          "skipped"
+        ]
+      },
+      "lines_changed": {
         "type": "integer"
       }
     }

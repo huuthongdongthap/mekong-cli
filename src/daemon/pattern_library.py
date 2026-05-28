@@ -322,7 +322,9 @@ class PatternLibrary:
     def get_stats(self) -> dict[str, Any]:
         """Get pattern library statistics."""
         total = len(self._patterns)
-        avg_confidence = sum(p.confidence for p in self._patterns.values()) / total if total > 0 else 0
+        avg_confidence = (
+            sum(p.confidence for p in self._patterns.values()) / total if total > 0 else 0
+        )
 
         return {
             "total_patterns": total,

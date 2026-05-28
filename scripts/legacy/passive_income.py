@@ -299,7 +299,9 @@ def cmd_seo(count=5):
                 product_url=product["url"],
             )
         else:  # comparison
-            content = f"# {title}\n\nComparison article placeholder.\n\n[Get our tools]({product['url']})"
+            content = (
+                f"# {title}\n\nComparison article placeholder.\n\n[Get our tools]({product['url']})"
+            )
 
         with open(filepath, "w") as f:
             f.write(content)
@@ -416,9 +418,7 @@ def cmd_status():
     print(f"\n{CYAN}TRAFFIC SOURCES:{RESET}")
     print("   🔍 Gumroad Discover: ACTIVE (products listed)")
     print(f"   📝 SEO/Blog: {data.get('seo_posts_generated', 0)} posts")
-    print(
-        f"   👥 Affiliates: {'Enabled' if data.get('affiliate_enabled') else 'Not enabled'}"
-    )
+    print(f"   👥 Affiliates: {'Enabled' if data.get('affiliate_enabled') else 'Not enabled'}")
 
     print(f"\n{CYAN}AUTOMATION LEVEL:{RESET}")
     auto_score = 0

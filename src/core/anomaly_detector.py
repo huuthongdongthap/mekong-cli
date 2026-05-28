@@ -184,8 +184,7 @@ class UsageAnomalyDetector:
             "version": 1,
             "last_updated": time.time(),
             "baselines": {
-                metric: baseline.to_dict()
-                for metric, baseline in self._baselines.items()
+                metric: baseline.to_dict() for metric, baseline in self._baselines.items()
             },
         }
         self._baseline_file.write_text(json.dumps(data, indent=2))
@@ -221,7 +220,7 @@ class UsageAnomalyDetector:
 
         # Trim to max samples (rolling window)
         if len(baseline.samples) > self.MAX_SAMPLES:
-            baseline.samples = baseline.samples[-self.MAX_SAMPLES:]
+            baseline.samples = baseline.samples[-self.MAX_SAMPLES :]
 
         baseline.sample_count = len(baseline.samples)
         baseline.last_updated = timestamp
@@ -288,7 +287,9 @@ class UsageAnomalyDetector:
         severity = self._calculate_severity(abs(z_score))
 
         # Normalize category for Anomaly object
-        norm_category = category if isinstance(category, AnomalyCategory) else AnomalyCategory(category_str)
+        norm_category = (
+            category if isinstance(category, AnomalyCategory) else AnomalyCategory(category_str)
+        )
 
         anomaly = Anomaly(
             anomaly_type=anomaly_type,

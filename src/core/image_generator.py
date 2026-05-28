@@ -24,21 +24,23 @@ import requests
 logger = logging.getLogger(__name__)
 
 # ── DashScope Image API ──
-DASHSCOPE_IMAGE_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis"
+DASHSCOPE_IMAGE_URL = (
+    "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis"
+)
 DASHSCOPE_TASK_URL = "https://dashscope.aliyuncs.com/api/v1/tasks"
 
 # Model variants
-MODEL_PLUS = "qwen-image-plus"       # Fast, good quality (~¥0.04/image)
-MODEL_MAX = "qwen-image-max"         # Highest quality (~¥0.16/image)
+MODEL_PLUS = "qwen-image-plus"  # Fast, good quality (~¥0.04/image)
+MODEL_MAX = "qwen-image-max"  # Highest quality (~¥0.16/image)
 MODEL_DEFAULT = MODEL_PLUS
 
 # Supported sizes (width*height)
 SIZES = {
     "square": "1024*1024",
-    "portrait": "720*1280",      # 9:16 TikTok vertical
-    "landscape": "1280*720",     # 16:9 horizontal
+    "portrait": "720*1280",  # 9:16 TikTok vertical
+    "landscape": "1280*720",  # 16:9 horizontal
     "hd_portrait": "1080*1920",  # Full HD vertical
-    "hd_landscape": "1920*1080", # Full HD horizontal
+    "hd_landscape": "1920*1080",  # Full HD horizontal
 }
 
 # Polling config
@@ -174,7 +176,9 @@ class QwenImageGenerator:
                     return []
 
                 # PENDING or RUNNING — keep polling
-                logger.debug("[QwenImage] Task %s — attempt %d/%d", status, attempt + 1, MAX_POLL_ATTEMPTS)
+                logger.debug(
+                    "[QwenImage] Task %s — attempt %d/%d", status, attempt + 1, MAX_POLL_ATTEMPTS
+                )
                 time.sleep(POLL_INTERVAL_SECS)
 
             except requests.RequestException as e:

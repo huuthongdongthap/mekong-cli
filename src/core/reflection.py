@@ -93,13 +93,15 @@ class ConfidenceCalibrator:
 
     def record(self, predicted_confidence: float, actual_success: bool) -> None:
         """Record a prediction and its outcome."""
-        self._predictions.append({
-            "predicted": predicted_confidence,
-            "actual": 1.0 if actual_success else 0.0,
-            "timestamp": time.time(),
-        })
+        self._predictions.append(
+            {
+                "predicted": predicted_confidence,
+                "actual": 1.0 if actual_success else 0.0,
+                "timestamp": time.time(),
+            }
+        )
         if len(self._predictions) > self.MAX_HISTORY:
-            self._predictions = self._predictions[-self.MAX_HISTORY:]
+            self._predictions = self._predictions[-self.MAX_HISTORY :]
 
     def get_calibration_error(self) -> float:
         """
@@ -141,9 +143,9 @@ class ConfidenceCalibrator:
             return raw_confidence
 
         # Calculate bias (positive = overconfident)
-        bias = sum(
-            p["predicted"] - p["actual"] for p in self._predictions[-20:]
-        ) / min(len(self._predictions), 20)
+        bias = sum(p["predicted"] - p["actual"] for p in self._predictions[-20:]) / min(
+            len(self._predictions), 20
+        )
 
         adjusted = raw_confidence - (bias * 0.5)
         return max(0.05, min(0.99, adjusted))
@@ -220,8 +222,7 @@ class ReflectionEngine:
 
             # Check for repeated failures
             similar_failures = [
-                r for r in self._reflections[-10:]
-                if r.status != "success" and r.goal == goal
+                r for r in self._reflections[-10:] if r.status != "success" and r.goal == goal
             ]
             if len(similar_failures) >= 2:
                 report.should_change_strategy = True
@@ -239,7 +240,8 @@ class ReflectionEngine:
                 report.strengths.extend(llm_report.get("strengths", []))
                 report.weaknesses.extend(llm_report.get("weaknesses", []))
                 report.alternative_approach = llm_report.get(
-                    "alternative_approach", "",
+                    "alternative_approach",
+                    "",
                 )
                 report.lesson_learned = llm_report.get("lesson_learned", "")
                 if "confidence_adjustment" in llm_report:
@@ -257,22 +259,26 @@ class ReflectionEngine:
 
         # Clamp confidence adjustment
         report.confidence_adjustment = max(
-            -1.0, min(1.0, report.confidence_adjustment),
+            -1.0,
+            min(1.0, report.confidence_adjustment),
         )
 
         # Record and emit
         self._reflections.append(report)
         if len(self._reflections) > self.MAX_REFLECTIONS:
-            self._reflections = self._reflections[-self.MAX_REFLECTIONS:]
+            self._reflections = self._reflections[-self.MAX_REFLECTIONS :]
 
         bus = get_event_bus()
-        bus.emit(EventType.AUTONOMOUS_CYCLE, {
-            "event": "reflection_complete",
-            "goal": goal,
-            "status": status,
-            "should_change_strategy": report.should_change_strategy,
-            "lesson": report.lesson_learned,
-        })
+        bus.emit(
+            EventType.AUTONOMOUS_CYCLE,
+            {
+                "event": "reflection_complete",
+                "goal": goal,
+                "status": status,
+                "should_change_strategy": report.should_change_strategy,
+                "lesson": report.lesson_learned,
+            },
+        )
 
         return report
 
@@ -288,7 +294,8 @@ class ReflectionEngine:
         """
         goal_lower = goal.lower()
         relevant = [
-            r for r in self._reflections
+            r
+            for r in self._reflections
             if goal_lower in r.goal.lower() or r.goal.lower() in goal_lower
         ]
 
@@ -302,11 +309,7 @@ class ReflectionEngine:
             return "Previous attempts all succeeded. Continue current approach."
 
         if len(failures) > len(successes):
-            alternatives = [
-                r.alternative_approach
-                for r in failures
-                if r.alternative_approach
-            ]
+            alternatives = [r.alternative_approach for r in failures if r.alternative_approach]
             if alternatives:
                 return f"Previous approach failed often. Try: {alternatives[-1]}"
             return "Previous approach unreliable. Consider a different strategy."
@@ -333,25 +336,24 @@ class ReflectionEngine:
             "strategy_changes_suggested": sum(
                 1 for r in self._reflections if r.should_change_strategy
             ),
-            "avg_confidence_adjustment": sum(
-                r.confidence_adjustment for r in self._reflections
-            ) / len(self._reflections),
+            "avg_confidence_adjustment": sum(r.confidence_adjustment for r in self._reflections)
+            / len(self._reflections),
             "lessons_learned": [
-                r.lesson_learned
-                for r in self._reflections[-5:]
-                if r.lesson_learned
+                r.lesson_learned for r in self._reflections[-5:] if r.lesson_learned
             ],
         }
 
     def _llm_reflect(
-        self, goal: str, status: str, duration_ms: float, error: str,
+        self,
+        goal: str,
+        status: str,
+        duration_ms: float,
+        error: str,
     ) -> Dict[str, Any]:
         """Use LLM for deep reflection analysis."""
         previous = ""
         for r in self._reflections[-3:]:
-            previous += (
-                f"- [{r.status}] {r.goal}: {r.lesson_learned or 'no lesson'}\n"
-            )
+            previous += f"- [{r.status}] {r.goal}: {r.lesson_learned or 'no lesson'}\n"
 
         prompt = _REFLECTION_PROMPT.format(
             goal=goal,

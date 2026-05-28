@@ -187,15 +187,12 @@ class JWTLicenseGenerator:
             "iat": int(now.timestamp()),
             "exp": int(exp.timestamp()),
             "jti": key_id,  # Unique token ID
-
             # License-specific claims
             "tier": tier,
             "key_id": key_id,
             "email": email,
-
             # Embedded quotas (for offline enforcement)
             "quotas": quotas,
-
             # Features enabled
             "features": self._get_tier_features(tier),
         }
@@ -270,7 +267,11 @@ class JWTLicenseGenerator:
 
             # Validate tier matches
             if payload["tier"] != tier:
-                return False, None, f"Tier mismatch: token says {tier}, payload says {payload['tier']}"
+                return (
+                    False,
+                    None,
+                    f"Tier mismatch: token says {tier}, payload says {payload['tier']}",
+                )
 
             # Validate expiration
             exp_timestamp = payload["exp"]
@@ -320,8 +321,12 @@ class JWTLicenseGenerator:
                 "max_agents": 10,
                 "max_concurrent_runs": 5,
                 "features": [
-                    "basic_cli", "open_source_agents", "premium_agents",
-                    "advanced_patterns", "priority_support", "custom_workflows",
+                    "basic_cli",
+                    "open_source_agents",
+                    "premium_agents",
+                    "advanced_patterns",
+                    "priority_support",
+                    "custom_workflows",
                 ],
             },
             "enterprise": {
@@ -422,6 +427,7 @@ def generate_jwt_license(
         JWT license token
     """
     import uuid
+
     key_id = str(uuid.uuid4())[:8]
     return get_jwt_generator().generate_token(tier, key_id, email, days, custom_quotas)
 

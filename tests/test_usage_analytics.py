@@ -3,6 +3,7 @@
 Covers: get_tenant_summary (daily breakdown, complexity breakdown, totals),
 get_recent_activity, and edge cases (empty DB, missing tables).
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -11,7 +12,6 @@ from pathlib import Path
 import pytest
 
 from src.raas.usage_analytics import DailyUsage, TenantUsageSummary, UsageAnalytics
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -34,8 +34,7 @@ def analytics(db_path: Path) -> UsageAnalytics:
 def seeded_db(db_path: Path) -> Path:
     """DB pre-seeded with missions table and sample data."""
     conn = sqlite3.connect(str(db_path))
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE missions (
             id TEXT PRIMARY KEY,
             tenant_id TEXT NOT NULL,
@@ -46,10 +45,10 @@ def seeded_db(db_path: Path) -> Path:
             created_at TEXT NOT NULL,
             completed_at TEXT
         )
-        """
-    )
+        """)
     # Insert sample missions for tenant-a
     from datetime import datetime, timezone
+
     now = datetime.now(timezone.utc).isoformat()
     missions = [
         ("m1", "tenant-a", "build app", "completed", "standard", 3, now, now),
@@ -57,9 +56,7 @@ def seeded_db(db_path: Path) -> Path:
         ("m3", "tenant-a", "deploy", "failed", "complex", 5, now, None),
         ("m4", "tenant-b", "other task", "completed", "simple", 1, now, now),
     ]
-    conn.executemany(
-        "INSERT INTO missions VALUES (?, ?, ?, ?, ?, ?, ?, ?)", missions
-    )
+    conn.executemany("INSERT INTO missions VALUES (?, ?, ?, ?, ?, ?, ?, ?)", missions)
     conn.commit()
     conn.close()
     return db_path

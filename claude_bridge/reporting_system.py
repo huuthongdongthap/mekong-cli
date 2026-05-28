@@ -71,12 +71,12 @@ class ReportingSystem:
             "recent_24h": len(recent),
             "command_usage": command_stats,
             "skill_usage": skill_stats,
-            "most_used_command": max(command_stats.items(), key=lambda x: x[1])[0]
-            if command_stats
-            else None,
-            "most_used_skill": max(skill_stats.items(), key=lambda x: x[1])[0]
-            if skill_stats
-            else None,
+            "most_used_command": (
+                max(command_stats.items(), key=lambda x: x[1])[0] if command_stats else None
+            ),
+            "most_used_skill": (
+                max(skill_stats.items(), key=lambda x: x[1])[0] if skill_stats else None
+            ),
         }
 
         # Save summary

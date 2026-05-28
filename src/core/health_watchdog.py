@@ -42,7 +42,9 @@ class HealthCheck:
         if value >= self.critical_threshold:
             return AlertSeverity.CRITICAL
         # Critical hysteresis: stay critical if value only dipped slightly
-        if previous == AlertSeverity.CRITICAL and value > (self.critical_threshold - self.hysteresis):
+        if previous == AlertSeverity.CRITICAL and value > (
+            self.critical_threshold - self.hysteresis
+        ):
             return AlertSeverity.CRITICAL
         if value >= self.warning_threshold:
             return AlertSeverity.WARNING
@@ -125,6 +127,7 @@ class HealthWatchdog:
                 value = check.check_fn(ctx)
             except Exception as e:
                 import logging
+
                 logging.debug(f"Check {name} failed: {e}")
                 value = 100.0  # Treat errors as critical
 
@@ -135,8 +138,12 @@ class HealthWatchdog:
                 state.transitions += 1
                 self._event_bus.emit(
                     EventType.PATTERN_DETECTED,
-                    {"check": name, "from": previous.value, "to": new_severity.value,
-                     "value": value},
+                    {
+                        "check": name,
+                        "from": previous.value,
+                        "to": new_severity.value,
+                        "value": value,
+                    },
                 )
 
             state.severity = new_severity
@@ -167,6 +174,7 @@ class HealthWatchdog:
 
 
 # Built-in quality gate checks (Binh Phap fronts)
+
 
 def check_success_rate(ctx: dict[str, Any]) -> float:
     """Check execution success rate (inverted: 100 = all failing)."""
@@ -199,33 +207,39 @@ def check_error_count(ctx: dict[str, Any]) -> float:
 def create_default_watchdog() -> HealthWatchdog:
     """Create a watchdog with default Binh Phap quality gate checks."""
     wd = HealthWatchdog()
-    wd.register(HealthCheck(
-        name="success_rate",
-        description="Execution step success rate",
-        check_fn=check_success_rate,
-        warning_threshold=20.0,
-        critical_threshold=50.0,
-        hysteresis=5.0,
-        unit="%_failed",
-    ))
-    wd.register(HealthCheck(
-        name="step_duration",
-        description="Step execution duration budget",
-        check_fn=check_step_duration,
-        warning_threshold=80.0,
-        critical_threshold=95.0,
-        hysteresis=5.0,
-        unit="%_budget",
-    ))
-    wd.register(HealthCheck(
-        name="error_count",
-        description="Error count threshold",
-        check_fn=check_error_count,
-        warning_threshold=60.0,
-        critical_threshold=80.0,
-        hysteresis=10.0,
-        unit="%_max",
-    ))
+    wd.register(
+        HealthCheck(
+            name="success_rate",
+            description="Execution step success rate",
+            check_fn=check_success_rate,
+            warning_threshold=20.0,
+            critical_threshold=50.0,
+            hysteresis=5.0,
+            unit="%_failed",
+        )
+    )
+    wd.register(
+        HealthCheck(
+            name="step_duration",
+            description="Step execution duration budget",
+            check_fn=check_step_duration,
+            warning_threshold=80.0,
+            critical_threshold=95.0,
+            hysteresis=5.0,
+            unit="%_budget",
+        )
+    )
+    wd.register(
+        HealthCheck(
+            name="error_count",
+            description="Error count threshold",
+            check_fn=check_error_count,
+            warning_threshold=60.0,
+            critical_threshold=80.0,
+            hysteresis=10.0,
+            unit="%_max",
+        )
+    )
     return wd
 
 

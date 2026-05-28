@@ -51,7 +51,7 @@ class RetryPolicy:
 
         """
         base = min(
-            self.initial_interval_seconds * (self.backoff_coefficient ** attempt),
+            self.initial_interval_seconds * (self.backoff_coefficient**attempt),
             self.max_interval_seconds,
         )
 

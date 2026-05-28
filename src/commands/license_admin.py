@@ -66,12 +66,14 @@ def list_licenses(
     console.print(table)
 
     # Pagination info
-    console.print(Panel(
-        f"Page {licenses['page']}/{licenses['total_pages']} | "
-        f"Total: {licenses['total']} | "
-        f"Showing: {len(licenses['items'])} items",
-        border_style="blue",
-    ))
+    console.print(
+        Panel(
+            f"Page {licenses['page']}/{licenses['total_pages']} | "
+            f"Total: {licenses['total']} | "
+            f"Showing: {len(licenses['items'])} items",
+            border_style="blue",
+        )
+    )
 
 
 @app.command("create")
@@ -107,19 +109,23 @@ def create_license(
 
     if result["keys"]:
         keys_text = "\n".join(result["keys"])
-        console.print(Panel(
-            f"[bold green]✅ Created {len(result['keys'])} license key(s)[/bold green]\n\n"
-            f"[bold]Tier:[/bold] {tier.upper()}\n"
-            f"[bold]Email:[/bold] {email}\n"
-            f"[bold]Keys:[/bold]\n[cyan]{keys_text}[/cyan]",
-            title="License Created",
-            border_style="green",
-        ))
+        console.print(
+            Panel(
+                f"[bold green]✅ Created {len(result['keys'])} license key(s)[/bold green]\n\n"
+                f"[bold]Tier:[/bold] {tier.upper()}\n"
+                f"[bold]Email:[/bold] {email}\n"
+                f"[bold]Keys:[/bold]\n[cyan]{keys_text}[/cyan]",
+                title="License Created",
+                border_style="green",
+            )
+        )
     else:
-        console.print(Panel(
-            "[bold red]❌ Failed to create license keys[/bold red]",
-            border_style="red",
-        ))
+        console.print(
+            Panel(
+                "[bold red]❌ Failed to create license keys[/bold red]",
+                border_style="red",
+            )
+        )
 
 
 @app.command("revoke")
@@ -152,18 +158,22 @@ def revoke_license(
     result = asyncio.run(_revoke())
 
     if result.get("success"):
-        console.print(Panel(
-            f"[bold green]✅ License revoked[/bold green]\n\n"
-            f"[bold]Key ID:[/bold] {key_id}\n"
-            f"[bold]Reason:[/bold] {reason}",
-            title="License Revoked",
-            border_style="green",
-        ))
+        console.print(
+            Panel(
+                f"[bold green]✅ License revoked[/bold green]\n\n"
+                f"[bold]Key ID:[/bold] {key_id}\n"
+                f"[bold]Reason:[/bold] {reason}",
+                title="License Revoked",
+                border_style="green",
+            )
+        )
     else:
-        console.print(Panel(
-            f"[bold red]❌ {result.get('error', 'Unknown error')}[/bold red]",
-            border_style="red",
-        ))
+        console.print(
+            Panel(
+                f"[bold red]❌ {result.get('error', 'Unknown error')}[/bold red]",
+                border_style="red",
+            )
+        )
 
 
 @app.command("audit")
@@ -219,11 +229,13 @@ def view_audit_logs(
 @app.command("dashboard")
 def interactive_dashboard() -> None:
     """Launch interactive admin dashboard."""
-    console.print(Panel.fit(
-        "[bold cyan]🔐 RAAS License Admin Dashboard[/bold cyan]\n"
-        "[dim]Phase 2 - License Management[/dim]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]🔐 RAAS License Admin Dashboard[/bold cyan]\n"
+            "[dim]Phase 2 - License Management[/dim]",
+            border_style="cyan",
+        )
+    )
     console.print()
 
     import asyncio
@@ -242,14 +254,16 @@ def interactive_dashboard() -> None:
     revoked_count = sum(1 for license in licenses["items"] if license.get("status") == "revoked")
     recent_actions = len(logs)
 
-    console.print(Panel(
-        f"[bold]Total Licenses:[/bold] {total_licenses}\n"
-        f"[green]● Active:[/green] {active_count}\n"
-        f"[red]● Revoked:[/red] {revoked_count}\n"
-        f"[blue]● Actions (7 days):[/blue] {recent_actions}",
-        title="📊 Summary",
-        border_style="blue",
-    ))
+    console.print(
+        Panel(
+            f"[bold]Total Licenses:[/bold] {total_licenses}\n"
+            f"[green]● Active:[/green] {active_count}\n"
+            f"[red]● Revoked:[/red] {revoked_count}\n"
+            f"[blue]● Actions (7 days):[/blue] {recent_actions}",
+            title="📊 Summary",
+            border_style="blue",
+        )
+    )
 
     # Recent activity
     console.print("\n[bold]Recent Activity:[/bold]")

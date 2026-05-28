@@ -10,7 +10,7 @@ Usage:
 
 Environment Variables:
     RAAS_LICENSE_KEY: License key (mk_* or JWT format)
-    RAAS_GATEWAY_URL: Gateway URL (default: https://raas.agencyos.network)
+    RAAS_GATEWAY_URL: Gateway URL (default: https://api.cashclaw.cc)
     RAAS_USE_CERTIFICATE_AUTH: Enable certificate auth (default: true)
 """
 
@@ -29,23 +29,18 @@ app = typer.Typer(help="RaaS License validation commands")
 def validate_license(
     license_key: str = typer.Option(
         None,
-        "--key", "-k",
-        help="License key (mk_* or JWT format). Uses RAAS_LICENSE_KEY env if not provided."
+        "--key",
+        "-k",
+        help="License key (mk_* or JWT format). Uses RAAS_LICENSE_KEY env if not provided.",
     ),
     check: bool = typer.Option(
-        False,
-        "--check", "-c",
-        help="Check license status without validation"
+        False, "--check", "-c", help="Check license status without validation"
     ),
     renew: bool = typer.Option(
-        False,
-        "--renew", "-r",
-        help="Force certificate renewal before validation"
+        False, "--renew", "-r", help="Force certificate renewal before validation"
     ),
     no_certificate: bool = typer.Option(
-        False,
-        "--no-cert",
-        help="Disable certificate-based authentication"
+        False, "--no-cert", help="Disable certificate-based authentication"
     ),
 ):
     """
@@ -73,7 +68,9 @@ def validate_license(
         raise typer.Exit(1)
 
     # Initialize auth client
-    use_certificate_auth = not no_certificate and os.getenv("RAAS_USE_CERTIFICATE_AUTH", "true").lower() != "false"
+    use_certificate_auth = (
+        not no_certificate and os.getenv("RAAS_USE_CERTIFICATE_AUTH", "true").lower() != "false"
+    )
 
     try:
         client = RaaSAuthClient(use_certificate_auth=use_certificate_auth)
@@ -99,9 +96,7 @@ def validate_license(
     if use_certificate_auth:
         cert_status = client.get_certificate_status()
         if cert_status.get("has_certificate"):
-            console.print(
-                f"[dim]Certificate: {cert_status.get('certificate_id', 'N/A')}[/dim]\n"
-            )
+            console.print(f"[dim]Certificate: {cert_status.get('certificate_id', 'N/A')}[/dim]\n")
 
     # Validate credentials
     console.print("[dim]Validating license with RaaS Gateway...[/dim]")
@@ -135,7 +130,9 @@ def _show_success_result(result, client):
 
     if tenant.expires_at:
         days_left = (tenant.expires_at - datetime.now(timezone.utc)).days
-        expiry_status = f"{tenant.expires_at.strftime('%Y-%m-%d %H:%M')} ({days_left} days remaining)"
+        expiry_status = (
+            f"{tenant.expires_at.strftime('%Y-%m-%d %H:%M')} ({days_left} days remaining)"
+        )
         if days_left < 7:
             expiry_status += " [yellow]⚠ Expiring soon![/yellow]"
         elif days_left < 0:
@@ -204,13 +201,17 @@ def _show_license_status(client):
 
     # Check environment
     has_env_key = bool(os.getenv("RAAS_LICENSE_KEY"))
-    console.print(f"RAAS_LICENSE_KEY env: {'[green]Set[/green]' if has_env_key else '[red]Not set[/red]'}")
+    console.print(
+        f"RAAS_LICENSE_KEY env: {'[green]Set[/green]' if has_env_key else '[red]Not set[/red]'}"
+    )
 
     # Check stored credentials
     try:
         creds = client._load_credentials()
         has_stored = bool(creds.get("token"))
-        console.print(f"Stored credentials: {'[green]Found[/green]' if has_stored else '[red]None[/red]'}")
+        console.print(
+            f"Stored credentials: {'[green]Found[/green]' if has_stored else '[red]None[/red]'}"
+        )
     except Exception:
         console.print("Stored credentials: [yellow]Unable to check[/yellow]")
 
@@ -220,7 +221,9 @@ def _show_license_status(client):
         console.print("\n[bold]Session Cache:[/bold]")
         console.print(f"  Tenant: {cache.tenant_id}")
         console.print(f"  Tier: {cache.tier}")
-        console.print(f"  Valid: [green]Yes[/green] (expires in {(cache.session_expires_at - datetime.now(timezone.utc)).total_seconds() / 60:.0f} min)")
+        console.print(
+            f"  Valid: [green]Yes[/green] (expires in {(cache.session_expires_at - datetime.now(timezone.utc)).total_seconds() / 60:.0f} min)"
+        )
     else:
         console.print("\nSession Cache: [dim]None or expired[/dim]")
 
@@ -228,11 +231,17 @@ def _show_license_status(client):
     if client._certificate_store:
         cert_status = client.get_certificate_status()
         console.print("\n[bold]Certificate:[/bold]")
-        console.print(f"  Present: {'[green]Yes[/green]' if cert_status.get('has_certificate') else '[red]No[/red]'}")
+        console.print(
+            f"  Present: {'[green]Yes[/green]' if cert_status.get('has_certificate') else '[red]No[/red]'}"
+        )
         if cert_status.get("has_certificate"):
             console.print(f"  ID: {cert_status.get('certificate_id', 'N/A')}")
-            console.print(f"  Valid: {'[green]Yes[/green]' if cert_status.get('is_valid') else '[red]No[/red]'}")
-            console.print(f"  Should Rotate: {'[yellow]Yes[/yellow]' if cert_status.get('should_rotate') else '[green]No[/green]'}")
+            console.print(
+                f"  Valid: {'[green]Yes[/green]' if cert_status.get('is_valid') else '[red]No[/red]'}"
+            )
+            console.print(
+                f"  Should Rotate: {'[yellow]Yes[/yellow]' if cert_status.get('should_rotate') else '[green]No[/green]'}"
+            )
 
     console.print()
 

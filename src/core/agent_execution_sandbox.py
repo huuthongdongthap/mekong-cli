@@ -81,12 +81,14 @@ class Sandbox:
     @classmethod
     def create_restricted(cls, capabilities: set[SandboxCapability]) -> "Sandbox":
         """Return a Sandbox with minimal policy granting only the specified capabilities."""
-        return cls(SandboxPolicy(
-            allowed_capabilities=capabilities,
-            max_execution_time=60,
-            max_memory_mb=128,
-            denied_commands=["rm -rf*", "sudo*", "chmod*", "dd*"],
-        ))
+        return cls(
+            SandboxPolicy(
+                allowed_capabilities=capabilities,
+                max_execution_time=60,
+                max_memory_mb=128,
+                denied_commands=["rm -rf*", "sudo*", "chmod*", "dd*"],
+            )
+        )
 
     @classmethod
     def create_unrestricted(cls) -> "Sandbox":

@@ -89,12 +89,14 @@ class AutonomousEngine:
         from .llm_client import LLMClient
 
         import os
+
         gemini_key = os.getenv("GEMINI_API_KEY", "")
         llm = LLMClient(gemini_key=gemini_key)
 
         if self._memory is None:
             try:
                 from .memory import MemoryStore
+
                 self._memory = MemoryStore()
             except Exception:
                 pass
@@ -102,6 +104,7 @@ class AutonomousEngine:
         if self._nlu is None:
             try:
                 from .nlu import IntentClassifier
+
                 self._nlu = IntentClassifier(llm_client=llm)
             except Exception:
                 pass
@@ -109,6 +112,7 @@ class AutonomousEngine:
         if self._recipe_gen is None:
             try:
                 from .recipe_gen import RecipeGenerator
+
                 self._recipe_gen = RecipeGenerator(llm_client=llm)
             except Exception:
                 pass
@@ -116,9 +120,8 @@ class AutonomousEngine:
         # Router depends on memory
         try:
             from .smart_router import SmartRouter
-            self._router = (
-                SmartRouter(memory_store=self._memory) if self._memory else None
-            )
+
+            self._router = SmartRouter(memory_store=self._memory) if self._memory else None
         except Exception:
             pass
 
@@ -126,6 +129,7 @@ class AutonomousEngine:
         if self._reflection is None:
             try:
                 from .reflection import ReflectionEngine
+
                 self._reflection = ReflectionEngine(llm_client=llm)
             except Exception:
                 pass
@@ -134,6 +138,7 @@ class AutonomousEngine:
         if self._world_model is None:
             try:
                 from .world_model import WorldModel
+
                 self._world_model = WorldModel(llm_client=llm)
             except Exception:
                 pass
@@ -232,6 +237,7 @@ class AutonomousEngine:
         # Record memory
         if self._memory and result.executed:
             from .memory import MemoryEntry
+
             self._memory.record(
                 MemoryEntry(
                     goal=goal,
@@ -252,6 +258,7 @@ class AutonomousEngine:
         if self._recipe_gen and self._memory and result.result_status == "success":
             try:
                 from .memory import MemoryEntry
+
                 entry = MemoryEntry(goal=goal, status="success")
                 recipe = self._recipe_gen.from_successful_run(entry)
                 if recipe.valid:
@@ -298,7 +305,7 @@ class AutonomousEngine:
         result.decision_trace = trace
         self._decision_traces.append(trace)
         if len(self._decision_traces) > self.MAX_HISTORY:
-            self._decision_traces = self._decision_traces[-self.MAX_HISTORY:]
+            self._decision_traces = self._decision_traces[-self.MAX_HISTORY :]
 
         # Emit cycle event
         bus = get_event_bus()
@@ -368,9 +375,7 @@ class AutonomousEngine:
         # Track consciousness over time
         self._consciousness_history.append(report)
         if len(self._consciousness_history) > self.MAX_HISTORY:
-            self._consciousness_history = self._consciousness_history[
-                -self.MAX_HISTORY:
-            ]
+            self._consciousness_history = self._consciousness_history[-self.MAX_HISTORY :]
 
         return report
 

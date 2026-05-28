@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class JournalEntry:
     """Single mission outcome record."""
+
     timestamp: float
     mission: str
     complexity: str
@@ -48,15 +49,24 @@ class LearningJournal:
             logger.warning("Journal write failed: %s", e)
 
     def record_mission(
-        self, mission: str, complexity: str, success: bool,
-        duration: float, error: Optional[str] = None,
+        self,
+        mission: str,
+        complexity: str,
+        success: bool,
+        duration: float,
+        error: Optional[str] = None,
     ) -> None:
         """Convenience method to record a mission outcome."""
-        self.record(JournalEntry(
-            timestamp=time.time(), mission=mission[:200],
-            complexity=complexity, success=success,
-            duration=round(duration, 2), error=error,
-        ))
+        self.record(
+            JournalEntry(
+                timestamp=time.time(),
+                mission=mission[:200],
+                complexity=complexity,
+                success=success,
+                duration=round(duration, 2),
+                error=error,
+            )
+        )
 
     def recent(self, limit: int = 20) -> List[JournalEntry]:
         """Read last N journal entries."""

@@ -33,6 +33,7 @@ class ExportFilter:
         tenant_id: Filter by tenant ID
         limit: Maximum records to export
     """
+
     date_from: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     date_to: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     license_key: Optional[str] = None
@@ -70,7 +71,7 @@ class AuditExporter:
         """
         # Validate license_key (alphanumeric, hyphens, underscores only)
         if filters.license_key:
-            if not re.match(r'^[a-zA-Z0-9_-]{1,255}$', filters.license_key):
+            if not re.match(r"^[a-zA-Z0-9_-]{1,255}$", filters.license_key):
                 raise ValueError(
                     "license_key must contain only alphanumeric characters, "
                     "hyphens, and underscores (max 255 chars)"
@@ -78,7 +79,7 @@ class AuditExporter:
 
         # Validate tenant_id (alphanumeric, hyphens, underscores only)
         if filters.tenant_id:
-            if not re.match(r'^[a-zA-Z0-9_-]{1,255}$', filters.tenant_id):
+            if not re.match(r"^[a-zA-Z0-9_-]{1,255}$", filters.tenant_id):
                 raise ValueError(
                     "tenant_id must contain only alphanumeric characters, "
                     "hyphens, and underscores (max 255 chars)"
@@ -92,10 +93,7 @@ class AuditExporter:
         if filters.date_from > filters.date_to:
             raise ValueError("date_from must be before or equal to date_to")
 
-    async def query_events(
-        self,
-        filters: ExportFilter
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    async def query_events(self, filters: ExportFilter) -> Dict[str, List[Dict[str, Any]]]:
         """Query audit events based on filters.
 
         Args:
@@ -149,7 +147,11 @@ class AuditExporter:
             ORDER BY created_at DESC
             LIMIT ${4 if filters.license_key or filters.tenant_id else 3}
         """
-        rate_params = params_base + [date_from, date_to, filters.limit] if params_base else [date_from, date_to, filters.limit]
+        rate_params = (
+            params_base + [date_from, date_to, filters.limit]
+            if params_base
+            else [date_from, date_to, filters.limit]
+        )
         if not filters.license_key and not filters.tenant_id:
             rate_query = """
                 SELECT * FROM rate_limit_events
@@ -192,11 +194,7 @@ class AuditExporter:
             "total_records": sum(len(v) for v in events.values()),
         }
 
-    async def export_json(
-        self,
-        filters: ExportFilter,
-        include_summary: bool = True
-    ) -> str:
+    async def export_json(self, filters: ExportFilter, include_summary: bool = True) -> str:
         """Export audit logs to JSON format.
 
         Args:
@@ -215,11 +213,7 @@ class AuditExporter:
 
         return json.dumps(output, indent=2, default=str)
 
-    async def export_csv(
-        self,
-        filters: ExportFilter,
-        output_path: str
-    ) -> str:
+    async def export_csv(self, filters: ExportFilter, output_path: str) -> str:
         """Export audit logs to CSV format.
 
         Creates separate CSV files for each event type.
@@ -260,10 +254,7 @@ class AuditExporter:
         return output_path
 
     async def export_pdf(
-        self,
-        filters: ExportFilter,
-        output_path: str,
-        title: str = "Compliance Audit Report"
+        self, filters: ExportFilter, output_path: str, title: str = "Compliance Audit Report"
     ) -> str:
         """Export audit logs to PDF format.
 
@@ -307,14 +298,21 @@ class AuditExporter:
 
             # Event counts by type
             for event_type, records in events.items():
-                story.append(Paragraph(f"{event_type.replace('_', ' ').title()}: {len(records)} records", styles["Heading3"]))
+                story.append(
+                    Paragraph(
+                        f"{event_type.replace('_', ' ').title()}: {len(records)} records",
+                        styles["Heading3"],
+                    )
+                )
                 if records:
                     # Add first 50 records as sample
                     for record in records[:50]:
                         record_text = " | ".join(f"{k}: {v}" for k, v in list(record.items())[:5])
                         story.append(Paragraph(record_text, styles["Normal"]))
                     if len(records) > 50:
-                        story.append(Paragraph(f"... and {len(records) - 50} more records", styles["Italic"]))
+                        story.append(
+                            Paragraph(f"... and {len(records) - 50} more records", styles["Italic"])
+                        )
                 story.append(Spacer(1, 12))
 
             doc.build(story)
@@ -328,10 +326,7 @@ class AuditExporter:
             return html_path
 
     def _generate_html_report(
-        self,
-        events: Dict[str, List[Dict[str, Any]]],
-        summary: Dict[str, Any],
-        title: str
+        self, events: Dict[str, List[Dict[str, Any]]], summary: Dict[str, Any], title: str
     ) -> str:
         """Generate HTML report content.
 
@@ -393,7 +388,11 @@ class AuditExporter:
                 for record in records[:100]:
                     html += "        <tr>\n"
                     for col in list(record.keys())[:8]:
-                        val = str(record[col])[:50] + "..." if len(str(record[col])) > 50 else record[col]
+                        val = (
+                            str(record[col])[:50] + "..."
+                            if len(str(record[col])) > 50
+                            else record[col]
+                        )
                         html += f"            <td>{val}</td>\n"
                     html += "        </tr>\n"
                 html += """    </table>

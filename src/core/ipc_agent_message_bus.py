@@ -39,7 +39,7 @@ class IPCMessage:
     correlation_id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
 
-IPCHandler = Callable[[IPCMessage], None]       # on() handler: fire-and-forget
+IPCHandler = Callable[[IPCMessage], None]  # on() handler: fire-and-forget
 IPCInvokeHandler = Callable[[IPCMessage], Any]  # handle() handler: returns response
 
 
@@ -91,7 +91,9 @@ class IPCBus:
         message = IPCMessage(channel=channel, sender=sender, payload=payload)
         return await asyncio.wait_for(
             asyncio.get_event_loop().run_in_executor(
-                None, self._invoke_handlers[channel], message,
+                None,
+                self._invoke_handlers[channel],
+                message,
             ),
             timeout=self._invoke_timeout,
         )

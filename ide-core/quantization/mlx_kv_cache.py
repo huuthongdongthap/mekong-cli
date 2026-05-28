@@ -19,8 +19,9 @@ from quantization.mlx_polar_quant import MLXPolarQuant
 @dataclass
 class CompressedLayer:
     """Compressed KV for a single layer."""
+
     k_indices: list[mx.array] = field(default_factory=list)  # per-head: (seq, d)
-    k_norms: list[mx.array] = field(default_factory=list)    # per-head: (seq,)
+    k_norms: list[mx.array] = field(default_factory=list)  # per-head: (seq,)
     v_indices: list[mx.array] = field(default_factory=list)
     v_norms: list[mx.array] = field(default_factory=list)
 
@@ -62,8 +63,7 @@ class TurboKVCache:
 
         # Boundary layer indices (first N + last N keep full precision)
         self.boundary_indices = set(
-            list(range(boundary_layers)) +
-            list(range(num_layers - boundary_layers, num_layers))
+            list(range(boundary_layers)) + list(range(num_layers - boundary_layers, num_layers))
         )
 
         # Quantizer for compressed layers (shared across all heads/layers)

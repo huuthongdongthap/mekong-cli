@@ -1,30 +1,37 @@
-# System Architecture: Mekong CLI v5.0.0 (OpenClaw v2026.3.23)
+# System Architecture: Mekong CLI v6.0.0 (OpenClaw v2026.4.16)
 
-**Last Updated:** 2026-03-23 | **Status:** Production
+**Last Updated:** 2026-04-16 | **Status:** Production
 
 ### Platform Endpoints
 
 | Service | URL | Type |
 |---------|-----|------|
-| Landing | mekongmind.com | CF Pages (project: mekongmind) |
-| Use Cases | mekongmind.com/use-cases/* | CF Pages (project: mekongmind) |
-| IDE App | mekongmind.com/ide | CF Pages (project: mekongmind) |
-| Reports | mekongmind.com/reports | CF Pages (project: mekongmind) |
-| Dashboard | mekongmind.com/dashboard | CF Pages (project: mekongmind) |
-| API | api.mekongmind.com | CF Workers v5.0.0 |
-| Docs | mekongmind.com/docs | CF Pages (project: mekongmind) |
-| LLM | 192.168.11.111:11434 | Ollama (M1 Max) |
+| Landing | www.mekongmind.com | CF Pages (project: mekongmind) |
+| Use Cases | www.mekongmind.com/{slug}/ | CF Pages (project: mekongmind) |
+| IDE App | ide.mekongmind.com | CF Pages (project: mekong-ide) |
+| Guide | www.mekongmind.com/guide/ | CF Pages (project: mekongmind) |
+| API Gateway | mekong-engine.mekongmind.workers.dev | Cloudflare Workers (Hono + D1) |
+| Webhook | api.cashclaw.cc/webhook/polar | Polar.sh payment events |
+| Docs | www.mekongmind.com/docs | CF Pages (project: mekongmind) |
+| LLM | localhost:11434 | Ollama (M1 Max, 5 models, 95GB) |
 
 ## 1. High-Level Overview
 
-Mekong CLI is an autonomous agent framework implementing Plan-Execute-Verify (PEV) with pluggable LLM providers, parallel task execution via DAG scheduling, and built-in multi-tenant credit billing.
+Mekong CLI v6.0 features a 4-phase "Hạt giống → Cây → Rừng → Đất" (Seed → Tree → Forest → Land) architecture. Phase 01-04 (Seed) is complete, establishing the foundation for autonomous agent orchestration with Plan-Execute-Verify (PEV), pluggable LLM providers, parallel task execution via DAG scheduling, and multi-tenant billing.
+
+### Architecture Phases (2026 Roadmap)
+
+**Phase 01 (Seed - COMPLETE):** Local CLI + Python stdlib agents + memory (ChromaDB + SQLite)
+**Phase 02 (Tree):** Telegram bot + Web UI (htmx) + single-tenant expansion
+**Phase 03 (Forest):** Multi-tenant JWT + Docker isolation + Redis queue
+**Phase 04 (Land):** Temporal workflow engine + 5-gate CI/CD + Signals loop + Clipmart
 
 ### Architecture Layers
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │              CLI / REST API / Edge Gateway               │
-│   (Typer CLI + FastAPI + Cloudflare Workers)            │
+│   (Typer CLI + Hono Router + Cloudflare Workers)       │
 │           + RaaS Auth Middleware + Billing              │
 └──────────────────┬───────────────────────────────────────┘
                    │
@@ -71,7 +78,7 @@ Mekong CLI is an autonomous agent framework implementing Plan-Execute-Verify (PE
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
 │  │ RaaS Gateway: Cloudflare KV (rate limiting cache) │  │
-│  │ NOWPayments Webhooks: payment → credit allocation    │  │
+│  │ Polar.sh Webhooks: payment → license + credit allocation    │  │
 │  └────────────────────────────────────────────────────┘  │
 └──────────────────┬───────────────────────────────────────┘
                    │
@@ -100,7 +107,7 @@ Mekong CLI is an autonomous agent framework implementing Plan-Execute-Verify (PE
 ```
 ┌──────────────────────────────────────────────────────────┐
 │              CLI / REST API / Edge Gateway               │
-│   (Typer CLI + FastAPI + Cloudflare Workers)            │
+│   (Typer CLI + Hono Router + Cloudflare Workers)       │
 │           + RaaS Auth Middleware + Billing              │
 └──────────────────┬───────────────────────────────────────┘
                    │
@@ -147,10 +154,79 @@ Mekong CLI is an autonomous agent framework implementing Plan-Execute-Verify (PE
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
 │  │ RaaS Gateway: Cloudflare KV (rate limiting cache) │  │
-│  │ NOWPayments Webhooks: payment → credit allocation    │  │
+│  │ Polar.sh Webhooks: payment → license + credit allocation    │  │
 │  └────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────┘
 ```
+
+## 1.5. Seed Layer (Phase 01 - COMPLETE 2026-04-25)
+
+Minimal standalone AI agent runtime using Python stdlib (no external LLM SDKs):
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  seed/main.py — Entry point (python seed/main.py "task") │
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  ┌──────────────────────┐  ┌──────────────────────────┐  │
+│  │  Agent Layer         │  │  LLM Router              │  │
+│  │  - ceo.py (planning) │  │  - ollama via urllib     │  │
+│  │  - developer.py      │  │  - stream-based parsing  │  │
+│  │  - tester.py         │  │  - fallback to offline   │  │
+│  │  - base.py (base)    │  └──────────────────────────┘  │
+│  └──────────────────────┘                                 │
+│                                                           │
+│  ┌──────────────────────┐  ┌──────────────────────────┐  │
+│  │  Memory (Hybrid)     │  │  Tools                   │  │
+│  │  - ChromaDB semantic │  │  - file_system.py        │  │
+│  │  - SQLite persistence│  │  - browser.py            │  │
+│  └──────────────────────┘  └──────────────────────────┘  │
+│                                                           │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  Config — ENV-based: OLLAMA_BASE_URL, LLM_MODEL     │  │
+│  └──────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Key Design:**
+- Pure Python (no requests/httpx) — `urllib` + streaming
+- Stdlib-only agents (CEO, Developer, Tester)
+- Memory: ChromaDB vectors + SQLite backing
+- Config via environment: `OLLAMA_BASE_URL`, `LLM_MODEL`
+- Testing: 69 unit tests in `tests/seed/` (mock LLM, no Ollama required)
+
+**Quick Start:**
+```bash
+export OLLAMA_BASE_URL=http://localhost:11434
+python3 seed/main.py "Create a Python script to fetch weather"
+```
+
+**Testing:**
+```bash
+# Run all 69 seed tests (no Ollama needed)
+pytest tests/seed/ -v
+
+# Gated in CI/CD via Gate 5 (`.github/workflows/ai-native-ci.yml`)
+```
+
+**Files Added (Phase 01):**
+- `seed/main.py` — Orchestrator entry point
+- `seed/agents/{ceo,developer,tester,base}.py` — Agent implementations + @timed decorator
+- `seed/llm_client.py` — Ollama urllib client
+- `seed/memory.py` — ChromaDB + SQLite hybrid
+- `seed/config.py` — Environment configuration
+- `tests/seed/` — 69 unit tests (mock LLM, no Ollama)
+- `tools/{file_system,browser}.py` — Capability tools
+- `apps/web/mission-control.html` — htmx UI (Phase 02)
+- `apps/api/{server,gateway}.py` — FastAPI single/multi-tenant
+- `worker/main.py` — Redis queue worker
+- `integrations/telegram_bot.py` — Telegram integration (Phase 02)
+- `observability/agent_metrics.py` — Metrics decorator + observability
+- `feedback/signals_loop.py` — Weekly LLM analysis
+- `clipmart/marketplace_api.py` — Agent template marketplace
+- `.github/workflows/ai-native-ci.yml` — 5-gate CI/CD (Gate 5 runs pytest)
+- `docker-compose.seed.yml` + `Dockerfile.seed` — Containerization (copies seed/ tools/ worker/ apps/ integrations/ clipmart/ observability/ feedback/)
+- `requirements.seed.txt` — Dependencies (chromadb, fastapi, uvicorn, redis, pytest)
 
 ## 2. Core Modules
 
@@ -198,10 +274,12 @@ class RecipeStep:
 
 Multi-mode task runner:
 
-- **Shell Mode** — Runs `bash` or `sh` commands
+- **Shell Mode** — Runs `bash` or `sh` commands (default subprocess, or isolated Docker when `FOREST_WORKER_EXECUTOR=docker`)
 - **LLM Mode** — Sends prompts to LLM provider
 - **API Mode** — Calls HTTP endpoints (future)
 - **Agent Mode** — Dispatches to registered agents
+
+**Docker Isolation (Phase 3 Land):** Agent-forest workers can execute inside isolated Docker containers via env vars `FOREST_WORKER_EXECUTOR`, `FOREST_DOCKER_IMAGE` (default `agent-core:latest`), and `FOREST_DOCKER_TIMEOUT_SECONDS` (default 300). Non-root uid 1000, requires `docker>=7` extra.
 
 **Execution Result:**
 ```python
@@ -436,7 +514,7 @@ Multi-tenant billing with SQLite backend:
 - `tenant.py` — Tenant management (create, list, rotate API keys)
 - `credits.py` — Credit ledger (add, deduct, check balance)
 - `missions.py` — Mission lifecycle (create, execute, complete, cancel)
-- `billing.py` — NOWPayments webhook receiver
+- `billing.py` — Polar.sh webhook receiver
 - `sdk.py` — Python client SDK
 - `rate_limiter.py` — Fair-use rate limiting per tenant
 
@@ -449,7 +527,7 @@ Multi-tenant billing with SQLite backend:
 
 **Workflow:**
 1. User creates tenant → gets API key
-2. Admin adds credits via NOWPayments purchase
+2. User purchases credits via Polar.sh checkout
 3. User submits mission via API
 4. Mission plan estimates credits → reserved
 5. Execution completes → credits deducted
@@ -573,12 +651,12 @@ GET    /api/v1/billing/usage    # Get tenant usage metrics
 | 1-10 MCU | 1 | Simple (single step) |
 | 11-30 MCU | 3 | Standard (multi-step) |
 | 31-60 MCU | 5 | Complex (parallel tasks) |
-| 61+ MCU | 8 | Enterprise (advanced) |
+| 61+ MCU | 8 | Critical (advanced) |
 
 **Billing Tiers:**
-- Free: 10 MCU/month included
-- Pro: Unlimited MCU, $9.99/month (via NOWPayments)
-- Enterprise: Custom limits, custom support
+- Starter: 200 MCU/month, $49/mo (via Polar.sh)
+- Growth: 1,000 MCU/month, $149/mo (via Polar.sh)
+- Pro: 5,000 MCU/month, $499/mo (via Polar.sh)
 
 ### 2.11 RaaS Gateway (`apps/raas-gateway/`)
 
@@ -587,7 +665,7 @@ Cloudflare Workers edge gateway with distributed rate limiting:
 **Features:**
 - **Edge Auth** — JWT validation at Cloudflare edge (before reaching origin)
 - **KV Rate Limiter** — Distributed rate limiting cache (Cloudflare KV)
-- **Webhook Handler** — NOWPayments payment events → credit allocation
+- **Webhook Handler** — Polar.sh payment events → license + credit allocation
 - **Edge Computing** — Process requests globally without database latency
 
 **Architecture:**
@@ -601,10 +679,10 @@ Cloudflare Edge (auth + rate limit)
 
 **Webhook Flow:**
 ```
-NOWPayments payment completed
-  → POST /webhooks/polar
-  → Verify signature + idempotency key
-  → Allocate credits to tenant
+Polar.sh subscription.created
+  → POST /webhook/polar
+  → Verify HMAC-SHA256 signature + timestamp
+  → Generate license key + allocate credits
   → Return 200 (idempotent)
 ```
 
@@ -1128,7 +1206,41 @@ The authentication layer implements OAuth2-based user authentication with JWT se
 | `STRIPE_SECRET_KEY` | (optional) | Stripe API key |
 | `STRIPE_WEBHOOK_SECRET` | (optional) | Stripe webhook secret |
 
-## 11. Health Monitoring System
+## 11. Layer 2: Observability & Feedback Loop
+
+**Added 2026-04-16.** Self-hosted observability stack + signals for model evaluation + SDLC scaffold.
+
+### Observability (OTel → Prometheus → Grafana)
+
+**Stack:** OpenTelemetry collector → Prometheus (M1 Max) → Grafana (CF Tunnel `m1max.cashclaw.cc`)
+
+**Metrics tracked:**
+- `agent.invocation_ms` — Agent latency
+- `agent.token_cost_usd` — Token consumption cost
+- `agent.retry_total` — Retry attempts
+- `agent.model_drift_score` — LLM consistency
+- `mlx.gpu_utilization_percent` — M1 Max GPU
+
+**Dashboards:** `observability/dashboards/` (agent-performance.json, m1max-health.json, cost-analysis.json)
+
+### Signals Loop (SQLite evals + Statsig/PostHog)
+
+**Phases:** Offline evals (SQLite) → Online A/B tests (Statsig) → Amplitude analytics (deferred >50 customers)
+
+**Location:** `.mekong/phases/signals/canary_flags.json` (feature gate state)
+
+### Enforcement Gates (5 GitHub Actions)
+
+**`.github/workflows/gates.yml`:** Runs on every PR to main.
+- g1-validation: Type checks, syntax validation
+- g2-security: Secret scanning, dependency audit
+- g3-quality: Linting, coverage > 80%
+- g4-dependency: Dependency freshness
+- g5-deploy: CF Pages deploy test
+
+---
+
+## 12. Health Monitoring System
 
 > **Phase 1-5 Monitoring Architecture** — Real-time detection, alerting, and automated recovery
 

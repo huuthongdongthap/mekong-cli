@@ -1,4 +1,5 @@
 """CLI commands for Tom Hum AGI daemon management."""
+
 import json
 import pathlib
 import subprocess
@@ -50,7 +51,14 @@ def status() -> None:
     report = engine.calculate()
 
     # Grade color
-    grade_colors = {"S": "bold magenta", "A": "bold green", "B": "cyan", "C": "yellow", "D": "red", "F": "bold red"}
+    grade_colors = {
+        "S": "bold magenta",
+        "A": "bold green",
+        "B": "cyan",
+        "C": "yellow",
+        "D": "red",
+        "F": "bold red",
+    }
     gc = grade_colors.get(report.grade, "white")
 
     # Score bar (visual)

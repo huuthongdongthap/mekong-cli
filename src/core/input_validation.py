@@ -9,10 +9,7 @@ from src.core.error_responses import (
 )
 
 
-def validate_required(
-    value: Any,
-    field_name: str
-) -> Optional[ErrorResponse]:
+def validate_required(value: Any, field_name: str) -> Optional[ErrorResponse]:
     """
     Check that a required field is not null, empty string, or empty list.
 
@@ -27,31 +24,28 @@ def validate_required(
         return error_response(
             ErrorCode.MISSING_FIELD,
             f"Field '{field_name}' is required",
-            [ErrorDetail(field=field_name, message="Required", value=None)]
+            [ErrorDetail(field=field_name, message="Required", value=None)],
         )
 
     if isinstance(value, str) and not value.strip():
         return error_response(
             ErrorCode.INVALID_INPUT,
             f"Field '{field_name}' cannot be empty",
-            [ErrorDetail(field=field_name, message="Cannot be empty", value="")]
+            [ErrorDetail(field=field_name, message="Cannot be empty", value="")],
         )
 
     if isinstance(value, list) and len(value) == 0:
         return error_response(
             ErrorCode.INVALID_INPUT,
             f"Field '{field_name}' cannot be an empty array",
-            [ErrorDetail(field=field_name, message="Cannot be empty array", value=[])]
+            [ErrorDetail(field=field_name, message="Cannot be empty array", value=[])],
         )
 
     return None
 
 
 def validate_string_length(
-    value: str,
-    field_name: str,
-    min_len: int = 1,
-    max_len: int = 1000
+    value: str, field_name: str, min_len: int = 1, max_len: int = 1000
 ) -> Optional[ErrorResponse]:
     """
     Validate string length is within bounds.
@@ -69,23 +63,20 @@ def validate_string_length(
         return error_response(
             ErrorCode.INVALID_FORMAT,
             f"Field '{field_name}' must be at least {min_len} characters",
-            [ErrorDetail(field=field_name, message=f"Min {min_len} chars", value=value[:50])]
+            [ErrorDetail(field=field_name, message=f"Min {min_len} chars", value=value[:50])],
         )
 
     if len(value) > max_len:
         return error_response(
             ErrorCode.INVALID_FORMAT,
             f"Field '{field_name}' must be at most {max_len} characters",
-            [ErrorDetail(field=field_name, message=f"Max {max_len} chars", value=value[:50])]
+            [ErrorDetail(field=field_name, message=f"Max {max_len} chars", value=value[:50])],
         )
 
     return None
 
 
-def validate_url(
-    value: str,
-    field_name: str
-) -> Optional[ErrorResponse]:
+def validate_url(value: str, field_name: str) -> Optional[ErrorResponse]:
     """
     Validate URL format (must start with http:// or https://).
 
@@ -100,16 +91,13 @@ def validate_url(
         return error_response(
             ErrorCode.INVALID_FORMAT,
             f"Field '{field_name}' must be a valid URL (http:// or https://)",
-            [ErrorDetail(field=field_name, message="Invalid URL format", value=value)]
+            [ErrorDetail(field=field_name, message="Invalid URL format", value=value)],
         )
     return None
 
 
 def validate_enum_value(
-    value: str,
-    field_name: str,
-    allowed_values: list[str],
-    error_message: str = None
+    value: str, field_name: str, allowed_values: list[str], error_message: str = None
 ) -> Optional[ErrorResponse]:
     """
     Validate value is one of the allowed enum values.
@@ -127,7 +115,11 @@ def validate_enum_value(
         return error_response(
             ErrorCode.INVALID_INPUT,
             error_message or f"Field '{field_name}' must be one of: {', '.join(allowed_values)}",
-            [ErrorDetail(field=field_name, message=f"Must be one of: {allowed_values}", value=value)]
+            [
+                ErrorDetail(
+                    field=field_name, message=f"Must be one of: {allowed_values}", value=value
+                )
+            ],
         )
     return None
 

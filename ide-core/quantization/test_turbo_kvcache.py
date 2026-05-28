@@ -9,12 +9,16 @@ Tests:
 """
 
 import mlx.core as mx
-import math
 import sys
+
 
 def test_wht_roundtrip():
     """WHT rotation + transpose should approximately recover input."""
-    from quantization.mlx_wht import generate_rotation_params, apply_rotation, apply_rotation_transpose
+    from quantization.mlx_wht import (
+        generate_rotation_params,
+        apply_rotation,
+        apply_rotation_transpose,
+    )
 
     d = 128
     signs1, signs2, padded_d = generate_rotation_params(d, seed=42)
@@ -29,6 +33,7 @@ def test_wht_roundtrip():
     assert rel_error < 1e-5, f"WHT round-trip error too large: {rel_error}"
     print("  PASS")
 
+
 def test_wht_batch():
     """Batch WHT should work correctly."""
     from quantization.mlx_wht import generate_rotation_params, apply_rotation
@@ -42,6 +47,7 @@ def test_wht_batch():
     assert Y.shape == (batch, d), f"Expected ({batch}, {d}), got {Y.shape}"
     print(f"  Batch WHT shape: {Y.shape}")
     print("  PASS")
+
 
 def test_polar_quant_distortion():
     """PolarQuant MSE should be within paper bounds."""
@@ -70,6 +76,7 @@ def test_polar_quant_distortion():
     assert avg_mse < 0.15, f"MSE too high: {avg_mse}"
     print("  PASS")
 
+
 def test_kv_cache_boundary_v():
     """Boundary V: boundary layers full precision, middle compressed."""
     from quantization.mlx_kv_cache import TurboKVCache
@@ -80,8 +87,11 @@ def test_kv_cache_boundary_v():
     boundary = 2
 
     cache = TurboKVCache(
-        num_layers=num_layers, num_heads=num_heads,
-        head_dim=head_dim, bit_width=4, boundary_layers=boundary
+        num_layers=num_layers,
+        num_heads=num_heads,
+        head_dim=head_dim,
+        bit_width=4,
+        boundary_layers=boundary,
     )
 
     # Insert tokens
@@ -116,14 +126,12 @@ def test_kv_cache_boundary_v():
     assert stats["compression_ratio"] > 1.5, f"Compression too low: {stats['compression_ratio']}"
     print("  PASS")
 
+
 def test_compression_ratio():
     """Verify theoretical compression ratio at 4-bit."""
     from quantization.mlx_kv_cache import TurboKVCache
 
-    cache = TurboKVCache(
-        num_layers=32, num_heads=32, head_dim=128,
-        bit_width=4, boundary_layers=2
-    )
+    cache = TurboKVCache(num_layers=32, num_heads=32, head_dim=128, bit_width=4, boundary_layers=2)
 
     # Simulate 1000 tokens
     for layer in range(32):
@@ -133,13 +141,14 @@ def test_compression_ratio():
             cache.update(layer, k, v)
 
     stats = cache.memory_stats()
-    print(f"  32-layer, 32-head, 128-dim, 10 tokens, 4-bit:")
+    print("  32-layer, 32-head, 128-dim, 10 tokens, 4-bit:")
     print(f"  Original: {stats['original_mb']:.1f} MB")
     print(f"  Compressed: {stats['compressed_mb']:.1f} MB")
     print(f"  Ratio: {stats['compression_ratio']:.2f}x")
     # With 4 boundary layers at fp16 + 28 compressed at 4-bit, expect ~3x+
     assert stats["compression_ratio"] > 2.0, f"Expected >2x, got {stats['compression_ratio']}"
     print("  PASS")
+
 
 def test_sparse_v_stats():
     """Sparse V: verify sparsity detection works."""
@@ -157,6 +166,7 @@ def test_sparse_v_stats():
     print(f"  Skip rate: {stats['skip_rate']:.1%}")
     assert stats["skip_rate"] > 0.5, f"Expected >50% skip, got {stats['skip_rate']}"
     print("  PASS")
+
 
 if __name__ == "__main__":
     tests = [

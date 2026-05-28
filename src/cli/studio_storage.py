@@ -3,13 +3,12 @@ Studio data persistence layer — JSON file storage.
 
 Stores studio, portfolio, deals, and experts in .mekong/ directory.
 """
+
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any
-
 
 STUDIO_DATA_DIR = Path(".mekong/studio")
 STUDIO_FILE = STUDIO_DATA_DIR / "studio.json"
@@ -41,6 +40,7 @@ def _save_json(filepath: Path, data: Any) -> None:
 
 # === Studio ===
 
+
 def get_studio() -> dict | None:
     """Get current studio config."""
     return _load_json(STUDIO_FILE, None)
@@ -54,6 +54,7 @@ def save_studio(name: str, thesis: str = "general") -> dict:
 
 
 # === Portfolio ===
+
 
 def get_portfolio() -> list:
     """Get all portfolio companies."""
@@ -91,14 +92,13 @@ def get_portfolio_company(slug: str) -> dict | None:
 
 # === Dealflow ===
 
+
 def get_dealflow() -> list:
     """Get all deals in pipeline."""
     return _load_json(DEALFLOW_FILE, [])
 
 
-def add_deal(
-    name: str, sector: str, source: str = "manual", one_liner: str = ""
-) -> dict:
+def add_deal(name: str, sector: str, source: str = "manual", one_liner: str = "") -> dict:
     """Add deal to pipeline."""
     deals = get_dealflow()
     deal_id = f"deal-{len(deals) + 1:03d}"
@@ -117,6 +117,7 @@ def add_deal(
 
 
 # === Experts ===
+
 
 def get_experts() -> list:
     """Get all experts in pool."""
@@ -141,14 +142,18 @@ def add_expert(name: str, email: str, specialties: list[str]) -> dict:
 
 # === Thesis ===
 
+
 def get_thesis() -> dict:
     """Get investment thesis."""
-    return _load_json(THESIS_FILE, {
-        "template": "general",
-        "focus": "AI-powered video generation and content automation",
-        "stages": ["idea", "validation", "mvp", "seed"],
-        "sectors": ["ai", "video", "content", "automation"],
-    })
+    return _load_json(
+        THESIS_FILE,
+        {
+            "template": "general",
+            "focus": "AI-powered video generation and content automation",
+            "stages": ["idea", "validation", "mvp", "seed"],
+            "sectors": ["ai", "video", "content", "automation"],
+        },
+    )
 
 
 def save_thesis(thesis: dict) -> None:

@@ -34,12 +34,7 @@ class NameCandidate:
 
     @property
     def score(self) -> float:
-        return (
-            self.pronounceable
-            + self.memorable
-            + self.brandable
-            + self.domain_friendly
-        ) / 4.0
+        return (self.pronounceable + self.memorable + self.brandable + self.domain_friendly) / 4.0
 
 
 @dataclass
@@ -372,18 +367,24 @@ def save_brand_kit(base_dir: str, kit: BrandKit) -> list[str]:
 
     # Name candidates
     path = brand_dir / "name-candidates.json"
-    path.write_text(json.dumps(
-        [asdict(c) for c in kit.candidates],
-        indent=2, ensure_ascii=False,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(c) for c in kit.candidates],
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     saved.append(str(path))
 
     # Domain availability
     path = brand_dir / "domain-availability.json"
-    path.write_text(json.dumps(
-        [asdict(d) for d in kit.domain_checks],
-        indent=2, ensure_ascii=False,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(d) for d in kit.domain_checks],
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     saved.append(str(path))
 
     # Positioning
@@ -393,10 +394,13 @@ def save_brand_kit(base_dir: str, kit: BrandKit) -> list[str]:
 
     # Taglines
     path = brand_dir / "taglines.json"
-    path.write_text(json.dumps(
-        [asdict(t) for t in kit.taglines],
-        indent=2, ensure_ascii=False,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(t) for t in kit.taglines],
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     saved.append(str(path))
 
     # Voice guide
@@ -536,11 +540,21 @@ def generate_fnb_materials() -> list[MaterialPalette]:
 def generate_fnb_print_specs() -> list[PrintSpec]:
     """Generate CMYK + Pantone print specs for AURA SPACE brand colors."""
     return [
-        PrintSpec("Midnight Black", "#0A0A0A", (0, 0, 0, 100), "PMS Black 6 C", "Logo, backgrounds"),
+        PrintSpec(
+            "Midnight Black", "#0A0A0A", (0, 0, 0, 100), "PMS Black 6 C", "Logo, backgrounds"
+        ),
         PrintSpec("Aura Black", "#111111", (0, 0, 0, 95), "PMS Black 7 C", "Secondary backgrounds"),
         PrintSpec("Container Steel", "#1A1A1A", (0, 0, 0, 90), "PMS 426 C", "Card backgrounds"),
-        PrintSpec("Master Gold", "#C9A200", (0, 12, 100, 18), "PMS 7405 C", "Logo, primary accent, signage"),
-        PrintSpec("Electric Gold", "#FFD700", (0, 6, 100, 0), "PMS 116 C", "Neon effects, highlights"),
+        PrintSpec(
+            "Master Gold",
+            "#C9A200",
+            (0, 12, 100, 18),
+            "PMS 7405 C",
+            "Logo, primary accent, signage",
+        ),
+        PrintSpec(
+            "Electric Gold", "#FFD700", (0, 6, 100, 0), "PMS 116 C", "Neon effects, highlights"
+        ),
         PrintSpec("Matte Gold", "#B8860B", (0, 20, 95, 25), "PMS 1245 C", "Premium print, emboss"),
         PrintSpec("Neon Amber", "#FFB300", (0, 18, 100, 0), "PMS 137 C", "Accent, glow effects"),
         PrintSpec("Smoke Gray", "#9E9E9E", (0, 0, 0, 38), "PMS Cool Gray 7 C", "Body text on dark"),

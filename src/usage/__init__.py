@@ -17,7 +17,6 @@ from src.usage.decorators import (
     track_feature as track_feature_decorator,
 )
 
-
 __all__ = [
     "UsageEvent",
     "UsageTracker",

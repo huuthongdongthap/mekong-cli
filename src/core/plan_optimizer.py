@@ -210,14 +210,8 @@ class PlanOptimizer:
         # OrderingConstraint: before_step must be ancestor of after_step.
         # We protect the direct edge if both match single steps.
         for oc in constraints.ordering:
-            befores = [
-                s for s in steps
-                if oc.before_step.lower() in s.title.lower()
-            ]
-            afters = [
-                s for s in steps
-                if oc.after_step.lower() in s.title.lower()
-            ]
+            befores = [s for s in steps if oc.before_step.lower() in s.title.lower()]
+            afters = [s for s in steps if oc.after_step.lower() in s.title.lower()]
             for b in befores:
                 for a in afters:
                     protected.add((b.order, a.order))
@@ -225,11 +219,10 @@ class PlanOptimizer:
         # MutualExclusion: ensure serialization edge is not removed
         for me in constraints.mutual_exclusions:
             matched = [
-                s for s in steps
-                if any(p.lower() in s.title.lower() for p in me.step_titles)
+                s for s in steps if any(p.lower() in s.title.lower() for p in me.step_titles)
             ]
             for i, s1 in enumerate(matched):
-                for s2 in matched[i + 1:]:
+                for s2 in matched[i + 1 :]:
                     # Protect whichever direction the dependency runs
                     if s2.order in s1.dependencies:
                         protected.add((s2.order, s1.order))

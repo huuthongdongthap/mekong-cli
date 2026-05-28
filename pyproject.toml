@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mekong-cli"
-version = "3.2.0"
+version = "6.0.0"
 description = "AI-operated business platform with PEV Engine — 319 commands, universal LLM, Cloudflare deploy"
 authors = ["Binh Phap Venture Studio <admin@binhphap.io>"]
 license = "BSL-1.1"
@@ -20,7 +20,7 @@ readme = "README.md"
 packages = [{include = "src"}]
 
 [tool.poetry.scripts]
-mekong = "src.main:app"
+mekong = "src.main:entrypoint"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
@@ -43,6 +43,10 @@ anthropic = ">=0.40.0"
 psutil = "^5.9.0"
 mem0ai = {version = "^0.1.0", optional = true}
 qdrant-client = {version = "^1.7.0", optional = true}
+prometheus-client = "^0.24.0"
+opentelemetry-api = ">=1.20.0"
+opentelemetry-sdk = ">=1.20.0"
+opentelemetry-instrumentation-fastapi = ">=0.45b0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -93,7 +97,7 @@ target-version = ['py311']
 line-length = 100
 target-version = "py311"
 exclude = [
-    "apps/sophia-proposal/.claude/",
+
     "apps/*/.claude/skills/",
     ".claude/skills/",
     "mekong/skills/",

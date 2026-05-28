@@ -314,9 +314,7 @@ class PluginRegistry:
             if manifest.source == "local" and manifest.entry_point:
                 import importlib.util
 
-                spec = importlib.util.spec_from_file_location(
-                    manifest.name, manifest.entry_point
-                )
+                spec = importlib.util.spec_from_file_location(manifest.name, manifest.entry_point)
                 if spec is None or spec.loader is None:
                     return False, "Cannot create module spec"
                 mod = importlib.util.module_from_spec(spec)

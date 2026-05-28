@@ -44,7 +44,9 @@ class StripeCustomer:
     @classmethod
     def from_dict(cls, data: dict) -> "StripeCustomer":
         """Create StripeCustomer from Stripe API response."""
-        subscription = data.get("subscriptions", {}).get("data", [{}])[0] if data.get("subscriptions") else {}
+        subscription = (
+            data.get("subscriptions", {}).get("data", [{}])[0] if data.get("subscriptions") else {}
+        )
         items_data = subscription.get("items", {}).get("data", [])
         subscription_tier = items_data[0].get("price", {}).get("id") if items_data else None
         return cls(
@@ -99,10 +101,7 @@ def get_tier_to_role_mapping() -> Dict[str, Role]:
             # Empty mapping — use defaults
             return DEFAULT_TIER_TO_ROLE
         # Convert string values to Role enums
-        return {
-            price_id: Role(role_str)
-            for price_id, role_str in custom_mapping.items()
-        }
+        return {price_id: Role(role_str) for price_id, role_str in custom_mapping.items()}
     except (json.JSONDecodeError, ValueError) as e:
         # Fall back to defaults on parse error
         logger.warning("Could not parse STRIPE_PRICE_IDS, using defaults: %s", e)
@@ -212,7 +211,9 @@ class StripeService:
                     return mapped_role
                 # Extract suffix after last underscore from pattern and check
                 pattern_suffix = price_pattern.split("_", 1)[-1]  # e.g., "pro" from "price_pro"
-                if stripe_price_id.endswith(f"_{pattern_suffix}") or stripe_price_id.endswith(pattern_suffix):
+                if stripe_price_id.endswith(f"_{pattern_suffix}") or stripe_price_id.endswith(
+                    pattern_suffix
+                ):
                     return mapped_role
         return role
 
@@ -306,8 +307,8 @@ class StripeService:
 
             # Compute expected signature
             expected_sig = hmac.new(
-                self.webhook_secret.encode('utf-8'),
-                signed_payload.encode('utf-8'),
+                self.webhook_secret.encode("utf-8"),
+                signed_payload.encode("utf-8"),
                 hashlib.sha256,
             ).hexdigest()
 
@@ -340,7 +341,9 @@ class StripeService:
                 # New subscription - provision role
                 subscription = data.get("object", {})
                 customer_id = subscription.get("customer")
-                price_id = subscription.get("items", {}).get("data", [{}])[0].get("price", {}).get("id")
+                price_id = (
+                    subscription.get("items", {}).get("data", [{}])[0].get("price", {}).get("id")
+                )
 
                 # Get customer email
                 customer = await self._get_customer_by_id(customer_id)
@@ -365,7 +368,9 @@ class StripeService:
                 # Subscription updated - update role
                 subscription = data.get("object", {})
                 customer_id = subscription.get("customer")
-                price_id = subscription.get("items", {}).get("data", [{}])[0].get("price", {}).get("id")
+                price_id = (
+                    subscription.get("items", {}).get("data", [{}])[0].get("price", {}).get("id")
+                )
 
                 customer = await self._get_customer_by_id(customer_id)
                 if not customer:
@@ -446,6 +451,7 @@ class StripeService:
 
 
 # Convenience functions for simple usage
+
 
 async def sync_user_from_stripe(user_id: str) -> bool:
     """Sync user role from Stripe subscription."""

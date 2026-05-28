@@ -1,4 +1,5 @@
 """Load tenant use-case configs from tenants/*.json."""
+
 from __future__ import annotations
 
 import json

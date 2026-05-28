@@ -10,12 +10,15 @@ import sys
 import time
 import unittest
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # ============================================================================
 # Circuit Breaker Tests
 # ============================================================================
+
 
 class TestCircuitBreaker(unittest.TestCase):
     """Tests for CircuitBreaker pattern."""
@@ -182,23 +185,28 @@ class TestCircuitBreaker(unittest.TestCase):
 # Pipeline Checkpoint Tests
 # ============================================================================
 
+
+@pytest.mark.skip(reason="pipeline_checkpoint archived — VN Hub slim")
 class TestPipelineCheckpoint(unittest.TestCase):
     """Tests for PipelineCheckpoint persistence."""
 
     def setUp(self):
         """Create temp checkpoint directory."""
         import tempfile
+
         self._tmpdir = tempfile.mkdtemp()
         self._cp_dir = os.path.join(self._tmpdir, "checkpoints")
 
     def tearDown(self):
         """Clean up temp directory."""
         import shutil
+
         shutil.rmtree(self._tmpdir, ignore_errors=True)
 
     def _make_checkpoint(self, pid="test-pipe", total=3):
         from pathlib import Path
         from src.core.pipeline_checkpoint import PipelineCheckpoint
+
         return PipelineCheckpoint(pid, total, checkpoint_dir=Path(self._cp_dir))
 
     def test_save_and_load_stage(self):
@@ -289,6 +297,7 @@ class TestPipelineCheckpoint(unittest.TestCase):
 # ============================================================================
 # Stage Retry Tests
 # ============================================================================
+
 
 class TestStageRetryExecutor(unittest.TestCase):
     """Tests for StageRetryExecutor with exponential backoff."""
@@ -450,15 +459,19 @@ class TestStageRetryExecutor(unittest.TestCase):
 # Integration: Retry + Checkpoint
 # ============================================================================
 
+
+@pytest.mark.skip(reason="pipeline_checkpoint archived — VN Hub slim")
 class TestRetryWithCheckpoint(unittest.TestCase):
     """Integration tests for retry + checkpoint workflow."""
 
     def setUp(self):
         import tempfile
+
         self._tmpdir = tempfile.mkdtemp()
 
     def tearDown(self):
         import shutil
+
         shutil.rmtree(self._tmpdir, ignore_errors=True)
 
     def test_checkpoint_saves_after_retry_success(self):
@@ -469,7 +482,8 @@ class TestRetryWithCheckpoint(unittest.TestCase):
         from src.core.stage_retry import StageRetryExecutor
 
         cp = PipelineCheckpoint(
-            "retry-pipe", total_stages=3,
+            "retry-pipe",
+            total_stages=3,
             checkpoint_dir=Path(self._tmpdir) / "cp",
         )
         policy = RetryPolicy(
@@ -545,6 +559,7 @@ class TestRetryWithCheckpoint(unittest.TestCase):
 # ============================================================================
 # Convenience function test
 # ============================================================================
+
 
 class TestConvenienceFunction(unittest.TestCase):
     """Test module-level convenience functions."""

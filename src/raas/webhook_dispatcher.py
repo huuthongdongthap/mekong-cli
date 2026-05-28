@@ -5,6 +5,7 @@ Delivers RaaSWebhookEvents to tenant-configured URLs with:
 - Exponential backoff (max 5 retries, cap 300s)
 - HMAC-SHA256 signature header
 """
+
 from __future__ import annotations
 
 import logging
@@ -50,8 +51,7 @@ class WebhookDispatcher:
     def _init_db(self) -> None:
         try:
             with self._connect() as conn:
-                conn.execute(
-                    """
+                conn.execute("""
                     CREATE TABLE IF NOT EXISTS webhook_deliveries (
                         event_id     TEXT NOT NULL,
                         tenant_id    TEXT NOT NULL,
@@ -60,8 +60,7 @@ class WebhookDispatcher:
                         last_status  INTEGER,
                         PRIMARY KEY (event_id, tenant_id)
                     )
-                    """
-                )
+                    """)
         except sqlite3.Error as exc:
             logger.warning("WebhookDispatcher: DB init failed: %s", exc)
 
@@ -85,6 +84,7 @@ class WebhookDispatcher:
         success: bool,
     ) -> None:
         from datetime import datetime, timezone
+
         now = datetime.now(timezone.utc).isoformat() if success else None
         try:
             with self._connect() as conn:
@@ -137,7 +137,10 @@ class WebhookDispatcher:
             if delay:
                 logger.info(
                     "Webhook retry %d/%d for %s in %ds",
-                    attempt, len(_RETRY_DELAYS), event.event_id, delay,
+                    attempt,
+                    len(_RETRY_DELAYS),
+                    event.event_id,
+                    delay,
                 )
                 time.sleep(delay)
 

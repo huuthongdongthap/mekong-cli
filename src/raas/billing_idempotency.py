@@ -75,9 +75,7 @@ class BatchRecord:
                 else datetime.now(timezone.utc)
             ),
             processed_at=(
-                datetime.fromisoformat(data["processed_at"])
-                if data.get("processed_at")
-                else None
+                datetime.fromisoformat(data["processed_at"]) if data.get("processed_at") else None
             ),
             billing_record_id=data.get("billing_record_id"),
             error_message=data.get("error_message"),
@@ -197,17 +195,20 @@ class IdempotencyManager:
 
         if existing:
             # Return existing record
-            return BatchRecord(
-                batch_id=existing["batch_id"],
-                license_key=existing["license_key"],
-                key_id=existing["key_id"],
-                events_count=existing["events_count"],
-                status=BatchStatus(existing["status"]),
-                created_at=existing["created_at"],
-                processed_at=existing.get("processed_at"),
-                billing_record_id=existing.get("billing_record_id"),
-                error_message=existing.get("error_message"),
-            ), True
+            return (
+                BatchRecord(
+                    batch_id=existing["batch_id"],
+                    license_key=existing["license_key"],
+                    key_id=existing["key_id"],
+                    events_count=existing["events_count"],
+                    status=BatchStatus(existing["status"]),
+                    created_at=existing["created_at"],
+                    processed_at=existing.get("processed_at"),
+                    billing_record_id=existing.get("billing_record_id"),
+                    error_message=existing.get("error_message"),
+                ),
+                True,
+            )
 
         # Try to create new batch
         try:

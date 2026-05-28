@@ -24,6 +24,7 @@ from .trace_decorator import set_active_trace
 
 logger = logging.getLogger(__name__)
 
+
 class ObservabilityFacade:
     """
     Singleton that orchestrates dual-write to Langfuse and local JSON.
@@ -53,6 +54,7 @@ class ObservabilityFacade:
         self._collector_loaded = True
         try:
             from src.core.telemetry import TelemetryCollector
+
             self._collector = TelemetryCollector()
         except ImportError:
             logger.debug("src.core.telemetry not importable — JSON write disabled")

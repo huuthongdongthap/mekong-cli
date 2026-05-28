@@ -57,9 +57,7 @@ class TestRecipeGeneratorFromRun(unittest.TestCase):
     def test_entry_with_recipe_used(self):
         """If entry used a recipe, step should reference it."""
         gen = RecipeGenerator()
-        entry = MemoryEntry(
-            goal="deploy", status="success", recipe_used="deploy-fast"
-        )
+        entry = MemoryEntry(goal="deploy", status="success", recipe_used="deploy-fast")
         recipe = gen.from_successful_run(entry)
         self.assertIn("deploy-fast", recipe.content)
 
@@ -88,7 +86,9 @@ class TestRecipeGeneratorFromPattern(unittest.TestCase):
     def test_with_llm_client(self):
         """Should use LLM when available and no steps provided."""
         mock_llm = MagicMock()
-        mock_llm.generate.return_value = "### Step 1: First\nDo first\n### Step 2: Second\nDo second"
+        mock_llm.generate.return_value = (
+            "### Step 1: First\nDo first\n### Step 2: Second\nDo second"
+        )
         gen = RecipeGenerator(llm_client=mock_llm)
         recipe = gen.from_goal_pattern("complex task")
         self.assertEqual(recipe.source, "llm")
@@ -101,10 +101,7 @@ class TestRecipeGeneratorValidation(unittest.TestCase):
     def test_valid_recipe(self):
         """A well-formed recipe should validate."""
         gen = RecipeGenerator()
-        md = (
-            "# Test Recipe\n\nA test recipe.\n\n"
-            "## Step 1: Do something\n\necho hello\n"
-        )
+        md = "# Test Recipe\n\nA test recipe.\n\n" "## Step 1: Do something\n\necho hello\n"
         valid, errors = gen.validate_recipe(md)
         self.assertTrue(valid)
         self.assertEqual(errors, [])
@@ -129,8 +126,10 @@ class TestRecipeGeneratorSave(unittest.TestCase):
     def test_save_creates_file(self):
         """save_recipe should create a .md file."""
         recipe = GeneratedRecipe(
-            name="test-save", content="# Test\n\nDesc.\n\n## Step 1: Run\n\necho hi\n",
-            source="test", valid=True,
+            name="test-save",
+            content="# Test\n\nDesc.\n\n## Step 1: Run\n\necho hi\n",
+            source="test",
+            valid=True,
         )
         path = self.gen.save_recipe(recipe)
         self.assertTrue(os.path.exists(path))
@@ -139,7 +138,10 @@ class TestRecipeGeneratorSave(unittest.TestCase):
     def test_auto_dir_created(self):
         """save_recipe should create the auto directory."""
         recipe = GeneratedRecipe(
-            name="dir-test", content="# X", source="test", valid=True,
+            name="dir-test",
+            content="# X",
+            source="test",
+            valid=True,
         )
         self.gen.save_recipe(recipe)
         self.assertTrue(os.path.isdir(self.gen.AUTO_DIR))
@@ -152,7 +154,10 @@ class TestRecipeGeneratorSave(unittest.TestCase):
 
         with patch("src.core.recipe_gen.get_event_bus", return_value=bus):
             recipe = GeneratedRecipe(
-                name="evt-test", content="# E", source="test", valid=True,
+                name="evt-test",
+                content="# E",
+                source="test",
+                valid=True,
             )
             self.gen.save_recipe(recipe)
 
@@ -167,7 +172,10 @@ class TestRecipeGeneratorSave(unittest.TestCase):
     def test_list_auto_recipes_with_files(self):
         """list_auto_recipes should return saved recipes."""
         recipe = GeneratedRecipe(
-            name="listed", content="# L", source="test", valid=True,
+            name="listed",
+            content="# L",
+            source="test",
+            valid=True,
         )
         self.gen.save_recipe(recipe)
         recipes = self.gen.list_auto_recipes()

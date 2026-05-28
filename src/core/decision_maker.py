@@ -36,7 +36,9 @@ class DecisionMaker:
         # Initialize local storage as backup for YAML fallback
         self.local_storage_path = Path.home() / ".mekong" / "decision_maker"
         self.local_storage_path.mkdir(parents=True, exist_ok=True)
-        self.local_decisions_file = self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        self.local_decisions_file = (
+            self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        )
 
     def _save_to_local_storage(self, data: dict) -> None:
         """Save data to local file storage as backup."""
@@ -136,7 +138,9 @@ class DecisionMaker:
 
         return stored_in_memory
 
-    def find_similar_decisions(self, context: str, threshold: float = 0.7, limit: int = 5) -> list[dict[str, Any]]:
+    def find_similar_decisions(
+        self, context: str, threshold: float = 0.7, limit: int = 5
+    ) -> list[dict[str, Any]]:
         """Find past decisions made in similar contexts.
 
         Args:
@@ -167,7 +171,9 @@ class DecisionMaker:
                     if parsed.get("type") == "decision_record":
                         # Calculate similarity based on context overlap
                         decision_context = parsed.get("decision_context", "")
-                        similarity = self._calculate_similarity(context_lower, decision_context.lower())
+                        similarity = self._calculate_similarity(
+                            context_lower, decision_context.lower()
+                        )
 
                         if similarity >= threshold:
                             parsed["similarity_score"] = similarity
@@ -192,12 +198,17 @@ class DecisionMaker:
 
                     if similarity >= threshold:
                         # Check if this decision is already in our results
-                        if not any(sd.get("decision_hash") == local_decision.get("decision_hash") for sd in similar_decisions):
+                        if not any(
+                            sd.get("decision_hash") == local_decision.get("decision_hash")
+                            for sd in similar_decisions
+                        ):
                             local_decision["similarity_score"] = similarity
                             similar_decisions.append(local_decision)
 
         # Sort by similarity score (descending) and confidence (descending)
-        similar_decisions.sort(key=lambda x: (x.get("similarity_score", 0), x.get("confidence", 0)), reverse=True)
+        similar_decisions.sort(
+            key=lambda x: (x.get("similarity_score", 0), x.get("confidence", 0)), reverse=True
+        )
         return similar_decisions[:limit]
 
     def _calculate_similarity(self, text1: str, text2: str) -> float:
@@ -226,7 +237,9 @@ class DecisionMaker:
         # Jaccard similarity
         return len(intersection) / len(union)
 
-    def get_recommendation(self, current_context: str, min_confidence: float = 0.6) -> tuple[str, dict] | None:
+    def get_recommendation(
+        self, current_context: str, min_confidence: float = 0.6
+    ) -> tuple[str, dict] | None:
         """Get a decision recommendation based on similar past contexts.
 
         Args:
@@ -240,7 +253,10 @@ class DecisionMaker:
         similar_decisions = self.find_similar_decisions(current_context, threshold=0.5, limit=3)
 
         for decision_data in similar_decisions:
-            if decision_data.get("confidence", 0) >= min_confidence and decision_data.get("outcome") != "failure":
+            if (
+                decision_data.get("confidence", 0) >= min_confidence
+                and decision_data.get("outcome") != "failure"
+            ):
                 return decision_data["decision"], decision_data
 
         return None
@@ -282,7 +298,9 @@ class DecisionMaker:
 
         return None
 
-    def update_decision_outcome(self, decision_hash: str, new_outcome: str, new_confidence: float | None = None) -> None:
+    def update_decision_outcome(
+        self, decision_hash: str, new_outcome: str, new_confidence: float | None = None
+    ) -> None:
         """Update the outcome and confidence of a previously made decision.
 
         Args:
@@ -423,7 +441,9 @@ class MemoryAugmentedDecisionEngine:
         # Jaccard similarity
         return len(intersection) / len(union)
 
-    def record_decision_outcome(self, context: str, decision: str, outcome: str, confidence: float = 0.5) -> None:
+    def record_decision_outcome(
+        self, context: str, decision: str, outcome: str, confidence: float = 0.5
+    ) -> None:
         """Record the actual outcome of a decision.
 
         Args:
@@ -449,7 +469,9 @@ class MemoryAugmentedDecisionEngine:
 
 
 # Convenience function for initialization
-def create_decision_maker(user_id: str = "system:default_decision_maker") -> MemoryAugmentedDecisionEngine:
+def create_decision_maker(
+    user_id: str = "system:default_decision_maker",
+) -> MemoryAugmentedDecisionEngine:
     """Create a memory-augmented decision maker instance.
 
     Args:

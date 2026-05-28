@@ -32,8 +32,7 @@ class PEVDashboardData:
     ) -> None:
         self._metrics = metrics or get_pev_metrics()
         self._storage_dir = (
-            Path(storage_dir) if storage_dir
-            else Path.home() / ".mekong" / "metrics"
+            Path(storage_dir) if storage_dir else Path.home() / ".mekong" / "metrics"
         )
 
     def get_overview(self) -> dict[str, Any]:

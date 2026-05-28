@@ -156,47 +156,63 @@ def analyze_term_sheet(
     # 1. Option pool shuffle
     if economic.option_pool_pre_money:
         eff = economic.effective_pre_money
-        clauses.append(analyze_clause(
-            "Option Pool Shuffle",
-            f"{economic.option_pool_pct}% pre-money",
-            "DANGER",
-            "Option pool created post-money",
-            f"Effective pre-money drops to ${eff / 1e6:.1f}M",
-            "Option pool to be created post-closing",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Option Pool Shuffle",
+                f"{economic.option_pool_pct}% pre-money",
+                "DANGER",
+                "Option pool created post-money",
+                f"Effective pre-money drops to ${eff / 1e6:.1f}M",
+                "Option pool to be created post-closing",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "Option Pool", f"{economic.option_pool_pct}% post-money",
-            "GREEN", "Post-money is standard", "No hidden dilution",
-            "Acceptable as-is",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Option Pool",
+                f"{economic.option_pool_pct}% post-money",
+                "GREEN",
+                "Post-money is standard",
+                "No hidden dilution",
+                "Acceptable as-is",
+            )
+        )
 
     # 2. Liquidation preference
     if economic.participating:
         rating = "EXTREME_DANGER" if economic.liquidation_pref_multiple >= 2 else "DANGER"
-        clauses.append(analyze_clause(
-            "Liquidation Preference",
-            f"{economic.liquidation_pref_multiple}x participating",
-            rating,
-            "1x non-participating preferred",
-            "VC double-dips on exit proceeds",
-            "Non-participating preferred, or cap at 3x",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Liquidation Preference",
+                f"{economic.liquidation_pref_multiple}x participating",
+                rating,
+                "1x non-participating preferred",
+                "VC double-dips on exit proceeds",
+                "Non-participating preferred, or cap at 3x",
+            )
+        )
     elif economic.liquidation_pref_multiple > 1:
-        clauses.append(analyze_clause(
-            "Liquidation Preference",
-            f"{economic.liquidation_pref_multiple}x non-participating",
-            "WATCH",
-            "1x non-participating",
-            f"VC gets {economic.liquidation_pref_multiple}x before common",
-            "Negotiate to 1x",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Liquidation Preference",
+                f"{economic.liquidation_pref_multiple}x non-participating",
+                "WATCH",
+                "1x non-participating",
+                f"VC gets {economic.liquidation_pref_multiple}x before common",
+                "Negotiate to 1x",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "Liquidation Preference", "1x non-participating",
-            "GREEN", "1x non-participating", "Standard protection",
-            "Acceptable",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Liquidation Preference",
+                "1x non-participating",
+                "GREEN",
+                "1x non-participating",
+                "Standard protection",
+                "Acceptable",
+            )
+        )
 
     # 3. Anti-dilution
     ad_ratings = {
@@ -205,92 +221,141 @@ def analyze_term_sheet(
         "broad_weighted_avg": "GREEN",
     }
     ad_rating = ad_ratings.get(economic.anti_dilution, "WATCH")
-    clauses.append(analyze_clause(
-        "Anti-Dilution", economic.anti_dilution, ad_rating,
-        "Broad-based weighted average",
-        "Full ratchet causes catastrophic founder dilution in down rounds"
-        if ad_rating != "GREEN" else "Standard protection",
-        "Broad-based weighted average anti-dilution only",
-    ))
+    clauses.append(
+        analyze_clause(
+            "Anti-Dilution",
+            economic.anti_dilution,
+            ad_rating,
+            "Broad-based weighted average",
+            (
+                "Full ratchet causes catastrophic founder dilution in down rounds"
+                if ad_rating != "GREEN"
+                else "Standard protection"
+            ),
+            "Broad-based weighted average anti-dilution only",
+        )
+    )
 
     # 4. Board control
     investor_majority = control.investor_board_seats > control.founder_board_seats
     if investor_majority:
-        clauses.append(analyze_clause(
-            "Board Control",
-            f"{control.investor_board_seats}I-{control.founder_board_seats}F-{control.independent_board_seats}Ind",
-            "DANGER",
-            "Founder majority at seed, balanced at Series A",
-            "Investor can fire founder, block M&A",
-            "Equal board until Series B",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Board Control",
+                f"{control.investor_board_seats}I-{control.founder_board_seats}F-{control.independent_board_seats}Ind",
+                "DANGER",
+                "Founder majority at seed, balanced at Series A",
+                "Investor can fire founder, block M&A",
+                "Equal board until Series B",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "Board Control",
-            f"{control.founder_board_seats}F-{control.investor_board_seats}I-{control.independent_board_seats}Ind",
-            "GREEN", "Founder majority is standard at seed",
-            "Founder retains control", "Acceptable",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Board Control",
+                f"{control.founder_board_seats}F-{control.investor_board_seats}I-{control.independent_board_seats}Ind",
+                "GREEN",
+                "Founder majority is standard at seed",
+                "Founder retains control",
+                "Acceptable",
+            )
+        )
 
     # 5. Drag-along
     if not control.drag_along_requires_common:
-        clauses.append(analyze_clause(
-            "Drag-Along", "Majority of preferred only",
-            "DANGER", "Requires majority of common AND preferred",
-            "VC can force sale without founder consent",
-            "Drag-along requires majority of common shareholders",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Drag-Along",
+                "Majority of preferred only",
+                "DANGER",
+                "Requires majority of common AND preferred",
+                "VC can force sale without founder consent",
+                "Drag-along requires majority of common shareholders",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "Drag-Along", "Requires common majority", "GREEN",
-            "Both common and preferred must agree", "Founder has veto",
-            "Acceptable",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Drag-Along",
+                "Requires common majority",
+                "GREEN",
+                "Both common and preferred must agree",
+                "Founder has veto",
+                "Acceptable",
+            )
+        )
 
     # 6. Founder vesting
     if founder.vesting_credit_months == 0 and founder.vesting_years == 4:
-        clauses.append(analyze_clause(
-            "Founder Vesting", "4yr re-vest from closing, no credit",
-            "WATCH", "Credit for time already worked",
-            "Founder loses credit for prior work",
-            "Founders credit for prior months of service",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Founder Vesting",
+                "4yr re-vest from closing, no credit",
+                "WATCH",
+                "Credit for time already worked",
+                "Founder loses credit for prior work",
+                "Founders credit for prior months of service",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "Founder Vesting",
-            f"{founder.vesting_years}yr, {founder.vesting_credit_months}mo credit",
-            "GREEN", "Credit for time worked", "Fair vesting", "Acceptable",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Founder Vesting",
+                f"{founder.vesting_years}yr, {founder.vesting_credit_months}mo credit",
+                "GREEN",
+                "Credit for time worked",
+                "Fair vesting",
+                "Acceptable",
+            )
+        )
 
     # 7. No-shop
     if founder.no_shop_days > 30:
-        clauses.append(analyze_clause(
-            "No-Shop", f"{founder.no_shop_days} days",
-            "WATCH", "30 days maximum",
-            "VC strings you along, kills other deals",
-            "30 days maximum with good faith milestones",
-        ))
+        clauses.append(
+            analyze_clause(
+                "No-Shop",
+                f"{founder.no_shop_days} days",
+                "WATCH",
+                "30 days maximum",
+                "VC strings you along, kills other deals",
+                "30 days maximum with good faith milestones",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "No-Shop", f"{founder.no_shop_days} days",
-            "GREEN", "30 days is standard",
-            "Reasonable exclusivity", "Acceptable",
-        ))
+        clauses.append(
+            analyze_clause(
+                "No-Shop",
+                f"{founder.no_shop_days} days",
+                "GREEN",
+                "30 days is standard",
+                "Reasonable exclusivity",
+                "Acceptable",
+            )
+        )
 
     # 8. Non-compete
     if founder.non_compete_months > 12:
-        clauses.append(analyze_clause(
-            "Non-Compete", f"{founder.non_compete_months} months",
-            "WATCH", "12 months, narrowly defined",
-            "Founder trapped for extended period",
-            "1 year, limited to direct competitive products",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Non-Compete",
+                f"{founder.non_compete_months} months",
+                "WATCH",
+                "12 months, narrowly defined",
+                "Founder trapped for extended period",
+                "1 year, limited to direct competitive products",
+            )
+        )
     else:
-        clauses.append(analyze_clause(
-            "Non-Compete", f"{founder.non_compete_months} months",
-            "GREEN", "12 months or less", "Reasonable scope",
-            "Acceptable",
-        ))
+        clauses.append(
+            analyze_clause(
+                "Non-Compete",
+                f"{founder.non_compete_months} months",
+                "GREEN",
+                "12 months or less",
+                "Reasonable scope",
+                "Acceptable",
+            )
+        )
 
     # Tally ratings
     danger = sum(1 for c in clauses if c.rating in ("DANGER", "EXTREME_DANGER"))
@@ -342,14 +407,16 @@ def simulate_exit(
         part_vc = pref_amount + remainder * frac
         part_founder = ev - part_vc
 
-        scenarios.append(ExitScenario(
-            exit_value=ev,
-            vc_payout_non_part=round(non_part_vc, 2),
-            vc_payout_part=round(part_vc, 2),
-            founder_payout_non_part=round(non_part_founder, 2),
-            founder_payout_part=round(part_founder, 2),
-            founder_delta=round(non_part_founder - part_founder, 2),
-        ))
+        scenarios.append(
+            ExitScenario(
+                exit_value=ev,
+                vc_payout_non_part=round(non_part_vc, 2),
+                vc_payout_part=round(part_vc, 2),
+                founder_payout_non_part=round(non_part_founder, 2),
+                founder_payout_part=round(part_founder, 2),
+                founder_delta=round(non_part_founder - part_founder, 2),
+            )
+        )
 
     return scenarios
 

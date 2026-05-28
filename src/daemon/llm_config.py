@@ -78,23 +78,23 @@ WORKER_MODEL = FAST_MODEL
 
 # Capability → ModelConfig mapping (dual-model: Nemotron fast + DeepSeek deep)
 CAPABILITY_MAP: dict[str, ModelConfig] = {
-    "lead_scan":     FAST_MODEL,
-    "triage":        FAST_MODEL,
+    "lead_scan": FAST_MODEL,
+    "triage": FAST_MODEL,
     "classification": FAST_MODEL,
-    "health_check":  FAST_MODEL,
-    "quick_check":   FAST_MODEL,
-    "monitoring":    FAST_MODEL,
+    "health_check": FAST_MODEL,
+    "quick_check": FAST_MODEL,
+    "monitoring": FAST_MODEL,
     "content_write": DEEP_MODEL,
-    "reasoning":     DEEP_MODEL,
-    "analysis":      DEEP_MODEL,
-    "sales":         DEEP_MODEL,
-    "general":       DEEP_MODEL,
-    "execution":     DEEP_MODEL,
-    "coding":        DEEP_MODEL,
-    "code_review":   DEEP_MODEL,
-    "validation":    DEEP_MODEL,
-    "planning":      DEEP_MODEL,
-    "template":      DEEP_MODEL,
+    "reasoning": DEEP_MODEL,
+    "analysis": DEEP_MODEL,
+    "sales": DEEP_MODEL,
+    "general": DEEP_MODEL,
+    "execution": DEEP_MODEL,
+    "coding": DEEP_MODEL,
+    "code_review": DEEP_MODEL,
+    "validation": DEEP_MODEL,
+    "planning": DEEP_MODEL,
+    "template": DEEP_MODEL,
 }
 
 

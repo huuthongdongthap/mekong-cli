@@ -110,20 +110,29 @@ class TestPortfolioCompany:
 
     def test_id_auto_generated(self):
         c1 = PortfolioCompany(
-            slug="a", name="A", stage=CompanyStage.IDEA,
-            sector="ai", one_liner="test",
+            slug="a",
+            name="A",
+            stage=CompanyStage.IDEA,
+            sector="ai",
+            one_liner="test",
         )
         c2 = PortfolioCompany(
-            slug="b", name="B", stage=CompanyStage.IDEA,
-            sector="ai", one_liner="test",
+            slug="b",
+            name="B",
+            stage=CompanyStage.IDEA,
+            sector="ai",
+            one_liner="test",
         )
         assert c1.id != c2.id
         assert len(c1.id) == 8
 
     def test_financial_defaults(self):
         company = PortfolioCompany(
-            slug="x", name="X", stage=CompanyStage.SEED,
-            sector="fintech", one_liner="payments",
+            slug="x",
+            name="X",
+            stage=CompanyStage.SEED,
+            sector="fintech",
+            one_liner="payments",
         )
         assert company.mrr == 0
         assert company.arr == 0
@@ -133,16 +142,24 @@ class TestPortfolioCompany:
 
     def test_openclaw_active_default(self):
         company = PortfolioCompany(
-            slug="x", name="X", stage=CompanyStage.SEED,
-            sector="ai", one_liner="test",
+            slug="x",
+            name="X",
+            stage=CompanyStage.SEED,
+            sector="ai",
+            one_liner="test",
         )
         assert company.openclaw_active is True
 
     def test_serialization_roundtrip(self):
         company = PortfolioCompany(
-            slug="test", name="Test", stage=CompanyStage.MVP,
-            sector="ai", one_liner="test co",
-            mrr=5000, arr=60000, team_size=3,
+            slug="test",
+            name="Test",
+            stage=CompanyStage.MVP,
+            sector="ai",
+            one_liner="test co",
+            mrr=5000,
+            arr=60000,
+            team_size=3,
         )
         data = company.model_dump()
         restored = PortfolioCompany(**data)

@@ -11,22 +11,31 @@ class TestCacheEntry(unittest.TestCase):
 
     def test_not_expired_by_default(self):
         entry = CacheEntry(
-            key="abc", content="hello", model="gpt-4o",
-            created_at=time.time(), ttl=3600,
+            key="abc",
+            content="hello",
+            model="gpt-4o",
+            created_at=time.time(),
+            ttl=3600,
         )
         self.assertFalse(entry.is_expired)
 
     def test_expired_after_ttl(self):
         entry = CacheEntry(
-            key="abc", content="hello", model="gpt-4o",
-            created_at=time.time() - 100, ttl=50,
+            key="abc",
+            content="hello",
+            model="gpt-4o",
+            created_at=time.time() - 100,
+            ttl=50,
         )
         self.assertTrue(entry.is_expired)
 
     def test_zero_ttl_never_expires(self):
         entry = CacheEntry(
-            key="abc", content="hello", model="gpt-4o",
-            created_at=time.time() - 999999, ttl=0,
+            key="abc",
+            content="hello",
+            model="gpt-4o",
+            created_at=time.time() - 999999,
+            ttl=0,
         )
         self.assertFalse(entry.is_expired)
 

@@ -1,4 +1,5 @@
 """Tests for QuotaCache and QuotaState — ROIaaS Phase 6b quota caching."""
+
 from __future__ import annotations
 
 import time
@@ -15,7 +16,6 @@ from src.raas.quota_cache import (
     cache_quota,
     invalidate_cache,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -136,9 +136,9 @@ class ClientPortalRepository:
                             "description": task.description,
                             "status": task.status.value,
                             "due_date": task.due_date.isoformat() if task.due_date else None,
-                            "completed_at": task.completed_at.isoformat()
-                            if task.completed_at
-                            else None,
+                            "completed_at": (
+                                task.completed_at.isoformat() if task.completed_at else None
+                            ),
                             "assignee": task.assignee,
                         }
                     )
@@ -184,12 +184,16 @@ class ClientPortalRepository:
                         name=task_data["name"],
                         description=task_data["description"],
                         status=TaskStatus(task_data["status"]),
-                        due_date=datetime.fromisoformat(task_data["due_date"])
-                        if task_data.get("due_date")
-                        else None,
-                        completed_at=datetime.fromisoformat(task_data["completed_at"])
-                        if task_data.get("completed_at")
-                        else None,
+                        due_date=(
+                            datetime.fromisoformat(task_data["due_date"])
+                            if task_data.get("due_date")
+                            else None
+                        ),
+                        completed_at=(
+                            datetime.fromisoformat(task_data["completed_at"])
+                            if task_data.get("completed_at")
+                            else None
+                        ),
                         assignee=task_data.get("assignee", "Team"),
                     )
                     tasks.append(task)
@@ -201,9 +205,11 @@ class ClientPortalRepository:
                     description=project_data["description"],
                     status=ProjectStatus(project_data["status"]),
                     start_date=datetime.fromisoformat(project_data["start_date"]),
-                    end_date=datetime.fromisoformat(project_data["end_date"])
-                    if project_data.get("end_date")
-                    else None,
+                    end_date=(
+                        datetime.fromisoformat(project_data["end_date"])
+                        if project_data.get("end_date")
+                        else None
+                    ),
                     tasks=tasks,
                     budget=project_data.get("budget", 0.0),
                     spent=project_data.get("spent", 0.0),
@@ -264,9 +270,11 @@ class ClientPortalRepository:
                     amount=invoice_data["amount"],
                     status=InvoiceStatus(invoice_data["status"]),
                     due_date=datetime.fromisoformat(invoice_data["due_date"]),
-                    paid_date=datetime.fromisoformat(invoice_data["paid_date"])
-                    if invoice_data.get("paid_date")
-                    else None,
+                    paid_date=(
+                        datetime.fromisoformat(invoice_data["paid_date"])
+                        if invoice_data.get("paid_date")
+                        else None
+                    ),
                     items=invoice_data.get("items", []),
                     notes=invoice_data.get("notes", ""),
                 )

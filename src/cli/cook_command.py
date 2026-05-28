@@ -26,8 +26,17 @@ def register_cook_command(app: typer.Typer) -> None:
         no_rollback: bool = typer.Option(False, help="Disable rollback on failure"),
         verbose: bool = typer.Option(False, "--verbose", "-v", help="Show step-by-step output"),
         dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Plan only, no execution"),
-        json_output: bool = typer.Option(False, "--json", "-j", help="Machine-readable JSON output"),
-        agi_dash: bool = typer.Option(False, "--agi-dash", help="Show AGI dashboard after execution"),
+        auto: bool = typer.Option(
+            False,
+            "--auto",
+            help="Run without interactive plan review; kept for autonomous workflows",
+        ),
+        json_output: bool = typer.Option(
+            False, "--json", "-j", help="Machine-readable JSON output"
+        ),
+        agi_dash: bool = typer.Option(
+            False, "--agi-dash", help="Show AGI dashboard after execution"
+        ),
     ) -> None:
         """Cook: Plan -> Execute -> Verify workflow (Binh Phap engine + AGI v2)"""
         from src.cli.agi_dashboard import show_agi_dashboard
@@ -36,13 +45,16 @@ def register_cook_command(app: typer.Typer) -> None:
 
         if dry_run:
             from src.core.planner import RecipePlanner
+
             planner = RecipePlanner(llm_client=llm_client if llm_client.is_available else None)
             recipe = planner.plan(goal)
-            console.print(Panel(
-                f"[bold]{recipe.name}[/bold]\n{recipe.description}",
-                title="📋 Dry Run — Plan Only",
-                border_style="yellow",
-            ))
+            console.print(
+                Panel(
+                    f"[bold]{recipe.name}[/bold]\n{recipe.description}",
+                    title="📋 Dry Run — Plan Only",
+                    border_style="yellow",
+                )
+            )
             plan_table = Table(title="Steps (not executed)")
             plan_table.add_column("#", style="bold cyan", justify="right")
             plan_table.add_column("Task", style="bold")
@@ -60,13 +72,16 @@ def register_cook_command(app: typer.Typer) -> None:
         )
 
         if verbose:
-            console.print(Panel(
-                f"[bold]Goal:[/bold] {goal}\n"
-                f"[bold]Strict:[/bold] {strict}\n"
-                f"[bold]Rollback:[/bold] {not no_rollback}",
-                title="⚙️ Cook Configuration",
-                border_style="dim",
-            ))
+            console.print(
+                Panel(
+                    f"[bold]Goal:[/bold] {goal}\n"
+                    f"[bold]Strict:[/bold] {strict}\n"
+                    f"[bold]Rollback:[/bold] {not no_rollback}\n"
+                    f"[bold]Auto:[/bold] {auto}",
+                    title="⚙️ Cook Configuration",
+                    border_style="dim",
+                )
+            )
 
         result = orchestrator.run_from_goal(goal)
 
@@ -114,20 +129,24 @@ def register_cook_command(app: typer.Typer) -> None:
         elif result.status == OrchestrationStatus.PARTIAL:
             console.print("\n[bold yellow]⚠️  Partial completion[/bold yellow]")
             if result.errors:
-                console.print(Panel(
-                    "\n".join(f"• {e}" for e in result.errors),
-                    title="[red]Errors[/red]",
-                    border_style="red",
-                ))
+                console.print(
+                    Panel(
+                        "\n".join(f"• {e}" for e in result.errors),
+                        title="[red]Errors[/red]",
+                        border_style="red",
+                    )
+                )
             raise typer.Exit(code=1)
         else:
             console.print("\n[bold red]❌ Mission failed[/bold red]")
             if result.errors:
-                console.print(Panel(
-                    "\n".join(f"• {e}" for e in result.errors),
-                    title="[red]Errors[/red]",
-                    border_style="red",
-                ))
+                console.print(
+                    Panel(
+                        "\n".join(f"• {e}" for e in result.errors),
+                        title="[red]Errors[/red]",
+                        border_style="red",
+                    )
+                )
             raise typer.Exit(code=1)
 
         if agi_dash or verbose:

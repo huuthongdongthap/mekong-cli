@@ -14,7 +14,6 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-
 # =============================================================================
 # BASE TYPES
 # =============================================================================
@@ -28,6 +27,7 @@ Priority = Literal["low", "normal", "high", "critical"]
 # MISSION LIFECYCLE EVENTS
 # =============================================================================
 
+
 class PlanStep(BaseModel):
     """Individual step in a mission plan."""
 
@@ -36,9 +36,7 @@ class PlanStep(BaseModel):
     agent: str = Field(..., description="Agent assigned to this step")
     params: dict[str, Any] = Field(default_factory=dict, description="Step parameters")
     estimated_duration: int = Field(0, description="Estimated seconds to complete")
-    dependencies: list[int] = Field(
-        default_factory=list, description="Dependent step orders"
-    )
+    dependencies: list[int] = Field(default_factory=list, description="Dependent step orders")
 
 
 class MissionCreatedPayload(BaseModel):
@@ -81,9 +79,7 @@ class PlanPayload(BaseModel):
     mission_id: str = Field(..., description="Parent mission ID")
     plan_id: str = Field(..., description="Unique plan identifier")
     steps: list[PlanStep] = Field(..., description="Execution steps")
-    total_estimated_duration: int = Field(
-        0, description="Estimated duration in seconds"
-    )
+    total_estimated_duration: int = Field(0, description="Estimated duration in seconds")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {
@@ -108,6 +104,7 @@ class PlanPayload(BaseModel):
 # =============================================================================
 # STEP EXECUTION EVENTS
 # =============================================================================
+
 
 class StepStartPayload(BaseModel):
     """Payload for mission.step.started event.
@@ -151,9 +148,7 @@ class StepDonePayload(BaseModel):
     duration_seconds: float = Field(..., description="Actual execution time")
     stdout: str = Field("", description="Standard output (truncated)")
     stderr: str = Field("", description="Standard error (truncated)")
-    artifacts: list[str] = Field(
-        default_factory=list, description="Generated file paths"
-    )
+    artifacts: list[str] = Field(default_factory=list, description="Generated file paths")
     credits_used: int = Field(1, description="Credits consumed by this step")
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -190,9 +185,7 @@ class StepFailPayload(BaseModel):
     duration_seconds: float = Field(..., description="Time until failure")
     retry_count: int = Field(..., description="Retry attempt number")
     max_retries: int = Field(3, description="Maximum retry attempts")
-    retry_after_seconds: int | None = Field(
-        None, description="Suggested wait time before retry"
-    )
+    retry_after_seconds: int | None = Field(None, description="Suggested wait time before retry")
     failed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {
@@ -217,6 +210,7 @@ class StepFailPayload(BaseModel):
 # MISSION COMPLETION EVENTS
 # =============================================================================
 
+
 class MissionDonePayload(BaseModel):
     """Payload for mission.completed event.
 
@@ -232,9 +226,7 @@ class MissionDonePayload(BaseModel):
     successful_steps: int = Field(..., description="Steps completed successfully")
     failed_steps: int = Field(0, description="Steps that failed then recovered")
     total_credits_used: int = Field(..., description="Final credit cost")
-    artifacts: list[str] = Field(
-        default_factory=list, description="All generated file paths"
-    )
+    artifacts: list[str] = Field(default_factory=list, description="All generated file paths")
     metrics: MissionMetrics = Field(..., description="Performance metrics")
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -290,15 +282,9 @@ class MissionFailPayload(BaseModel):
     error_type: str = Field(..., description="Exception class name")
     failed_step_order: int = Field(..., description="Step that caused failure")
     total_duration_seconds: float = Field(..., description="Time until failure")
-    partial_steps_completed: int = Field(
-        0, description="Steps completed before failure"
-    )
-    credits_refunded: int = Field(
-        ..., description="Credits to refund to tenant"
-    )
-    retry_exhausted: bool = Field(
-        True, description="Whether all retries were attempted"
-    )
+    partial_steps_completed: int = Field(0, description="Steps completed before failure")
+    credits_refunded: int = Field(..., description="Credits to refund to tenant")
+    retry_exhausted: bool = Field(True, description="Whether all retries were attempted")
     failed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {
@@ -323,6 +309,7 @@ class MissionFailPayload(BaseModel):
 # BILLING EVENTS
 # =============================================================================
 
+
 class CreditsLowPayload(BaseModel):
     """Payload for credits.low event.
 
@@ -334,9 +321,7 @@ class CreditsLowPayload(BaseModel):
     current_balance: int = Field(..., description="Remaining credits")
     threshold: int = Field(10, description="Low balance threshold")
     recommended_top_up: int = Field(100, description="Suggested purchase amount")
-    last_mission_cost: int = Field(
-        0, description="Credits used by last mission"
-    )
+    last_mission_cost: int = Field(0, description="Credits used by last mission")
     warned_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {

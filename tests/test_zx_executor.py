@@ -257,6 +257,7 @@ class TestPipe:
         # pipe() joins commands with ' | ' then calls shell() which uses shlex.split.
         # shlex.split doesn't execute shell pipes, so mock subprocess for expected output.
         import unittest.mock
+
         mock_proc = subprocess.CompletedProcess(
             args=["echo", "abc", "|", "tr", "a", "x", "|", "tr", "b", "y"],
             returncode=0,
@@ -267,4 +268,3 @@ class TestPipe:
             result = pipe("echo abc", "tr 'a' 'x'", "tr 'b' 'y'")
         assert result.ok
         assert "xyc" in result.stdout
-

@@ -23,7 +23,7 @@ class TestUsageTracker:
         from src.metering.usage_tracker import UsageTracker
 
         # Use temp database for testing
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
         tracker = UsageTracker(db_path=db_path)
@@ -226,7 +226,7 @@ class TestIntegration:
         from src.analytics.roi_dashboard import ROIDashboard
 
         # Temp database
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
         tracker = UsageTracker(db_path=db_path)
@@ -258,9 +258,9 @@ class TestIntegration:
         plan_estimate = TIME_ESTIMATES["plan"]
 
         expected_minutes = (
-            (cook_estimate["manual"] - cook_estimate["cli"]) +
-            (plan_estimate["manual"] - plan_estimate["cli"]) +
-            (TIME_ESTIMATES["planner"]["manual"] - TIME_ESTIMATES["planner"]["cli"])
+            (cook_estimate["manual"] - cook_estimate["cli"])
+            + (plan_estimate["manual"] - plan_estimate["cli"])
+            + (TIME_ESTIMATES["planner"]["manual"] - TIME_ESTIMATES["planner"]["cli"])
         )
 
         # Verify estimates are reasonable
@@ -292,17 +292,19 @@ class TestCLICommands:
     def test_usage_commands_module(self):
         """Test usage commands module loads."""
         from src.commands import usage_commands
-        assert hasattr(usage_commands, 'app')
-        assert hasattr(usage_commands, 'usage_report')
-        assert hasattr(usage_commands, 'usage_check')
-        assert hasattr(usage_commands, 'usage_export')
+
+        assert hasattr(usage_commands, "app")
+        assert hasattr(usage_commands, "usage_report")
+        assert hasattr(usage_commands, "usage_check")
+        assert hasattr(usage_commands, "usage_export")
 
     def test_analytics_show_commands_module(self):
         """Test analytics show commands module loads."""
         from src.commands import analytics_show_commands
-        assert hasattr(analytics_show_commands, 'app')
-        assert hasattr(analytics_show_commands, 'analytics_show')
-        assert hasattr(analytics_show_commands, 'analytics_export')
+
+        assert hasattr(analytics_show_commands, "app")
+        assert hasattr(analytics_show_commands, "analytics_show")
+        assert hasattr(analytics_show_commands, "analytics_export")
 
     def test_time_estimates_consistency(self):
         """Verify time estimates match between modules."""

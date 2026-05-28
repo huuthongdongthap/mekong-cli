@@ -93,15 +93,17 @@ def register_paper_command(app: typer.Typer) -> None:
         else:
             logging.basicConfig(level=logging.INFO)
 
-        console.print(Panel(
-            f"Capital: ${capital:.2f}\n"
-            f"Ensemble: N={ensemble_n}\n"
-            f"Interval: {interval}s\n"
-            f"DB: {db_path}\n"
-            f"Mode: PAPER (no real trades)",
-            title="CashClaw Paper Trading",
-            border_style="green",
-        ))
+        console.print(
+            Panel(
+                f"Capital: ${capital:.2f}\n"
+                f"Ensemble: N={ensemble_n}\n"
+                f"Interval: {interval}s\n"
+                f"DB: {db_path}\n"
+                f"Mode: PAPER (no real trades)",
+                title="CashClaw Paper Trading",
+                border_style="green",
+            )
+        )
 
         # Initialize components
         scanner = MarketScanner(ScannerFilters())
@@ -138,14 +140,16 @@ def register_paper_command(app: typer.Typer) -> None:
             console.print("\n[yellow]Shutting down...[/yellow]")
             loop.stop()
             port = exchange.get_portfolio()
-            console.print(Panel(
-                f"Total Trades: {port.total_trades}\n"
-                f"Win Rate: {port.win_rate * 100:.0f}%\n"
-                f"Final P&L: ${port.total_pnl:+.2f}\n"
-                f"Capital: ${port.capital_with_pnl:.2f}",
-                title="Final Report",
-                border_style="green",
-            ))
+            console.print(
+                Panel(
+                    f"Total Trades: {port.total_trades}\n"
+                    f"Win Rate: {port.win_rate * 100:.0f}%\n"
+                    f"Final P&L: ${port.total_pnl:+.2f}\n"
+                    f"Capital: ${port.capital_with_pnl:.2f}",
+                    title="Final Report",
+                    border_style="green",
+                )
+            )
             sys.exit(0)
 
         signal.signal(signal.SIGINT, handle_sigint)
@@ -182,9 +186,7 @@ def register_paper_command(app: typer.Typer) -> None:
 
                 # Dashboard every 5 cycles
                 if cycle % 5 == 0 or cycle == 1:
-                    dashboard = _build_dashboard(
-                        exchange, cycle, last_signals, risk_mgr, db_path
-                    )
+                    dashboard = _build_dashboard(exchange, cycle, last_signals, risk_mgr, db_path)
                     console.print(dashboard)
 
                 time.sleep(config.cycle_interval_sec)

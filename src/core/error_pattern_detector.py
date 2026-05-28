@@ -170,8 +170,7 @@ class ErrorPatternDetector:
         seen_patterns: set[str] = set()
 
         patterns = [
-            p for p in self._patterns.values()
-            if category is None or p.category == category
+            p for p in self._patterns.values() if category is None or p.category == category
         ]
 
         for pattern in patterns:
@@ -185,12 +184,14 @@ class ErrorPatternDetector:
                 if match and pattern.name not in seen_patterns:
                     seen_patterns.add(pattern.name)
                     context = self._extract_context(lines, line_no - 1)
-                    detected.append(DetectedError(
-                        pattern=pattern,
-                        match_text=match.group(0),
-                        line_number=line_no,
-                        context=context,
-                    ))
+                    detected.append(
+                        DetectedError(
+                            pattern=pattern,
+                            match_text=match.group(0),
+                            line_number=line_no,
+                            context=context,
+                        )
+                    )
                     break  # one match per pattern
 
         return detected
@@ -212,7 +213,9 @@ class ErrorPatternDetector:
         return "\n".join(lines[start:end])
 
     def filter_by_severity(
-        self, detected: List[DetectedError], severity: str,
+        self,
+        detected: List[DetectedError],
+        severity: str,
     ) -> List[DetectedError]:
         """Filter detected errors to only those with matching severity.
 

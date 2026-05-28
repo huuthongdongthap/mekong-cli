@@ -19,10 +19,16 @@ app = typer.Typer(name="usage", help="📊 Usage metering")
 
 @app.command("report")
 def usage_report(
-    license_key: Optional[str] = typer.Option(None, "--key", "-k", help="License key (defaults to env var)"),
+    license_key: Optional[str] = typer.Option(
+        None, "--key", "-k", help="License key (defaults to env var)"
+    ),
     period: str = typer.Option("current", "--period", "-p", help="Period: current, last, custom"),
-    start_date: Optional[str] = typer.Option(None, "--start", help="Start date (YYYY-MM-DD, used with period=custom)"),
-    end_date: Optional[str] = typer.Option(None, "--end", help="End date (YYYY-MM-DD, used with period=custom)"),
+    start_date: Optional[str] = typer.Option(
+        None, "--start", help="Start date (YYYY-MM-DD, used with period=custom)"
+    ),
+    end_date: Optional[str] = typer.Option(
+        None, "--end", help="End date (YYYY-MM-DD, used with period=custom)"
+    ),
 ) -> None:
     """
     📊 Show usage report for billing period.
@@ -37,9 +43,12 @@ def usage_report(
     # Resolve license key
     if not license_key:
         import os
+
         license_key = os.getenv("RAAS_LICENSE_KEY", "")
         if not license_key:
-            console.print("[yellow]No license key provided. Set RAAS_LICENSE_KEY env var or use --key.[/yellow]\n")
+            console.print(
+                "[yellow]No license key provided. Set RAAS_LICENSE_KEY env var or use --key.[/yellow]\n"
+            )
 
     # Calculate date range
     if period == "current":
@@ -64,14 +73,17 @@ def usage_report(
     try:
         # Get usage data
         from src.db.repository import get_repository
+
         repo = get_repository()
 
         # Fetch usage events
-        usage_events = asyncio.run(repo.get_usage_events(
-            license_key=license_key if license_key else None,
-            start_date=start_dt,
-            end_date=end_dt,
-        ))
+        usage_events = asyncio.run(
+            repo.get_usage_events(
+                license_key=license_key if license_key else None,
+                start_date=start_dt,
+                end_date=end_dt,
+            )
+        )
 
         if not usage_events:
             console.print("[yellow]No usage data found for this period.[/yellow]\n")
@@ -80,11 +92,11 @@ def usage_report(
         # Aggregate by event type
         aggregated = {}
         for event in usage_events:
-            event_type = event.get('event_type', 'unknown')
+            event_type = event.get("event_type", "unknown")
             if event_type not in aggregated:
-                aggregated[event_type] = {'count': 0, 'value': Decimal('0')}
-            aggregated[event_type]['count'] += 1
-            aggregated[event_type]['value'] += Decimal(str(event.get('value', 0)))
+                aggregated[event_type] = {"count": 0, "value": Decimal("0")}
+            aggregated[event_type]["count"] += 1
+            aggregated[event_type]["value"] += Decimal(str(event.get("value", 0)))
 
         # Display table
         table = Table(show_header=True, header_style="bold cyan")
@@ -93,11 +105,7 @@ def usage_report(
         table.add_column("Total Value", justify="right")
 
         for event_type, data in sorted(aggregated.items()):
-            table.add_row(
-                event_type,
-                str(data['count']),
-                f"{data['value']:,.0f}"
-            )
+            table.add_row(event_type, str(data["count"]), f"{data['value']:,.0f}")
 
         console.print(table)
 
@@ -109,22 +117,24 @@ def usage_report(
         engine = get_engine()
         usage_events_obj = [
             UsageEvent(
-                event_type=UsageEventType(e.get('event_type', 'usage:api_call')),
+                event_type=UsageEventType(e.get("event_type", "usage:api_call")),
                 category=AnomalyCategory.API_CALLS,
-                metric=e.get('metric', 'requests'),
-                value=e.get('value', 0),
-                timestamp=float(e.get('timestamp', datetime.now().timestamp())),
-                metadata=e.get('metadata', {}),
+                metric=e.get("metric", "requests"),
+                value=e.get("value", 0),
+                timestamp=float(e.get("timestamp", datetime.now().timestamp())),
+                metadata=e.get("metadata", {}),
             )
             for e in usage_events
         ]
 
-        result = asyncio.run(engine.calculate_charges(
-            license_key=license_key if license_key else "anonymous",
-            usage_events=usage_events_obj,
-            period_start=start_dt,
-            period_end=end_dt,
-        ))
+        result = asyncio.run(
+            engine.calculate_charges(
+                license_key=license_key if license_key else "anonymous",
+                usage_events=usage_events_obj,
+                period_start=start_dt,
+                period_end=end_dt,
+            )
+        )
 
         # Cost summary
         cost_table = Table(title="💰 Cost Summary", show_header=True, header_style="bold green")
@@ -145,7 +155,9 @@ def usage_report(
 @app.command("submit")
 def submit_usage(
     license_key: str = typer.Option(..., "--key", "-k", help="License key"),
-    events_file: Optional[str] = typer.Option(None, "--events-file", "-f", help="JSON file with usage events"),
+    events_file: Optional[str] = typer.Option(
+        None, "--events-file", "-f", help="JSON file with usage events"
+    ),
     event_type: Optional[str] = typer.Option(None, "--event-type", "-t", help="Event type"),
     metric: str = typer.Option("requests", "--metric", "-m", help="Metric name"),
     value: Optional[float] = typer.Option(None, "--value", "-v", help="Usage value"),
@@ -188,9 +200,7 @@ def submit_usage(
             }
         ]
     else:
-        console.print(
-            "[red]Error:[/red] Provide --events-file OR (--event-type and --value)\n"
-        )
+        console.print("[red]Error:[/red] Provide --events-file OR (--event-type and --value)\n")
         raise typer.Exit(1)
 
     if not events:
@@ -254,18 +264,21 @@ def submit_usage(
             billing_record_id = f"br_{batch_id}_{int(datetime.now().timestamp())}"
 
             from src.billing.event_emitter import get_emitter
+
             emitter = get_emitter()
             emitter.emit_billing_recorded(result, billing_record_id)
 
             return billing_record_id
 
-        result = asyncio.run(idempotency_manager.process_batch(
-            batch_id=batch_id,
-            license_key=license_key,
-            key_id="",
-            events=events,
-            process_fn=process_batch,
-        ))
+        result = asyncio.run(
+            idempotency_manager.process_batch(
+                batch_id=batch_id,
+                license_key=license_key,
+                key_id="",
+                events=events,
+                process_fn=process_batch,
+            )
+        )
 
         if result.is_duplicate:
             console.print("[yellow]⚠ Duplicate batch (already processed)[/yellow]")
@@ -285,7 +298,9 @@ def submit_usage(
 
 @app.command("quota")
 def check_quota(
-    license_key: Optional[str] = typer.Option(None, "--key", "-k", help="License key (defaults to env var)"),
+    license_key: Optional[str] = typer.Option(
+        None, "--key", "-k", help="License key (defaults to env var)"
+    ),
 ) -> None:
     """
     🎯 Check quota status and remaining capacity.
@@ -298,13 +313,14 @@ def check_quota(
 
     if not license_key:
         import os
+
         license_key = os.getenv("RAAS_LICENSE_KEY", "")
         if not license_key:
             console.print("[yellow]No license key provided.[/yellow]\n")
 
     try:
         from src.lib.raas_gate import LicenseService
-        from src. raas.quota_cache import get_quota_cache
+        from src.raas.quota_cache import get_quota_cache
 
         service = LicenseService.getInstance()
         service.validateSync(license_key)
@@ -320,9 +336,9 @@ def check_quota(
         table.add_column("Remaining", justify="right")
         table.add_column("Usage %", justify="right")
 
-        for quota_type in ['daily', 'monthly']:
-            used = quota_status.get(f'{quota_type}_used', 0)
-            limit = quota_status.get(f'{quota_type}_limit', 0)
+        for quota_type in ["daily", "monthly"]:
+            used = quota_status.get(f"{quota_type}_used", 0)
+            limit = quota_status.get(f"{quota_type}_limit", 0)
             remaining = limit - used
             usage_pct = (used / limit * 100) if limit > 0 else 0
 
@@ -344,9 +360,9 @@ def check_quota(
         console.print(table)
 
         # Warnings
-        if quota_status.get('daily_usage_pct', 0) >= 95:
+        if quota_status.get("daily_usage_pct", 0) >= 95:
             console.print("\n[yellow]⚠️  Daily quota nearly exhausted (≥95%)[/yellow]")
-        if quota_status.get('monthly_usage_pct', 0) >= 95:
+        if quota_status.get("monthly_usage_pct", 0) >= 95:
             console.print("\n[yellow]⚠️  Monthly quota nearly exhausted (≥95%)[/yellow]")
 
     except Exception as e:

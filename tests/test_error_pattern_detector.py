@@ -28,9 +28,15 @@ class TestBuiltinPatterns(unittest.TestCase):
     def test_builtins_registered(self):
         names = self.detector.registered_names
         for expected in [
-            "stack_trace", "permission_denied", "connection_refused",
-            "out_of_memory", "syntax_error", "import_error", "timeout",
-            "file_not_found", "assertion_error",
+            "stack_trace",
+            "permission_denied",
+            "connection_refused",
+            "out_of_memory",
+            "syntax_error",
+            "import_error",
+            "timeout",
+            "file_not_found",
+            "assertion_error",
         ]:
             self.assertIn(expected, names)
 
@@ -117,7 +123,10 @@ class TestCustomPatternRegistration(unittest.TestCase):
 
     def test_overwrite_existing_pattern(self):
         new_p = ErrorPattern(
-            name="timeout", pattern=r"CUSTOM_TIMEOUT", severity="warning", category="performance",
+            name="timeout",
+            pattern=r"CUSTOM_TIMEOUT",
+            severity="warning",
+            category="performance",
         )
         self.detector.register_pattern(new_p)
         retrieved = self.detector.get_pattern("timeout")

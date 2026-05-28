@@ -12,10 +12,10 @@ from src.core.plan_constraints import (
     PlanConstraints,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def make_step(order: int, title: str = "", deps: list[int] | None = None) -> RecipeStep:
     deps = deps or []
@@ -36,6 +36,7 @@ def make_recipe(*steps: RecipeStep) -> Recipe:
 # ---------------------------------------------------------------------------
 # compute_critical_path
 # ---------------------------------------------------------------------------
+
 
 class TestComputeCriticalPath:
     def setup_method(self):
@@ -93,6 +94,7 @@ class TestComputeCriticalPath:
 # ---------------------------------------------------------------------------
 # remove_transitive_edges
 # ---------------------------------------------------------------------------
+
 
 class TestRemoveTransitiveEdges:
     def setup_method(self):
@@ -172,6 +174,7 @@ class TestRemoveTransitiveEdges:
 # compute_parallelism_score
 # ---------------------------------------------------------------------------
 
+
 class TestComputeParallelismScore:
     def setup_method(self):
         self.opt = PlanOptimizer()
@@ -211,6 +214,7 @@ class TestComputeParallelismScore:
 # ---------------------------------------------------------------------------
 # optimize (integration)
 # ---------------------------------------------------------------------------
+
 
 class TestOptimize:
     def setup_method(self):
@@ -279,9 +283,7 @@ class TestOptimize:
         c = make_step(3, "start-server", deps=[1, 2])
 
         constraints = PlanConstraints(
-            mutual_exclusions=[
-                MutualExclusion(step_titles=["migrate-db", "seed-db"])
-            ]
+            mutual_exclusions=[MutualExclusion(step_titles=["migrate-db", "seed-db"])]
         )
         recipe = make_recipe(a, b, c)
         result = self.opt.optimize(recipe, constraints)

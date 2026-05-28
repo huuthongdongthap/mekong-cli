@@ -1,4 +1,5 @@
 """Polar webhook handler for subscription events (workspace-level billing)."""
+
 from __future__ import annotations
 
 import hashlib

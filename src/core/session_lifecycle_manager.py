@@ -30,13 +30,17 @@ class SessionState(str, Enum):
 
 # Valid state machine transitions
 _TRANSITIONS: dict[SessionState, list[SessionState]] = {
-    SessionState.CREATED:   [SessionState.ACTIVE, SessionState.EXPIRED],
-    SessionState.ACTIVE:    [SessionState.PAUSED, SessionState.COMPLETED,
-                             SessionState.FAILED, SessionState.EXPIRED],
-    SessionState.PAUSED:    [SessionState.ACTIVE, SessionState.FAILED, SessionState.EXPIRED],
+    SessionState.CREATED: [SessionState.ACTIVE, SessionState.EXPIRED],
+    SessionState.ACTIVE: [
+        SessionState.PAUSED,
+        SessionState.COMPLETED,
+        SessionState.FAILED,
+        SessionState.EXPIRED,
+    ],
+    SessionState.PAUSED: [SessionState.ACTIVE, SessionState.FAILED, SessionState.EXPIRED],
     SessionState.COMPLETED: [SessionState.EXPIRED],
-    SessionState.FAILED:    [SessionState.EXPIRED],
-    SessionState.EXPIRED:   [],
+    SessionState.FAILED: [SessionState.EXPIRED],
+    SessionState.EXPIRED: [],
 }
 
 
@@ -129,8 +133,11 @@ class SessionManager:
     def list_active(self) -> list[Session]:
         """Return all sessions in ACTIVE or PAUSED state."""
         with self._lock:
-            return [s for s in self._sessions.values()
-                    if s.state in (SessionState.ACTIVE, SessionState.PAUSED)]
+            return [
+                s
+                for s in self._sessions.values()
+                if s.state in (SessionState.ACTIVE, SessionState.PAUSED)
+            ]
 
     def cleanup(self, max_age_seconds: float = 3600.0) -> int:
         """Remove sessions older than max_age_seconds or in terminal states.
@@ -143,7 +150,8 @@ class SessionManager:
         terminal = {SessionState.COMPLETED, SessionState.FAILED, SessionState.EXPIRED}
         with self._lock:
             to_remove = [
-                sid for sid, s in self._sessions.items()
+                sid
+                for sid, s in self._sessions.items()
                 if s.updated_at < cutoff or s.state in terminal
             ]
             for sid in to_remove:

@@ -169,7 +169,13 @@ class TestTemplateRegistry(unittest.TestCase):
                     "x": {"name": "x", "description": "X var", "default": "val"},
                 },
                 "template_steps": [
-                    {"order": 1, "title": "Do {{x}}", "description": "desc", "agent": None, "params": {}},
+                    {
+                        "order": 1,
+                        "title": "Do {{x}}",
+                        "description": "desc",
+                        "agent": None,
+                        "params": {},
+                    },
                 ],
             }
             Path(tmpdir, "tmpl.json").write_text(json.dumps(data), encoding="utf-8")
@@ -190,7 +196,9 @@ class TestBuiltinTemplates(unittest.TestCase):
     """Built-in template smoke tests."""
 
     def test_deploy_template_renders(self) -> None:
-        recipe = DEPLOY_TEMPLATE.render({"project_name": "myapi", "branch": "main", "prod_url": "https://api.example.com"})
+        recipe = DEPLOY_TEMPLATE.render(
+            {"project_name": "myapi", "branch": "main", "prod_url": "https://api.example.com"}
+        )
         self.assertEqual(len(recipe.steps), 3)
         self.assertIn("myapi", recipe.steps[0].title)
 

@@ -36,7 +36,7 @@ app.add_middleware(SessionMiddleware)
 
 # CORS middleware - Security: wildcard origin is incompatible with
 # allow_credentials=True (CORS spec). Use explicit origins from env var.
-import os as _os
+import os as _os  # noqa: E402 — intentional late import for security-scoped config
 
 _ALLOWED_ORIGINS: list[str] = [
     o.strip()
@@ -137,9 +137,7 @@ async def get_api_calls(
 ):
     """Get API call volume for date range."""
     try:
-        daily_usage = await dashboard_service._queries.get_daily_usage(
-            start_date, end_date
-        )
+        daily_usage = await dashboard_service._queries.get_daily_usage(start_date, end_date)
         chart_data = dashboard_service._format_chart_data(daily_usage, granularity)
         return {"success": True, "data": chart_data}
     except Exception as e:
@@ -245,9 +243,12 @@ async def get_renewal_prompts(
         metrics = await dashboard_service.get_metrics(range_days=30)
         # Filter to only show prompts within the specified days window
         prompts = [
-            p for p in metrics.renewal_prompts
-            if abs(p.get('days_since_or_until_expiry', 0)) <= days
-        ][:20]  # Limit to 20 results
+            p
+            for p in metrics.renewal_prompts
+            if abs(p.get("days_since_or_until_expiry", 0)) <= days
+        ][
+            :20
+        ]  # Limit to 20 results
         return {
             "success": True,
             "data": prompts,
@@ -303,12 +304,14 @@ async def get_license_filters():
         for lic in licenses:
             key = lic.get("license_key", "")
             if key and key not in seen:
-                result.append({
-                    "key_id": lic.get("key_id", ""),
-                    "license_key": key[:20] + "..." if len(key) > 20 else key,
-                    "tier": lic.get("tier", "unknown"),
-                    "email": lic.get("email", ""),
-                })
+                result.append(
+                    {
+                        "key_id": lic.get("key_id", ""),
+                        "license_key": key[:20] + "..." if len(key) > 20 else key,
+                        "tier": lic.get("tier", "unknown"),
+                        "email": lic.get("email", ""),
+                    }
+                )
                 seen.add(key)
         return {
             "success": True,
@@ -407,9 +410,7 @@ def run_dashboard(
     import webbrowser
 
     if open_browser:
-        threading.Timer(
-            1.5, lambda: webbrowser.open(f"http://localhost:{port}")
-        ).start()
+        threading.Timer(1.5, lambda: webbrowser.open(f"http://localhost:{port}")).start()
 
     import uvicorn
 

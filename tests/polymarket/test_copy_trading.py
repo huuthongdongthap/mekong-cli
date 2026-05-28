@@ -98,9 +98,7 @@ class TestTradeReplication:
     def test_replicate_trade(self, engine) -> None:
         s = engine.register_strategy("S1", "desc", "a1")
         sub = engine.subscribe("c1", s.strategy_id, 500.0)
-        trade = engine.replicate_trade(
-            sub.subscription_id, "orig_001", "m1", "YES", 50.0, 0.55
-        )
+        trade = engine.replicate_trade(sub.subscription_id, "orig_001", "m1", "YES", 50.0, 0.55)
         assert trade is not None
         assert trade.size_usd == 50.0
         updated = engine.get_subscription(sub.subscription_id)

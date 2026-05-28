@@ -46,7 +46,8 @@ def register_health_metrics_commands(app: typer.Typer) -> None:
         try:
             result = subprocess.run(
                 ["tmux", "has-session", "-t", TMUX_SESSION],
-                capture_output=True, timeout=5,
+                capture_output=True,
+                timeout=5,
             )
             if result.returncode == 0:
                 table.add_row("Tmux Session", "[green]UP[/green]", f"Session: {TMUX_SESSION}")
@@ -60,7 +61,9 @@ def register_health_metrics_commands(app: typer.Typer) -> None:
             try:
                 result = subprocess.run(
                     ["tmux", "capture-pane", "-t", f"{TMUX_SESSION}:0.{pane_idx}", "-p"],
-                    capture_output=True, text=True, timeout=5,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
                 )
                 if result.returncode == 0:
                     tail = result.stdout.strip().split("\n")[-3:]
@@ -102,10 +105,14 @@ def register_health_metrics_commands(app: typer.Typer) -> None:
         try:
             result = subprocess.run(
                 ["pgrep", "-f", "task-watcher"],
-                capture_output=True, text=True, timeout=5,
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.stdout.strip():
-                table.add_row("Tom Hum Daemon", "[green]UP[/green]", f"PID {result.stdout.strip().split()[0]}")
+                table.add_row(
+                    "Tom Hum Daemon", "[green]UP[/green]", f"PID {result.stdout.strip().split()[0]}"
+                )
             else:
                 table.add_row("Tom Hum Daemon", "[yellow]OFF[/yellow]", "Not running")
         except Exception:
@@ -198,8 +205,12 @@ def register_health_metrics_commands(app: typer.Typer) -> None:
                 status_styled = status
 
             event_table.add_row(
-                parts[0][:19], event, parts[2], parts[3],
-                status_styled, parts[5] if len(parts) > 5 else "",
+                parts[0][:19],
+                event,
+                parts[2],
+                parts[3],
+                status_styled,
+                parts[5] if len(parts) > 5 else "",
             )
 
         console.print(event_table)

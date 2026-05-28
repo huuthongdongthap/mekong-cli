@@ -211,22 +211,26 @@ def list_workflows(base_dir: str | Path = ".") -> list[dict]:
 
     # Built-in
     for name in WORKFLOW_BUILDERS:
-        workflows.append({
-            "name": name,
-            "type": "built-in",
-            "trigger": _get_trigger(name),
-        })
+        workflows.append(
+            {
+                "name": name,
+                "type": "built-in",
+                "trigger": _get_trigger(name),
+            }
+        )
 
     # Custom from .mekong/workflows/
     base = Path(base_dir)
     wf_dir = base / ".mekong" / "workflows"
     if wf_dir.exists():
         for f in sorted(wf_dir.glob("*.md")):
-            workflows.append({
-                "name": f.stem,
-                "type": "custom",
-                "trigger": "manual",
-            })
+            workflows.append(
+                {
+                    "name": f.stem,
+                    "type": "custom",
+                    "trigger": "manual",
+                }
+            )
 
     return workflows
 

@@ -1,4 +1,5 @@
 """Tests for Quota Error Messages — ROIaaS Phase 6 user-facing error handling."""
+
 from __future__ import annotations
 
 
@@ -8,7 +9,6 @@ from src.lib.quota_error_messages import (
     format_simple_error,
     get_upgrade_url,
 )
-
 
 # ---------------------------------------------------------------------------
 # Test: format_quota_error with all tiers

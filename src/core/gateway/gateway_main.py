@@ -62,6 +62,7 @@ VERSION = "1.0.0"
 
 # -- Token verification --
 
+
 def verify_token(token: str) -> None:
     """Verify the provided token against MEKONG_API_TOKEN env var."""
     expected = os.environ.get("MEKONG_API_TOKEN")
@@ -71,6 +72,7 @@ def verify_token(token: str) -> None:
             detail="MEKONG_API_TOKEN not configured on server",
         )
     import hmac as _hmac
+
     if not _hmac.compare_digest(token.encode(), expected.encode()):
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -84,10 +86,14 @@ def build_human_summary(result: OrchestrationResult) -> HumanSummary:
         en = f"All done! {result.completed_steps} tasks completed successfully."
         vi = f"Xong! {result.completed_steps} tac vu hoan thanh thanh cong."
     elif status == "partial":
-        en = (f"Partially done. {result.completed_steps}/{result.total_steps} "
-              f"tasks completed ({rate:.0f}%). Some issues need attention.")
-        vi = (f"Hoan thanh mot phan. {result.completed_steps}/{result.total_steps} "
-              f"tac vu ({rate:.0f}%). Can xem lai mot so van de.")
+        en = (
+            f"Partially done. {result.completed_steps}/{result.total_steps} "
+            f"tasks completed ({rate:.0f}%). Some issues need attention."
+        )
+        vi = (
+            f"Hoan thanh mot phan. {result.completed_steps}/{result.total_steps} "
+            f"tac vu ({rate:.0f}%). Can xem lai mot so van de."
+        )
     else:
         en = f"Failed. {result.failed_steps} tasks had problems. Please check errors."
         vi = f"That bai. {result.failed_steps} tac vu gap loi. Vui long kiem tra."
@@ -104,11 +110,13 @@ def _scan_projects() -> list[ProjectInfo]:
             continue
         for child in sorted(base_dir.iterdir()):
             if child.is_dir() and not child.name.startswith("."):
-                projects.append(ProjectInfo(
-                    name=child.name,
-                    path=str(child),
-                    has_git=(child / ".git").exists(),
-                ))
+                projects.append(
+                    ProjectInfo(
+                        name=child.name,
+                        path=str(child),
+                        has_git=(child / ".git").exists(),
+                    )
+                )
     return projects
 
 
@@ -122,7 +130,9 @@ def _build_orchestrator() -> RecipeOrchestrator:
     )
 
 
-def _build_cmd_response(result: OrchestrationResult, goal: str, orchestrator: RecipeOrchestrator) -> CommandResponse:
+def _build_cmd_response(
+    result: OrchestrationResult, goal: str, orchestrator: RecipeOrchestrator
+) -> CommandResponse:
     """Build CommandResponse from orchestration result."""
     steps = [
         StepSummary(
@@ -158,6 +168,7 @@ def _build_cmd_response(result: OrchestrationResult, goal: str, orchestrator: Re
 
 
 # -- FastAPI app factory --
+
 
 def create_app() -> FastAPI:
     """Create and configure the gateway FastAPI application."""
@@ -285,7 +296,8 @@ def create_app() -> FastAPI:
                     "total": current_result.total_steps,
                 }
                 future = asyncio.run_coroutine_threadsafe(
-                    websocket.send_json(msg), loop,
+                    websocket.send_json(msg),
+                    loop,
                 )
                 future.result(timeout=10)
 
@@ -293,24 +305,27 @@ def create_app() -> FastAPI:
                 """Execute the orchestration pipeline in a worker thread."""
                 orchestrator = _build_orchestrator()
                 result = orchestrator.run_from_goal(
-                    goal, progress_callback=progress_callback,
+                    goal,
+                    progress_callback=progress_callback,
                 )
                 return result, orchestrator
 
             result, _orchestrator = await asyncio.to_thread(run_goal)
 
             human_summary = build_human_summary(result)
-            await websocket.send_json({
-                "type": "complete",
-                "status": result.status.value,
-                "goal": goal,
-                "total_steps": result.total_steps,
-                "completed_steps": result.completed_steps,
-                "failed_steps": result.failed_steps,
-                "success_rate": result.success_rate,
-                "errors": result.errors,
-                "human_summary": {"en": human_summary.en, "vi": human_summary.vi},
-            })
+            await websocket.send_json(
+                {
+                    "type": "complete",
+                    "status": result.status.value,
+                    "goal": goal,
+                    "total_steps": result.total_steps,
+                    "completed_steps": result.completed_steps,
+                    "failed_steps": result.failed_steps,
+                    "success_rate": result.success_rate,
+                    "errors": result.errors,
+                    "human_summary": {"en": human_summary.en, "vi": human_summary.vi},
+                }
+            )
 
         except WebSocketDisconnect:
             pass
@@ -347,8 +362,11 @@ def create_app() -> FastAPI:
         recipe = gen.from_goal_pattern(req.goal, req.steps or None)
         path = gen.save_recipe(recipe) if recipe.valid else ""
         return RecipeGenerateResponse(
-            name=recipe.name, content=recipe.content,
-            source=recipe.source, valid=recipe.valid, path=path,
+            name=recipe.name,
+            content=recipe.content,
+            source=recipe.source,
+            valid=recipe.valid,
+            path=path,
         )
 
     @gateway.get("/recipes/auto")
@@ -384,12 +402,19 @@ def create_app() -> FastAPI:
     def swarm_register(req: SwarmRegisterRequest) -> SwarmNodeInfo:
         """Register a remote Mekong node in the swarm."""
         from datetime import datetime
+
         node = swarm_registry.register_node(
-            name=req.name, host=req.host, port=req.port, token=req.token,
+            name=req.name,
+            host=req.host,
+            port=req.port,
+            token=req.token,
         )
         return SwarmNodeInfo(
-            id=node.id, name=node.name, host=node.host,
-            port=node.port, token=req.token,
+            id=node.id,
+            name=node.name,
+            host=node.host,
+            port=node.port,
+            token=req.token,
             registered_at=datetime.now().isoformat(),
             last_seen=datetime.now().isoformat(),
             status=node.status,
@@ -400,12 +425,24 @@ def create_app() -> FastAPI:
         """List all registered swarm nodes with health status."""
         swarm_registry.check_all_health(timeout=2.0)
         from datetime import datetime
+
         return [
             SwarmNodeInfo(
-                id=n.id, name=n.name, host=n.host, port=n.port,
+                id=n.id,
+                name=n.name,
+                host=n.host,
+                port=n.port,
                 token=n.token,
-                registered_at=datetime.fromtimestamp(n.last_heartbeat).isoformat() if n.last_heartbeat > 0 else datetime.now().isoformat(),
-                last_seen=datetime.fromtimestamp(n.last_heartbeat).isoformat() if n.last_heartbeat > 0 else "never",
+                registered_at=(
+                    datetime.fromtimestamp(n.last_heartbeat).isoformat()
+                    if n.last_heartbeat > 0
+                    else datetime.now().isoformat()
+                ),
+                last_seen=(
+                    datetime.fromtimestamp(n.last_heartbeat).isoformat()
+                    if n.last_heartbeat > 0
+                    else "never"
+                ),
                 status=n.status,
             )
             for n in swarm_registry.list_nodes()
@@ -443,8 +480,11 @@ def create_app() -> FastAPI:
         entries = memory_store.recent(limit)
         return [
             MemoryEntryInfo(
-                goal=e.goal, status=e.status, timestamp=e.timestamp,
-                duration_ms=e.duration_ms, error_summary=e.error_summary,
+                goal=e.goal,
+                status=e.status,
+                timestamp=e.timestamp,
+                duration_ms=e.duration_ms,
+                error_summary=e.error_summary,
                 recipe_used=e.recipe_used,
             )
             for e in entries
@@ -462,8 +502,11 @@ def create_app() -> FastAPI:
         entries = memory_store.query(q) if q else memory_store.recent()
         return [
             MemoryEntryInfo(
-                goal=e.goal, status=e.status, timestamp=e.timestamp,
-                duration_ms=e.duration_ms, error_summary=e.error_summary,
+                goal=e.goal,
+                status=e.status,
+                timestamp=e.timestamp,
+                duration_ms=e.duration_ms,
+                error_summary=e.error_summary,
                 recipe_used=e.recipe_used,
             )
             for e in entries
@@ -480,10 +523,15 @@ def create_app() -> FastAPI:
             daily_time=req.daily_time,
         )
         return ScheduleJobInfo(
-            id=job.id, name=job.name, goal=job.goal,
-            job_type=job.job_type, interval_seconds=job.interval_seconds,
-            daily_time=job.daily_time, enabled=job.enabled,
-            last_run=job.last_run, next_run=job.next_run,
+            id=job.id,
+            name=job.name,
+            goal=job.goal,
+            job_type=job.job_type,
+            interval_seconds=job.interval_seconds,
+            daily_time=job.daily_time,
+            enabled=job.enabled,
+            last_run=job.last_run,
+            next_run=job.next_run,
             run_count=job.run_count,
         )
 
@@ -492,10 +540,15 @@ def create_app() -> FastAPI:
         """List all scheduled jobs."""
         return [
             ScheduleJobInfo(
-                id=j.id, name=j.name, goal=j.goal,
-                job_type=j.job_type, interval_seconds=j.interval_seconds,
-                daily_time=j.daily_time, enabled=j.enabled,
-                last_run=j.last_run, next_run=j.next_run,
+                id=j.id,
+                name=j.name,
+                goal=j.goal,
+                job_type=j.job_type,
+                interval_seconds=j.interval_seconds,
+                daily_time=j.daily_time,
+                enabled=j.enabled,
+                last_run=j.last_run,
+                next_run=j.next_run,
                 run_count=j.run_count,
             )
             for j in scheduler.list_jobs()
@@ -567,6 +620,7 @@ def create_app() -> FastAPI:
         if not server_token:
             raise HTTPException(status_code=500, detail="MEKONG_API_TOKEN not configured")
         import hmac as _hmac
+
         if not _hmac.compare_digest(req.token.encode(), server_token.encode()):
             raise HTTPException(status_code=401, detail="Invalid token")
 

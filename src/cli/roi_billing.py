@@ -27,7 +27,9 @@ def billing_status(
         mekong roi billing status -k lk_abc123
     """
     console.print("[bold cyan]📊 Billing Status[/bold cyan]\n")
-    console.print(f"License: [cyan]{license_key[:12] if len(license_key) > 12 else license_key}...[/cyan]\n")
+    console.print(
+        f"License: [cyan]{license_key[:12] if len(license_key) > 12 else license_key}...[/cyan]\n"
+    )
 
     try:
         from src.db.repository import get_repository
@@ -42,11 +44,13 @@ def billing_status(
 
         # Get current period usage
         engine = get_engine()
-        result = asyncio.run(engine.calculate_period_charges(
-            license_key=license_key,
-            period_start=datetime.now().replace(day=1),
-            period_end=datetime.now(),
-        ))
+        result = asyncio.run(
+            engine.calculate_period_charges(
+                license_key=license_key,
+                period_start=datetime.now().replace(day=1),
+                period_end=datetime.now(),
+            )
+        )
 
         table = Table(show_header=True, header_style="bold green")
         table.add_column("Metric", style="dim")
@@ -67,7 +71,9 @@ def billing_status(
 
 @app.command("reconcile")
 def trigger_reconciliation(
-    license_key: Optional[str] = typer.Option(None, "--key", "-k", help="Specific license to reconcile"),
+    license_key: Optional[str] = typer.Option(
+        None, "--key", "-k", help="Specific license to reconcile"
+    ),
     audit_date: Optional[str] = typer.Option(None, "--date", "-d", help="Audit date (YYYY-MM-DD)"),
     all_licenses: bool = typer.Option(False, "--all", help="Reconcile all licenses"),
 ) -> None:
@@ -126,7 +132,11 @@ def trigger_reconciliation(
                 status_style = "red"
 
             table.add_row(
-                result.license_key[:12] + "..." if len(result.license_key) > 12 else result.license_key,
+                (
+                    result.license_key[:12] + "..."
+                    if len(result.license_key) > 12
+                    else result.license_key
+                ),
                 f"[{status_style}]{result.status}[/{status_style}]",
                 f"${result.expected_amount:.2f}",
                 f"${result.actual_amount:.2f}",
@@ -143,7 +153,9 @@ def trigger_reconciliation(
         console.print(f"  Investigating: [red]{investigating}[/red]")
 
         if variance > 0 or investigating > 0:
-            console.print("\n[yellow]⚠ Variances detected — review reconciliation_audits table[/yellow]")
+            console.print(
+                "\n[yellow]⚠ Variances detected — review reconciliation_audits table[/yellow]"
+            )
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {str(e)}")
@@ -172,6 +184,7 @@ def verify_webhook(
         # Show last 10 webhook events from DB
         try:
             from src.db.repository import get_repository
+
             repo = get_repository()
             events = asyncio.run(repo.get_recent_webhook_events(limit=10))
 
@@ -187,10 +200,10 @@ def verify_webhook(
 
             for event in events:
                 table.add_row(
-                    event.get('id', 'unknown')[:12] + "...",
-                    event.get('event_type', 'unknown'),
-                    "✅" if event.get('status') == 'success' else "⚠️",
-                    event.get('created_at', 'unknown'),
+                    event.get("id", "unknown")[:12] + "...",
+                    event.get("event_type", "unknown"),
+                    "✅" if event.get("status") == "success" else "⚠️",
+                    event.get("created_at", "unknown"),
                 )
 
             console.print(table)
@@ -216,12 +229,15 @@ def list_events(
 
     try:
         from src.db.repository import get_repository
+
         repo = get_repository()
 
-        events = asyncio.run(repo.get_billing_events(
-            license_key=license_key,
-            limit=limit,
-        ))
+        events = asyncio.run(
+            repo.get_billing_events(
+                license_key=license_key,
+                limit=limit,
+            )
+        )
 
         if not events:
             console.print("[yellow]No billing events found.[/yellow]\n")
@@ -235,10 +251,14 @@ def list_events(
 
         for event in events:
             table.add_row(
-                event.get('event_type', 'unknown'),
-                (event.get('license_key', 'unknown')[:12] + "...") if event.get('license_key') else "N/A",
+                event.get("event_type", "unknown"),
+                (
+                    (event.get("license_key", "unknown")[:12] + "...")
+                    if event.get("license_key")
+                    else "N/A"
+                ),
                 f"${event.get('amount', 0):.2f}",
-                event.get('created_at', 'unknown'),
+                event.get("created_at", "unknown"),
             )
 
         console.print(table)

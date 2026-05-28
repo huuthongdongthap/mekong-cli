@@ -272,10 +272,7 @@ class HookPipeline:
             Dict mapping phase name to list of hook names
 
         """
-        return {
-            phase.value: [h.name for h in hooks]
-            for phase, hooks in self._hooks.items()
-        }
+        return {phase.value: [h.name for h in hooks] for phase, hooks in self._hooks.items()}
 
 
 def create_default_pipeline() -> HookPipeline:

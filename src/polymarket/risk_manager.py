@@ -20,18 +20,20 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RiskConfig:
     """Risk management configuration."""
-    max_position_pct: float = 0.10       # 10% of capital per position
-    daily_loss_limit_pct: float = 0.05   # 5% daily loss limit
-    consecutive_loss_pause: int = 3       # Pause after N consecutive losses
-    pause_duration_sec: float = 3600.0   # 1 hour pause on consecutive losses
-    max_brier_score: float = 0.30        # Halt if calibration drifts
-    max_api_errors_per_min: int = 5      # Halt on API error storm
+
+    max_position_pct: float = 0.10  # 10% of capital per position
+    daily_loss_limit_pct: float = 0.05  # 5% daily loss limit
+    consecutive_loss_pause: int = 3  # Pause after N consecutive losses
+    pause_duration_sec: float = 3600.0  # 1 hour pause on consecutive losses
+    max_brier_score: float = 0.30  # Halt if calibration drifts
+    max_api_errors_per_min: int = 5  # Halt on API error storm
     paper_trading: bool = True
 
 
 @dataclass
 class RiskState:
     """Current risk state tracking."""
+
     daily_pnl: float = 0.0
     daily_trades: int = 0
     consecutive_losses: int = 0
@@ -160,9 +162,7 @@ class RiskManager:
         """Update capital for position sizing calculations."""
         self.capital = new_capital
 
-    def _trip_circuit_breaker(
-        self, reason: str, auto_resume_sec: Optional[float] = None
-    ) -> None:
+    def _trip_circuit_breaker(self, reason: str, auto_resume_sec: Optional[float] = None) -> None:
         """Trip the circuit breaker."""
         self.state.circuit_breaker = CircuitBreakerState.OPEN
         self.state.circuit_breaker_reason = reason

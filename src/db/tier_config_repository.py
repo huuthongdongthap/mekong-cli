@@ -13,6 +13,7 @@ from src.db.database import get_database, DatabaseConnection
 @dataclass
 class TierConfig:
     """Tier configuration data class."""
+
     id: Optional[str]
     tier: str
     preset: str
@@ -23,6 +24,7 @@ class TierConfig:
 @dataclass
 class TenantRateLimitOverride:
     """Tenant rate limit override data class."""
+
     id: Optional[str]
     tenant_id: str
     tier: Optional[str]
@@ -42,6 +44,7 @@ class TenantRateLimitOverride:
 
         try:
             import datetime
+
             # Handle both ISO format with and without timezone
             expires_str = self.expires_at.replace("Z", "+00:00")
             expires_dt = datetime.datetime.fromisoformat(expires_str)
@@ -362,6 +365,7 @@ def get_repository() -> TierConfigRepository:
 async def init_repository() -> TierConfigRepository:
     """Initialize repository with database connection."""
     from src.db.database import init_database
+
     await init_database()
     return get_repository()
 

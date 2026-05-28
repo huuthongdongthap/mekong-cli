@@ -81,7 +81,9 @@ def register_system_commands(app: typer.Typer) -> None:
             return
 
         selected = PRESET_ACTIONS[int(choice) - 1]
-        console.print(f"\n[bold green]Running:[/bold green] {selected['icon']}  {selected['label']}")
+        console.print(
+            f"\n[bold green]Running:[/bold green] {selected['icon']}  {selected['label']}"
+        )
 
         llm_client = get_client()
         orchestrator = RecipeOrchestrator(
@@ -117,11 +119,13 @@ def register_system_commands(app: typer.Typer) -> None:
         from src.core.self_improve import SelfImprover
 
         improver = SelfImprover(MemoryStore(), RecipeGenerator())
-        console.print(Panel(
-            "[bold]Running self-improvement cycle...[/bold]",
-            title="🧬 Evolution Engine",
-            border_style="magenta",
-        ))
+        console.print(
+            Panel(
+                "[bold]Running self-improvement cycle...[/bold]",
+                title="🧬 Evolution Engine",
+                border_style="magenta",
+            )
+        )
         results = improver.analyze_and_improve()
         if not results:
             console.print("[yellow]No evolution actions taken — not enough data yet.[/yellow]")
@@ -132,22 +136,27 @@ def register_system_commands(app: typer.Typer) -> None:
             table.add_column("Reason", style="dim")
             for entry in results:
                 action_style = {
-                    "generated": "green", "deprecated": "red", "suggestion": "yellow"
+                    "generated": "green",
+                    "deprecated": "red",
+                    "suggestion": "yellow",
                 }.get(entry.action, "dim")
                 table.add_row(
                     f"[{action_style}]{entry.action}[/{action_style}]",
-                    entry.target, entry.reason,
+                    entry.target,
+                    entry.reason,
                 )
             console.print(table)
 
         stats = improver.get_evolution_stats()
-        console.print(Panel(
-            f"[bold]Generated:[/bold] {stats['total_generated']}\n"
-            f"[bold]Deprecated:[/bold] {stats['total_deprecated']}\n"
-            f"[bold]Journal Size:[/bold] {stats['journal_size']}",
-            title="📊 Evolution Statistics",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Generated:[/bold] {stats['total_generated']}\n"
+                f"[bold]Deprecated:[/bold] {stats['total_deprecated']}\n"
+                f"[bold]Journal Size:[/bold] {stats['journal_size']}",
+                title="📊 Evolution Statistics",
+                border_style="cyan",
+            )
+        )
 
     @app.command(name="evolve-code")
     def evolve_code(
@@ -163,15 +172,17 @@ def register_system_commands(app: typer.Typer) -> None:
             console.print(f"[red]{report['error']}[/red]")
             raise typer.Exit(code=1)
 
-        console.print(Panel(
-            f"[bold]Target:[/bold] {report['target']}\n"
-            f"[bold]Files:[/bold] {len(report['files'])}\n"
-            f"[bold]Total Lines:[/bold] {report['total_lines']}\n"
-            f"[bold]Functions:[/bold] {report['total_functions']}\n"
-            f"[bold]Issues Found:[/bold] {len(report['issues'])}",
-            title="🧬 Code Analysis",
-            border_style="magenta",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Target:[/bold] {report['target']}\n"
+                f"[bold]Files:[/bold] {len(report['files'])}\n"
+                f"[bold]Total Lines:[/bold] {report['total_lines']}\n"
+                f"[bold]Functions:[/bold] {report['total_functions']}\n"
+                f"[bold]Issues Found:[/bold] {len(report['issues'])}",
+                title="🧬 Code Analysis",
+                border_style="magenta",
+            )
+        )
         if report["issues"]:
             console.print("\n[bold yellow]Issues:[/bold yellow]")
             for issue in report["issues"]:
@@ -194,14 +205,16 @@ def register_system_commands(app: typer.Typer) -> None:
     @app.command()
     def version() -> None:
         """Show version info + AGI subsystem health"""
-        console.print(Panel(
-            "[bold green]Mekong CLI[/bold green] v2.0.0-agi\n"
-            "[dim]RaaS Agency Operating System[/dim]\n"
-            "[dim]Engine: Plan-Execute-Verify (Binh Pháp)[/dim]\n"
-            "[dim]DNA: ClaudeKit v2.9.1+[/dim]",
-            title="Version",
-            border_style="blue",
-        ))
+        console.print(
+            Panel(
+                "[bold green]Mekong CLI[/bold green] v2.0.0-agi\n"
+                "[dim]RaaS Agency Operating System[/dim]\n"
+                "[dim]Engine: Plan-Execute-Verify (Binh Pháp)[/dim]\n"
+                "[dim]DNA: ClaudeKit v2.9.1+[/dim]",
+                title="Version",
+                border_style="blue",
+            )
+        )
 
         subsystems = []
         _modules = [
@@ -225,9 +238,11 @@ def register_system_commands(app: typer.Typer) -> None:
 
         healthy = sum(1 for s in subsystems if "✓" in s)
         health_color = "green" if healthy == 9 else "yellow" if healthy >= 6 else "red"
-        console.print(Panel(
-            f"[bold]AGI Subsystems:[/bold] [{health_color}]{healthy}/9 online[/{health_color}]\n"
-            + "  ".join(subsystems),
-            title="🧠 AGI v2 Health",
-            border_style="magenta",
-        ))
+        console.print(
+            Panel(
+                f"[bold]AGI Subsystems:[/bold] [{health_color}]{healthy}/9 online[/{health_color}]\n"
+                + "  ".join(subsystems),
+                title="🧠 AGI v2 Health",
+                border_style="magenta",
+            )
+        )

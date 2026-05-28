@@ -75,42 +75,52 @@ class AssertionEngine:
 
     def _register_builtins(self) -> None:
         """Register built-in assertion set."""
-        self.register_assertion(Assertion(
-            name="exit_code_zero",
-            check_fn=lambda r: r.exit_code == 0,
-            message="Exit code must be 0",
-            severity=AssertionSeverity.ERROR,
-        ))
-        self.register_assertion(Assertion(
-            name="no_stderr",
-            check_fn=lambda r: not r.stderr.strip(),
-            message="Stderr must be empty",
-            severity=AssertionSeverity.WARNING,
-        ))
-        self.register_assertion(Assertion(
-            name="output_not_empty",
-            check_fn=lambda r: bool(r.stdout.strip()),
-            message="Stdout must not be empty",
-            severity=AssertionSeverity.WARNING,
-        ))
-        self.register_assertion(Assertion(
-            name="no_timeout",
-            check_fn=lambda r: not (
-                r.error is not None
-                and (
-                    "timeout" in str(r.error).lower()
-                    or "timeout" in type(r.error).__name__.lower()
-                )
-            ),
-            message="Execution must not have timed out",
-            severity=AssertionSeverity.ERROR,
-        ))
-        self.register_assertion(Assertion(
-            name="no_exception",
-            check_fn=lambda r: r.error is None,
-            message="Execution must not raise an exception",
-            severity=AssertionSeverity.ERROR,
-        ))
+        self.register_assertion(
+            Assertion(
+                name="exit_code_zero",
+                check_fn=lambda r: r.exit_code == 0,
+                message="Exit code must be 0",
+                severity=AssertionSeverity.ERROR,
+            )
+        )
+        self.register_assertion(
+            Assertion(
+                name="no_stderr",
+                check_fn=lambda r: not r.stderr.strip(),
+                message="Stderr must be empty",
+                severity=AssertionSeverity.WARNING,
+            )
+        )
+        self.register_assertion(
+            Assertion(
+                name="output_not_empty",
+                check_fn=lambda r: bool(r.stdout.strip()),
+                message="Stdout must not be empty",
+                severity=AssertionSeverity.WARNING,
+            )
+        )
+        self.register_assertion(
+            Assertion(
+                name="no_timeout",
+                check_fn=lambda r: not (
+                    r.error is not None
+                    and (
+                        "timeout" in str(r.error).lower()
+                        or "timeout" in type(r.error).__name__.lower()
+                    )
+                ),
+                message="Execution must not have timed out",
+                severity=AssertionSeverity.ERROR,
+            )
+        )
+        self.register_assertion(
+            Assertion(
+                name="no_exception",
+                check_fn=lambda r: r.error is None,
+                message="Execution must not raise an exception",
+                severity=AssertionSeverity.ERROR,
+            )
+        )
 
     def register_assertion(self, assertion: Assertion) -> None:
         """Register an assertion by name (overwrites existing).
@@ -160,17 +170,21 @@ class AssertionEngine:
             try:
                 passed = assertion.check_fn(execution_result)
                 actual = execution_result.exit_code if "exit_code" in assertion.name else None
-                results.append(AssertionResult(
-                    passed=passed,
-                    assertion=assertion,
-                    actual_value=actual,
-                ))
+                results.append(
+                    AssertionResult(
+                        passed=passed,
+                        assertion=assertion,
+                        actual_value=actual,
+                    )
+                )
             except Exception as exc:  # noqa: BLE001
-                results.append(AssertionResult(
-                    passed=False,
-                    assertion=assertion,
-                    message=f"Assertion raised exception: {exc}",
-                ))
+                results.append(
+                    AssertionResult(
+                        passed=False,
+                        assertion=assertion,
+                        message=f"Assertion raised exception: {exc}",
+                    )
+                )
 
         return results
 
@@ -184,11 +198,7 @@ class AssertionEngine:
             True if no ERROR-severity assertion failed.
 
         """
-        return all(
-            r.passed
-            for r in results
-            if r.assertion.severity == AssertionSeverity.ERROR
-        )
+        return all(r.passed for r in results if r.assertion.severity == AssertionSeverity.ERROR)
 
     @property
     def registered_names(self) -> List[str]:

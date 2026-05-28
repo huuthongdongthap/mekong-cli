@@ -116,9 +116,7 @@ NORTH_STAR_MAP: dict[str, dict[str, str]] = {
 }
 
 
-def select_north_star(
-    product_type: str, target: float = 0.0
-) -> NorthStarMetric:
+def select_north_star(product_type: str, target: float = 0.0) -> NorthStarMetric:
     """Select north star metric based on product type."""
     config = NORTH_STAR_MAP.get(product_type)
     if not config:
@@ -157,18 +155,22 @@ def build_kpi_hierarchy(product_type: str) -> list[KPIMetric]:
 
     # Add ops metrics for usage-based / saas with agents
     if product_type in ("saas", "usage_based"):
-        kpis.extend([
-            KPIMetric("mcu_per_user", 3, "operations", "stable or growing"),
-            KPIMetric("agent_success_rate", 3, "operations", "> 90%", unit="%"),
-            KPIMetric("llm_cost_margin", 3, "operations", "> 60%", unit="%"),
-        ])
+        kpis.extend(
+            [
+                KPIMetric("mcu_per_user", 3, "operations", "stable or growing"),
+                KPIMetric("agent_success_rate", 3, "operations", "> 90%", unit="%"),
+                KPIMetric("llm_cost_margin", 3, "operations", "> 60%", unit="%"),
+            ]
+        )
 
     # Tier 4 — Leading indicators
-    kpis.extend([
-        KPIMetric("trial_to_paid_velocity", 4, "leading", "< 7 days avg"),
-        KPIMetric("engagement_score", 4, "leading", "growing"),
-        KPIMetric("referral_rate", 4, "leading", "> 10%", unit="%"),
-    ])
+    kpis.extend(
+        [
+            KPIMetric("trial_to_paid_velocity", 4, "leading", "< 7 days avg"),
+            KPIMetric("engagement_score", 4, "leading", "growing"),
+            KPIMetric("referral_rate", 4, "leading", "> 10%", unit="%"),
+        ]
+    )
 
     return kpis
 
@@ -180,37 +182,53 @@ def build_alert_rules() -> list[AlertRule]:
     """Build default alert rule set."""
     return [
         # Critical
-        AlertRule("mrr_drop", "critical", "MRR drops > 5% WoW", 5.0,
-                  "/founder churn --analyze"),
-        AlertRule("high_churn", "critical", "Churn rate > 10% monthly", 10.0,
-                  "Investigate churn causes immediately"),
-        AlertRule("agent_failure", "critical", "Agent success rate < 80%", 80.0,
-                  "Check agent configs and prompts"),
-        AlertRule("low_margin", "critical", "MCU margin < 60%", 60.0,
-                  "Review LLM costs and pricing"),
+        AlertRule("mrr_drop", "critical", "MRR drops > 5% WoW", 5.0, "/founder churn --analyze"),
+        AlertRule(
+            "high_churn",
+            "critical",
+            "Churn rate > 10% monthly",
+            10.0,
+            "Investigate churn causes immediately",
+        ),
+        AlertRule(
+            "agent_failure",
+            "critical",
+            "Agent success rate < 80%",
+            80.0,
+            "Check agent configs and prompts",
+        ),
+        AlertRule(
+            "low_margin", "critical", "MCU margin < 60%", 60.0, "Review LLM costs and pricing"
+        ),
         # Warning
-        AlertRule("low_activation", "warning", "Activation rate < 40%", 40.0,
-                  "Review onboarding flow"),
-        AlertRule("low_engagement", "warning", "DAU/MAU < 0.15", 0.15,
-                  "Investigate feature adoption"),
-        AlertRule("support_spike", "warning", "Support tickets spike > 2x", 2.0,
-                  "Check for product issues"),
+        AlertRule(
+            "low_activation", "warning", "Activation rate < 40%", 40.0, "Review onboarding flow"
+        ),
+        AlertRule(
+            "low_engagement", "warning", "DAU/MAU < 0.15", 0.15, "Investigate feature adoption"
+        ),
+        AlertRule(
+            "support_spike",
+            "warning",
+            "Support tickets spike > 2x",
+            2.0,
+            "Check for product issues",
+        ),
         # Celebration
-        AlertRule("mrr_1k", "celebration", "MRR milestone $1K", 1000,
-                  "Share publicly! /launch tweet"),
-        AlertRule("mrr_10k", "celebration", "MRR milestone $10K", 10000,
-                  "Investor update time"),
-        AlertRule("100_customers", "celebration", "100th customer", 100,
-                  "Case study from top customer"),
+        AlertRule(
+            "mrr_1k", "celebration", "MRR milestone $1K", 1000, "Share publicly! /launch tweet"
+        ),
+        AlertRule("mrr_10k", "celebration", "MRR milestone $10K", 10000, "Investor update time"),
+        AlertRule(
+            "100_customers", "celebration", "100th customer", 100, "Case study from top customer"
+        ),
     ]
 
 
 # ── Metrics Setup ────────────────────────────────────────────────────
 
 
-def setup_metrics(
-    product_type: str, north_star_target: float = 0.0
-) -> MetricsConfig:
+def setup_metrics(product_type: str, north_star_target: float = 0.0) -> MetricsConfig:
     """Full metrics setup: north star + KPIs + alerts."""
     return MetricsConfig(
         north_star=select_north_star(product_type, north_star_target),
@@ -223,9 +241,7 @@ def setup_metrics(
 # ── Dashboard Check ──────────────────────────────────────────────────
 
 
-def check_metrics(
-    base_dir: str, mcu_gate=None, tenant_id: str = "default"
-) -> MetricSnapshot:
+def check_metrics(base_dir: str, mcu_gate=None, tenant_id: str = "default") -> MetricSnapshot:
     """Pull current metrics and generate dashboard snapshot."""
     base = Path(base_dir)
     metrics: dict[str, float] = {}
@@ -277,19 +293,19 @@ def check_metrics(
 # ── Alert Check (for daily cron) ─────────────────────────────────────
 
 
-def check_alerts(
-    base_dir: str, config: MetricsConfig | None = None
-) -> list[dict[str, str]]:
+def check_alerts(base_dir: str, config: MetricsConfig | None = None) -> list[dict[str, str]]:
     """Run alert checks against current metrics. Returns triggered alerts."""
     snapshot = check_metrics(base_dir)
     triggered: list[dict[str, str]] = []
 
     for alert_msg in snapshot.alerts_triggered:
-        triggered.append({
-            "severity": "critical" if "failure" in alert_msg else "warning",
-            "message": alert_msg,
-            "timestamp": snapshot.timestamp,
-        })
+        triggered.append(
+            {
+                "severity": "critical" if "failure" in alert_msg else "warning",
+                "message": alert_msg,
+                "timestamp": snapshot.timestamp,
+            }
+        )
 
     return triggered
 
@@ -310,10 +326,13 @@ def save_metrics_config(base_dir: str, config: MetricsConfig) -> list[str]:
 
     # Alert rules (separate for cron access)
     path = founder_dir / "alert-rules.json"
-    path.write_text(json.dumps(
-        [asdict(a) for a in config.alerts],
-        indent=2, ensure_ascii=False,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(a) for a in config.alerts],
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     saved.append(str(path))
 
     return saved

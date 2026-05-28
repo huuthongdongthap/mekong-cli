@@ -98,10 +98,7 @@ class CollectorRegistry:
 
     def find_for_task(self, task_type: str) -> list[CollectorSpec]:
         """Find all collectors that support a given task type."""
-        return [
-            c for c in self._collectors.values()
-            if task_type in c.supported_tasks
-        ]
+        return [c for c in self._collectors.values() if task_type in c.supported_tasks]
 
     def health_check(self) -> dict[str, bool]:
         """Run health checks on all registered collectors."""
@@ -111,6 +108,7 @@ class CollectorRegistry:
                 healthy = collector.check()
             except Exception as e:
                 import logging
+
                 logging.debug(f"Health check failed for {name}: {e}")
                 healthy = False
             results[name] = healthy
@@ -153,10 +151,12 @@ class CollectorRegistry:
                 # Look for classes implementing CollectorSpec
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
-                    if (isinstance(attr, type)
-                            and attr_name != "CollectorSpec"
-                            and isinstance(attr, type)
-                            and _has_collector_interface(attr)):
+                    if (
+                        isinstance(attr, type)
+                        and attr_name != "CollectorSpec"
+                        and isinstance(attr, type)
+                        and _has_collector_interface(attr)
+                    ):
                         info.supported_tasks = list(getattr(attr, "supported_tasks", []))
                         result.found.append(info)
                         break

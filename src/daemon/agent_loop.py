@@ -53,43 +53,76 @@ TIER_URLS = {k: v["url"] for k, v in TIER_CONFIG.items()}
 
 # Tool definitions (OpenAI function calling format)
 TOOLS = [
-    {"type": "function", "function": {
-        "name": "read_file",
-        "description": "Read a file from .mekong/ sandbox directory",
-        "parameters": {"type": "object", "properties": {
-            "path": {"type": "string", "description": "Relative path inside .mekong/"}
-        }, "required": ["path"]}
-    }},
-    {"type": "function", "function": {
-        "name": "write_file",
-        "description": "Write content to a file in .mekong/ sandbox directory",
-        "parameters": {"type": "object", "properties": {
-            "path": {"type": "string", "description": "Relative path inside .mekong/"},
-            "content": {"type": "string", "description": "File content"}
-        }, "required": ["path", "content"]}
-    }},
-    {"type": "function", "function": {
-        "name": "http_get",
-        "description": "Make HTTP GET request to a URL and return response body",
-        "parameters": {"type": "object", "properties": {
-            "url": {"type": "string", "description": "URL to fetch"}
-        }, "required": ["url"]}
-    }},
-    {"type": "function", "function": {
-        "name": "list_dir",
-        "description": "List files in a .mekong/ subdirectory",
-        "parameters": {"type": "object", "properties": {
-            "path": {"type": "string", "description": "Relative dir path inside .mekong/"}
-        }, "required": ["path"]}
-    }},
-    {"type": "function", "function": {
-        "name": "append_log",
-        "description": "Append a line to a log file in .mekong/logs/",
-        "parameters": {"type": "object", "properties": {
-            "filename": {"type": "string", "description": "Log filename"},
-            "message": {"type": "string", "description": "Log message"}
-        }, "required": ["filename", "message"]}
-    }},
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read a file from .mekong/ sandbox directory",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path inside .mekong/"}
+                },
+                "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Write content to a file in .mekong/ sandbox directory",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path inside .mekong/"},
+                    "content": {"type": "string", "description": "File content"},
+                },
+                "required": ["path", "content"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "http_get",
+            "description": "Make HTTP GET request to a URL and return response body",
+            "parameters": {
+                "type": "object",
+                "properties": {"url": {"type": "string", "description": "URL to fetch"}},
+                "required": ["url"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_dir",
+            "description": "List files in a .mekong/ subdirectory",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative dir path inside .mekong/"}
+                },
+                "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "append_log",
+            "description": "Append a line to a log file in .mekong/logs/",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filename": {"type": "string", "description": "Log filename"},
+                    "message": {"type": "string", "description": "Log message"},
+                },
+                "required": ["filename", "message"],
+            },
+        },
+    },
 ]
 
 
@@ -120,6 +153,7 @@ def execute_tool(name: str, args: dict[str, Any]) -> str:
                 return "Error: URL must start with http"
             # Block SSRF: reject private/internal IPs
             from urllib.parse import urlparse
+
             host = urlparse(url).hostname or ""
             if host in ("localhost", "127.0.0.1", "0.0.0.0") or host.startswith(
                 ("10.", "172.16.", "192.168.", "169.254.")
@@ -151,18 +185,24 @@ def execute_tool(name: str, args: dict[str, Any]) -> str:
 
 
 def _llm_call(
-    messages: list, base_url: str, model: str = "default",
-    api_key: str = "local", max_tokens: int = 512, timeout: int = 120,
+    messages: list,
+    base_url: str,
+    model: str = "default",
+    api_key: str = "local",
+    max_tokens: int = 512,
+    timeout: int = 120,
 ) -> dict:
     """Call LLM via OpenAI-compatible API. Returns assistant message dict."""
     url = f"{base_url.rstrip('/')}/chat/completions"
-    payload = json.dumps({
-        "model": model,
-        "messages": messages,
-        "tools": TOOLS,
-        "max_tokens": max_tokens,
-        "temperature": 0.3,
-    }).encode("utf-8")
+    payload = json.dumps(
+        {
+            "model": model,
+            "messages": messages,
+            "tools": TOOLS,
+            "max_tokens": max_tokens,
+            "temperature": 0.3,
+        }
+    ).encode("utf-8")
 
     headers = {"Content-Type": "application/json"}
     if api_key != "local":
@@ -196,8 +236,9 @@ def run_agent_sync(
 
     for step in range(max_steps):
         try:
-            msg = _llm_call(messages, base_url, model_id, api_key,
-                            max_tokens=max_tok, timeout=timeout)
+            msg = _llm_call(
+                messages, base_url, model_id, api_key, max_tokens=max_tok, timeout=timeout
+            )
         except (URLError, Exception) as e:
             logger.error(f"LLM call failed (step {step}): {e}")
             return f"Error: LLM call failed — {e}"
@@ -218,11 +259,13 @@ def run_agent_sync(
                 fn_args = {}
             result = execute_tool(fn_name, fn_args)
             logger.info(f"[Step {step}] {fn_name}({fn_args}) → {result[:100]}")
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc["id"],
-                "content": result,
-            })
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tc["id"],
+                    "content": result,
+                }
+            )
 
     return messages[-1].get("content", "Max steps reached")
 
@@ -230,6 +273,7 @@ def run_agent_sync(
 async def run_agent(task: str, **kwargs) -> str:
     """Async wrapper for run_agent_sync (runs in thread to avoid blocking)."""
     import asyncio
+
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, lambda: run_agent_sync(task, **kwargs))
 

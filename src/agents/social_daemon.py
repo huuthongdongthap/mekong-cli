@@ -123,8 +123,9 @@ class SocialDaemon:
             for c in comments:
                 cid = str(c.get("id"))
                 if cid not in last_seen and self.replier.should_reply(c):
-                    r = self.poster.reply_devto_comment(article_id, int(c["id"]),
-                                                        self.replier.generate_reply(c, ctx))
+                    r = self.poster.reply_devto_comment(
+                        article_id, int(c["id"]), self.replier.generate_reply(c, ctx)
+                    )
                     if r.get("id"):
                         self.replier.track_reply("devto", cid, str(r["id"]))
                 last_seen.add(cid)
@@ -133,7 +134,11 @@ class SocialDaemon:
     def _poll_github(self, state: dict[str, Any]) -> None:
         """Poll GitHub Discussions for new comments and auto-reply."""
         for _key, info in state.get("github", {}).items():
-            repo, number, disc_id = info.get("repo", ""), int(info.get("number", 0)), info.get("id", "")
+            repo, number, disc_id = (
+                info.get("repo", ""),
+                int(info.get("number", 0)),
+                info.get("id", ""),
+            )
             if not repo or not number:
                 continue
             comments = self.poster.get_gh_discussion_comments(repo, number)
@@ -142,8 +147,9 @@ class SocialDaemon:
             for c in comments:
                 cid = str(c.get("id"))
                 if cid not in last_seen and self.replier.should_reply(c):
-                    r = self.poster.reply_gh_discussion(repo, disc_id,
-                                                        self.replier.generate_reply(c, ctx))
+                    r = self.poster.reply_gh_discussion(
+                        repo, disc_id, self.replier.generate_reply(c, ctx)
+                    )
                     if r.get("id"):
                         self.replier.track_reply("github", cid, str(r["id"]))
                 last_seen.add(cid)
@@ -180,6 +186,7 @@ class SocialDaemon:
 # ------------------------------------------------------------------
 # CLI entry point
 # ------------------------------------------------------------------
+
 
 def main() -> None:
     args = build_arg_parser().parse_args()

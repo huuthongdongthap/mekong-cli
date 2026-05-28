@@ -33,13 +33,18 @@ class PromptCache:
         self.memory = get_memory_facade()
         self.memory.connect()
 
-        logger.debug("PromptCache initialized for %s, using %s storage",
-                     self.user_id, self.memory.get_provider_status()["active_provider"])
+        logger.debug(
+            "PromptCache initialized for %s, using %s storage",
+            self.user_id,
+            self.memory.get_provider_status()["active_provider"],
+        )
 
         # Initialize local storage as backup for YAML fallback
         self.local_storage_path = Path.home() / ".mekong" / "prompt_cache"
         self.local_storage_path.mkdir(parents=True, exist_ok=True)
-        self.local_cache_file = self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        self.local_cache_file = (
+            self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        )
 
     def _save_to_local_storage(self, data: dict) -> None:
         """Save data to local file storage as backup."""
@@ -133,7 +138,9 @@ class PromptCache:
 
         return stored_in_memory
 
-    def find_similar_prompts(self, query_prompt: str, threshold: float = 0.7, limit: int = 5) -> list[dict[str, Any]]:
+    def find_similar_prompts(
+        self, query_prompt: str, threshold: float = 0.7, limit: int = 5
+    ) -> list[dict[str, Any]]:
         """Find prompts similar to the query prompt.
 
         Args:
@@ -189,12 +196,17 @@ class PromptCache:
 
                     if similarity >= threshold:
                         # Check if this prompt is already in our results
-                        if not any(sp.get("prompt_hash") == local_prompt.get("prompt_hash") for sp in similar_prompts):
+                        if not any(
+                            sp.get("prompt_hash") == local_prompt.get("prompt_hash")
+                            for sp in similar_prompts
+                        ):
                             local_prompt["similarity_score"] = similarity
                             similar_prompts.append(local_prompt)
 
         # Sort by similarity score (descending) and outcome score (descending)
-        similar_prompts.sort(key=lambda x: (x.get("similarity_score", 0), x.get("outcome_score", 0)), reverse=True)
+        similar_prompts.sort(
+            key=lambda x: (x.get("similarity_score", 0), x.get("outcome_score", 0)), reverse=True
+        )
         return similar_prompts[:limit]
 
     def _calculate_similarity(self, text1: str, text2: str) -> float:
@@ -223,7 +235,9 @@ class PromptCache:
         # Jaccard similarity
         return len(intersection) / len(union)
 
-    def get_cached_response(self, query_prompt: str, min_outcome_score: float = 0.5) -> tuple[str, dict] | None:
+    def get_cached_response(
+        self, query_prompt: str, min_outcome_score: float = 0.5
+    ) -> tuple[str, dict] | None:
         """Get a cached response for a similar prompt.
 
         Args:
@@ -285,7 +299,9 @@ class PromptCache:
         cached_prompts.sort(key=lambda x: x.get("outcome_score", 0), reverse=True)
         return cached_prompts[:limit]
 
-    def update_prompt_outcome(self, prompt: str, new_outcome_score: float, additional_metadata: dict | None = None) -> None:
+    def update_prompt_outcome(
+        self, prompt: str, new_outcome_score: float, additional_metadata: dict | None = None
+    ) -> None:
         """Update the outcome score of a previously stored prompt.
 
         Args:
@@ -344,7 +360,10 @@ class IntelligentPromptManager:
 
         if cached_result:
             response, metadata = cached_result
-            logger.info("Retrieved cached response with %.2f similarity", metadata.get("similarity_score", 0))
+            logger.info(
+                "Retrieved cached response with %.2f similarity",
+                metadata.get("similarity_score", 0),
+            )
             return response
 
         # Generate new response
@@ -356,7 +375,9 @@ class IntelligentPromptManager:
 
         return response
 
-    def evaluate_and_update_cache(self, prompt: str, response: str, outcome_evaluation: float) -> None:
+    def evaluate_and_update_cache(
+        self, prompt: str, response: str, outcome_evaluation: float
+    ) -> None:
         """Evaluate the outcome of a prompt-response pair and update the cache.
 
         Args:
@@ -383,13 +404,16 @@ class IntelligentPromptManager:
 
         # Filter for only those with high outcome scores
         return [
-            prompt_data for prompt_data in search_results
+            prompt_data
+            for prompt_data in search_results
             if prompt_data.get("outcome_score", 0) >= 0.7
         ]
 
 
 # Convenience function for initialization
-def create_intelligent_prompt_manager(user_id: str = "system:default_prompt_manager") -> IntelligentPromptManager:
+def create_intelligent_prompt_manager(
+    user_id: str = "system:default_prompt_manager",
+) -> IntelligentPromptManager:
     """Create an intelligent prompt manager instance.
 
     Args:

@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 
-
 DB_PATH = Path.home() / ".mekong" / "raas" / "free_tier_analytics.db"
 
 
@@ -30,6 +29,7 @@ class FreeTierUsage:
         created_at: ISO timestamp of usage
         metadata: Additional data (JSON)
     """
+
     key_id: str
     command: str
     command_cost: int = 1
@@ -228,8 +228,7 @@ class FreeTierTracker:
                     "active_days": row["active_days"],
                     "unique_commands": row["unique_commands"],
                     "top_commands": [
-                        {"command": r["command"], "credits": r["credits"]}
-                        for r in top_commands
+                        {"command": r["command"], "credits": r["credits"]} for r in top_commands
                     ],
                 }
 

@@ -95,9 +95,7 @@ def get_retainer_clients() -> List[Dict]:
     invoices = load_json(INVOICES_FILE)
 
     # Find clients with paid invoices (retainer clients)
-    paid_emails = {
-        inv.get("client_email") for inv in invoices if inv.get("status") == "paid"
-    }
+    paid_emails = {inv.get("client_email") for inv in invoices if inv.get("status") == "paid"}
 
     # Also include closed leads
     clients = []
@@ -148,11 +146,7 @@ def generate_metrics(client: Dict) -> ClientMetrics:
 
 def generate_report_content(metrics: ClientMetrics) -> str:
     """Generate Markdown report content."""
-    week_str = (
-        metrics.week_start.strftime("%b %d")
-        + " - "
-        + metrics.week_end.strftime("%b %d, %Y")
-    )
+    week_str = metrics.week_start.strftime("%b %d") + " - " + metrics.week_end.strftime("%b %d, %Y")
 
     # Health indicator
     if metrics.health_score >= 90:

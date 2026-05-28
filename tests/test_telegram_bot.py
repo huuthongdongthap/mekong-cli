@@ -97,7 +97,18 @@ class TestMekongBot(unittest.TestCase):
     def test_help_text_contains_commands(self):
         """Help text lists all commands."""
         # Updated list based on Tôm Hùm edition help text
-        for cmd in ["/cook", "/spawn", "/tasks", "/sessions", "/status", "/schedule", "/memory", "/help", "/agi", "/remember"]:
+        for cmd in [
+            "/cook",
+            "/spawn",
+            "/tasks",
+            "/sessions",
+            "/status",
+            "/schedule",
+            "/memory",
+            "/help",
+            "/agi",
+            "/remember",
+        ]:
             self.assertIn(cmd, HELP_TEXT)
 
     def test_build_keyboard_no_telegram(self):
@@ -135,6 +146,7 @@ class TestMekongBot(unittest.TestCase):
             MekongBot.CONFIG_PATH = original
 
         import shutil
+
         shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_cmd_handler_no_args(self):

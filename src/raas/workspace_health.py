@@ -5,6 +5,7 @@ Composite score from 3 dimensions:
 - Feature adoption (35%): breadth of features used
 - Billing health (25%): credit balance status
 """
+
 from __future__ import annotations
 
 import logging
@@ -46,7 +47,11 @@ class WorkspaceHealthCalculator:
         adoption = self._calc_adoption_score(workspace_id, days)
         billing = self._calc_billing_score(workspace_id)
 
-        total = int(usage * self.USAGE_WEIGHT + adoption * self.ADOPTION_WEIGHT + billing * self.BILLING_WEIGHT)
+        total = int(
+            usage * self.USAGE_WEIGHT
+            + adoption * self.ADOPTION_WEIGHT
+            + billing * self.BILLING_WEIGHT
+        )
         total = max(0, min(100, total))
         grade = self._grade(total)
         active_users = self._store.get_workspace_user_count(workspace_id)
@@ -56,9 +61,14 @@ class WorkspaceHealthCalculator:
         self._store.save_health_snapshot(workspace_id, total, grade, components)
 
         return WorkspaceHealthScore(
-            workspace_id=workspace_id, score=total, grade=grade,
-            usage_score=usage, adoption_score=adoption, billing_score=billing,
-            active_users=active_users, trend=trend,
+            workspace_id=workspace_id,
+            score=total,
+            grade=grade,
+            usage_score=usage,
+            adoption_score=adoption,
+            billing_score=billing,
+            active_users=active_users,
+            trend=trend,
         )
 
     def get_history(self, workspace_id: str, days: int = 30) -> List[HealthSnapshot]:

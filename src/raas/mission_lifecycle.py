@@ -4,6 +4,7 @@ Coordinates MissionStore, CreditStore, and WebhookDispatcher to execute the
 full RaaS mission pipeline. Credits are reserved BEFORE execution per global
 RaaS standard (idempotent billing).
 """
+
 from __future__ import annotations
 
 import logging
@@ -163,9 +164,7 @@ class MissionLifecycle:
         record = self._missions.get(mission_id, tenant_id)
         if record is None:
             return None
-        self._missions.update_status(
-            mission_id, MissionStatus.failed, error_msg=reason
-        )
+        self._missions.update_status(mission_id, MissionStatus.failed, error_msg=reason)
         if refund and record.credits_cost > 0:
             self._credits.add(
                 tenant_id=tenant_id,
@@ -247,6 +246,7 @@ class MissionLifecycle:
 # ---------------------------------------------------------------------------
 # Internal helper
 # ---------------------------------------------------------------------------
+
 
 def _auto_detect_complexity(goal: str) -> MissionComplexity:
     length = len(goal)

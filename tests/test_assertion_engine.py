@@ -38,8 +38,10 @@ class TestAssertionDataclass(unittest.TestCase):
 
     def test_custom_severity(self):
         a = Assertion(
-            name="warn", check_fn=lambda r: False,
-            message="warn", severity=AssertionSeverity.WARNING,
+            name="warn",
+            check_fn=lambda r: False,
+            message="warn",
+            severity=AssertionSeverity.WARNING,
         )
         self.assertEqual(a.severity, AssertionSeverity.WARNING)
 
@@ -66,7 +68,13 @@ class TestBuiltinAssertions(unittest.TestCase):
 
     def test_builtins_registered(self):
         names = self.engine.registered_names
-        for expected in ["exit_code_zero", "no_stderr", "output_not_empty", "no_timeout", "no_exception"]:
+        for expected in [
+            "exit_code_zero",
+            "no_stderr",
+            "output_not_empty",
+            "no_timeout",
+            "no_exception",
+        ]:
             self.assertIn(expected, names)
 
     def test_exit_code_zero_passes(self):
@@ -165,6 +173,7 @@ class TestRunAssertions(unittest.TestCase):
     def test_exception_in_check_fn_caught(self):
         def bad_check(r):
             raise ValueError("unexpected")
+
         self.engine.register_assertion(Assertion(name="bad", check_fn=bad_check, message="bad"))
         result = ExecutionResult()
         results = self.engine.run_assertions(result, names=["bad"])
@@ -185,14 +194,19 @@ class TestAllPassed(unittest.TestCase):
         self.assertTrue(self.engine.all_passed(results))
 
     def test_error_failure_blocks(self):
-        a = Assertion(name="err", check_fn=lambda r: False, message="fail",
-                      severity=AssertionSeverity.ERROR)
+        a = Assertion(
+            name="err", check_fn=lambda r: False, message="fail", severity=AssertionSeverity.ERROR
+        )
         results = [AssertionResult(passed=False, assertion=a)]
         self.assertFalse(self.engine.all_passed(results))
 
     def test_warning_failure_does_not_block(self):
-        a = Assertion(name="warn", check_fn=lambda r: False, message="warn",
-                      severity=AssertionSeverity.WARNING)
+        a = Assertion(
+            name="warn",
+            check_fn=lambda r: False,
+            message="warn",
+            severity=AssertionSeverity.WARNING,
+        )
         results = [AssertionResult(passed=False, assertion=a)]
         self.assertTrue(self.engine.all_passed(results))
 

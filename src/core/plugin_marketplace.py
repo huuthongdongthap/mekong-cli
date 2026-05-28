@@ -254,9 +254,7 @@ class MarketplaceClient:
             page=data.get("page", page),
             page_size=data.get("page_size", page_size),
             total_pages=data.get("total_pages", 0),
-            plugins=[
-                MarketplacePlugin.from_dict(p) for p in data.get("plugins", [])
-            ],
+            plugins=[MarketplacePlugin.from_dict(p) for p in data.get("plugins", [])],
         )
 
     def get_plugin(self, name: str) -> MarketplacePlugin:

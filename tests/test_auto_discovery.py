@@ -28,7 +28,7 @@ class TestAutoDiscovery:
 
     def test_discover_nextjs_project(self, tmp_path):
         (tmp_path / "next.config.js").write_text("module.exports = {}")
-        (tmp_path / "package.json").write_text('{}')
+        (tmp_path / "package.json").write_text("{}")
         ad = AutoDiscovery()
         results = ad.discover(str(tmp_path))
         types = [r.project_type for r in results]

@@ -37,9 +37,7 @@ from src.config.logging_config import get_logger
 class SyncConfig:
     """Configuration for billing sync."""
 
-    db_path: str = field(default_factory=lambda: str(
-        Path.home() / ".mekong" / "usage.db"
-    ))
+    db_path: str = field(default_factory=lambda: str(Path.home() / ".mekong" / "usage.db"))
     gateway_url: str = "https://raas.mekongmind.com/v2/usage"
     api_key: Optional[str] = None
     batch_size: int = 100
@@ -99,7 +97,9 @@ class BillingSyncService:
             config: Optional SyncConfig instance
         """
         self.config = config or SyncConfig()
-        self.api_key = self.config.api_key or os.getenv("MEKONG_API_KEY") or os.getenv("RAAS_LICENSE_KEY")
+        self.api_key = (
+            self.config.api_key or os.getenv("MEKONG_API_KEY") or os.getenv("RAAS_LICENSE_KEY")
+        )
         self._conn: Optional[sqlite3.Connection] = None
         self._logger = get_logger(__name__)
 
@@ -203,21 +203,23 @@ class BillingSyncService:
 
         records = []
         for row in rows:
-            records.append(UsageRecord(
-                id=row["id"],
-                event_id=row["event_id"],
-                event_type=row["event_type"],
-                tenant_id=row["tenant_id"],
-                timestamp=row["timestamp"],
-                endpoint=row["endpoint"],
-                model=row["model"],
-                input_tokens=row["input_tokens"] or 0,
-                output_tokens=row["output_tokens"] or 0,
-                duration_ms=row["duration_ms"] or 0.0,
-                metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-                synced=bool(row["synced"]),
-                created_at=row["created_at"],
-            ))
+            records.append(
+                UsageRecord(
+                    id=row["id"],
+                    event_id=row["event_id"],
+                    event_type=row["event_type"],
+                    tenant_id=row["tenant_id"],
+                    timestamp=row["timestamp"],
+                    endpoint=row["endpoint"],
+                    model=row["model"],
+                    input_tokens=row["input_tokens"] or 0,
+                    output_tokens=row["output_tokens"] or 0,
+                    duration_ms=row["duration_ms"] or 0.0,
+                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                    synced=bool(row["synced"]),
+                    created_at=row["created_at"],
+                )
+            )
 
         return records
 
@@ -262,17 +264,19 @@ class BillingSyncService:
         total_duration = 0.0
 
         for record in records:
-            events.append({
-                "event_id": record.event_id,
-                "event_type": record.event_type,
-                "timestamp": record.timestamp,
-                "endpoint": record.endpoint,
-                "model": record.model,
-                "input_tokens": record.input_tokens,
-                "output_tokens": record.output_tokens,
-                "duration_ms": record.duration_ms,
-                "metadata": record.metadata,
-            })
+            events.append(
+                {
+                    "event_id": record.event_id,
+                    "event_type": record.event_type,
+                    "timestamp": record.timestamp,
+                    "endpoint": record.endpoint,
+                    "model": record.model,
+                    "input_tokens": record.input_tokens,
+                    "output_tokens": record.output_tokens,
+                    "duration_ms": record.duration_ms,
+                    "metadata": record.metadata,
+                }
+            )
             total_input += record.input_tokens
             total_output += record.output_tokens
             total_duration += record.duration_ms
@@ -306,10 +310,12 @@ class BillingSyncService:
         Returns:
             Backoff time in seconds
         """
-        backoff = self.config.base_backoff_seconds * (2 ** attempt)
+        backoff = self.config.base_backoff_seconds * (2**attempt)
         return min(backoff, self.config.max_backoff_seconds)
 
-    def send_to_gateway(self, payload: dict[str, Any], idempotency_key: str) -> tuple[bool, Optional[dict], Optional[str]]:
+    def send_to_gateway(
+        self, payload: dict[str, Any], idempotency_key: str
+    ) -> tuple[bool, Optional[dict], Optional[str]]:
         """
         Send payload to RaaS Gateway with retry logic.
 
@@ -359,8 +365,12 @@ class BillingSyncService:
                             )
                             return True, response_data, None
                         else:
-                            last_error = f"Unexpected response status: {response_data.get('status')}"
-                            self._logger.warning("billing_sync.unexpected_status", status=response_data.get("status"))
+                            last_error = (
+                                f"Unexpected response status: {response_data.get('status')}"
+                            )
+                            self._logger.warning(
+                                "billing_sync.unexpected_status", status=response_data.get("status")
+                            )
 
                     # Handle HTTP errors
                     if response.status_code >= 500:
@@ -512,17 +522,20 @@ class BillingSyncService:
             error: Error message if failed
         """
         conn = self._get_connection()
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO sync_history (idempotency_key, records_count, payload_size, status, gateway_response, error)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            idempotency_key,
-            records_count,
-            payload_size,
-            status,
-            json.dumps(gateway_response) if gateway_response else None,
-            error,
-        ))
+        """,
+            (
+                idempotency_key,
+                records_count,
+                payload_size,
+                status,
+                json.dumps(gateway_response) if gateway_response else None,
+                error,
+            ),
+        )
         conn.commit()
 
     def sync_to_gateway(self, limit: Optional[int] = None) -> SyncResult:

@@ -54,15 +54,17 @@ def generate_mock_events(start: datetime, num_events: int = 100) -> list[ExportE
             minutes=random.randint(0, 59),
         )
 
-        events.append({
-            "event_id": f"evt_{i:06d}",
-            "event_type": random.choice(event_types),
-            "timestamp": event_time.isoformat() + "Z",
-            "input_tokens": random.randint(100, 2000),
-            "output_tokens": random.randint(50, 1500),
-            "duration_ms": random.randint(50, 5000),
-            "endpoint": random.choice(endpoints),
-        })
+        events.append(
+            {
+                "event_id": f"evt_{i:06d}",
+                "event_type": random.choice(event_types),
+                "timestamp": event_time.isoformat() + "Z",
+                "input_tokens": random.randint(100, 2000),
+                "output_tokens": random.randint(50, 1500),
+                "duration_ms": random.randint(50, 5000),
+                "endpoint": random.choice(endpoints),
+            }
+        )
 
     return events
 

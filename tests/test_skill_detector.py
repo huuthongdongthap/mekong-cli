@@ -36,9 +36,7 @@ class TestSkillDetector:
         names = [s.name for s in skills]
         assert "python" in names
 
-    def test_detect_returns_sorted_by_confidence(
-        self, py_workspace: SkillDetector
-    ) -> None:
+    def test_detect_returns_sorted_by_confidence(self, py_workspace: SkillDetector) -> None:
         """Skills are sorted by confidence descending."""
         skills = py_workspace.detect()
         if len(skills) > 1:
@@ -49,25 +47,19 @@ class TestSkillDetector:
         """inject_context returns empty string for empty workspace."""
         assert detector.inject_context() == ""
 
-    def test_inject_context_with_skills(
-        self, py_workspace: SkillDetector
-    ) -> None:
+    def test_inject_context_with_skills(self, py_workspace: SkillDetector) -> None:
         """inject_context includes detected skill names."""
         ctx = py_workspace.inject_context()
         assert "python" in ctx
         assert "Detected Skills" in ctx
 
-    def test_cache_returns_same_results(
-        self, py_workspace: SkillDetector
-    ) -> None:
+    def test_cache_returns_same_results(self, py_workspace: SkillDetector) -> None:
         """Second call returns cached results."""
         first = py_workspace.detect()
         second = py_workspace.detect()
         assert first is second  # Same object = cached
 
-    def test_force_refresh_bypasses_cache(
-        self, py_workspace: SkillDetector
-    ) -> None:
+    def test_force_refresh_bypasses_cache(self, py_workspace: SkillDetector) -> None:
         """force=True bypasses the cache."""
         first = py_workspace.detect()
         refreshed = py_workspace.detect(force=True)

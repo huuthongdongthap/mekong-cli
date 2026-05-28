@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # ── Data Models ──────────────────────────────────────────────────────
 
+
 @dataclass
 class EarningsCalendar:
     quarter: str
@@ -65,11 +66,31 @@ class PublicCoPackage:
 # (event_type, description, filing_required) — all deadline_days=4 (SEC 8-K rule)
 _MATERIAL_EVENT_DATA = (
     ("Major Acquisition", "Acquisition/disposition >10% total assets", "8-K Item 1.01/2.01"),
-    ("CEO / CFO Departure", "Principal officer departure, appointment, or pay change", "8-K Item 5.02"),
-    ("Cybersecurity Incident", "Material breach per SEC Rule 13a-15 (eff. Dec 2023)", "8-K Item 1.05"),
-    ("Bankruptcy / Receivership", "Filing for or material risk of bankruptcy/insolvency", "8-K Item 1.03"),
-    ("Amendment to Articles / Bylaws", "Change to certificate of incorporation or bylaws", "8-K Item 5.03"),
-    ("New Material Definitive Agreement", "Entry into or termination of material agreement", "8-K Item 1.01"),
+    (
+        "CEO / CFO Departure",
+        "Principal officer departure, appointment, or pay change",
+        "8-K Item 5.02",
+    ),
+    (
+        "Cybersecurity Incident",
+        "Material breach per SEC Rule 13a-15 (eff. Dec 2023)",
+        "8-K Item 1.05",
+    ),
+    (
+        "Bankruptcy / Receivership",
+        "Filing for or material risk of bankruptcy/insolvency",
+        "8-K Item 1.03",
+    ),
+    (
+        "Amendment to Articles / Bylaws",
+        "Change to certificate of incorporation or bylaws",
+        "8-K Item 5.03",
+    ),
+    (
+        "New Material Definitive Agreement",
+        "Entry into or termination of material agreement",
+        "8-K Item 1.01",
+    ),
     ("Unregistered Equity Sale", "Private placement or unregistered equity sale", "8-K Item 3.02"),
     ("Financial Restatement", "Prior financials should no longer be relied upon", "8-K Item 4.02"),
 )
@@ -100,6 +121,7 @@ EARNINGS_CALL_STRUCTURE: dict = {
 
 # ── Core Functions ────────────────────────────────────────────────────
 
+
 def build_earnings_calendar(fiscal_year_start_month: int) -> list[EarningsCalendar]:
     """Generate Q1-Q4 earnings filing calendar. 10-K: 60d; 10-Q: 45d (large accelerated)."""
     year = date.today().year
@@ -107,15 +129,20 @@ def build_earnings_calendar(fiscal_year_start_month: int) -> list[EarningsCalend
     for q in range(1, 5):
         qe_month = (fiscal_year_start_month - 1 + q * 3) % 12 or 12
         qe_year = year if qe_month >= fiscal_year_start_month else year + 1
-        qe = (date(qe_year, 12, 31) if qe_month == 12
-              else date(qe_year, qe_month + 1, 1) - timedelta(days=1))
+        qe = (
+            date(qe_year, 12, 31)
+            if qe_month == 12
+            else date(qe_year, qe_month + 1, 1) - timedelta(days=1)
+        )
         earnings_dt = qe + timedelta(days=30)
-        calendar.append(EarningsCalendar(
-            quarter=f"Q{q}",
-            earnings_date=earnings_dt.isoformat(),
-            filing_deadline=(qe + timedelta(days=60 if q == 4 else 45)).isoformat(),
-            quiet_period_start=(earnings_dt - timedelta(days=14)).isoformat(),
-        ))
+        calendar.append(
+            EarningsCalendar(
+                quarter=f"Q{q}",
+                earnings_date=earnings_dt.isoformat(),
+                filing_deadline=(qe + timedelta(days=60 if q == 4 else 45)).isoformat(),
+                quiet_period_start=(earnings_dt - timedelta(days=14)).isoformat(),
+            )
+        )
     return calendar
 
 
@@ -138,22 +165,38 @@ def calculate_guidance(
     mid = base * 0.95
     growth_pct = round(((mid / current_revenue) ** 4 - 1) * 100, 2) if current_revenue > 0 else 0.0
     return GuidanceModel(
-        revenue_low=round(mid * 0.97, 2), revenue_high=round(mid * 1.03, 2),
-        growth_pct=growth_pct, confidence_level=0.92,
+        revenue_low=round(mid * 0.97, 2),
+        revenue_high=round(mid * 1.03, 2),
+        growth_pct=growth_pct,
+        confidence_level=0.92,
     )
 
 
 def build_quarterly_report(
-    quarter: str, revenue: float, arr: float, gm_pct: float, nrr_pct: float,
-    customers: int, fcf: float, prev_guidance_mid: float,
+    quarter: str,
+    revenue: float,
+    arr: float,
+    gm_pct: float,
+    nrr_pct: float,
+    customers: int,
+    fcf: float,
+    prev_guidance_mid: float,
 ) -> QuarterlyMetrics:
     """Build quarterly metrics with guidance beat/miss pct."""
-    beat = (round(((revenue - prev_guidance_mid) / prev_guidance_mid) * 100, 2)
-            if prev_guidance_mid > 0 else 0.0)
+    beat = (
+        round(((revenue - prev_guidance_mid) / prev_guidance_mid) * 100, 2)
+        if prev_guidance_mid > 0
+        else 0.0
+    )
     return QuarterlyMetrics(
-        quarter=quarter, revenue=round(revenue, 2), arr=round(arr, 2),
-        gross_margin_pct=round(gm_pct, 2), nrr_pct=round(nrr_pct, 2),
-        customers=customers, fcf=round(fcf, 2), guidance_beat_pct=beat,
+        quarter=quarter,
+        revenue=round(revenue, 2),
+        arr=round(arr, 2),
+        gross_margin_pct=round(gm_pct, 2),
+        nrr_pct=round(nrr_pct, 2),
+        customers=customers,
+        fcf=round(fcf, 2),
+        guidance_beat_pct=beat,
     )
 
 
@@ -163,24 +206,40 @@ def get_material_events() -> list[MaterialEvent]:
 
 
 def build_public_co_package(
-    fiscal_year_start: int, quarter: str, revenue: float, arr: float,
-    gm_pct: float, nrr_pct: float, customers: int, fcf: float,
+    fiscal_year_start: int,
+    quarter: str,
+    revenue: float,
+    arr: float,
+    gm_pct: float,
+    nrr_pct: float,
+    customers: int,
+    fcf: float,
 ) -> PublicCoPackage:
     """Build complete public company operations package for current quarter."""
     return PublicCoPackage(
         earnings_calendar=build_earnings_calendar(fiscal_year_start),
         current_metrics=build_quarterly_report(
-            quarter=quarter, revenue=revenue, arr=arr, gm_pct=gm_pct,
-            nrr_pct=nrr_pct, customers=customers, fcf=fcf, prev_guidance_mid=0.0,
+            quarter=quarter,
+            revenue=revenue,
+            arr=arr,
+            gm_pct=gm_pct,
+            nrr_pct=nrr_pct,
+            customers=customers,
+            fcf=fcf,
+            prev_guidance_mid=0.0,
         ),
         guidance=calculate_guidance(
-            current_revenue=revenue, growth_rate=0.25, churn_rate=0.08, signed_contracts=0.0,
+            current_revenue=revenue,
+            growth_rate=0.25,
+            churn_rate=0.08,
+            signed_contracts=0.0,
         ),
         material_events=get_material_events(),
     )
 
 
 # ── Save Functions ────────────────────────────────────────────────────
+
 
 def save_public_co(output_dir: str, package: PublicCoPackage) -> list[str]:
     """Persist public company package to .mekong/ipo/. Returns saved paths."""

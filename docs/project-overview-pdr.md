@@ -1,8 +1,8 @@
-# Mekong CLI v5.0.0 — Project Overview & PDR
+# Mekong CLI v6.0.0 — Project Overview & PDR
 
-**Version:** 5.0.0 (Open Source)
+**Version:** 6.0.0 (Open Source)
 **Status:** Production | Public MIT License
-**Updated:** 2026-03-23
+**Updated:** 2026-04-26
 **Target:** Python 3.9+, TypeScript 18+, Cloudflare Workers
 **Repository:** https://github.com/longtho638-jpg/mekong-cli
 
@@ -97,8 +97,8 @@ Pluggable agents (Git, File, Shell) + community extensions via PyPI entry points
 
 ### Company Templates (Clipmart)
 Pre-built Paperclip AI company templates for different team structures:
-- **mekong-saas-startup** — 22-agent full organization (founders, executives, 5 teams)
-- **mekong-dev-shop** — 8-agent engineering-focused agency
+- **mekong-saas-startup** — 22-agent full organization (solo founder with 5 departments)
+- **mekong-dev-shop** — 8-agent engineering-focused solo operation
 - **mekong-solo-founder** — 5-agent lean starter template
 Each includes agent definitions, escalation matrices, Binh Pháp governance, and 300+ operational skills.
 

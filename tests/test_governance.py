@@ -42,9 +42,7 @@ class TestGovernanceDecision(unittest.TestCase):
 
     def test_fields(self):
         """GovernanceDecision should have expected fields."""
-        d = GovernanceDecision(
-            action_class=ActionClass.SAFE, reason="ok"
-        )
+        d = GovernanceDecision(action_class=ActionClass.SAFE, reason="ok")
         self.assertEqual(d.action_class, ActionClass.SAFE)
         self.assertEqual(d.reason, "ok")
         self.assertFalse(d.requires_approval)
@@ -159,9 +157,7 @@ class TestAuditTrail(unittest.TestCase):
     """Tests for audit trail persistence."""
 
     def setUp(self):
-        self.tmpfile = tempfile.NamedTemporaryFile(
-            suffix=".yaml", delete=False
-        )
+        self.tmpfile = tempfile.NamedTemporaryFile(suffix=".yaml", delete=False)
         self.tmpfile.close()
         self.gov = Governance(audit_path=self.tmpfile.name)
 
@@ -189,26 +185,20 @@ class TestAuditTrail(unittest.TestCase):
     def test_fifo_eviction(self):
         """Audit trail should evict old entries past MAX_AUDIT."""
         for i in range(Governance.MAX_AUDIT + 5):
-            self.gov.record_audit(
-                AuditEntry(goal=f"goal-{i}", action_class="safe", result="ok")
-            )
+            self.gov.record_audit(AuditEntry(goal=f"goal-{i}", action_class="safe", result="ok"))
         trail = self.gov.get_audit_trail(limit=Governance.MAX_AUDIT + 10)
         self.assertLessEqual(len(trail), Governance.MAX_AUDIT)
 
     def test_get_audit_trail_limit(self):
         """get_audit_trail should respect limit parameter."""
         for i in range(10):
-            self.gov.record_audit(
-                AuditEntry(goal=f"g-{i}", action_class="safe", result="ok")
-            )
+            self.gov.record_audit(AuditEntry(goal=f"g-{i}", action_class="safe", result="ok"))
         trail = self.gov.get_audit_trail(limit=3)
         self.assertEqual(len(trail), 3)
 
     def test_request_approval_returns_true(self):
         """request_approval placeholder should return True."""
-        d = GovernanceDecision(
-            action_class=ActionClass.REVIEW_REQUIRED, reason="test"
-        )
+        d = GovernanceDecision(action_class=ActionClass.REVIEW_REQUIRED, reason="test")
         result = self.gov.request_approval("deploy prod", d)
         self.assertTrue(result)
 

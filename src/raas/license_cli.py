@@ -6,6 +6,7 @@ Commands:
 - mekong license generate — Generate new license key
 - mekong license validate — Validate a license key
 """
+
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -41,6 +42,7 @@ def _generate_key(tier: LicenseTier, tenant_id: str = None) -> str:
     # Generate HMAC (using secret from env)
     # SECURITY: No default secret - must be set explicitly
     import os
+
     secret = os.getenv("RAAS_KEY_SECRET")
     if not secret:
         raise ValueError(
@@ -63,11 +65,7 @@ def check_license():
     table.add_column("Property", style="cyan")
     table.add_column("Value", style="green")
 
-    tier_display = {
-        'free': '🔓 FREE',
-        'pro': '💎 PRO',
-        'enterprise': '🏢 ENTERPRISE'
-    }
+    tier_display = {"free": "🔓 FREE", "pro": "💎 PRO", "enterprise": "🏢 ENTERPRISE"}
 
     table.add_row("Tier", tier_display.get(validation.tier, validation.tier.upper()))
     table.add_row("Valid", "✅ Yes" if validation.valid else "❌ No")
@@ -97,26 +95,14 @@ def check_license():
 
 @app.command("generate")
 def generate_license(
-    tier: str = typer.Option(
-        "pro",
-        "--tier", "-t",
-        help="License tier: pro or enterprise"
-    ),
-    tenant_id: str = typer.Option(
-        None,
-        "--tenant",
-        help="Tenant ID to embed in license"
-    ),
-    quantity: int = typer.Option(
-        1,
-        "--quantity", "-q",
-        help="Number of keys to generate"
-    )
+    tier: str = typer.Option("pro", "--tier", "-t", help="License tier: pro or enterprise"),
+    tenant_id: str = typer.Option(None, "--tenant", help="Tenant ID to embed in license"),
+    quantity: int = typer.Option(1, "--quantity", "-q", help="Number of keys to generate"),
 ):
     """Generate new license key(s)."""
     # Validate tier
     tier_lower = tier.lower()
-    if tier_lower not in ('pro', 'enterprise'):
+    if tier_lower not in ("pro", "enterprise"):
         console.print(f"[red]Error:[/red] Invalid tier '{tier}'. Must be 'pro' or 'enterprise'.")
         raise typer.Exit(1)
 
@@ -144,21 +130,15 @@ def generate_license(
 
 @app.command("validate")
 def validate_license(
-    key: str = typer.Argument(
-        None,
-        help="License key to validate"
-    ),
-    from_env: bool = typer.Option(
-        True,
-        "--env", "-e",
-        help="Read from RAAS_LICENSE_KEY env var"
-    )
+    key: str = typer.Argument(None, help="License key to validate"),
+    from_env: bool = typer.Option(True, "--env", "-e", help="Read from RAAS_LICENSE_KEY env var"),
 ):
     """Validate a license key."""
     service = LicenseService.getInstance()
 
     if from_env or not key:
         import os
+
         key = os.getenv("RAAS_LICENSE_KEY", "")
         if not key:
             console.print("[red]Error:[/red] No license key provided and RAAS_LICENSE_KEY not set.")
@@ -184,12 +164,10 @@ def list_features():
     console.print("\n[bold]📦 RaaS Premium Features[/bold]\n")
 
     for tier_name, features in PREMIUM_FEATURES.items():
-        tier_display = {
-            'free': '🔓 FREE',
-            'pro': '💎 PRO',
-            'enterprise': '🏢 ENTERPRISE'
-        }
-        console.print(f"[bold]{tier_display.get(tier_name, tier_name.upper())}[/bold] ({len(features)} features)")
+        tier_display = {"free": "🔓 FREE", "pro": "💎 PRO", "enterprise": "🏢 ENTERPRISE"}
+        console.print(
+            f"[bold]{tier_display.get(tier_name, tier_name.upper())}[/bold] ({len(features)} features)"
+        )
         for feature in features:
             console.print(f"  • {feature}")
         console.print()

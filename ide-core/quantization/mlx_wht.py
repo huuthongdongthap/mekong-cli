@@ -114,7 +114,9 @@ def apply_rotation(x: mx.array, signs1: mx.array, signs2: mx.array, padded_d: in
     return result[0] if single else result
 
 
-def apply_rotation_transpose(y: mx.array, signs1: mx.array, signs2: mx.array, padded_d: int) -> mx.array:
+def apply_rotation_transpose(
+    y: mx.array, signs1: mx.array, signs2: mx.array, padded_d: int
+) -> mx.array:
     """Apply transpose of structured rotation: D1 @ H @ D2 @ y.
 
     H and D are symmetric/self-inverse, so transpose reverses the order.

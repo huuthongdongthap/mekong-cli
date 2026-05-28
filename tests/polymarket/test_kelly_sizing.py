@@ -1,6 +1,5 @@
 """Tests for Kelly position sizer — half-Kelly, caps, edge cases."""
 
-
 from src.polymarket.kelly_position_sizer import KellyPositionSizer, SizerConfig
 from src.polymarket.types import Prediction
 
@@ -50,10 +49,14 @@ class TestHalfKellyCalculation:
     def test_negative_edge_returns_zero(self) -> None:
         """When predicted < market, edge is negative → no bet."""
         pred = Prediction(
-            market_id="m1", question="Test",
-            predicted_probability=0.40, market_price=0.55,
-            edge=-0.15, confidence=0.5,
-            model_used="test", ensemble_agreement=0.5,
+            market_id="m1",
+            question="Test",
+            predicted_probability=0.40,
+            market_price=0.55,
+            edge=-0.15,
+            confidence=0.5,
+            model_used="test",
+            ensemble_agreement=0.5,
         )
         sizer = KellyPositionSizer()
         assert sizer.calculate_kelly(pred) == 0.0

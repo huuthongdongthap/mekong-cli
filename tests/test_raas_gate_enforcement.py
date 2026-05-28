@@ -1,4 +1,5 @@
 """Tests for RaaS Gate Enforcement Layer — ROIaaS Phase 6 integration."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -10,7 +11,6 @@ from src.lib.quota_error_messages import QuotaErrorContext, format_quota_error
 from src.lib.license_generator import get_tier_limits as get_license_tier_limits
 from src.raas.violation_tracker import ViolationEvent
 from src.lib.usage_meter import UsageMeter
-
 
 # ---------------------------------------------------------------------------
 
@@ -363,9 +363,7 @@ async def test_usage_meter_quota_exceeded(mock_usage_meter: UsageMeter) -> None:
     # Return current usage at limit
     with patch("src.lib.usage_meter.get_tier_limits") as mock_limits:
         mock_limits.return_value = {"commands_per_day": 10}
-        mock_usage_meter._repo.get_usage = AsyncMock(
-            return_value={"commands_count": 10}
-        )
+        mock_usage_meter._repo.get_usage = AsyncMock(return_value={"commands_count": 10})
 
         allowed, error = await mock_usage_meter.record_usage("key-exceeded", "free")
 
@@ -376,15 +374,19 @@ async def test_usage_meter_quota_exceeded(mock_usage_meter: UsageMeter) -> None:
 async def test_usage_meter_get_usage_summary(mock_usage_meter: UsageMeter) -> None:
     """Test get_usage_summary method."""
     # Mock tier and license lookup
-    with patch("src.lib.usage_meter.get_tier_limits") as mock_limits, \
-         patch.object(mock_usage_meter._repo, "get_license_by_key_id", new_callable=AsyncMock) as mock_license, \
-         patch.object(mock_usage_meter._repo, "get_usage_summary", new_callable=AsyncMock) as mock_summary:
+    with (
+        patch("src.lib.usage_meter.get_tier_limits") as mock_limits,
+        patch.object(
+            mock_usage_meter._repo, "get_license_by_key_id", new_callable=AsyncMock
+        ) as mock_license,
+        patch.object(
+            mock_usage_meter._repo, "get_usage_summary", new_callable=AsyncMock
+        ) as mock_summary,
+    ):
 
         mock_limits.return_value = {"commands_per_day": 100}
         mock_license.return_value = {"tier": "pro"}
-        mock_usage_meter._repo.get_usage = AsyncMock(
-            return_value={"commands_count": 50}
-        )
+        mock_usage_meter._repo.get_usage = AsyncMock(return_value={"commands_count": 50})
         mock_summary.return_value = {
             "days_with_usage": 1,
             "total_commands": 100,

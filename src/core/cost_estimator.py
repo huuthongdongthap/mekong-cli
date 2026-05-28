@@ -68,10 +68,7 @@ def estimate_cost(profile: TaskProfile, model_id: str) -> CostEstimate:
     else:
         cost_in, cost_out = COST_TABLE.get(model_id, (0.0, 0.0))
 
-    usd_llm = (
-        tokens["input"] / 1_000_000 * cost_in
-        + tokens["output"] / 1_000_000 * cost_out
-    )
+    usd_llm = tokens["input"] / 1_000_000 * cost_in + tokens["output"] / 1_000_000 * cost_out
 
     # Revenue from MCU
     revenue = MCU_REVENUE_TABLE.get(profile.mcu_cost, 0.049)

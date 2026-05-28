@@ -94,6 +94,7 @@ class TestShellAgent(unittest.TestCase):
     def test_empty_command(self):
         """Empty command should fail gracefully."""
         from src.core.agent_base import Task
+
         task = Task(id="shell_run", description="Empty", input={"command": ""})
         result = self.agent.execute(task)
         self.assertFalse(result.success)

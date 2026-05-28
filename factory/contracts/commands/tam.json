@@ -4,21 +4,19 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
-    "name_vi": "Tam",
     "name_en": "Tam",
     "icon": "",
-    "description_vi": "Execute Tam command",
-    "description_en": "Execute Tam command"
+    "description_en": "Total Addressable Market analysis — market sizing and segmentation"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "researcher",
+      "strategist"
     ],
-    "hub": "founder-hub",
+    "hub": "business-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 3,
+    "credit_cost": 2,
     "requires_approval": false
   },
   "input": {
@@ -28,29 +26,47 @@
     ],
     "properties": {
       "goal": {
-        "type": "string",
-        "description": "Natural language task description"
+        "type": "string"
       },
-      "project": {
-        "type": "string",
-        "description": "Target project path"
+      "market": {
+        "type": "string"
+      },
+      "geography": {
+        "type": "string"
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "summary": {
-        "type": "string"
+      "tam": {
+        "type": "number"
       },
-      "files_modified": {
+      "sam": {
+        "type": "number"
+      },
+      "som": {
+        "type": "number"
+      },
+      "growth_rate": {
+        "type": "number"
+      },
+      "segments": {
         "type": "array",
         "items": {
-          "type": "string"
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "size": {
+              "type": "number"
+            },
+            "growth": {
+              "type": "number"
+            }
+          }
         }
-      },
-      "credits_used": {
-        "type": "integer"
       }
     }
   },

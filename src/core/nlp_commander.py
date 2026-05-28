@@ -218,10 +218,7 @@ class NLPCommander:
             # Validate project name
             if task.project and task.project not in KNOWN_PROJECTS:
                 for p in KNOWN_PROJECTS:
-                    if (
-                        task.project.lower() in p.lower()
-                        or p.lower() in task.project.lower()
-                    ):
+                    if task.project.lower() in p.lower() or p.lower() in task.project.lower():
                         task.project = p
                         break
 
@@ -231,7 +228,8 @@ class NLPCommander:
         except Exception as e:
             logger.exception(f"NLP parse error: {e}")
             return self._fallback_parse(
-                message, error_detail=f"exception: {str(e)[:80]}",
+                message,
+                error_detail=f"exception: {str(e)[:80]}",
             )
 
     def _fallback_parse(self, message: str, error_detail: str = "") -> StructuredTask:
@@ -241,11 +239,7 @@ class NLPCommander:
         # Detect Project
         project = None
         for p in KNOWN_PROJECTS:
-            if (
-                p in msg_lower
-                or p.replace("-", "") in msg_lower
-                or p.split("-")[0] in msg_lower
-            ):
+            if p in msg_lower or p.replace("-", "") in msg_lower or p.split("-")[0] in msg_lower:
                 project = p
                 break
         if not project and "agency" in msg_lower:
@@ -265,9 +259,7 @@ class NLPCommander:
         elif any(w in msg_lower for w in ["fix", "sửa", "bug", "lỗi", "debug"]):
             intent = "fix"
             claudekit_commands = ["/debug"]
-        elif any(
-            w in msg_lower for w in ["review", "kiểm tra", "đánh giá", "xem giúp"]
-        ):
+        elif any(w in msg_lower for w in ["review", "kiểm tra", "đánh giá", "xem giúp"]):
             intent = "review"
             claudekit_commands = ["/review"]
         elif any(w in msg_lower for w in ["test", "kiểm thử"]):
@@ -313,9 +305,7 @@ class NLPCommander:
         }
         icon = intent_icons.get(task.intent, "🦞")
         project_str = f"\n📂 Project: `{task.project}`" if task.project else ""
-        commands_str = (
-            " → ".join(task.claudekit_commands) if task.claudekit_commands else ""
-        )
+        commands_str = " → ".join(task.claudekit_commands) if task.claudekit_commands else ""
 
         return (
             f"🧠 *Tôm Hùm hiểu:*\n\n"

@@ -25,6 +25,7 @@ import requests
 @dataclass
 class ReleaseInfo:
     """GitHub release information."""
+
     version: str
     tag_name: str
     name: str
@@ -39,6 +40,7 @@ class ReleaseInfo:
 @dataclass
 class UpdateResult:
     """Result of update operation."""
+
     success: bool
     old_version: str
     new_version: str
@@ -55,10 +57,12 @@ class GitHubReleaseFetcher:
 
     def __init__(self, github_token: Optional[str] = None):
         self.session = requests.Session()
-        self.session.headers.update({
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "mekong-cli-updater",
-        })
+        self.session.headers.update(
+            {
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "mekong-cli-updater",
+            }
+        )
         if github_token:
             self.session.headers["Authorization"] = f"token {github_token}"
 
@@ -170,6 +174,7 @@ xsBNBF... (truncated - would be actual key in production)
         """Import Mekong CLI public key."""
         try:
             import gnupg
+
             self.gpg = gnupg.GPG(gnupghome=self.gnupghome)
             self.gpg.import_keys(self.GPG_PUBLIC_KEY)
         except ImportError:
@@ -349,7 +354,7 @@ class UsageMeteringLogger:
     def __init__(self):
         self.endpoint = os.getenv(
             "RAAS_USAGE_ENDPOINT",
-            "https://api.agencyos.network/api/usage",
+            "https://api.cashclaw.cc/api/usage",
         )
         self.api_key = os.getenv("RAAS_API_KEY")
 
@@ -394,6 +399,7 @@ class AutoUpdater:
         """Get current CLI version."""
         try:
             from importlib.metadata import version
+
             return version("mekong-cli")
         except Exception:
             return "0.2.0-dev"

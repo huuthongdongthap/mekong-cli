@@ -16,7 +16,9 @@ def run(
     platform: str = typer.Argument(..., help="Platform to deploy to: cloudflare, docker, custom"),
     build_first: bool = typer.Option(True, "--build", help="Build before deploying"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Simulate deployment without executing"),
-    env: str = typer.Option("production", "--env", "-e", help="Environment: production, staging, development"),
+    env: str = typer.Option(
+        "production", "--env", "-e", help="Environment: production, staging, development"
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
 ):
     """Deploy application to specified platform"""
@@ -48,11 +50,12 @@ def deploy_cloudflare(env: str, verbose: bool) -> None:
     """Deploy to Cloudflare (Pages + Workers)."""
     try:
         result = subprocess.run(
-            ["wrangler", "--version"],
-            capture_output=True, text=True, check=False
+            ["wrangler", "--version"], capture_output=True, text=True, check=False
         )
         if result.returncode != 0:
-            console.print("[red]wrangler CLI not found. Install with: npm install -g wrangler[/red]")
+            console.print(
+                "[red]wrangler CLI not found. Install with: npm install -g wrangler[/red]"
+            )
             raise typer.Exit(code=1)
 
         cmd = ["wrangler", "deploy"]
@@ -63,7 +66,9 @@ def deploy_cloudflare(env: str, verbose: bool) -> None:
             cmd.append("--log-level=debug")
 
         console.print(f"[blue]Deploying to Cloudflare ({env})...[/blue]")
-        result = subprocess.run(cmd, cwd=Path.cwd(), check=True, capture_output=not verbose, text=True)
+        result = subprocess.run(
+            cmd, cwd=Path.cwd(), check=True, capture_output=not verbose, text=True
+        )
 
         if result.stdout:
             console.print(Panel(result.stdout, title="Wrangler Output"))
@@ -83,8 +88,7 @@ def deploy_docker(env: str, verbose: bool):
     try:
         # Check if Docker is available
         result = subprocess.run(
-            ["docker", "--version"],
-            capture_output=True, text=True, check=False
+            ["docker", "--version"], capture_output=True, text=True, check=False
         )
         if result.returncode != 0:
             console.print("[red]❌ Docker not found. Please install Docker.[/red]")
@@ -124,6 +128,7 @@ def deploy_to_kubernetes(image_tag: str, verbose: bool):
     if not kubectl_path.exists():
         # Look for kubectl in PATH
         import shutil
+
         if not shutil.which("kubectl"):
             console.print("[yellow]⚠️  kubectl not found, skipping Kubernetes deployment[/yellow]")
             return
@@ -132,9 +137,19 @@ def deploy_to_kubernetes(image_tag: str, verbose: bool):
     deployment_name = os.environ.get("K8S_DEPLOYMENT_NAME", "mekong-cli")
     namespace = os.environ.get("K8S_NAMESPACE", "default")
 
-    cmd = ["kubectl", "set", "image", f"deployment/{deployment_name}", f"app={image_tag}", "-n", namespace]
+    cmd = [
+        "kubectl",
+        "set",
+        "image",
+        f"deployment/{deployment_name}",
+        f"app={image_tag}",
+        "-n",
+        namespace,
+    ]
 
-    console.print(f"[blue]☸️  Updating Kubernetes deployment ({namespace}/{deployment_name})[/blue]")
+    console.print(
+        f"[blue]☸️  Updating Kubernetes deployment ({namespace}/{deployment_name})[/blue]"
+    )
     result = subprocess.run(cmd, cwd=Path.cwd(), check=True, capture_output=not verbose, text=True)
 
     if result.stdout:
@@ -149,13 +164,17 @@ def deploy_custom(env: str, verbose: bool):
 
     if not Path(deploy_script).exists():
         console.print(f"[red]❌ Custom deployment script not found: {deploy_script}[/red]")
-        console.print("[dim]Set CUSTOM_DEPLOY_SCRIPT environment variable or create ./deploy.sh[/dim]")
+        console.print(
+            "[dim]Set CUSTOM_DEPLOY_SCRIPT environment variable or create ./deploy.sh[/dim]"
+        )
         return
 
     try:
         cmd = ["bash", deploy_script, env]
         console.print(f"[blue]🔧 Running custom deployment: {deploy_script}[/blue]")
-        result = subprocess.run(cmd, cwd=Path.cwd(), check=True, capture_output=not verbose, text=True)
+        result = subprocess.run(
+            cmd, cwd=Path.cwd(), check=True, capture_output=not verbose, text=True
+        )
 
         if result.stdout:
             console.print(Panel(result.stdout, title="Deployment Output"))
@@ -188,8 +207,7 @@ def check_cloudflare_status() -> None:
     """Check Cloudflare Workers/Pages deployment status."""
     try:
         result = subprocess.run(
-            ["wrangler", "deployments", "list"],
-            capture_output=True, text=True, check=False
+            ["wrangler", "deployments", "list"], capture_output=True, text=True, check=False
         )
 
         if result.returncode == 0:
@@ -207,21 +225,19 @@ def check_docker_status():
     """Check Docker deployment status"""
     try:
         # Check if Docker daemon is running
-        result = subprocess.run(
-            ["docker", "info"],
-            capture_output=True, text=True, check=False
-        )
+        result = subprocess.run(["docker", "info"], capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
-            console.print(Panel("Docker daemon is running", title="Docker Status", border_style="green"))
+            console.print(
+                Panel("Docker daemon is running", title="Docker Status", border_style="green")
+            )
         else:
-            console.print(Panel("Docker daemon is not running", title="Docker Status", border_style="red"))
+            console.print(
+                Panel("Docker daemon is not running", title="Docker Status", border_style="red")
+            )
 
         # Check running containers
-        result = subprocess.run(
-            ["docker", "ps"],
-            capture_output=True, text=True, check=False
-        )
+        result = subprocess.run(["docker", "ps"], capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
             console.print(Panel(result.stdout, title="Running Containers"))

@@ -155,10 +155,7 @@ class ProrationCalculator:
         original_portion = Decimal(days_elapsed) / Decimal(days_in_period)
         new_portion = Decimal(days_remaining) / Decimal(days_in_period)
 
-        prorated_base_fee = (
-            original_base_fee * original_portion +
-            new_base_fee * new_portion
-        )
+        prorated_base_fee = original_base_fee * original_portion + new_base_fee * new_portion
 
         # Calculate prorated included quantities
         prorated_included = {}
@@ -168,10 +165,7 @@ class ProrationCalculator:
             orig_qty = original_included.get(event_type, Decimal(0))
             new_qty = new_included.get(event_type, Decimal(0))
 
-            prorated_qty = (
-                orig_qty * original_portion +
-                new_qty * new_portion
-            )
+            prorated_qty = orig_qty * original_portion + new_qty * new_portion
             prorated_included[event_type] = prorated_qty
 
         return ProrationResult(
@@ -233,19 +227,21 @@ class ProrationCalculator:
             charge = overage_qty * overage_rate
             total_overage += charge
 
-            calculations.append(OverageCalculation(
-                event_type=event_type,
-                model_name=model_name,
-                total_usage=used,
-                included_quantity=included,
-                overage_quantity=overage_qty,
-                unit_price=unit_price,
-                overage_rate=overage_rate,
-                charge=round(charge, 4),
-                metadata={
-                    "overage_percentage": float((overage_qty / used * 100) if used > 0 else 0),
-                },
-            ))
+            calculations.append(
+                OverageCalculation(
+                    event_type=event_type,
+                    model_name=model_name,
+                    total_usage=used,
+                    included_quantity=included,
+                    overage_quantity=overage_qty,
+                    unit_price=unit_price,
+                    overage_rate=overage_rate,
+                    charge=round(charge, 4),
+                    metadata={
+                        "overage_percentage": float((overage_qty / used * 100) if used > 0 else 0),
+                    },
+                )
+            )
 
         return total_overage, calculations
 
@@ -351,7 +347,9 @@ class ProrationCalculator:
             credit = Decimal(0)
             reason = "No credit due (new plan exceeds unused original)"
         else:
-            reason = f"Credit for {days_remaining} days remaining at {new_fee - original_fee} difference"
+            reason = (
+                f"Credit for {days_remaining} days remaining at {new_fee - original_fee} difference"
+            )
 
         return round(credit, 2), reason
 

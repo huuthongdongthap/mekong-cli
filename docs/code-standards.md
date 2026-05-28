@@ -11,6 +11,83 @@
 - **Linter**: Ruff (with strict settings)
 - **Type Checker**: mypy (strict mode)
 
+## 1.5. TypeScript Code Standards (Mekong Engine + Dashboard)
+
+### Style Guide
+
+- **TypeScript Version**: 5.6+
+- **Framework**: Hono.js (Workers) / React 19 (Dashboard)
+- **Formatter**: Prettier (default)
+- **Linter**: ESLint with @typescript-eslint
+- **Build**: Wrangler (Workers) / Vite (Dashboard)
+
+### Type Safety
+
+**All TypeScript files MUST:**
+- Use strict mode: `"strict": true` in `tsconfig.json`
+- Avoid `any` types — use concrete types or generics
+- Use `unknown` instead of `any` for catch blocks
+
+```typescript
+// ✅ CORRECT
+async function fetchMission(id: string): Promise<Mission> {
+  const response = await fetch(`/api/v1/tasks/${id}`);
+  if (!response.ok) throw new Error("Not found");
+  return response.json() as Promise<Mission>;
+}
+
+// ❌ WRONG
+async function fetchMission(id): Promise<any> {
+  const response: any = await fetch(`/api/v1/tasks/${id}`);
+  return response.json();
+}
+```
+
+### Hono Routing (mekong-engine)
+
+Use Hono's type-safe routing:
+
+```typescript
+// ✅ CORRECT - Type-safe handlers
+type HonoBindings = {
+  DB: D1Database;
+  KV: KVNamespace;
+  AUTH_ENVIRONMENT: string;
+};
+
+const app = new Hono<{ Bindings: HonoBindings }>();
+
+app.post("/auth/login", async (c) => {
+  const { email, password } = await c.req.json();
+  // c.env.DB, c.env.KV type-checked
+  return c.json({ token: "..." });
+});
+```
+
+### React Components (dashboard)
+
+```typescript
+// ✅ CORRECT - Typed props
+interface AnalyticsDashboardProps {
+  tenantId: string;
+  dateRange: [Date, Date];
+  onRefresh?: () => Promise<void>;
+}
+
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
+  tenantId,
+  dateRange,
+  onRefresh,
+}) => {
+  // Component implementation
+};
+
+// ❌ WRONG
+export function AnalyticsDashboard(props: any) {
+  // Untyped props
+}
+```
+
 ### Type Hints (Mandatory)
 
 All functions **must** have type hints:
@@ -286,14 +363,57 @@ def test_executor_with_mock_llm(mock_chat):
     assert result.success
 ```
 
-## 8. Documentation
+## 8. Observability & Telemetry (Layer 2)
+
+### Instrumentation
+
+All agent invocations **must** use the `@observe_agent` decorator:
+
+```python
+from src.core.telemetry import observe_agent
+
+@observe_agent("my-agent")
+def execute_mission(goal: str) -> Result:
+    """Execute mission with automatic telemetry."""
+    return result
+
+# Emits: agent.invocation_ms, agent.token_cost_usd, agent.retry_total
+```
+
+### Signals Emission
+
+For eval tracking, emit mission events:
+
+```python
+from src.core.signals import emit_mission_event
+
+emit_mission_event(
+    agent_id="agent-123",
+    event_type="success",
+    latency_ms=1500,
+    token_cost=0.25,
+    model_drift_score=0.95
+)
+```
+
+### Key Metrics
+
+| Metric | Unit | Purpose |
+|--------|------|---------|
+| `agent.invocation_ms` | milliseconds | Agent execution latency |
+| `agent.token_cost_usd` | USD | LLM token consumption |
+| `agent.retry_total` | count | Failure recovery attempts |
+| `agent.model_drift_score` | 0-1 | LLM consistency (model switch cost) |
+| `mlx.gpu_utilization_percent` | % | M1 Max GPU usage |
+
+## 9. Documentation
 
 - Add docstrings to all public functions/classes
 - Update CHANGELOG.md for features
 - Include examples in docstrings for non-obvious APIs
 - API docs auto-generated via FastAPI + OpenAPI
 
-## 9. Getting Help
+## 10. Getting Help
 
 - **Docs**: `/docs` directory
 - **Issues**: GitHub issues for bugs/features

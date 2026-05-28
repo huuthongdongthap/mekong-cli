@@ -23,7 +23,7 @@ def run(cmd, silent=False, use_shell=False):
             result = subprocess.run(cmd_parts, capture_output=True, text=True)
         else:
             result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     if not silent:
         print(result.stdout)
     return result.returncode == 0
@@ -35,16 +35,16 @@ def run_safe_pytest_with_tail(silent=False):
         result = subprocess.run(
             ["python3", "-m", "pytest", "tests/test_wow.py", "-v", "--tb=short"],
             capture_output=True,
-            text=True
+            text=True,
         )
-        
+
         # Get last 5 lines using Python instead of shell tail
-        lines = result.stdout.strip().split('\n')
-        tail_output = '\n'.join(lines[-5:]) if lines else ""
-        
+        lines = result.stdout.strip().split("\n")
+        tail_output = "\n".join(lines[-5:]) if lines else ""
+
         if not silent:
             print(tail_output)
-        
+
         return result.returncode == 0
     except Exception as e:
         print(f"Error running pytest: {e}")

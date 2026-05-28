@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "core"))
 
 # Direct import from module file to avoid __init__.py importing orchestrator
 import importlib.util
+
 plugin_loader_path = Path(__file__).parent.parent.parent / "src" / "core" / "plugin_loader.py"
 spec = importlib.util.spec_from_file_location("plugin_loader", plugin_loader_path)
 plugin_loader = importlib.util.module_from_spec(spec)
@@ -152,7 +153,7 @@ class TestPluginLoaderEntrypoints(unittest.TestCase):
         # Second call without args returns dict
         mock_entry_points.side_effect = [
             TypeError(),  # First call: entry_points(group=...)
-            mock_dict,    # Second call: entry_points()
+            mock_dict,  # Second call: entry_points()
         ]
 
         mock_registry = MagicMock()

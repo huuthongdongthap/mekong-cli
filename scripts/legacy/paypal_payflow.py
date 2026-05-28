@@ -90,9 +90,7 @@ class PayflowGateway:
     def _generate_request_id(self) -> str:
         """Generate unique request ID."""
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        random_str = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=8)
-        )
+        random_str = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
         return f"REQ{timestamp}{random_str}"
 
     def _build_params(self, **kwargs) -> str:
@@ -133,9 +131,7 @@ class PayflowGateway:
         }
 
         try:
-            response = requests.post(
-                self.endpoint, data=params, headers=headers, timeout=60
-            )
+            response = requests.post(self.endpoint, data=params, headers=headers, timeout=60)
 
             result = self._parse_response(response.text)
             result["_request_id"] = request_id
@@ -350,9 +346,9 @@ class PayflowGateway:
             START=start_date,
             TERM=str(term),
             PAYPERIOD=frequency,
-            PROFILENAME=profile_name
-            if profile_name
-            else f"Profile_{datetime.now().strftime('%Y%m%d')}",
+            PROFILENAME=(
+                profile_name if profile_name else f"Profile_{datetime.now().strftime('%Y%m%d')}"
+            ),
             NAME=name if name else None,
             EMAIL=email if email else None,
         )
@@ -502,9 +498,7 @@ class PayflowGateway:
         Attempts a $0 authorization to verify credentials.
         """
         # Try inquiry with dummy PNREF (will fail but confirms connectivity)
-        params = self._build_params(
-            TRXTYPE=self.TRXTYPE_INQUIRY, ORIGID="TEST000000000"
-        )
+        params = self._build_params(TRXTYPE=self.TRXTYPE_INQUIRY, ORIGID="TEST000000000")
 
         result = self._request(params)
 

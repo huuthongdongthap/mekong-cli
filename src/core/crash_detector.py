@@ -254,10 +254,12 @@ class CrashDetector:
         last_crash = None
         if crashes_in_window:
             first_crash = datetime.fromtimestamp(
-                min(crashes_in_window), tz=timezone.utc,
+                min(crashes_in_window),
+                tz=timezone.utc,
             ).isoformat()
             last_crash = datetime.fromtimestamp(
-                max(crashes_in_window), tz=timezone.utc,
+                max(crashes_in_window),
+                tz=timezone.utc,
             ).isoformat()
 
         return CrashFrequency(
@@ -328,9 +330,7 @@ class CrashDetector:
         # Count by exit code
         exit_code_counts: dict[int, int] = {}
         for crash in self._recent_crashes:
-            exit_code_counts[crash.exit_code] = (
-                exit_code_counts.get(crash.exit_code, 0) + 1
-            )
+            exit_code_counts[crash.exit_code] = exit_code_counts.get(crash.exit_code, 0) + 1
 
         return {
             "total_crashes_stored": len(self._recent_crashes),

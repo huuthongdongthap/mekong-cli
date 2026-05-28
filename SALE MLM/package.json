@@ -6,10 +6,13 @@
   "scripts": {
     "dev": "node src/server.js",
     "dev:dashboard": "cd src/dashboard && npx vite",
-    "test": "node test/auth.test.js && node test/members.test.js && node test/habits.test.js",
+    "test": "jest --coverage --silent",
+    "test:watch": "jest --watch",
+    "test:verbose": "jest --coverage --verbose",
     "test:habits": "node test/habits.test.js",
     "test:members": "node test/members.test.js",
-    "test:auth": "node test/auth.test.js"
+    "test:auth": "node test/auth.test.js",
+    "test:legacy": "node test/auth.test.js && node test/members.test.js && node test/habits.test.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

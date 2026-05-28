@@ -4,7 +4,7 @@ Every command wraps execution in this framework.
 """
 
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 import traceback
 import json

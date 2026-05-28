@@ -3,6 +3,7 @@
 Stores daily engagement events, user streaks, workspace health snapshots,
 and nudge dismissals in SQLite.
 """
+
 from __future__ import annotations
 
 import json
@@ -124,8 +125,9 @@ class EngagementStore:
         except sqlite3.Error as exc:
             raise RuntimeError(f"Failed to init engagement DB: {exc}") from exc
 
-    def track_event(self, user_id: str, workspace_id: str, event_type: str,
-                    event_date: Optional[str] = None) -> None:
+    def track_event(
+        self, user_id: str, workspace_id: str, event_type: str, event_date: Optional[str] = None
+    ) -> None:
         now = datetime.now(timezone.utc)
         event_date = event_date or now.strftime("%Y-%m-%d")
         try:
@@ -148,8 +150,17 @@ class EngagementStore:
                 "SELECT user_id, workspace_id, event_type, event_count, event_date, created_at FROM engagement_events WHERE user_id = ? AND event_date >= ? ORDER BY event_date DESC",
                 (user_id, cutoff),
             ).fetchall()
-            return [EngagementEvent(r["user_id"], r["workspace_id"], r["event_type"],
-                                    r["event_count"], r["event_date"], r["created_at"]) for r in rows]
+            return [
+                EngagementEvent(
+                    r["user_id"],
+                    r["workspace_id"],
+                    r["event_type"],
+                    r["event_count"],
+                    r["event_date"],
+                    r["created_at"],
+                )
+                for r in rows
+            ]
 
     def get_daily_event_counts(self, user_id: str, days: int = 30) -> List[DailyActivity]:
         cutoff = _cutoff_date(days)
@@ -160,7 +171,10 @@ class EngagementStore:
                 GROUP BY event_date ORDER BY event_date DESC""",
                 (user_id, cutoff),
             ).fetchall()
-            return [DailyActivity(r["event_date"], r["total"], (r["types"] or "").split(",")) for r in rows]
+            return [
+                DailyActivity(r["event_date"], r["total"], (r["types"] or "").split(","))
+                for r in rows
+            ]
 
     def get_active_dates(self, user_id: str, days: int = 30) -> List[str]:
         cutoff = _cutoff_date(days)
@@ -181,21 +195,42 @@ class EngagementStore:
                     current_streak=excluded.current_streak, longest_streak=excluded.longest_streak,
                     last_active_date=excluded.last_active_date, streak_started=excluded.streak_started,
                     grace_used=excluded.grace_used, updated_at=excluded.updated_at""",
-                (data.user_id, data.current_streak, data.longest_streak,
-                 data.last_active_date, data.streak_started, data.grace_used, now),
+                (
+                    data.user_id,
+                    data.current_streak,
+                    data.longest_streak,
+                    data.last_active_date,
+                    data.streak_started,
+                    data.grace_used,
+                    now,
+                ),
             )
             conn.commit()
 
     def get_streak(self, user_id: str) -> Optional[StreakData]:
         with self._connect() as conn:
-            row = conn.execute("SELECT * FROM user_streaks WHERE user_id = ?", (user_id,)).fetchone()
+            row = conn.execute(
+                "SELECT * FROM user_streaks WHERE user_id = ?", (user_id,)
+            ).fetchone()
             if not row:
                 return None
-            return StreakData(row["user_id"], row["current_streak"], row["longest_streak"],
-                             row["last_active_date"], row["streak_started"], row["grace_used"])
+            return StreakData(
+                row["user_id"],
+                row["current_streak"],
+                row["longest_streak"],
+                row["last_active_date"],
+                row["streak_started"],
+                row["grace_used"],
+            )
 
-    def save_health_snapshot(self, workspace_id: str, score: int, grade: str,
-                             components: Dict[str, float], snapshot_date: Optional[str] = None) -> None:
+    def save_health_snapshot(
+        self,
+        workspace_id: str,
+        score: int,
+        grade: str,
+        components: Dict[str, float],
+        snapshot_date: Optional[str] = None,
+    ) -> None:
         now = datetime.now(timezone.utc)
         snapshot_date = snapshot_date or now.strftime("%Y-%m-%d")
         with self._connect() as conn:
@@ -203,7 +238,14 @@ class EngagementStore:
                 """INSERT INTO workspace_health_snapshots (workspace_id, score, grade, components, snapshot_date, created_at)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(workspace_id, snapshot_date) DO UPDATE SET score=excluded.score, grade=excluded.grade, components=excluded.components""",
-                (workspace_id, score, grade, json.dumps(components), snapshot_date, now.isoformat()),
+                (
+                    workspace_id,
+                    score,
+                    grade,
+                    json.dumps(components),
+                    snapshot_date,
+                    now.isoformat(),
+                ),
             )
             conn.commit()
 
@@ -214,8 +256,16 @@ class EngagementStore:
                 "SELECT * FROM workspace_health_snapshots WHERE workspace_id = ? AND snapshot_date >= ? ORDER BY snapshot_date DESC",
                 (workspace_id, cutoff),
             ).fetchall()
-            return [HealthSnapshot(r["workspace_id"], r["score"], r["grade"],
-                                   json.loads(r["components"]), r["snapshot_date"]) for r in rows]
+            return [
+                HealthSnapshot(
+                    r["workspace_id"],
+                    r["score"],
+                    r["grade"],
+                    json.loads(r["components"]),
+                    r["snapshot_date"],
+                )
+                for r in rows
+            ]
 
     def dismiss_nudge(self, user_id: str, nudge_id: str, reason: str = "manual") -> bool:
         now = datetime.now(timezone.utc).isoformat()
@@ -232,9 +282,10 @@ class EngagementStore:
 
     def get_dismissed_nudge_ids(self, user_id: str) -> List[str]:
         with self._connect() as conn:
-            rows = conn.execute("SELECT nudge_id FROM nudge_dismissals WHERE user_id = ?", (user_id,)).fetchall()
+            rows = conn.execute(
+                "SELECT nudge_id FROM nudge_dismissals WHERE user_id = ?", (user_id,)
+            ).fetchall()
             return [r["nudge_id"] for r in rows]
-
 
     def get_distinct_users(self, workspace_id: str) -> List[str]:
         with self._connect() as conn:
@@ -252,7 +303,10 @@ class EngagementStore:
                 FROM engagement_events WHERE workspace_id = ? AND event_date >= ?""",
                 (workspace_id, cutoff),
             ).fetchone()
-            return {"active_days": row["active_days"] or 0, "total_events": row["total_events"] or 0}
+            return {
+                "active_days": row["active_days"] or 0,
+                "total_events": row["total_events"] or 0,
+            }
 
     def get_workspace_feature_count(self, workspace_id: str, days: int = 30) -> int:
         cutoff = _cutoff_date(days)
@@ -285,4 +339,5 @@ class EngagementStore:
 
 def _cutoff_date(days: int) -> str:
     from datetime import timedelta
+
     return (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")

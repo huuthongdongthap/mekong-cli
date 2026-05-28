@@ -14,7 +14,10 @@ app = typer.Typer()
 def analytics(
     port: int = typer.Option(8080, "--port", "-p", help="Server port"),
     no_browser: bool = typer.Option(
-        False, "--no-browser", "-n", help="Don't open browser",
+        False,
+        "--no-browser",
+        "-n",
+        help="Don't open browser",
     ),
 ) -> None:
     """Launch analytics dashboard (RaaS usage tracking)."""

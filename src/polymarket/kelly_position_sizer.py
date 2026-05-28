@@ -13,9 +13,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SizerConfig:
     """Position sizing configuration."""
+
     use_half_kelly: bool = True
-    max_position_pct: float = 0.10   # 10% of capital max per position
-    min_edge: float = 0.02           # 2% minimum edge to size
+    max_position_pct: float = 0.10  # 10% of capital max per position
+    min_edge: float = 0.02  # 2% minimum edge to size
 
 
 class KellyPositionSizer:
@@ -96,9 +97,7 @@ class KellyPositionSizer:
             expected_value=prediction.edge * position_usd,
         )
 
-    def size_signals(
-        self, predictions: list[Prediction], capital: float
-    ) -> list[Signal]:
+    def size_signals(self, predictions: list[Prediction], capital: float) -> list[Signal]:
         """Size multiple predictions and return ranked signals."""
         signals: list[Signal] = []
         for pred in predictions:

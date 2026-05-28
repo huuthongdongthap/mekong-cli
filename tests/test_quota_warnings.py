@@ -1,4 +1,5 @@
 """Tests for quota warning functions — ROIaaS Phase 6b quota warnings."""
+
 from __future__ import annotations
 
 
@@ -8,7 +9,6 @@ from src.lib.quota_error_messages import (
     get_warning_threshold,
     QuotaWarningContext,
 )
-
 
 # ---------------------------------------------------------------------------
 # get_warning_threshold tests

@@ -16,10 +16,10 @@ from src.core.timeout_manager import (
     TimeoutManager,
 )
 
-
 # ---------------------------------------------------------------------------
 # Minimal RecipeStep stub (avoids importing parser deps)
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class _Step:
@@ -264,6 +264,7 @@ def test_global_timeout_error_defaults() -> None:
 
 def test_module_all_exports() -> None:
     from src.core import timeout_manager
+
     assert hasattr(timeout_manager, "__all__")
     for name in ["GlobalTimeoutError", "StepTimeoutError", "TimeoutConfig", "TimeoutManager"]:
         assert name in timeout_manager.__all__

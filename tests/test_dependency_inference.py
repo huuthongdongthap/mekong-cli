@@ -11,12 +11,14 @@ from __future__ import annotations
 from src.core.dependency_inference import DependencyInference
 from src.core.parser import RecipeStep
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-def make_step(order: int, title: str = "", description: str = "", deps: list[int] | None = None) -> RecipeStep:
+
+def make_step(
+    order: int, title: str = "", description: str = "", deps: list[int] | None = None
+) -> RecipeStep:
     return RecipeStep(
         order=order,
         title=title,
@@ -28,6 +30,7 @@ def make_step(order: int, title: str = "", description: str = "", deps: list[int
 # ---------------------------------------------------------------------------
 # extract_io — file I/O
 # ---------------------------------------------------------------------------
+
 
 class TestExtractFileIO:
     def setup_method(self):
@@ -80,6 +83,7 @@ class TestExtractFileIO:
 # extract_io — package I/O
 # ---------------------------------------------------------------------------
 
+
 class TestExtractPkgIO:
     def setup_method(self):
         self.di = DependencyInference()
@@ -120,6 +124,7 @@ class TestExtractPkgIO:
 # extract_io — environment variables
 # ---------------------------------------------------------------------------
 
+
 class TestExtractEnvIO:
     def setup_method(self):
         self.di = DependencyInference()
@@ -149,6 +154,7 @@ class TestExtractEnvIO:
 # ---------------------------------------------------------------------------
 # extract_io — git state
 # ---------------------------------------------------------------------------
+
 
 class TestExtractGitIO:
     def setup_method(self):
@@ -180,6 +186,7 @@ class TestExtractGitIO:
 # ---------------------------------------------------------------------------
 # infer_dependencies
 # ---------------------------------------------------------------------------
+
 
 class TestInferDependencies:
     def setup_method(self):
@@ -258,6 +265,7 @@ class TestInferDependencies:
 # merge_dependencies
 # ---------------------------------------------------------------------------
 
+
 class TestMergeDependencies:
     def setup_method(self):
         self.di = DependencyInference()
@@ -310,6 +318,7 @@ class TestMergeDependencies:
 # Integration: full infer + merge pipeline
 # ---------------------------------------------------------------------------
 
+
 class TestFullPipeline:
     def setup_method(self):
         self.di = DependencyInference()
@@ -317,7 +326,9 @@ class TestFullPipeline:
     def test_install_import_pipeline(self):
         steps = [
             make_step(1, title="Install deps", description="pip install flask"),
-            make_step(2, title="Run app", description="from flask import Flask\napp = Flask(__name__)"),
+            make_step(
+                2, title="Run app", description="from flask import Flask\napp = Flask(__name__)"
+            ),
         ]
         inferred = self.di.infer_dependencies(steps)
         self.di.merge_dependencies(steps, inferred)

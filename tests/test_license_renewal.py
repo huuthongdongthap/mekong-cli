@@ -7,7 +7,8 @@ Tests for renewal commands, deep linking, and post-renewal sync.
 from unittest.mock import patch, MagicMock
 
 import sys
-sys.path.insert(0, '/Users/macbookprom1/mekong-cli')
+
+sys.path.insert(0, "/Users/macbookprom1/mekong-cli")
 
 from src.lib.quota_error_messages import get_renewal_url, format_license_expired_with_renewal
 
@@ -56,8 +57,7 @@ class TestFormatLicenseExpiredWithRenewal:
     def test_format_with_date_and_url(self):
         """Formats correctly with date and URL."""
         msg = format_license_expired_with_renewal(
-            expiry_date="2025-12-31",
-            renewal_url="https://raas.mekong.dev/renew?key=123"
+            expiry_date="2025-12-31", renewal_url="https://raas.mekong.dev/renew?key=123"
         )
 
         assert "2025-12-31" in msg
@@ -67,26 +67,21 @@ class TestFormatLicenseExpiredWithRenewal:
     def test_format_with_empty_date(self):
         """Uses default message when date is empty."""
         msg = format_license_expired_with_renewal(
-            expiry_date="",
-            renewal_url="https://raas.mekong.dev/renew"
+            expiry_date="", renewal_url="https://raas.mekong.dev/renew"
         )
 
         assert "an unknown date" in msg
 
     def test_format_with_empty_url(self):
         """Uses default URL when empty."""
-        msg = format_license_expired_with_renewal(
-            expiry_date="2025-12-31",
-            renewal_url=""
-        )
+        msg = format_license_expired_with_renewal(expiry_date="2025-12-31", renewal_url="")
 
         assert "raas.mekong.dev/renew" in msg
 
     def test_format_contains_required_elements(self):
         """Contains all required UI elements."""
         msg = format_license_expired_with_renewal(
-            expiry_date="2025-12-31",
-            renewal_url="https://raas.mekong.dev/renew"
+            expiry_date="2025-12-31", renewal_url="https://raas.mekong.dev/renew"
         )
 
         assert "╔" in msg and "╝" in msg  # Boxed format
@@ -98,8 +93,7 @@ class TestFormatLicenseExpiredWithRenewal:
     def test_format_strips_whitespace(self):
         """Strips leading/trailing whitespace."""
         msg = format_license_expired_with_renewal(
-            expiry_date="2025-12-31",
-            renewal_url="https://raas.mekong.dev/renew"
+            expiry_date="2025-12-31", renewal_url="https://raas.mekong.dev/renew"
         )
 
         assert msg == msg.strip()
@@ -110,8 +104,8 @@ class TestFormatLicenseExpiredWithRenewal:
 class TestRenewalCommands:
     """Tests for renewal CLI commands."""
 
-    @patch('src.commands.license_renewal.get_license_gate')
-    @patch('src.commands.license_renewal.webbrowser.open')
+    @patch("src.commands.license_renewal.get_license_gate")
+    @patch("src.commands.license_renewal.webbrowser.open")
     def test_renewal_open_with_auto(self, mock_open, mock_get_gate):
         """renewal_open --auto opens browser with deep link."""
         mock_gate = MagicMock()
@@ -131,7 +125,7 @@ class TestRenewalCommands:
         assert "key_id=test-key" in called_url
         assert "tier=pro" in called_url
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_open_without_auto(self, mock_get_gate):
         """renewal_open without --auto shows URL only."""
         mock_gate = MagicMock()
@@ -148,7 +142,7 @@ class TestRenewalCommands:
         assert result.exit_code == 0
         assert "Use --auto to open in browser" in result.stdout
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_status_no_license(self, mock_get_gate):
         """renewal_status shows error when no license."""
         mock_gate = MagicMock()
@@ -164,7 +158,7 @@ class TestRenewalCommands:
         assert result.exit_code == 1
         assert "No license" in result.stdout
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_status_expired(self, mock_get_gate):
         """renewal_status shows renewal URL for expired license."""
         mock_gate = MagicMock()
@@ -173,7 +167,7 @@ class TestRenewalCommands:
         mock_gate.validate_remote.return_value = (
             False,
             {"status": "expired", "tier": "pro", "key_id": "key-123", "expires_at": 1735689600},
-            "License expired"
+            "License expired",
         )
         mock_get_gate.return_value = mock_gate
 
@@ -188,7 +182,7 @@ class TestRenewalCommands:
         assert "expired" in result.stdout.lower()
         assert "raas.mekong.dev/renew" in result.stdout
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_status_active(self, mock_get_gate):
         """renewal_status shows active status."""
         mock_gate = MagicMock()
@@ -197,7 +191,7 @@ class TestRenewalCommands:
         mock_gate.validate_remote.return_value = (
             True,
             {"status": "active", "tier": "pro", "key_id": "key-123"},
-            ""
+            "",
         )
         mock_get_gate.return_value = mock_gate
 
@@ -210,17 +204,13 @@ class TestRenewalCommands:
         assert result.exit_code == 0
         assert "active" in result.stdout.lower()
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_sync_success(self, mock_get_gate):
         """renewal_sync succeeds when license is valid."""
         mock_gate = MagicMock()
         mock_gate.has_license = True
         mock_gate.license_key = "raas-pro-key-sig"
-        mock_gate.validate_remote.return_value = (
-            True,
-            {"status": "active", "tier": "pro"},
-            ""
-        )
+        mock_gate.validate_remote.return_value = (True, {"status": "active", "tier": "pro"}, "")
         mock_get_gate.return_value = mock_gate
 
         from typer.testing import CliRunner
@@ -232,7 +222,7 @@ class TestRenewalCommands:
         assert result.exit_code == 0
         assert "synced" in result.stdout.lower()
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_sync_no_license(self, mock_get_gate):
         """renewal_sync fails when no license."""
         mock_gate = MagicMock()
@@ -248,17 +238,13 @@ class TestRenewalCommands:
         assert result.exit_code == 1
         assert "No license" in result.stdout
 
-    @patch('src.commands.license_renewal.get_license_gate')
+    @patch("src.commands.license_renewal.get_license_gate")
     def test_renewal_sync_failed(self, mock_get_gate):
         """renewal_sync shows renewal URL on failure."""
         mock_gate = MagicMock()
         mock_gate.has_license = True
         mock_gate.license_key = "raas-pro-key-sig"
-        mock_gate.validate_remote.return_value = (
-            False,
-            None,
-            "Validation failed"
-        )
+        mock_gate.validate_remote.return_value = (False, None, "Validation failed")
         mock_get_gate.return_value = mock_gate
 
         from typer.testing import CliRunner

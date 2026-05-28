@@ -19,6 +19,7 @@ logger = logging.getLogger("mekong.rate_limits.metrics")
 @dataclass
 class RateLimitEvent:
     """Rate limit event data structure."""
+
     tenant_id: str
     tier: str
     endpoint: str
@@ -74,7 +75,9 @@ class RateLimitMetricsEmitter:
         """
         try:
             await self._persist_event(event)
-            logger.debug(f"Emitted rate limit event: {event.event_type} for tenant {event.tenant_id}")
+            logger.debug(
+                f"Emitted rate limit event: {event.event_type} for tenant {event.tenant_id}"
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to emit rate limit event: {e}")
@@ -154,7 +157,7 @@ class RateLimitMetricsEmitter:
         """ % hours
 
         result = await self._db.fetch_one(query, (tenant_id,))
-        return int(result.get('count', 0)) if result else 0
+        return int(result.get("count", 0)) if result else 0
 
     async def get_quota_utilization(self, tenant_id: str, hours: int = 24) -> Dict[str, Any]:
         """
@@ -182,9 +185,9 @@ class RateLimitMetricsEmitter:
             return {"avg_utilization": 0, "max_utilization": 0, "total_requests": 0}
 
         return {
-            "avg_utilization": float(result.get('avg_utilization', 0) or 0),
-            "max_utilization": float(result.get('max_utilization', 0) or 0),
-            "total_requests": int(result.get('total_requests', 0)),
+            "avg_utilization": float(result.get("avg_utilization", 0) or 0),
+            "max_utilization": float(result.get("max_utilization", 0) or 0),
+            "total_requests": int(result.get("total_requests", 0)),
         }
 
     async def get_events_by_tier(self, hours: int = 24) -> List[Dict[str, Any]]:
@@ -211,7 +214,9 @@ class RateLimitMetricsEmitter:
         results = await self._db.fetch_all(query)
         return [dict(row) for row in results]
 
-    async def get_top_violated_tenants(self, limit: int = 10, hours: int = 24) -> List[Dict[str, Any]]:
+    async def get_top_violated_tenants(
+        self, limit: int = 10, hours: int = 24
+    ) -> List[Dict[str, Any]]:
         """
         Get tenants with most rate limit violations.
 
@@ -239,10 +244,7 @@ class RateLimitMetricsEmitter:
         return [dict(row) for row in results]
 
     async def get_recent_events(
-        self,
-        tenant_id: Optional[str] = None,
-        event_type: Optional[str] = None,
-        limit: int = 50
+        self, tenant_id: Optional[str] = None, event_type: Optional[str] = None, limit: int = 50
     ) -> List[Dict[str, Any]]:
         """
         Get recent rate limit events with optional filters.
@@ -302,7 +304,7 @@ class RateLimitMetricsEmitter:
               AND created_at > NOW() - INTERVAL '%s hours'
         """ % hours
         total_result = await self._db.fetch_one(total_query)
-        total = int(total_result.get('total', 0)) if total_result else 0
+        total = int(total_result.get("total", 0)) if total_result else 0
 
         # By tenant
         by_tenant_query = """
@@ -353,7 +355,7 @@ class TelemetryIntegration:
         event_type: str,
         endpoint: str = "",
         preset: str = "api_default",
-        **kwargs: Any
+        **kwargs: Any,
     ) -> bool:
         """
         Record rate limit event via emitter.
@@ -375,7 +377,7 @@ class TelemetryIntegration:
             endpoint=endpoint,
             preset=preset,
             event_type=event_type,
-            **kwargs
+            **kwargs,
         )
         return await self._emitter.emit_event(event)
 

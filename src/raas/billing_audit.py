@@ -138,27 +138,25 @@ class ReconciliationService:
                     )
 
             except Exception as e:
-                logger.error(
-                    f"Reconciliation failed for {license_key}: {e}"
-                )
+                logger.error(f"Reconciliation failed for {license_key}: {e}")
                 # Create error audit record
-                results.append(AuditResult(
-                    audit_id=f"audit_{license_key}_{audit_date}_error",
-                    license_key=license_key,
-                    key_id=key_id,
-                    audit_date=audit_date,
-                    expected_amount=Decimal(0),
-                    actual_amount=Decimal(0),
-                    variance=Decimal(0),
-                    variance_percent=0,
-                    status="investigating",
-                    discrepancies=[{"error": str(e)}],
-                    details={"reconciliation_error": str(e)},
-                ))
+                results.append(
+                    AuditResult(
+                        audit_id=f"audit_{license_key}_{audit_date}_error",
+                        license_key=license_key,
+                        key_id=key_id,
+                        audit_date=audit_date,
+                        expected_amount=Decimal(0),
+                        actual_amount=Decimal(0),
+                        variance=Decimal(0),
+                        variance_percent=0,
+                        status="investigating",
+                        discrepancies=[{"error": str(e)}],
+                        details={"reconciliation_error": str(e)},
+                    )
+                )
 
-        logger.info(
-            f"Daily reconciliation complete: {len(results)} licenses audited"
-        )
+        logger.info(f"Daily reconciliation complete: {len(results)} licenses audited")
         return results
 
     async def _reconcile_license(
@@ -221,7 +219,8 @@ class ReconciliationService:
             discrepancies=discrepancies,
             details={
                 "calculation_method": "usage_events_vs_billing_records",
-                "auto_resolved": status == "matched" and variance_percent < self._config.auto_resolve_threshold_percent,
+                "auto_resolved": status == "matched"
+                and variance_percent < self._config.auto_resolve_threshold_percent,
             },
         )
 
@@ -269,7 +268,11 @@ class ReconciliationService:
                     category="usage",
                     metric=e.get("metric", "requests"),
                     value=e.get("value", 0),
-                    timestamp=e["timestamp"].timestamp() if isinstance(e["timestamp"], datetime) else e["timestamp"],
+                    timestamp=(
+                        e["timestamp"].timestamp()
+                        if isinstance(e["timestamp"], datetime)
+                        else e["timestamp"]
+                    ),
                     metadata=e.get("metadata", {}),
                 )
             )
@@ -338,19 +341,23 @@ class ReconciliationService:
 
         # Variance detected - determine type
         if variance > 0:
-            discrepancies.append({
-                "type": "over_billing",
-                "description": f"Actual (${actual_amount}) exceeds expected (${expected_amount})",
-                "variance": str(variance),
-                "variance_percent": variance_percent,
-            })
+            discrepancies.append(
+                {
+                    "type": "over_billing",
+                    "description": f"Actual (${actual_amount}) exceeds expected (${expected_amount})",
+                    "variance": str(variance),
+                    "variance_percent": variance_percent,
+                }
+            )
         else:
-            discrepancies.append({
-                "type": "under_billing",
-                "description": f"Expected (${expected_amount}) exceeds actual (${actual_amount})",
-                "variance": str(variance),
-                "variance_percent": variance_percent,
-            })
+            discrepancies.append(
+                {
+                    "type": "under_billing",
+                    "description": f"Expected (${expected_amount}) exceeds actual (${actual_amount})",
+                    "variance": str(variance),
+                    "variance_percent": variance_percent,
+                }
+            )
 
         # Limit discrepancies
         if len(discrepancies) > self._config.max_discrepancies:

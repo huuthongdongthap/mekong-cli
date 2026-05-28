@@ -72,6 +72,7 @@ def memory_clear() -> None:
 
     if Confirm.ask("[red]Are you sure you want to clear all memories?[/red]"):
         from src.core.memory import MemoryStore
+
         store = MemoryStore()
         store.clear()
         console.print("[green]Memory cleared.[/green]")

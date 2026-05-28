@@ -36,13 +36,18 @@ class ContextManager:
         if ":" not in user_id:
             self.user_id = f"default:{user_id}"
 
-        logger.debug("ContextManager initialized for %s, using %s storage",
-                     self.user_id, self.memory.get_provider_status()["active_provider"])
+        logger.debug(
+            "ContextManager initialized for %s, using %s storage",
+            self.user_id,
+            self.memory.get_provider_status()["active_provider"],
+        )
 
         # Initialize local storage as backup for YAML fallback
         self.local_storage_path = Path.home() / ".mekong" / "contexts"
         self.local_storage_path.mkdir(parents=True, exist_ok=True)
-        self.local_context_file = self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        self.local_context_file = (
+            self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        )
 
     def _save_to_local_storage(self, data: dict) -> None:
         """Save data to local file storage as backup."""
@@ -73,7 +78,9 @@ class ContextManager:
             logger.warning("Could not load from local storage: %s", e)
         return []
 
-    def store_interaction(self, user_message: str, agent_response: str, metadata: dict | None = None) -> bool:
+    def store_interaction(
+        self, user_message: str, agent_response: str, metadata: dict | None = None
+    ) -> bool:
         """Store a conversation interaction in memory.
 
         Args:
@@ -148,18 +155,22 @@ class ContextManager:
                     context_items.append(parsed)
                 else:
                     # Raw string content
-                    context_items.append({
-                        "type": "raw_memory",
-                        "content": memory_content,
-                        "timestamp": datetime.now().isoformat(),
-                    })
+                    context_items.append(
+                        {
+                            "type": "raw_memory",
+                            "content": memory_content,
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
             except json.JSONDecodeError:
                 # If it's not JSON, store as raw content
-                context_items.append({
-                    "type": "raw_content",
-                    "content": memory_content,
-                    "timestamp": datetime.now().isoformat(),
-                })
+                context_items.append(
+                    {
+                        "type": "raw_content",
+                        "content": memory_content,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                )
 
         # Add results from local storage to supplement if needed
         if len(context_items) < limit:
@@ -169,7 +180,9 @@ class ContextManager:
                 if len(context_items) >= limit:
                     break
                 # Check if this item is already in our context_items
-                if not any(item.get("timestamp") == local_item.get("timestamp") for item in context_items):
+                if not any(
+                    item.get("timestamp") == local_item.get("timestamp") for item in context_items
+                ):
                     context_items.insert(0, local_item)
 
         # Return up to the limit

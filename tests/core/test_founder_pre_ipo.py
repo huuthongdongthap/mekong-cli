@@ -2,14 +2,14 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.core.founder_ipo.founder_pre_ipo import (
     score_readiness,
     recommend_exchange,
     get_timeline,
 )
-
 
 _FULL_SCORES = {
     "financial": {"audited_financials": 10, "revenue_growth": 8, "path_to_profitability": 7},
@@ -47,7 +47,11 @@ def test_score_readiness_mid_range_verdict():
         "business": {"market_size": 5, "competitive_moat": 5, "revenue_quality": 5},
         "governance": {"board_independence": 5, "audit_committee": 4, "executive_team": 3},
         "legal": {"ip_protection": 3, "regulatory_compliance": 3, "litigation_risk": 2},
-        "operations": {"scalable_systems": 3, "internal_controls": 3, "reporting_infrastructure": 2},
+        "operations": {
+            "scalable_systems": 3,
+            "internal_controls": 3,
+            "reporting_infrastructure": 2,
+        },
     }
     result = score_readiness(**mid)
     assert 40 <= result.total_score <= 70

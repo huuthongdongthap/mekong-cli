@@ -226,6 +226,7 @@ def retry(
         Decorator function that wraps the target callable.
 
     """
+
     def decorator(func: Callable) -> Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             last_error: Exception | None = None
@@ -243,7 +244,9 @@ def retry(
                         current_delay *= backoff
 
             raise last_error  # type: ignore[misc]
+
         return wrapper
+
     return decorator
 
 
@@ -278,7 +281,9 @@ def retry_shell(
         try:
             return shell(command, **shell_kwargs)
         except Exception as e:
-            logger.debug("Shell retry attempt %d/%d failed for command '%s': %s", attempt, count, command, e)
+            logger.debug(
+                "Shell retry attempt %d/%d failed for command '%s': %s", attempt, count, command, e
+            )
             if attempt < count:
                 time.sleep(current_delay)
                 current_delay *= backoff

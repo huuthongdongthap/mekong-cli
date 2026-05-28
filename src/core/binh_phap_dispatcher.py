@@ -176,15 +176,19 @@ class BinhPhapDispatcher:
     ) -> None:
         """Record diagonal cycle lesson."""
         cycle = self.topology.state.get("cycle_number", 1)
-        self.topology.record_cycle_lesson(CycleLesson(
-            cycle=cycle,
-            mrr=mrr,
-            customers=customers,
-            lessons=lessons,
-            adaptations=adaptations or [],
-        ))
+        self.topology.record_cycle_lesson(
+            CycleLesson(
+                cycle=cycle,
+                mrr=mrr,
+                customers=customers,
+                lessons=lessons,
+                adaptations=adaptations or [],
+            )
+        )
 
-    def handle_event(self, event_type: str, source: str = "manual", data: dict | None = None) -> list[dict]:
+    def handle_event(
+        self, event_type: str, source: str = "manual", data: dict | None = None
+    ) -> list[dict]:
         """Process an external event through the reaction engine.
 
         Returns list of actions to execute.
@@ -229,6 +233,7 @@ class BinhPhapDispatcher:
             config = resolve_llm_provider(llm_level)
             try:
                 from .providers import OpenAICompatibleProvider
+
                 fallback = OpenAICompatibleProvider(
                     base_url=config.get("fallback_url", "http://localhost:11434/v1"),
                     api_key="local",
@@ -253,9 +258,6 @@ class BinhPhapDispatcher:
             "auto_dispatch": state.get("auto_dispatch", False),
             "target_mrr": state.get("target_mrr", 1000),
             "consecutive_failures": self.topology.consecutive_failures,
-            "groups": {
-                name: g.status.value
-                for name, g in self.topology.groups.items()
-            },
+            "groups": {name: g.status.value for name, g in self.topology.groups.items()},
             "cycles_completed": len(state.get("cycle_history", [])),
         }

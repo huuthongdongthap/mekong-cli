@@ -100,7 +100,9 @@ JURISDICTION_CONFIGS: dict[Jurisdiction, dict] = {
             ChecklistItem("Charter capital (recommend 100-500M VND)", "high"),
             ChecklistItem("Business registration code selection", "high"),
             ChecklistItem("Registration documents (CCCD + forms)", "high"),
-            ChecklistItem("Submit to Dept of Planning & Investment", "high", "~1M VND", "3-5 business days"),
+            ChecklistItem(
+                "Submit to Dept of Planning & Investment", "high", "~1M VND", "3-5 business days"
+            ),
             ChecklistItem("Open business bank account", "high", "", "After registration"),
         ],
     },
@@ -172,7 +174,9 @@ def build_ip_checklist() -> IPChecklist:
         trademark_items=[
             ChecklistItem("Search USPTO.gov (US) / IP Vietnam / IPOS (SG)", "medium"),
             ChecklistItem("File trademark when revenue > $5K/mo", "low", "$250-350/class (US)"),
-            ChecklistItem("File in primary market first", "medium", "", "8-12 months to registration"),
+            ChecklistItem(
+                "File in primary market first", "medium", "", "8-12 months to registration"
+            ),
         ],
         domain_items=[
             ChecklistItem("Primary .com registered", "high", "~$10/yr"),
@@ -194,7 +198,8 @@ def build_contract_templates() -> list[ContractTemplate]:
     """Build contract template references."""
     return [
         ContractTemplate(
-            "Terms of Service", "tos",
+            "Terms of Service",
+            "tos",
             [
                 "Acceptable use policy",
                 "Payment + refund terms",
@@ -205,7 +210,8 @@ def build_contract_templates() -> list[ContractTemplate]:
             "Required for any SaaS product",
         ),
         ContractTemplate(
-            "Privacy Policy", "privacy",
+            "Privacy Policy",
+            "privacy",
             [
                 "What data you collect",
                 "How you use it",
@@ -217,7 +223,8 @@ def build_contract_templates() -> list[ContractTemplate]:
             "Required for any user data collection. Disclose AI provider usage.",
         ),
         ContractTemplate(
-            "Contractor Agreement", "contractor",
+            "Contractor Agreement",
+            "contractor",
             [
                 "Scope of work",
                 "Payment terms",
@@ -227,7 +234,8 @@ def build_contract_templates() -> list[ContractTemplate]:
             ],
         ),
         ContractTemplate(
-            "Advisor Agreement", "advisor",
+            "Advisor Agreement",
+            "advisor",
             [
                 "Equity: 0.1-0.5%, 2-year vest, no cliff",
                 "FAST agreement (standard Silicon Valley)",
@@ -236,7 +244,8 @@ def build_contract_templates() -> list[ContractTemplate]:
             ],
         ),
         ContractTemplate(
-            "Employment Offer Letter", "employment",
+            "Employment Offer Letter",
+            "employment",
             [
                 "Job title + description",
                 "Salary + bonus structure",
@@ -355,10 +364,13 @@ def save_legal_kit(base_dir: str, kit: LegalKit) -> list[str]:
 
     # Compliance
     path = legal_dir / "compliance-checklist.json"
-    path.write_text(json.dumps(
-        [asdict(c) for c in kit.compliance],
-        indent=2, ensure_ascii=False,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(c) for c in kit.compliance],
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     saved.append(str(path))
 
     return saved

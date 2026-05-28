@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 # Optional httpx import for async HTTP
 try:
     import httpx
+
     HAS_HTTPX = True
 except ImportError:
     HAS_HTTPX = False
@@ -37,6 +38,7 @@ TELEGRAM_API = "https://api.telegram.org"
 @dataclass
 class TelegramConfig:
     """Telegram bot configuration."""
+
     bot_token: str = ""
     chat_id: str = ""
     enabled: bool = False

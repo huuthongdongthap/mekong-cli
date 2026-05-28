@@ -3,6 +3,7 @@
 Generates nudges for users based on engagement state.
 Tracks dismissals to prevent nudge fatigue (max 3 active).
 """
+
 from __future__ import annotations
 
 import logging
@@ -33,8 +34,9 @@ class Nudge:
 class NudgeEngine:
     """Rule-based nudge generation for re-engagement."""
 
-    def __init__(self, store: Optional[EngagementStore] = None,
-                 tracker: Optional[EngagementTracker] = None) -> None:
+    def __init__(
+        self, store: Optional[EngagementStore] = None, tracker: Optional[EngagementTracker] = None
+    ) -> None:
         self._store = store or EngagementStore(db_path=_DB_PATH)
         self._tracker = tracker or EngagementTracker(store=self._store)
         self._catalog = self._build_catalog()
@@ -73,32 +75,77 @@ class NudgeEngine:
     def _build_catalog(self) -> Dict[str, List[Nudge]]:
         return {
             "comeback": [
-                Nudge("comeback_miss_you", "comeback", "We Miss You!",
-                      "It's been a while. Pick up where you left off.", 1,
-                      "/dashboard", "Go to Dashboard"),
-                Nudge("comeback_new_features", "comeback", "New Features Await",
-                      "Check out what's new since your last visit.", 2,
-                      "/dashboard/changelog", "See What's New"),
+                Nudge(
+                    "comeback_miss_you",
+                    "comeback",
+                    "We Miss You!",
+                    "It's been a while. Pick up where you left off.",
+                    1,
+                    "/dashboard",
+                    "Go to Dashboard",
+                ),
+                Nudge(
+                    "comeback_new_features",
+                    "comeback",
+                    "New Features Await",
+                    "Check out what's new since your last visit.",
+                    2,
+                    "/dashboard/changelog",
+                    "See What's New",
+                ),
             ],
             "feature_discovery": [
-                Nudge("discover_analytics", "feature_discovery", "Unlock Analytics",
-                      "Track your team's performance with built-in analytics.", 2,
-                      "/onboarding/analytics", "View Analytics"),
-                Nudge("discover_agents", "feature_discovery", "Try AI Agents",
-                      "Automate repetitive tasks with custom AI agents.", 2,
-                      "/dashboard/agents", "Explore Agents"),
+                Nudge(
+                    "discover_analytics",
+                    "feature_discovery",
+                    "Unlock Analytics",
+                    "Track your team's performance with built-in analytics.",
+                    2,
+                    "/onboarding/analytics",
+                    "View Analytics",
+                ),
+                Nudge(
+                    "discover_agents",
+                    "feature_discovery",
+                    "Try AI Agents",
+                    "Automate repetitive tasks with custom AI agents.",
+                    2,
+                    "/dashboard/agents",
+                    "Explore Agents",
+                ),
             ],
             "milestone": [
-                Nudge("milestone_50_missions", "milestone", "50 Missions!",
-                      "You've completed 50 AI missions. Keep the momentum!", 1),
-                Nudge("milestone_power_user", "milestone", "Power User Status",
-                      "You're using 5+ features regularly. Impressive!", 2),
+                Nudge(
+                    "milestone_50_missions",
+                    "milestone",
+                    "50 Missions!",
+                    "You've completed 50 AI missions. Keep the momentum!",
+                    1,
+                ),
+                Nudge(
+                    "milestone_power_user",
+                    "milestone",
+                    "Power User Status",
+                    "You're using 5+ features regularly. Impressive!",
+                    2,
+                ),
             ],
             "tip": [
-                Nudge("tip_shortcuts", "tip", "Pro Tip: Keyboard Shortcuts",
-                      "Speed up your workflow with mekong CLI shortcuts.", 3),
-                Nudge("tip_templates", "tip", "Save Time with Templates",
-                      "Create reusable mission templates for common tasks.", 3,
-                      "/dashboard/templates", "Create Template"),
+                Nudge(
+                    "tip_shortcuts",
+                    "tip",
+                    "Pro Tip: Keyboard Shortcuts",
+                    "Speed up your workflow with mekong CLI shortcuts.",
+                    3,
+                ),
+                Nudge(
+                    "tip_templates",
+                    "tip",
+                    "Save Time with Templates",
+                    "Create reusable mission templates for common tasks.",
+                    3,
+                    "/dashboard/templates",
+                    "Create Template",
+                ),
             ],
         }

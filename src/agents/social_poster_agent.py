@@ -64,10 +64,18 @@ class SocialPosterAgent:
             return {}
 
         headers = {"api-key": self.devto_api_key, "Content-Type": "application/json"}
-        payload = {"article": {"title": title, "body_markdown": body_markdown,
-                               "tags": tags, "published": published}}
+        payload = {
+            "article": {
+                "title": title,
+                "body_markdown": body_markdown,
+                "tags": tags,
+                "published": published,
+            }
+        }
         try:
-            resp = httpx.post(f"{DEVTO_API_BASE}/articles", json=payload, headers=headers, timeout=15)
+            resp = httpx.post(
+                f"{DEVTO_API_BASE}/articles", json=payload, headers=headers, timeout=15
+            )
             resp.raise_for_status()
             data = resp.json()
             logger.info("[dev.to] Article created: %s", data.get("url"))
@@ -79,28 +87,32 @@ class SocialPosterAgent:
     def get_devto_comments(self, article_id: int) -> list[dict[str, Any]]:
         """Fetch all comments for a dev.to article."""
         try:
-            resp = httpx.get(f"{DEVTO_API_BASE}/comments",
-                             params={"a_id": article_id}, timeout=10)
+            resp = httpx.get(f"{DEVTO_API_BASE}/comments", params={"a_id": article_id}, timeout=10)
             resp.raise_for_status()
             return resp.json()  # type: ignore[return-value]
         except httpx.HTTPError as exc:
             logger.exception("[dev.to] Failed to fetch comments %d: %s", article_id, exc)
             return []
 
-    def reply_devto_comment(
-        self, article_id: int, parent_id: int, body: str
-    ) -> dict[str, Any]:
+    def reply_devto_comment(self, article_id: int, parent_id: int, body: str) -> dict[str, Any]:
         """Post a reply to a dev.to comment."""
         if not self.devto_api_key:
             logger.error("[dev.to] DEVTO_API_KEY not set")
             return {}
 
         headers = {"api-key": self.devto_api_key, "Content-Type": "application/json"}
-        payload = {"comment": {"body_markdown": body, "commentable_id": article_id,
-                               "commentable_type": "Article", "parent_id": parent_id}}
+        payload = {
+            "comment": {
+                "body_markdown": body,
+                "commentable_id": article_id,
+                "commentable_type": "Article",
+                "parent_id": parent_id,
+            }
+        }
         try:
-            resp = httpx.post(f"{DEVTO_API_BASE}/comments", json=payload,
-                              headers=headers, timeout=10)
+            resp = httpx.post(
+                f"{DEVTO_API_BASE}/comments", json=payload, headers=headers, timeout=10
+            )
             resp.raise_for_status()
             return resp.json()  # type: ignore[return-value]
         except httpx.HTTPError as exc:
@@ -132,7 +144,7 @@ class SocialPosterAgent:
         """Create a GitHub Discussion. Returns dict with 'id', 'number', 'url'."""
         owner, name = repo.split("/", 1)
         repo_data = self._gh_graphql(
-            'query($o:String!,$n:String!){repository(owner:$o,name:$n){id}}',
+            "query($o:String!,$n:String!){repository(owner:$o,name:$n){id}}",
             {"o": owner, "n": name},
         )
         repo_id = repo_data.get("data", {}).get("repository", {}).get("id", "")
@@ -145,7 +157,9 @@ class SocialPosterAgent:
             "createDiscussion(input:{repositoryId:$rId,categoryId:$cId,title:$t,body:$b})"
             "{discussion{id number url}}}"
         )
-        data = self._gh_graphql(mutation, {"rId": repo_id, "cId": category_id, "t": title, "b": body})
+        data = self._gh_graphql(
+            mutation, {"rId": repo_id, "cId": category_id, "t": title, "b": body}
+        )
         disc = data.get("data", {}).get("createDiscussion", {}).get("discussion", {})
         if disc:
             logger.info("[GH] Discussion created: %s", disc.get("url"))
@@ -161,8 +175,11 @@ class SocialPosterAgent:
         )
         data = self._gh_graphql(query, {"o": owner, "n": name, "num": discussion_number})
         return (
-            data.get("data", {}).get("repository", {})
-            .get("discussion", {}).get("comments", {}).get("nodes", [])
+            data.get("data", {})
+            .get("repository", {})
+            .get("discussion", {})
+            .get("comments", {})
+            .get("nodes", [])
         )
 
     def reply_gh_discussion(self, repo: str, discussion_id: str, body: str) -> dict[str, Any]:

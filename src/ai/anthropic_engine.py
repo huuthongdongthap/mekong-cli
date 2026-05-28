@@ -92,9 +92,7 @@ class AnthropicEngine:
             try:
                 import anthropic  # noqa: F811
             except ImportError:
-                raise ImportError(
-                    "anthropic SDK not installed. Run: pip install anthropic"
-                )
+                raise ImportError("anthropic SDK not installed. Run: pip install anthropic")
 
             if not self._api_key:
                 raise ValueError(
@@ -150,19 +148,23 @@ class AnthropicEngine:
 
             except anthropic.RateLimitError as e:
                 last_error = e
-                delay = self.BASE_DELAY * (2 ** attempt)
+                delay = self.BASE_DELAY * (2**attempt)
                 logger.warning(
                     "Rate limited (attempt %d/%d), retrying in %.1fs",
-                    attempt + 1, self.MAX_RETRIES, delay,
+                    attempt + 1,
+                    self.MAX_RETRIES,
+                    delay,
                 )
                 time.sleep(delay)
 
             except anthropic.APITimeoutError as e:
                 last_error = e
-                delay = self.BASE_DELAY * (2 ** attempt)
+                delay = self.BASE_DELAY * (2**attempt)
                 logger.warning(
                     "API timeout (attempt %d/%d), retrying in %.1fs",
-                    attempt + 1, self.MAX_RETRIES, delay,
+                    attempt + 1,
+                    self.MAX_RETRIES,
+                    delay,
                 )
                 time.sleep(delay)
 

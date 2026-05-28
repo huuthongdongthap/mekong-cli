@@ -25,6 +25,7 @@ logger = logging.getLogger("mekong.license_enforcement")
 
 class LicenseStatus(str, Enum):
     """License status enumeration."""
+
     ACTIVE = "active"
     SUSPENDED = "suspended"
     REVOKED = "revoked"
@@ -36,6 +37,7 @@ class LicenseStatus(str, Enum):
 @dataclass
 class LicenseInfo:
     """License information data class."""
+
     key_id: str
     tier: str
     status: str
@@ -128,6 +130,7 @@ class LicenseEnforcementService:
             if license_key.startswith("raasjwt-"):
                 # Import here to avoid circular dependency
                 from src.lib.jwt_license_generator import validate_jwt_license
+
                 is_valid, payload, _ = validate_jwt_license(license_key)
                 if is_valid and payload:
                     key_id = payload.get("key_id", license_key)
@@ -193,6 +196,7 @@ class LicenseEnforcementService:
             # License not found in DB - check if JWT is valid
             if license_key.startswith("raasjwt-"):
                 from src.lib.jwt_license_generator import validate_jwt_license
+
                 is_valid, payload, _ = validate_jwt_license(license_key)
                 if is_valid and payload:
                     # Valid JWT but not in DB - treat as ACTIVE with payload tier

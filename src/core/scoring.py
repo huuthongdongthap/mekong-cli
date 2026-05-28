@@ -19,7 +19,6 @@ from dataclasses import dataclass, field
 
 from .telemetry_models import SubsystemHealthReport
 
-
 # 9 AGI subsystems in the Mekong architecture
 AGI_SUBSYSTEMS = [
     "memory",
@@ -126,15 +125,11 @@ def calculate_agi_score(
 
     # Dimension 3: Recipe reuse rate (0.0 - 1.0)
     if benchmark.total_recipe_opportunities > 0:
-        score.recipe_reuse_rate = (
-            benchmark.recipes_reused / benchmark.total_recipe_opportunities
-        )
+        score.recipe_reuse_rate = benchmark.recipes_reused / benchmark.total_recipe_opportunities
 
     # Dimension 4: Average quality score (0.0 - 1.0)
     if benchmark.quality_scores:
-        score.avg_quality_score = sum(benchmark.quality_scores) / len(
-            benchmark.quality_scores
-        )
+        score.avg_quality_score = sum(benchmark.quality_scores) / len(benchmark.quality_scores)
 
     # Dimension 5: Subsystem coverage (0.0 - 1.0)
     if health_report:

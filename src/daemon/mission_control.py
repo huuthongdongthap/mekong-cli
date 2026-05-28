@@ -107,7 +107,15 @@ def get_worker_status() -> list[WorkerStatus]:
         # Only include daemon-related processes
         if not any(
             keyword in name.lower()
-            for keyword in ["worker", "daemon", "dispatcher", "scheduler", "heartbeat", "jidoka", "learning"]
+            for keyword in [
+                "worker",
+                "daemon",
+                "dispatcher",
+                "scheduler",
+                "heartbeat",
+                "jidoka",
+                "learning",
+            ]
         ):
             continue
 

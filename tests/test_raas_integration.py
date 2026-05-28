@@ -8,6 +8,7 @@ but CreditStore.deduct/add require it.  _CreditStoreCompat below makes `reason`
 optional so that the MissionService can be exercised end-to-end without
 modifying any src/ file.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -23,7 +24,6 @@ from src.raas.mission_models import MissionComplexity
 from src.raas.missions import MissionService, mission_router
 from src.raas.mission_store import MissionStore
 from src.raas.tenant import TenantStore
-
 
 # ---------------------------------------------------------------------------
 # Compat shim — makes `reason` optional so MissionService calls succeed.
@@ -108,9 +108,7 @@ def _make_app(credit_store, mission_store, tasks_dir) -> FastAPI:
 # ---------------------------------------------------------------------------
 
 
-def test_full_mission_lifecycle(
-    credit_store, mission_store, tasks_dir, tenant_a
-):
+def test_full_mission_lifecycle(credit_store, mission_store, tasks_dir, tenant_a):
     """Create tenant, add credits, POST mission, GET status, verify credits deducted."""
     credit_store.add(tenant_a.id, 10, "test top-up")
     assert credit_store.get_balance(tenant_a.id) == 10
@@ -170,14 +168,10 @@ def test_credit_insufficient_deduct_returns_false(credit_store, tenant_a):
 # ---------------------------------------------------------------------------
 
 
-def test_tenant_isolation(
-    credit_store, mission_store, tasks_dir, tenant_a, tenant_b
-):
+def test_tenant_isolation(credit_store, mission_store, tasks_dir, tenant_a, tenant_b):
     """Tenant B's auth context cannot retrieve Tenant A's mission (404)."""
     # Create mission directly via store (bypasses credit check)
-    record = mission_store.create(
-        tenant_a.id, "private goal", MissionComplexity.simple, 1
-    )
+    record = mission_store.create(tenant_a.id, "private goal", MissionComplexity.simple, 1)
 
     app = _make_app(credit_store, mission_store, tasks_dir)
 
@@ -200,9 +194,7 @@ def test_tenant_isolation(
 # ---------------------------------------------------------------------------
 
 
-def test_cancel_refund(
-    credit_store, mission_store, tasks_dir, tenant_a
-):
+def test_cancel_refund(credit_store, mission_store, tasks_dir, tenant_a):
     """Cancel a queued mission and verify credits are refunded."""
     credit_store.add(tenant_a.id, 10, "test top-up")
 

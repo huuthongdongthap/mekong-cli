@@ -18,7 +18,9 @@ def run(
     clean: bool = typer.Option(False, "--clean", help="Clean build artifacts first"),
     optimize: bool = typer.Option(False, "--optimize", "-O", help="Optimize build"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
-    target: str = typer.Option("all", "--target", "-t", help="Build target: all, python, js, docker"),
+    target: str = typer.Option(
+        "all", "--target", "-t", help="Build target: all, python, js, docker"
+    ),
 ):
     """Build the project with various options"""
 
@@ -64,7 +66,7 @@ def clean_build():
     ]
 
     for pattern in dirs_to_clean:
-        for path in Path('.').glob(pattern):
+        for path in Path(".").glob(pattern):
             if path.is_dir():
                 shutil.rmtree(path, ignore_errors=True)
                 console.print(f"  Removed directory: {path}")
@@ -173,10 +175,7 @@ def info():
 
     # Check Docker
     try:
-        result = subprocess.run(
-            ["docker", "images", "mekong-cli"],
-            capture_output=True, text=True
-        )
+        result = subprocess.run(["docker", "images", "mekong-cli"], capture_output=True, text=True)
         if "mekong-cli" in result.stdout:
             table.add_row("Docker Image", "✅ Built", "mekong-cli:latest")
         else:
@@ -211,8 +210,10 @@ def docker(
             console.print(f"[bold blue]⬆️  Pushing image: {tag}[/bold blue]")
             subprocess.run(
                 ["docker", "push", tag],
-                cwd=Path.cwd(), check=True,
-                capture_output=not verbose, text=True
+                cwd=Path.cwd(),
+                check=True,
+                capture_output=not verbose,
+                text=True,
             )
             console.print(f"[green]✅ Docker image pushed: {tag}[/green]")
 

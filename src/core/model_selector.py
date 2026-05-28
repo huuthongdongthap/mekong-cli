@@ -145,16 +145,19 @@ def detect_provider(model_id: str) -> str:
 
 def _lookup_matrix(profile: TaskProfile) -> str | None:
     """Look up model from routing matrix with wildcard fallback."""
-    key = (profile.agent_role, profile.complexity,
-           profile.requires_reasoning, profile.data_sensitivity)
+    key = (
+        profile.agent_role,
+        profile.complexity,
+        profile.requires_reasoning,
+        profile.data_sensitivity,
+    )
 
     # Exact match first
     if key in MODEL_ROUTING_MATRIX:
         return MODEL_ROUTING_MATRIX[key]
 
     # Wildcard sensitivity match
-    wildcard_key = (profile.agent_role, profile.complexity,
-                    profile.requires_reasoning, "*")
+    wildcard_key = (profile.agent_role, profile.complexity, profile.requires_reasoning, "*")
     if wildcard_key in MODEL_ROUTING_MATRIX:
         return MODEL_ROUTING_MATRIX[wildcard_key]
 
@@ -180,6 +183,7 @@ def _env_override(profile: TaskProfile) -> ModelConfig | None:
     honours the sensitive→local-only rule.
     """
     import os
+
     env_model = os.environ.get("LLM_MODEL", "").strip()
     if not env_model:
         return None
@@ -192,6 +196,7 @@ def _env_override(profile: TaskProfile) -> ModelConfig | None:
         return None
 
     from src.core.cost_estimator import COST_TABLE
+
     ctx_window = CONTEXT_WINDOW_MAP.get(model_id, 32000)
     costs = COST_TABLE.get(model_id, (0.0, 0.0))
     return ModelConfig(
@@ -243,9 +248,11 @@ def select_model(profile: TaskProfile, state: SystemState) -> ModelConfig:
     if state.tenant_tier == "starter" and model_id == "claude-opus-4-6":
         model_id = "claude-sonnet-4-6"
 
-    if (state.tenant_tier == "starter"
-            and state.local_available
-            and profile.domain not in ("code", "sales")):
+    if (
+        state.tenant_tier == "starter"
+        and state.local_available
+        and profile.domain not in ("code", "sales")
+    ):
         model_id = BEST_LOCAL_FOR_DOMAIN.get(profile.domain, model_id)
 
     # Step 4: Build ModelConfig
@@ -254,6 +261,7 @@ def select_model(profile: TaskProfile, state: SystemState) -> ModelConfig:
     provider = detect_provider(model_id)
 
     from src.core.cost_estimator import COST_TABLE
+
     costs = COST_TABLE.get(model_id, (0.0, 0.0))
 
     return ModelConfig(
@@ -266,6 +274,7 @@ def select_model(profile: TaskProfile, state: SystemState) -> ModelConfig:
         cost_per_mtok_output=costs[1],
     )
 
+
 # --- Task Complexity Override (Superpowers-inspired) ---
 # When task is mechanical, use cheaper model regardless of agent role
 
@@ -275,9 +284,9 @@ def select_model(profile: TaskProfile, state: SystemState) -> ModelConfig:
 # qwen2.5-coder:7b = fast simple tasks (1.3s)
 # deepseek-r1:32b = heavy reasoning (security, analysis)
 TASK_TIER_OVERRIDE: dict[str, str | None] = {
-    "mechanical": "ollama:qwen2.5-coder:7b",     # fast: simple tasks, 1.3s
-    "integration": "ollama:qwen3-coder-next",     # coding/agentic workflows
-    "architecture": "ollama:qwen3:32b",           # broad reasoning + content
+    "mechanical": "ollama:qwen2.5-coder:7b",  # fast: simple tasks, 1.3s
+    "integration": "ollama:qwen3-coder-next",  # coding/agentic workflows
+    "architecture": "ollama:qwen3:32b",  # broad reasoning + content
 }
 
 
@@ -305,6 +314,7 @@ def select_model_with_tier(
         # Use cheap model for mechanical tasks
         provider = detect_provider(override)
         from src.core.cost_estimator import COST_TABLE
+
         costs = COST_TABLE.get(override, (0.0, 0.0))
         ctx = CONTEXT_WINDOW_MAP.get(override, 128000)
         return ModelConfig(

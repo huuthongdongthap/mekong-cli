@@ -41,9 +41,7 @@ def _lloyds_gaussian_np(n_centroids: int, sigma: float, n_iter: int = 100) -> np
     """Lloyd's algorithm in NumPy. One-time init cost."""
     from scipy import stats
 
-    boundaries = stats.norm.ppf(
-        np.linspace(0, 1, n_centroids + 1)[1:-1], scale=sigma
-    )
+    boundaries = stats.norm.ppf(np.linspace(0, 1, n_centroids + 1)[1:-1], scale=sigma)
     centroids = np.zeros(n_centroids)
 
     def cond_exp(a, b):

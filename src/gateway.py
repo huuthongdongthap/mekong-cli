@@ -3,61 +3,56 @@
 FastAPI server exposing Mekong CLI orchestration to AgencyOS.
 REST API + SSE streaming for real-time mission execution.
 
-Sprint 3.3 - Task 3.1: Clean API Contract
-
-Endpoints:
-    POST   /v1/missions                 - Create mission
-    GET    /v1/missions/{id}            - Get mission status
-    GET    /v1/missions/{id}/stream     - SSE progress stream
-    POST   /v1/webhook/test             - Test webhook connectivity
-    GET    /v1/webhook/schema           - Webhook event schema
-    GET    /health                      - Health check
-
 Usage:
     uvicorn src.gateway:app --host 0.0.0.0 --port 8000
 """
 
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
 import os as _os
-import uuid
+import sys
+import time as _time
 from datetime import datetime, timezone
-from typing import AsyncGenerator, Optional
 
-from fastapi import FastAPI, HTTPException, Header, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
 
-from src.core.error_responses import ErrorCode, error_response
-from src.core.input_validation import (
-    validate_required,
-    validate_url,
-    validate_enum_value,
-    validate_string_length,
-)
-from src.core.gateway_api import (
-    MissionRequest,
-    create_mission,
-    get_webhook_schema,
-    validate_webhook_url,
-)
-from src.core.mcu_billing import MCUBilling, MCU_COSTS
-from src.core.webhook_events import WEBHOOK_EVENT_PAYLOADS
-from src.core.api_key_manager import validate_api_key
+from src.api.gateway_mission_routes import router as mission_router
+from src.api.gateway_webhook_mcu_routes import router as webhook_mcu_router
+from src.api.coupon_router import router as coupon_router
+from src.api.polar_webhook import router as polar_webhook_router
+from src.api.auth_routes import router as auth_router, vn_auth_router
 from src.raas.missions_api_router import router as raas_router
 from src.raas.revenue_router import router as revenue_router
 from src.raas.checkout_router import router as checkout_router
 from src.raas.tenant_use_case_router import router as tenant_router
 from src.raas.reports_router import router as reports_router
 from src.raas.autopilot import router as autopilot_router
-
+from src.api.vn_pricing_routes import router as vn_pricing_router
+from src.api.vn_pilot_routes import router as vn_pilot_router
+from src.api.vn_payments_routes import router as vn_payments_router
+from src.api.org_routes import org_router
 from src.core.request_logger import RequestLoggerMiddleware
+from src.core.mcu_billing import MCUBilling
+from src.core.logging_config import configure_logging
+from src.core.sentry_init import init_sentry
+from src.core.telemetry_init import init_telemetry
+
+configure_logging()
+init_sentry()
+init_telemetry()
 
 logger = logging.getLogger(__name__)
+
+# Capture process start time for uptime reporting
+_APP_START_TIME: float = _time.monotonic()
+
+# =============================================================================
+# BILLING SINGLETON
+# =============================================================================
+# Global MCUBilling instance for credit management
+mcu_billing = MCUBilling()
 
 # =============================================================================
 # FASTAPI APP
@@ -65,28 +60,38 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Mekong CLI Gateway API",
-    description="Unified API contract for AgencyOS → Mekong CLI integration",
+    description="Unified API for MekongMind — the one-person company platform",
     version="3.3.0",
     docs_url="/api-docs",
     redoc_url="/api-redoc",
 )
 
-# Mount RaaS API router
+# Mount routers — gateway endpoints
+app.include_router(mission_router)
+app.include_router(webhook_mcu_router)
+app.include_router(coupon_router)
+app.include_router(polar_webhook_router)
+app.include_router(auth_router)
+app.include_router(vn_auth_router)
+
+# Mount routers — RaaS endpoints
 app.include_router(raas_router)
 app.include_router(revenue_router)
 app.include_router(checkout_router)
 app.include_router(tenant_router)
 app.include_router(reports_router)
+app.include_router(vn_pricing_router)
+app.include_router(vn_pilot_router)
+app.include_router(vn_payments_router)
+app.include_router(org_router)
 app.include_router(autopilot_router)
 
 # CORS for AgencyOS frontend
-# Security: wildcard origin is incompatible with allow_credentials=True (CORS spec).
-# Use explicit origins list from env var; fall back to localhost for dev.
 _ALLOWED_ORIGINS: list[str] = [
     o.strip()
     for o in _os.environ.get(
         "CORS_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://localhost:8080,https://mekongmind.pages.dev,https://mekongmind.com,https://www.mekongmind.com,https://api.cashclaw.cc",
+        "http://localhost:3000,http://localhost:8080,https://mekongmind.com,https://www.mekongmind.com,https://api.cashclaw.cc,https://ide.mekongmind.com",
     ).split(",")
     if o.strip()
 ]
@@ -101,518 +106,87 @@ app.add_middleware(
 
 
 # =============================================================================
-# REQUEST/RESPONSE MODELS
+# HEALTH CHECK
 # =============================================================================
 
-class CreateMissionRequest(BaseModel):
-    """Request body for POST /v1/missions."""
-
-    goal: str = Field(..., description="Natural language goal")
-    tenant_id: str = Field(..., description="AgencyOS tenant ID")
-    webhook_url: Optional[str] = Field(None, description="Callback URL for results")
-    priority: str = Field("normal", description="low|normal|high")
-    metadata: dict = Field(default_factory=dict)
+_APP_VERSION = "3.3.0"
 
 
-class CreateMissionResponse(BaseModel):
-    """Response body for POST /v1/missions."""
-
-    mission_id: str
-    status: str
-    created_at: str
-    estimated_steps: int = 0
-    stream_url: str
-
-
-class MissionStatusResponse(BaseModel):
-    """Response body for GET /v1/missions/{id}."""
-
-    mission_id: str
-    status: str
-    goal: str
-    tenant_id: str
-    created_at: str
-    updated_at: Optional[str] = None
-    completed_at: Optional[str] = None
-    steps_total: int = 0
-    steps_completed: int = 0
-
-
-class TestWebhookRequest(BaseModel):
-    """Request body for POST /v1/webhook/test."""
-
-    webhook_url: str = Field(..., description="Webhook URL to test")
-    tenant_id: Optional[str] = Field(None, description="Optional tenant context")
-
-
-class TestWebhookResponse(BaseModel):
-    """Response body for POST /v1/webhook/test."""
-
-    success: bool
-    message: str
-    status_code: Optional[int] = None
-    response_time_ms: Optional[float] = None
-
-
-class MCUDeductRequest(BaseModel):
-    """Request body for POST /v1/mcu/deduct."""
-
-    tenant_id: str = Field(..., description="Tenant identifier")
-    complexity: str = Field("simple", description="simple|standard|complex")
-    mission_id: str = Field("", description="Associated mission ID")
-
-
-class MCUDeductResponse(BaseModel):
-    """Response body for POST /v1/mcu/deduct."""
-
-    success: bool
-    balance_before: int
-    balance_after: int
-    amount_deducted: int
-    low_balance: bool = False
-    error: str = ""
-
-
-# =============================================================================
-# IN-MEMORY STORES
-# =============================================================================
-
-MISSION_STORE: dict[str, dict] = {}
-mcu_billing = MCUBilling()
-
-
-# =============================================================================
-# ENDPOINTS
-# =============================================================================
-
-def _validate_api_key(x_api_key: str = Header(None, alias="X-API-Key")) -> str:
-    """Validate X-API-Key header."""
-    if not x_api_key:
-        raise HTTPException(status_code=401, detail="Missing X-API-Key header")
-    result = validate_api_key(x_api_key)
-    if not result.valid:
-        raise HTTPException(status_code=401, detail=result.error or "Invalid API key")
-    return result.tenant_id or ""
-
-
-@app.post("/v1/missions", response_model=CreateMissionResponse)
-async def create_mission_endpoint(
-    request: CreateMissionRequest,
-    background_tasks: BackgroundTasks,
-) -> CreateMissionResponse:
-    """Create a new mission from AgencyOS.
-
-    AgencyOS calls this endpoint to submit a goal for Mekong CLI to execute.
-    Returns mission_id and stream_url for real-time progress tracking.
-    Uses hybrid router for background execution.
-
-    **Webhook:** If webhook_url provided, sends mission.created event.
-    """
-    request_id = str(uuid.uuid4())
-
-    # Validate required fields
-    error = validate_required(request.goal, "goal")
-    if error:
-        logger.warning("Mission creation failed validation: %s", error.message)
-        raise HTTPException(status_code=400, detail=error.to_dict())
-
-    error = validate_required(request.tenant_id, "tenant_id")
-    if error:
-        logger.warning("Mission creation failed validation: %s", error.message)
-        raise HTTPException(status_code=400, detail=error.to_dict())
-
-    # Validate goal length
-    error = validate_string_length(request.goal, "goal", min_len=1, max_len=5000)
-    if error:
-        raise HTTPException(status_code=400, detail=error.to_dict())
-
-    # Validate priority
-    error = validate_enum_value(
-        request.priority,
-        "priority",
-        ["low", "normal", "high"],
-        f"Invalid priority '{request.priority}'. Use: low, normal, high",
-    )
-    if error:
-        raise HTTPException(status_code=400, detail=error.to_dict())
-
+def _memory_usage_mb() -> float | None:
+    """Return RSS memory in MB, or None if psutil unavailable."""
     try:
-        mission_request = MissionRequest(
-            goal=request.goal.strip(),
-            tenant_id=request.tenant_id.strip(),
-            webhook_url=request.webhook_url.strip() if request.webhook_url else None,
-            priority=request.priority,  # type: ignore
-            metadata=request.metadata or {},
-        )
+        import psutil
 
-        # Validate webhook URL if provided
-        if mission_request.webhook_url:
-            error = validate_url(mission_request.webhook_url, "webhook_url")
-            if error:
-                raise HTTPException(status_code=400, detail=error.to_dict())
-
-        response = create_mission(mission_request)
-        mission_id = response.mission_id
-
-        # Store mission state
-        MISSION_STORE[mission_id] = {
-            "goal": request.goal,
-            "tenant_id": request.tenant_id,
-            "webhook_url": request.webhook_url,
-            "status": response.status.value,
-            "created_at": response.created_at,
-            "steps": [],
-            "events": [],
-        }
-
-        # Launch hybrid router as background task
-        background_tasks.add_task(
-            _run_hybrid_router,
-            mission_id=mission_id,
-            goal=request.goal,
-            tenant_id=request.tenant_id,
-        )
-
-        logger.info(
-            "Mission %s created for tenant %s (hybrid router queued)",
-            mission_id,
-            request.tenant_id,
-        )
-
-        return CreateMissionResponse(
-            mission_id=mission_id,
-            status=response.status.value,
-            created_at=response.created_at,
-            estimated_steps=response.estimated_steps,
-            stream_url=response.stream_url or f"/v1/missions/{mission_id}/stream",
-        )
-
-    except ValueError as e:
-        # API key validation or business logic errors
-        logger.warning("Mission creation business error: %s", e)
-        raise HTTPException(status_code=400, detail=str(e))
-
-    except HTTPException:
-        raise
-
-    except Exception as e:
-        logger.error("Mission creation failed: %s", str(e), exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "INTERNAL_ERROR",
-                "message": "Failed to create mission",
-                "request_id": request_id,
-            },
-        )
+        proc = psutil.Process()
+        return round(proc.memory_info().rss / 1024 / 1024, 2)
+    except Exception:
+        return None
 
 
-async def _run_hybrid_router(mission_id: str, goal: str, tenant_id: str) -> None:
-    """Background task: run hybrid LLM router for a mission."""
+def _component_status() -> dict[str, dict]:
+    """Check key component availability without external I/O."""
+    components: dict[str, dict] = {}
+
+    # Billing
     try:
-        from src.core.hybrid_router import route_and_execute
+        _ = mcu_billing  # singleton already constructed
+        components["billing"] = {"status": "healthy"}
+    except Exception as exc:
+        components["billing"] = {"status": "unhealthy", "error": str(exc)}
 
-        result = await route_and_execute(
-            goal=goal,
-            tenant_id=tenant_id,
-            mission_id=mission_id,
-        )
-
-        if mission_id in MISSION_STORE:
-            MISSION_STORE[mission_id]["status"] = "completed" if result.success else "failed"
-            MISSION_STORE[mission_id]["events"].append({
-                "event_type": "mission.completed" if result.success else "mission.failed",
-                "mission_id": mission_id,
-                "data": {
-                    "model_used": result.model_used,
-                    "mcu_charged": result.mcu_charged,
-                    "output_preview": result.output[:200] if result.output else "",
-                },
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            })
-    except Exception as e:
-        logger.error("Hybrid router failed for mission %s: %s", mission_id, e)
-        if mission_id in MISSION_STORE:
-            MISSION_STORE[mission_id]["status"] = "failed"
-
-
-@app.get("/v1/missions/{mission_id}", response_model=MissionStatusResponse)
-async def get_mission_status(mission_id: str) -> MissionStatusResponse:
-    """Get current mission status.
-
-    Returns mission state including progress (steps completed/total).
-    """
-    # Validate mission_id format
-    if not mission_id or not mission_id.strip():
-        raise HTTPException(
-            status_code=400,
-            detail={"error": "INVALID_INPUT", "message": "Mission ID cannot be empty"},
-        )
-
+    # Auth (check module importability)
     try:
-        if mission_id not in MISSION_STORE:
-            logger.warning("Mission not found: %s", mission_id)
-            raise HTTPException(status_code=404, detail="Mission not found")
+        from src.core.auth_jwt import decode_jwt  # noqa: F401
 
-        mission = MISSION_STORE[mission_id]
-        steps = mission.get("steps", [])
+        components["auth"] = {"status": "healthy"}
+    except Exception as exc:
+        components["auth"] = {"status": "unhealthy", "error": str(exc)}
 
-        return MissionStatusResponse(
-            mission_id=mission_id,
-            status=mission["status"],
-            goal=mission["goal"],
-            tenant_id=mission["tenant_id"],
-            created_at=mission["created_at"],
-            updated_at=datetime.now(timezone.utc).isoformat(),
-            steps_total=len(steps),
-            steps_completed=sum(1 for s in steps if s.get("status") == "completed"),
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Get mission status failed for %s: %s", mission_id, str(e))
-        raise HTTPException(
-            status_code=500,
-            detail={"error": "INTERNAL_ERROR", "message": "Failed to get mission status"},
-        )
-
-
-@app.get("/v1/missions/{mission_id}/stream")
-async def stream_mission(mission_id: str) -> StreamingResponse:
-    """Server-Sent Events (SSE) stream for real-time mission progress.
-
-    AgencyOS dashboard subscribes to this endpoint to show live progress.
-    Events: mission.created, mission.step.started, mission.step.completed, etc.
-
-    **Important:** Client must handle reconnection if stream drops.
-    """
-    if not mission_id or not mission_id.strip():
-        raise HTTPException(
-            status_code=400,
-            detail=error_response(
-                ErrorCode.MISSING_FIELD,
-                "Mission ID is required",
-            ).to_dict(),
-        )
-
-    if mission_id not in MISSION_STORE:
-        raise HTTPException(status_code=404, detail="Mission not found")
-
-    async def event_generator() -> AsyncGenerator[str, None]:
-        """Generate SSE events."""
-        mission = MISSION_STORE[mission_id]
-        max_poll_duration = 300  # 5 minute timeout
-        start_time = asyncio.get_event_loop().time()
-
-        try:
-            # Send initial state
-            event = {
-                "event_type": "mission.state",
-                "mission_id": mission_id,
-                "data": {
-                    "status": mission["status"],
-                    "goal": mission["goal"],
-                    "steps": mission.get("steps", []),
-                },
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
-            yield f"data: {json.dumps(event)}\n\n"
-
-            last_event_idx = 0
-            while True:
-                # Timeout protection
-                if (asyncio.get_event_loop().time() - start_time) > max_poll_duration:
-                    logger.warning("Stream timeout for mission %s", mission_id)
-                    break
-
-                events = mission.get("events", [])
-                if len(events) > last_event_idx:
-                    for evt in events[last_event_idx:]:
-                        yield f"data: {json.dumps(evt)}\n\n"
-                    last_event_idx = len(events)
-
-                if mission["status"] in ["completed", "failed", "cancelled"]:
-                    final_event = {
-                        "event_type": f"mission.{mission['status']}",
-                        "mission_id": mission_id,
-                        "data": {"final_state": mission},
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                    }
-                    yield f"data: {json.dumps(final_event)}\n\n"
-                    break
-
-                await asyncio.sleep(0.5)  # Poll for new events
-
-        except asyncio.CancelledError:
-            logger.info("Stream cancelled for mission %s", mission_id)
-        except Exception as e:
-            logger.error("Stream error for mission %s: %s", mission_id, str(e))
-            error_event = {
-                "event_type": "mission.error",
-                "mission_id": mission_id,
-                "data": {"error": str(e)},
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
-            yield f"data: {json.dumps(error_event)}\n\n"
-
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
-
-
-@app.post("/v1/webhook/test", response_model=TestWebhookResponse)
-async def test_webhook(request: TestWebhookRequest) -> TestWebhookResponse:
-    """Test webhook connectivity before going live.
-
-    AgencyOS calls this to verify webhook endpoint is reachable
-    before subscribing to mission events.
-    """
-    import time
-
-    # Validate webhook_url
-    error = validate_required(request.webhook_url, "webhook_url")
-    if error:
-        logger.warning("Webhook test failed validation: %s", error.message)
-        return TestWebhookResponse(
-            success=False,
-            message=error.message,
-            response_time_ms=0,
-        )
-
-    error = validate_url(request.webhook_url, "webhook_url")
-    if error:
-        logger.warning("Webhook test failed validation: %s", error.message)
-        return TestWebhookResponse(
-            success=False,
-            message=error.message,
-            response_time_ms=0,
-        )
-
-    start = time.time()
-    try:
-        success, message = validate_webhook_url(request.webhook_url)
-        elapsed_ms = (time.time() - start) * 1000
-
-        status_code = None
-        if "HTTP" in message:
-            try:
-                status_code = int(message.split()[-1])
-            except (ValueError, IndexError):
-                pass
-
-        return TestWebhookResponse(
-            success=success,
-            message=message,
-            status_code=status_code,
-            response_time_ms=elapsed_ms,
-        )
-
-    except Exception as e:
-        logger.error("Webhook test error for %s: %s", request.webhook_url, str(e))
-        return TestWebhookResponse(
-            success=False,
-            message=f"Webhook test failed: {str(e)}",
-            response_time_ms=0,
-        )
-
-
-@app.get("/v1/webhook/schema")
-async def webhook_schema() -> dict:
-    """Get webhook event schema documentation.
-
-    Returns all webhook event types with descriptions.
-    """
-    return {
-        "version": "3.3.0",
-        "events": {
-            name: model.__name__
-            for name, model in WEBHOOK_EVENT_PAYLOADS.items()
-        },
-        "descriptions": get_webhook_schema(),
+    # Sentry
+    sentry_dsn = _os.getenv("SENTRY_DSN")
+    components["sentry"] = {
+        "status": "healthy" if sentry_dsn else "disabled",
+        "configured": bool(sentry_dsn),
     }
 
+    # OpenTelemetry
+    otel_endpoint = _os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+    components["otel"] = {
+        "status": "healthy" if otel_endpoint else "disabled",
+        "configured": bool(otel_endpoint),
+    }
 
-@app.post("/v1/mcu/deduct", response_model=MCUDeductResponse)
-async def mcu_deduct(request: MCUDeductRequest) -> MCUDeductResponse:
-    """Deduct MCU credits for a mission execution.
+    return components
 
-    Complexity costs: simple=1 MCU, standard=3 MCU, complex=5 MCU.
-    """
-    # Validate required fields
-    error = validate_required(request.tenant_id, "tenant_id")
-    if error:
-        logger.warning("MCU deduct failed validation: %s", error.message)
-        raise HTTPException(status_code=400, detail=error.to_dict())
 
-    # Validate complexity
-    error = validate_enum_value(
-        request.complexity,
-        "complexity",
-        ["simple", "standard", "complex"],
-        f"Invalid complexity '{request.complexity}'. Use: simple, standard, complex",
-    )
-    if error:
-        raise HTTPException(status_code=400, detail=error.to_dict())
-
-    try:
-        # Use SQLite CreditStore (same as /raas/missions) instead of
-        # in-memory MCUBilling to avoid split-store bug (BUG-06).
-        from src.raas.credits import CreditStore
-
-        cost = MCU_COSTS.get(request.complexity, 1)
-        credit_store = CreditStore()
-        balance_before = credit_store.get_balance(request.tenant_id)
-
-        if balance_before < cost:
-            raise HTTPException(
-                status_code=402,
-                detail={
-                    "error": "INSUFFICIENT_CREDITS",
-                    "message": f"Insufficient MCU: need {cost}, have {balance_before}",
-                    "balance": balance_before,
-                    "required": cost,
-                },
-            )
-
-        credit_store.deduct(
-            tenant_id=request.tenant_id,
-            amount=cost,
-            reason=f"mcu_{request.complexity}_{request.mission_id or 'direct'}",
-        )
-        balance_after = credit_store.get_balance(request.tenant_id)
-
-        return MCUDeductResponse(
-            success=True,
-            balance_before=balance_before,
-            balance_after=balance_after,
-            amount_deducted=cost,
-            low_balance=balance_after < 10,
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("MCU deduct failed for tenant %s: %s", request.tenant_id, str(e))
-        raise HTTPException(
-            status_code=500,
-            detail={"error": "INTERNAL_ERROR", "message": "Failed to deduct MCU credits"},
-        )
+@app.get("/healthz")
+async def healthz() -> dict:
+    """Lightweight liveness probe (no I/O) for load balancers / Fly.io checks."""
+    return {"status": "ok", "version": _APP_VERSION}
 
 
 @app.get("/health")
 async def health_check() -> dict:
-    """Health check endpoint for load balancers."""
+    """Enhanced health check with uptime, memory, version, and component status."""
+    uptime_seconds = round(_time.monotonic() - _APP_START_TIME, 2)
+    components = _component_status()
+
+    # Overall status: unhealthy if any required component is unhealthy
+    required = {"billing", "auth"}
+    overall = "healthy"
+    for name, info in components.items():
+        if name in required and info.get("status") == "unhealthy":
+            overall = "unhealthy"
+            break
+
     return {
-        "status": "healthy",
+        "status": overall,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "3.3.0",
+        "version": _APP_VERSION,
+        "uptime_seconds": uptime_seconds,
+        "python_version": sys.version.split()[0],
+        "memory_mb": _memory_usage_mb(),
+        "components": components,
     }
 
 
@@ -626,4 +200,9 @@ app.add_middleware(RequestLoggerMiddleware)
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "src.gateway:app",
+        host="0.0.0.0",
+        port=int(_os.environ.get("GATEWAY_PORT", "8000")),
+        reload=True,
+    )

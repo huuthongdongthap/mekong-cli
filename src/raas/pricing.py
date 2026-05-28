@@ -68,8 +68,11 @@ _PLANS: Dict[PlanTier, Plan] = {
         price_monthly=99,
         credits=2500,
         features=[
-            "Unlimited recipes", "Priority support",
-            "Parallel review", "Custom skills", "AGI dashboard",
+            "Unlimited recipes",
+            "Priority support",
+            "Parallel review",
+            "Custom skills",
+            "AGI dashboard",
         ],
     ),
     PlanTier.TEAM: Plan(
@@ -78,8 +81,11 @@ _PLANS: Dict[PlanTier, Plan] = {
         price_monthly=249,
         credits=10000,
         features=[
-            "Everything in Pro", "Team workspace",
-            "SSO", "Audit logs", "Dedicated support",
+            "Everything in Pro",
+            "Team workspace",
+            "SSO",
+            "Audit logs",
+            "Dedicated support",
         ],
     ),
     PlanTier.ENTERPRISE: Plan(
@@ -88,8 +94,11 @@ _PLANS: Dict[PlanTier, Plan] = {
         price_monthly=0,  # Custom pricing
         credits=0,  # Unlimited
         features=[
-            "Everything in Team", "Custom credits",
-            "SLA", "On-prem option", "Dedicated CSM",
+            "Everything in Team",
+            "Custom credits",
+            "SLA",
+            "On-prem option",
+            "Dedicated CSM",
         ],
     ),
 }

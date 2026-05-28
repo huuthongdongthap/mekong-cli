@@ -81,7 +81,7 @@ class TestRaaSAuthClientInit:
     def test_default_init(self):
         """Test default initialization."""
         client = RaaSAuthClient()
-        assert client.gateway_url == "https://raas.agencyos.network"
+        assert client.gateway_url == "https://api.cashclaw.cc"
         assert client.credentials_path.suffix == ".json"
         assert client.use_secure_storage is True
 
@@ -156,9 +156,10 @@ class TestCredentialValidation:
         """Test validation with expired JWT."""
         # Create expired JWT payload
         import base64
-        header = base64.urlsafe_b64encode(b'{"alg":"HS256","typ":"JWT"}').rstrip(b'=').decode()
-        payload = base64.urlsafe_b64encode(b'{"exp":0}').rstrip(b'=').decode()
-        signature = base64.urlsafe_b64encode(b'fake_signature').rstrip(b'=').decode()
+
+        header = base64.urlsafe_b64encode(b'{"alg":"HS256","typ":"JWT"}').rstrip(b"=").decode()
+        payload = base64.urlsafe_b64encode(b'{"exp":0}').rstrip(b"=").decode()
+        signature = base64.urlsafe_b64encode(b"fake_signature").rstrip(b"=").decode()
         expired_jwt = f"{header}.{payload}.{signature}"
 
         result = client.validate_credentials(expired_jwt)
@@ -255,6 +256,7 @@ class TestGatewayValidation:
     def test_validate_gateway_network_error_fallback_local(self, mock_post):
         """Test network error falls back to local validation."""
         import requests
+
         mock_post.side_effect = requests.exceptions.ConnectionError("Network error")
         client = RaaSAuthClient(use_secure_storage=False)
 
@@ -277,9 +279,7 @@ class TestSecureStorageIntegration:
         yield creds_file
 
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_save_credentials_secure_storage(
-        self, mock_get_storage, temp_credentials_file
-    ):
+    def test_save_credentials_secure_storage(self, mock_get_storage, temp_credentials_file):
         """Test saving credentials uses secure storage when available."""
         mock_storage = MagicMock()
         mock_get_storage.return_value = mock_storage
@@ -296,9 +296,7 @@ class TestSecureStorageIntegration:
         assert not temp_credentials_file.exists()
 
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_save_credentials_fallback_file(
-        self, mock_get_storage, temp_credentials_file
-    ):
+    def test_save_credentials_fallback_file(self, mock_get_storage, temp_credentials_file):
         """Test saving credentials falls back to file when secure storage unavailable."""
         mock_get_storage.side_effect = Exception("Secure storage unavailable")
 
@@ -315,9 +313,7 @@ class TestSecureStorageIntegration:
         assert data["token"] == "mk_test_token"
 
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_load_credentials_from_secure_storage(
-        self, mock_get_storage, temp_credentials_file
-    ):
+    def test_load_credentials_from_secure_storage(self, mock_get_storage, temp_credentials_file):
         """Test loading credentials from secure storage."""
         mock_storage = MagicMock()
         mock_storage.get_license.return_value = "mk_secure_token"
@@ -360,9 +356,7 @@ class TestMigrationLogic:
     def temp_credentials_file(self, tmp_path):
         """Create temporary credentials file with test data."""
         creds_file = tmp_path / "credentials.json"
-        creds_file.write_text(
-            json.dumps({"token": "mk_old_token", "updated_at": 123456})
-        )
+        creds_file.write_text(json.dumps({"token": "mk_old_token", "updated_at": 123456}))
         yield creds_file
 
     @patch("src.core.raas_auth.get_secure_storage")
@@ -562,6 +556,7 @@ class TestSingletonPattern:
 
         # Reset singleton
         import src.core.raas_auth as module
+
         module._auth_client = None
 
         client1 = get_auth_client()

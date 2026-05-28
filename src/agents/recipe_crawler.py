@@ -34,18 +34,18 @@ class RecipeCrawler(AgentBase):
             Task(
                 id="search_repo",
                 description=f"Search community repo for '{query}'",
-                input={"query": query}
+                input={"query": query},
             ),
             Task(
                 id="filter_results",
                 description="Filter valid recipes (.md files)",
-                input={"query": query}
+                input={"query": query},
             ),
             Task(
                 id="download_recipes",
                 description="Download selected recipes",
-                input={"query": query}
-            )
+                input={"query": query},
+            ),
         ]
 
     def execute(self, task: Task) -> Result:
@@ -65,9 +65,9 @@ class RecipeCrawler(AgentBase):
                             "lead-gen-v2.md",
                             "tiktok-automation.md",
                             "README.md",
-                            "setup.sh"
+                            "setup.sh",
                         ]
-                    }
+                    },
                 )
 
             elif task.id == "filter_results":
@@ -79,9 +79,9 @@ class RecipeCrawler(AgentBase):
                     output={
                         "recipes": [
                             {"name": "Lead Gen V2", "file": "lead-gen-v2.md"},
-                            {"name": "TikTok Automation", "file": "tiktok-automation.md"}
+                            {"name": "TikTok Automation", "file": "tiktok-automation.md"},
                         ]
-                    }
+                    },
                 )
 
             elif task.id == "download_recipes":
@@ -90,29 +90,18 @@ class RecipeCrawler(AgentBase):
                     task_id=task.id,
                     success=True,
                     output={
-                        "downloaded": [
-                            "/recipes/lead-gen-v2.md",
-                            "/recipes/tiktok-automation.md"
-                        ],
-                        "status": "Saved to local recipes directory"
-                    }
+                        "downloaded": ["/recipes/lead-gen-v2.md", "/recipes/tiktok-automation.md"],
+                        "status": "Saved to local recipes directory",
+                    },
                 )
 
             else:
                 return Result(
-                    task_id=task.id,
-                    success=False,
-                    output=None,
-                    error=f"Unknown task: {task.id}"
+                    task_id=task.id, success=False, output=None, error=f"Unknown task: {task.id}"
                 )
 
         except Exception as e:
-            return Result(
-                task_id=task.id,
-                success=False,
-                output=None,
-                error=str(e)
-            )
+            return Result(task_id=task.id, success=False, output=None, error=str(e))
 
     def verify(self, result: Result) -> bool:
         """Verify results are valid"""

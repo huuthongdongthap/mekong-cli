@@ -139,9 +139,11 @@ class TestUpdateCheckerWithMockGateway:
         self.mock_gateway = Mock()
 
         # Create checker with mock gateway
-        with patch.object(UpdateChecker, '_load_cache', return_value=UpdateCache(
-            checked_at=datetime.min.replace(tzinfo=timezone.utc)
-        )):
+        with patch.object(
+            UpdateChecker,
+            "_load_cache",
+            return_value=UpdateCache(checked_at=datetime.min.replace(tzinfo=timezone.utc)),
+        ):
             self.checker = UpdateChecker(gateway_client=self.mock_gateway)
             self.checker.cache_path = self.cache_file
 
@@ -159,7 +161,7 @@ class TestUpdateCheckerWithMockGateway:
         }
         self.mock_gateway.get.return_value = mock_response
 
-        with patch('importlib.metadata.version', return_value="0.2.0"):
+        with patch("importlib.metadata.version", return_value="0.2.0"):
             result = await self.checker.check_version()
             assert result is None
 
@@ -181,7 +183,7 @@ class TestUpdateCheckerWithMockGateway:
         }
         self.mock_gateway.get.return_value = mock_response
 
-        with patch('importlib.metadata.version', return_value="0.2.0"):
+        with patch("importlib.metadata.version", return_value="0.2.0"):
             result = await self.checker.check_version()
             assert result is not None
             assert result.latest_version == "0.3.0"
@@ -191,12 +193,13 @@ class TestUpdateCheckerWithMockGateway:
     @pytest.mark.asyncio
     async def test_check_version_handles_gateway_timeout(self):
         """Should fail silently on gateway timeout."""
+
         async def timeout_side_effect(*args, **kwargs):
             raise asyncio.TimeoutError()
 
         self.mock_gateway.get.side_effect = timeout_side_effect
 
-        with patch('importlib.metadata.version', return_value="0.2.0"):
+        with patch("importlib.metadata.version", return_value="0.2.0"):
             result = await self.checker.check_version()
             assert result is None
 
@@ -205,7 +208,7 @@ class TestUpdateCheckerWithMockGateway:
         """Should fail silently on gateway error."""
         self.mock_gateway.get.side_effect = Exception("Gateway error")
 
-        with patch('importlib.metadata.version', return_value="0.2.0"):
+        with patch("importlib.metadata.version", return_value="0.2.0"):
             result = await self.checker.check_version()
             assert result is None
 
@@ -221,7 +224,7 @@ class TestUpdateCheckerWithMockGateway:
         }
         self.mock_gateway.get.return_value = mock_response
 
-        with patch('importlib.metadata.version', return_value="0.2.0"):
+        with patch("importlib.metadata.version", return_value="0.2.0"):
             result = await self.checker.check_version()
             assert result is not None
             assert result.is_critical is True
@@ -276,7 +279,7 @@ class TestUpdateCheckerIntegration:
     @pytest.mark.asyncio
     async def test_check_for_updates_async(self):
         """Async wrapper should work correctly."""
-        with patch('src.cli.update_checker.get_update_checker') as mock_get:
+        with patch("src.cli.update_checker.get_update_checker") as mock_get:
             mock_checker = Mock()
             mock_checker.should_check.return_value = False
             mock_get.return_value = mock_checker

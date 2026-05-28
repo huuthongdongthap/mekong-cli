@@ -4,11 +4,10 @@ Anthropic → OpenAI Bridge Proxy for MLX Server
 Translates Claude Code CLI requests (Anthropic format) to MLX server (OpenAI format).
 Listens on port 11435, forwards to MLX on port 8080.
 """
+
 import json
 import http.server
 import urllib.request
-import sys
-import threading
 
 MLX_URL = "http://127.0.0.1:8083"
 LISTEN_PORT = 11435
@@ -23,9 +22,7 @@ def anthropic_to_openai(anthropic_body: dict) -> dict:
     system = anthropic_body.get("system", "")
     if system:
         if isinstance(system, list):
-            system = " ".join(
-                b.get("text", "") for b in system if isinstance(b, dict)
-            )
+            system = " ".join(b.get("text", "") for b in system if isinstance(b, dict))
         messages.append({"role": "system", "content": system})
 
     # Convert messages
@@ -64,11 +61,11 @@ def anthropic_to_openai(anthropic_body: dict) -> dict:
         "temperature": anthropic_body.get("temperature", 0.7),
         "stream": anthropic_body.get("stream", False),
     }
-    
+
     tools = anthropic_body.get("tools", [])
     if tools:
         req_body["tools"] = [{"type": "function", "function": t} for t in tools]
-        
+
     return req_body
 
 
@@ -168,7 +165,7 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
 
                 import threading
-                import time
+
                 keep_alive_event = threading.Event()
 
                 def keep_alive():
@@ -182,26 +179,30 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
                 t = threading.Thread(target=keep_alive)
                 t.daemon = True
                 t.start()
-                
+
                 try:
                     msg_start = f'event: message_start\ndata: {{"type":"message_start","message":{{"id":"msg_local","type":"message","role":"assistant","model":"{MODEL}","content":[],"stop_reason":null,"usage":{{"input_tokens":0,"output_tokens":0}}}}}}\n\n'
-                    self.wfile.write(msg_start.encode('utf-8'))
+                    self.wfile.write(msg_start.encode("utf-8"))
 
-                    self.wfile.write('event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}\n\n'.encode('utf-8'))
+                    self.wfile.write(
+                        'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}\n\n'.encode(
+                            "utf-8"
+                        )
+                    )
                     self.wfile.flush()
-                    
+
                     req = urllib.request.Request(
                         f"{MLX_URL}/v1/chat/completions",
                         data=req_data,
                         headers={"Content-Type": "application/json"},
                         method="POST",
                     )
-                    
+
                     with urllib.request.urlopen(req, timeout=7200) as resp:
                         active_tool_idx = None
                         for line_bytes in resp:
                             keep_alive_event.set()
-                            line = line_bytes.decode('utf-8').strip()
+                            line = line_bytes.decode("utf-8").strip()
                             if not line or not line.startswith("data: "):
                                 continue
                             json_str = line[6:]
@@ -210,51 +211,81 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
                             try:
                                 chunk = json.loads(json_str)
                                 delta = chunk.get("choices", [{}])[0].get("delta", {})
-                                
+
                                 combined = ""
                                 if delta.get("content"):
                                     combined += str(delta.get("content", ""))
                                 if delta.get("reasoning"):
                                     combined += str(delta.get("reasoning", ""))
-                                    
+
                                 if combined:
                                     escaped = json.dumps(combined)[1:-1]
-                                    self.wfile.write(f'event: content_block_delta\ndata: {{"type":"content_block_delta","index":0,"delta":{{"type":"text_delta","text":"{escaped}"}}}}\n\n'.encode('utf-8'))
-                                    
+                                    self.wfile.write(
+                                        f'event: content_block_delta\ndata: {{"type":"content_block_delta","index":0,"delta":{{"type":"text_delta","text":"{escaped}"}}}}\n\n'.encode(
+                                            "utf-8"
+                                        )
+                                    )
+
                                 tool_calls = delta.get("tool_calls")
                                 if tool_calls:
                                     for tc in tool_calls:
                                         idx = tc.get("index", 0)
                                         if active_tool_idx != idx:
                                             if active_tool_idx is not None:
-                                                self.wfile.write(f'event: content_block_stop\ndata: {{"type":"content_block_stop","index":{1 + active_tool_idx}}}\n\n'.encode('utf-8'))
+                                                self.wfile.write(
+                                                    f'event: content_block_stop\ndata: {{"type":"content_block_stop","index":{1 + active_tool_idx}}}\n\n'.encode(
+                                                        "utf-8"
+                                                    )
+                                                )
                                             active_tool_idx = idx
                                             func = tc.get("function", {})
                                             name = func.get("name", "")
                                             tid = tc.get("id", f"call_{idx}")
-                                            self.wfile.write(f'event: content_block_start\ndata: {{"type":"content_block_start","index":{1 + idx},"content_block":{{"type":"tool_use","id":"{tid}","name":"{name}","input":{{}}}}}}\n\n'.encode('utf-8'))
-                                        
+                                            self.wfile.write(
+                                                f'event: content_block_start\ndata: {{"type":"content_block_start","index":{1 + idx},"content_block":{{"type":"tool_use","id":"{tid}","name":"{name}","input":{{}}}}}}\n\n'.encode(
+                                                    "utf-8"
+                                                )
+                                            )
+
                                         arg_delta = tc.get("function", {}).get("arguments", "")
                                         if arg_delta:
                                             escaped_args = json.dumps(arg_delta)[1:-1]
-                                            self.wfile.write(f'event: content_block_delta\ndata: {{"type":"content_block_delta","index":{1 + idx},"delta":{{"type":"input_json_delta","partial_json":"{escaped_args}"}}}}\n\n'.encode('utf-8'))
-                                
+                                            self.wfile.write(
+                                                f'event: content_block_delta\ndata: {{"type":"content_block_delta","index":{1 + idx},"delta":{{"type":"input_json_delta","partial_json":"{escaped_args}"}}}}\n\n'.encode(
+                                                    "utf-8"
+                                                )
+                                            )
+
                                 self.wfile.flush()
                             except Exception:
                                 continue
 
-                        self.wfile.write('event: content_block_stop\ndata: {"type":"content_block_stop","index":0}\n\n'.encode())
+                        self.wfile.write(
+                            'event: content_block_stop\ndata: {"type":"content_block_stop","index":0}\n\n'.encode()
+                        )
                         if active_tool_idx is not None:
-                            self.wfile.write(f'event: content_block_stop\ndata: {{"type":"content_block_stop","index":{1 + active_tool_idx}}}\n\n'.encode('utf-8'))
-                            self.wfile.write('event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":0}}\n\n'.encode())
+                            self.wfile.write(
+                                f'event: content_block_stop\ndata: {{"type":"content_block_stop","index":{1 + active_tool_idx}}}\n\n'.encode(
+                                    "utf-8"
+                                )
+                            )
+                            self.wfile.write(
+                                'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":0}}\n\n'.encode()
+                            )
                         else:
-                            self.wfile.write('event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":0}}\n\n'.encode())
-                        self.wfile.write('event: message_stop\ndata: {"type":"message_stop"}\n\n'.encode())
+                            self.wfile.write(
+                                'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":0}}\n\n'.encode()
+                            )
+                        self.wfile.write(
+                            'event: message_stop\ndata: {"type":"message_stop"}\n\n'.encode()
+                        )
                         self.wfile.flush()
                 except urllib.error.URLError as e:
-                    self.wfile.write(f'event: error\ndata: {{"type": "error", "error": {{"type": "api_error", "message": "MLX connection failed: {str(e)}"}}}}\n\n'.encode())
+                    self.wfile.write(
+                        f'event: error\ndata: {{"type": "error", "error": {{"type": "api_error", "message": "MLX connection failed: {str(e)}"}}}}\n\n'.encode()
+                    )
                 except BrokenPipeError:
-                    pass # Client disconnected early
+                    pass  # Client disconnected early
                 finally:
                     keep_alive_event.set()
             else:

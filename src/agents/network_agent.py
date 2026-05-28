@@ -15,6 +15,7 @@ from src.core.agent_base import AgentBase, Task, Result
 @dataclass
 class NetworkTestResult:
     """Result of network test"""
+
     target: str
     test_type: str
     success: bool
@@ -53,46 +54,58 @@ class NetworkAgent(AgentBase):
         input_lower = input_data.lower()
 
         if "ping" in input_lower or "connectivity" in input_lower:
-            tasks.append(Task(
-                id="ping_test",
-                description="Test network connectivity",
-                input={"type": "ping", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="ping_test",
+                    description="Test network connectivity",
+                    input={"type": "ping", "query": input_data},
+                )
+            )
 
         if "latency" in input_lower or "response" in input_lower:
-            tasks.append(Task(
-                id="latency_test",
-                description="Test endpoint latency",
-                input={"type": "latency", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="latency_test",
+                    description="Test endpoint latency",
+                    input={"type": "latency", "query": input_data},
+                )
+            )
 
         if "scan" in input_lower and "port" in input_lower:
-            tasks.append(Task(
-                id="port_scan",
-                description="Scan open ports",
-                input={"type": "port_scan", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="port_scan",
+                    description="Scan open ports",
+                    input={"type": "port_scan", "query": input_data},
+                )
+            )
 
         if "dns" in input_lower or "resolve" in input_lower:
-            tasks.append(Task(
-                id="dns_check",
-                description="Check DNS resolution",
-                input={"type": "dns", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="dns_check",
+                    description="Check DNS resolution",
+                    input={"type": "dns", "query": input_data},
+                )
+            )
 
         if "trace" in input_lower or "traceroute" in input_lower:
-            tasks.append(Task(
-                id="trace_route",
-                description="Trace network path",
-                input={"type": "traceroute", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="trace_route",
+                    description="Trace network path",
+                    input={"type": "traceroute", "query": input_data},
+                )
+            )
 
         if not tasks:
-            tasks.append(Task(
-                id="connectivity",
-                description="Run connectivity test",
-                input={"type": "ping", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="connectivity",
+                    description="Run connectivity test",
+                    input={"type": "ping", "query": input_data},
+                )
+            )
 
         return tasks
 
@@ -129,12 +142,15 @@ class NetworkAgent(AgentBase):
     def _extract_host(self, query: str) -> Optional[str]:
         """Extract hostname/IP from query string"""
         import re
+
         # Try to find URL
-        url_match = re.search(r'https?://([a-zA-Z0-9.\-]+)', query)
+        url_match = re.search(r"https?://([a-zA-Z0-9.\-]+)", query)
         if url_match:
             return url_match.group(1)
         # Try to find hostname/IP
-        host_match = re.search(r'\b([a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3})\b', query)
+        host_match = re.search(
+            r"\b([a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3})\b", query
+        )
         if host_match:
             return host_match.group(1)
         return None
@@ -158,8 +174,11 @@ class NetworkAgent(AgentBase):
 
             # Parse ping results
             import re
-            rtt_match = re.search(r'rtt min/avg/max/stddev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+)', output)
-            packet_loss_match = re.search(r'(\d+)% packet loss', output)
+
+            rtt_match = re.search(
+                r"rtt min/avg/max/stddev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+)", output
+            )
+            packet_loss_match = re.search(r"(\d+)% packet loss", output)
 
             result_data: Dict[str, Any] = {
                 "host": host,
@@ -194,7 +213,7 @@ class NetworkAgent(AgentBase):
         import re
 
         query = task.input.get("query", "")
-        url_match = re.search(r'https?://\S+', query)
+        url_match = re.search(r"https?://\S+", query)
 
         if not url_match:
             return Result(
@@ -207,9 +226,21 @@ class NetworkAgent(AgentBase):
         url = url_match.group(0).strip()
 
         # Use curl for latency measurement - safe: no shell=True
-        cmd = ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code} %{time_total} %{time_connect}", "--max-time", str(self.timeout_secs), url]
+        cmd = [
+            "curl",
+            "-s",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code} %{time_total} %{time_connect}",
+            "--max-time",
+            str(self.timeout_secs),
+            url,
+        ]
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=self.timeout_secs + 5)
+            proc = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=self.timeout_secs + 5
+            )
             parts = proc.stdout.strip().split()
 
             if len(parts) >= 3:
@@ -260,7 +291,7 @@ class NetworkAgent(AgentBase):
         default_ports = [22, 80, 443, 3000, 5000, 5432, 6379, 8080, 8443, 9000]
 
         # Check if specific port mentioned
-        port_match = re.search(r'port\s*(\d+)', query.lower())
+        port_match = re.search(r"port\s*(\d+)", query.lower())
         if port_match:
             ports = [int(port_match.group(1))]
         else:
@@ -303,7 +334,7 @@ class NetworkAgent(AgentBase):
         domain = self._extract_host(query)
         if not domain:
             # Try to find any domain-like string
-            domain_match = re.search(r'\b([a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b', query)
+            domain_match = re.search(r"\b([a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b", query)
             if domain_match:
                 domain = domain_match.group(1)
 
@@ -329,7 +360,8 @@ class NetworkAgent(AgentBase):
             if proc.returncode == 0 and proc.stdout.strip():
                 # Extract IPs
                 import re
-                ips = re.findall(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', proc.stdout)
+
+                ips = re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", proc.stdout)
 
                 return Result(
                     task_id=task.id,
@@ -373,7 +405,7 @@ class NetworkAgent(AgentBase):
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
             # Parse hops
-            lines = proc.stdout.strip().split('\n')[1:]  # Skip header
+            lines = proc.stdout.strip().split("\n")[1:]  # Skip header
             hops = []
             for line in lines[:10]:  # Max 10 hops
                 if line.strip():

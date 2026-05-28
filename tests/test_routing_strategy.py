@@ -90,9 +90,7 @@ class TestStrategyParser(unittest.TestCase):
             "strategy": {"mode": "fallback"},
             "targets": [{"provider": "vertex"}],
         }
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(config, f)
             f.flush()
             path = f.name

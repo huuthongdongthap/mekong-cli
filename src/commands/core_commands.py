@@ -9,11 +9,11 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from typing import Any
 
-from src.core.llm_client import get_client
+from src.core.llm_client import get_client, LLMClient
 from src.core.planner import RecipePlanner, PlanningContext, TaskComplexity
 from src.core.orchestrator import RecipeOrchestrator, OrchestrationStatus
+from src.core.orchestrator.models import OrchestrationResult
 from src.cli.helpers import (
     create_config_panel,
     create_step_table,
@@ -29,7 +29,6 @@ from src.cli.validators import (
     require_api_token,
 )
 from src.lib.raas_gate import require_license
-
 
 console = Console()
 app = typer.Typer()
@@ -82,7 +81,7 @@ def cook(
     _print_final_result(result)
 
 
-def _run_dry_run(goal: str, llm_client: Any) -> None:
+def _run_dry_run(goal: str, llm_client: LLMClient) -> None:
     """Run dry-run mode: plan only without execution."""
     planner = RecipePlanner(llm_client=llm_client if llm_client.is_available else None)
     recipe = planner.plan(goal)
@@ -103,7 +102,7 @@ def _run_dry_run(goal: str, llm_client: Any) -> None:
     console.print("\n[yellow]Dry run complete — no steps executed.[/yellow]")
 
 
-def _print_json_output(result: Any, goal: str) -> None:
+def _print_json_output(result: OrchestrationResult, goal: str) -> None:
     """Print JSON output for machine consumption."""
     output = {
         "status": result.status.value,
@@ -128,7 +127,7 @@ def _print_json_output(result: Any, goal: str) -> None:
     print_json_output(output)
 
 
-def _print_final_result(result: Any) -> None:
+def _print_final_result(result: OrchestrationResult) -> None:
     """Print final result summary."""
     if result.status == OrchestrationStatus.SUCCESS:
         print_success("🎉 Mission accomplished!", title="Success")
@@ -145,9 +144,7 @@ def _print_final_result(result: Any) -> None:
 @app.command(name="plan")
 def plan_cmd(
     goal: str = typer.Argument(..., help="Goal to decompose into tasks"),
-    complexity: str = typer.Option(
-        "moderate", help="Task complexity: simple/moderate/complex"
-    ),
+    complexity: str = typer.Option("moderate", help="Task complexity: simple/moderate/complex"),
 ) -> None:
     """📋 Plan: Decompose a goal into executable steps (plan only, no execution)"""
     from src.cli.validators import validate_complexity
@@ -218,9 +215,9 @@ def ask_cmd(
 
     plan_table = create_step_table()
     for step in recipe.steps:
-        plan_table.add_row(*format_agent_step_row(
-            step.order, step.title, step.agent, step.description
-        ))
+        plan_table.add_row(
+            *format_agent_step_row(step.order, step.title, step.agent, step.description)
+        )
     console.print(plan_table)
 
 
@@ -247,9 +244,9 @@ def debug_cmd(
 
         plan_table = create_step_table("Debug Steps")
         for step in recipe.steps:
-            plan_table.add_row(*format_agent_step_row(
-                step.order, step.title, step.agent, step.description
-            ))
+            plan_table.add_row(
+                *format_agent_step_row(step.order, step.title, step.agent, step.description)
+            )
         console.print(plan_table)
         console.print(
             f'\n[dim]Run [bold cyan]mekong debug "{issue}" --execute[/bold cyan] to run[/dim]'
@@ -291,11 +288,11 @@ def gateway(
         "Endpoint": f"POST http://{host}:{port}/cmd",
     }
 
-    console.print(create_config_panel(
-        "🌐 Mekong Gateway — OpenClaw Hybrid Commander",
-        config,
-        border_style="cyan"
-    ))
+    console.print(
+        create_config_panel(
+            "🌐 Mekong Gateway — OpenClaw Hybrid Commander", config, border_style="cyan"
+        )
+    )
 
     uvicorn.run("src.core.gateway:app", host=host, port=port, log_level="info")
 

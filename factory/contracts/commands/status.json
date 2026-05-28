@@ -4,19 +4,16 @@
   "layer": "ops",
   "chapter": "九變 — Nine Variations",
   "display": {
-    "name_vi": "Status",
     "name_en": "Status",
     "icon": "",
-    "description_vi": "Execute Status command",
-    "description_en": "Execute Status command"
+    "description_en": "Project status report — progress, blockers, metrics"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "pm"
     ],
     "hub": "ops-hub",
-    "complexity": "trivial",
+    "complexity": "simple",
     "timeout_ms": 10000,
     "credit_cost": 0,
     "requires_approval": false
@@ -31,9 +28,20 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "project": {
+      "services": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Target services"
+      },
+      "environment": {
         "type": "string",
-        "description": "Target project path"
+        "enum": [
+          "local",
+          "staging",
+          "production"
+        ]
       }
     }
   },
@@ -43,14 +51,26 @@
       "summary": {
         "type": "string"
       },
-      "files_modified": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "healthy",
+          "degraded",
+          "down",
+          "completed"
+        ]
+      },
+      "findings": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "credits_used": {
-        "type": "integer"
+      "actions_taken": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     }
   },

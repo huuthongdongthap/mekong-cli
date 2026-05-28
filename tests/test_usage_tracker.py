@@ -87,12 +87,8 @@ class TestUsageTrackerIdempotency:
 
     def test_generate_idempotency_key_different_commands(self):
         """Test that different commands produce different keys."""
-        key1 = self.tracker._generate_idempotency_key(
-            "key-123", "command", {"command": "cook"}
-        )
-        key2 = self.tracker._generate_idempotency_key(
-            "key-123", "command", {"command": "plan"}
-        )
+        key1 = self.tracker._generate_idempotency_key("key-123", "command", {"command": "cook"})
+        key2 = self.tracker._generate_idempotency_key("key-123", "command", {"command": "plan"})
 
         assert key1 != key2
 
@@ -134,14 +130,19 @@ class TestUsageTrackerTrackCommand:
         self.mock_repo = AsyncMock(spec=LicenseRepository)
         # Add required methods that may not be in spec
         self.mock_repo.check_idempotency_key = AsyncMock(return_value=False)
-        self.mock_repo.create_usage_event = AsyncMock(return_value={"id": 1, "created_at": datetime.now(timezone.utc)})
+        self.mock_repo.create_usage_event = AsyncMock(
+            return_value={"id": 1, "created_at": datetime.now(timezone.utc)}
+        )
         self.tracker = UsageTracker(repository=self.mock_repo)
 
     @pytest.mark.asyncio
     async def test_track_command_success(self):
         """Test successful command tracking."""
         self.mock_repo.check_idempotency_key.return_value = False
-        self.mock_repo.create_usage_event.return_value = {"id": 1, "created_at": datetime.now(timezone.utc)}
+        self.mock_repo.create_usage_event.return_value = {
+            "id": 1,
+            "created_at": datetime.now(timezone.utc),
+        }
 
         success, message = await self.tracker.track_command(
             key_id="key-123",
@@ -191,7 +192,9 @@ class TestUsageTrackerTrackFeature:
         self.mock_repo = AsyncMock(spec=LicenseRepository)
         # Add required methods that may not be in spec
         self.mock_repo.check_idempotency_key = AsyncMock(return_value=False)
-        self.mock_repo.create_usage_event = AsyncMock(return_value={"id": 1, "created_at": datetime.now(timezone.utc)})
+        self.mock_repo.create_usage_event = AsyncMock(
+            return_value={"id": 1, "created_at": datetime.now(timezone.utc)}
+        )
         self.tracker = UsageTracker(repository=self.mock_repo)
 
     @pytest.mark.asyncio
@@ -232,7 +235,9 @@ class TestUsageTrackerGetSummary:
         self.mock_repo = AsyncMock(spec=LicenseRepository)
         # Add required methods that may not be in spec
         self.mock_repo.check_idempotency_key = AsyncMock(return_value=False)
-        self.mock_repo.create_usage_event = AsyncMock(return_value={"id": 1, "created_at": datetime.now(timezone.utc)})
+        self.mock_repo.create_usage_event = AsyncMock(
+            return_value={"id": 1, "created_at": datetime.now(timezone.utc)}
+        )
         self.mock_repo.get_usage_events = AsyncMock(return_value=[])
         self.tracker = UsageTracker(repository=self.mock_repo)
 

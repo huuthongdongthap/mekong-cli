@@ -18,7 +18,9 @@ app = typer.Typer(name="dashboard", help="📈 Analytics dashboard")
 
 @app.command("show")
 def show_dashboard(
-    license_key: Optional[str] = typer.Option(None, "--key", "-k", help="License key (defaults to env var)"),
+    license_key: Optional[str] = typer.Option(
+        None, "--key", "-k", help="License key (defaults to env var)"
+    ),
     range_days: int = typer.Option(30, "--range", "-r", help="Date range in days"),
     format: str = typer.Option("table", "--format", "-f", help="Output format: table, json"),
 ) -> None:
@@ -34,6 +36,7 @@ def show_dashboard(
 
     if not license_key:
         import os
+
         license_key = os.getenv("RAAS_LICENSE_KEY", "")
 
     try:
@@ -58,78 +61,85 @@ def show_dashboard(
         # Display tables
         # Active Licenses
         if metrics.active_licenses:
-            license_table = Table(title="👥 Active Licenses", show_header=True, header_style="bold cyan")
+            license_table = Table(
+                title="👥 Active Licenses", show_header=True, header_style="bold cyan"
+            )
             license_table.add_column("Metric", style="dim")
             license_table.add_column("Value", justify="right")
 
-            license_table.add_row("Total", str(metrics.active_licenses.get('total', 0)))
+            license_table.add_row("Total", str(metrics.active_licenses.get("total", 0)))
 
             console.print(license_table)
 
         # Tier Distribution
         if metrics.tier_distribution:
-            tier_table = Table(title="📊 Tier Distribution", show_header=True, header_style="bold cyan")
+            tier_table = Table(
+                title="📊 Tier Distribution", show_header=True, header_style="bold cyan"
+            )
             tier_table.add_column("Tier", style="dim")
             tier_table.add_column("Count", justify="right")
             tier_table.add_column("Percentage", justify="right")
 
-            total = sum(v for v in metrics.tier_distribution.values() if isinstance(v, (int, float)))
+            total = sum(
+                v for v in metrics.tier_distribution.values() if isinstance(v, (int, float))
+            )
 
             for tier, count in metrics.tier_distribution.items():
                 if isinstance(count, (int, float)):
                     pct = (count / total * 100) if total > 0 else 0
                     tier_display = {
-                        'free': '🔓 FREE',
-                        'pro': '💎 PRO',
-                        'enterprise': '🏢 ENTERPRISE'
+                        "free": "🔓 FREE",
+                        "pro": "💎 PRO",
+                        "enterprise": "🏢 ENTERPRISE",
                     }
                     tier_table.add_row(
-                        tier_display.get(tier, tier.upper()),
-                        str(int(count)),
-                        f"{pct:.1f}%"
+                        tier_display.get(tier, tier.upper()), str(int(count)), f"{pct:.1f}%"
                     )
 
             console.print(tier_table)
 
         # Revenue Summary
         if metrics.revenue:
-            revenue_table = Table(title="💰 Revenue Summary", show_header=True, header_style="bold green")
+            revenue_table = Table(
+                title="💰 Revenue Summary", show_header=True, header_style="bold green"
+            )
             revenue_table.add_column("Metric", style="dim")
             revenue_table.add_column("Value", justify="right")
 
             for key, value in metrics.revenue.items():
                 if isinstance(value, (int, float)):
-                    revenue_table.add_row(
-                        key.replace('_', ' ').title(),
-                        f"${value:,.2f}"
-                    )
+                    revenue_table.add_row(key.replace("_", " ").title(), f"${value:,.2f}")
 
             console.print(revenue_table)
 
         # Rate Limit Violations (Phase 6)
         if metrics.rate_limit_violations:
-            violation_table = Table(title="⚠️ Rate Limit Violations (24h)", show_header=True, header_style="bold yellow")
+            violation_table = Table(
+                title="⚠️ Rate Limit Violations (24h)", show_header=True, header_style="bold yellow"
+            )
             violation_table.add_column("Tenant", style="dim")
             violation_table.add_column("Violations", justify="right")
 
             for violation in metrics.rate_limit_violations[:10]:
-                tenant_id = violation.get('tenant_id', 'unknown')[:12]
-                count = violation.get('count', 0)
+                tenant_id = violation.get("tenant_id", "unknown")[:12]
+                count = violation.get("count", 0)
                 violation_table.add_row(tenant_id, str(count))
 
             console.print(violation_table)
 
         # License Health (Phase 7)
         if metrics.license_health:
-            health_table = Table(title="❤️ License Health", show_header=True, header_style="bold green")
+            health_table = Table(
+                title="❤️ License Health", show_header=True, header_style="bold green"
+            )
             health_table.add_column("Metric", style="dim")
             health_table.add_column("Value", justify="right")
 
             for key, value in metrics.license_health.items():
                 if isinstance(value, (int, float)):
                     health_table.add_row(
-                        key.replace('_', ' ').title(),
-                        str(int(value)) if isinstance(value, int) else f"{value:.2f}"
+                        key.replace("_", " ").title(),
+                        str(int(value)) if isinstance(value, int) else f"{value:.2f}",
                     )
 
             console.print(health_table)
@@ -170,19 +180,23 @@ def export_analytics(
         service = DashboardService()
 
         if format == "csv":
-            csv_data = asyncio.run(service.export_to_csv(
-                date_range=(start_date, end_date),
-                license_key=license_key,
-            ))
+            csv_data = asyncio.run(
+                service.export_to_csv(
+                    date_range=(start_date, end_date),
+                    license_key=license_key,
+                )
+            )
             with open(output, "w") as f:
                 f.write(csv_data)
             console.print(f"[green]✓ Exported to {output}[/green]")
 
         elif format == "json":
-            json_data = asyncio.run(service.export_to_json(
-                date_range=(start_date, end_date),
-                license_key=license_key,
-            ))
+            json_data = asyncio.run(
+                service.export_to_json(
+                    date_range=(start_date, end_date),
+                    license_key=license_key,
+                )
+            )
             with open(output, "w") as f:
                 f.write(json_data)
             console.print(f"[green]✓ Exported to {output}[/green]")

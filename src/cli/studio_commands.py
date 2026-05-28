@@ -13,6 +13,7 @@ app = typer.Typer(name="studio", help="🏯 VC Studio Platform — Binh Phap Ton
 
 # === STUDIO CORE ===
 
+
 @app.command("init")
 def studio_init(
     name: str = typer.Argument(..., help="Studio name"),
@@ -20,6 +21,7 @@ def studio_init(
 ) -> None:
     """Initialize venture studio in current project."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]🏯 Studio '{name}' initialized (template: {thesis}).[/bold green]")
     console.print("[dim]Run `mekong venture thesis` to define investment thesis.[/dim]")
@@ -29,6 +31,7 @@ def studio_init(
 def studio_status() -> None:
     """Show studio Andon dashboard — portfolio health, pipeline, alerts."""
     from rich.console import Console
+
     console = Console()
     console.print("[bold]🏯 Studio Status[/bold] — no studio initialized yet.")
     console.print("[dim]Run `mekong studio init <name>` first.[/dim]")
@@ -41,6 +44,7 @@ def studio_report(
 ) -> None:
     """Generate studio performance report with cross-portfolio intelligence."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]📊 Studio Report ({period})[/bold] — output: {output}")
 
@@ -59,6 +63,7 @@ def portfolio_create(
 ) -> None:
     """Create new portfolio company with OpenClaw CTO instance."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]✅ Portfolio company '{name}' created[/bold green]")
     console.print(f"   Sector: {sector} | Stage: {stage} | Equity: {equity}%")
@@ -71,6 +76,7 @@ def portfolio_list(
 ) -> None:
     """List all portfolio companies."""
     from rich.console import Console
+
     console = Console()
     console.print("[bold]📊 Portfolio Companies[/bold] — empty portfolio.")
 
@@ -81,6 +87,7 @@ def portfolio_status(
 ) -> None:
     """Detailed status of a portfolio company."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]📊 Status: {company}[/bold] — company not found.")
 
@@ -94,6 +101,7 @@ def portfolio_update(
 ) -> None:
     """Update portfolio company metrics."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]✅ Updated: {company}[/bold green]")
 
@@ -104,6 +112,7 @@ def portfolio_health(
 ) -> None:
     """AI-powered health assessment using Five Factors."""
     from rich.console import Console
+
     console = Console()
     target = company or "all"
     console.print(f"[bold]🏥 Health Assessment: {target}[/bold]")
@@ -123,6 +132,7 @@ def dealflow_add(
 ) -> None:
     """Add new deal to pipeline."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]✅ Deal '{name}' added to pipeline[/bold green]")
 
@@ -133,6 +143,7 @@ def dealflow_list(
 ) -> None:
     """List deals in pipeline."""
     from rich.console import Console
+
     console = Console()
     console.print("[bold]🔍 Deal Pipeline[/bold] — empty pipeline.")
 
@@ -143,6 +154,7 @@ def dealflow_screen(
 ) -> None:
     """AI-powered deal screening against investment thesis."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🔍 Screening deal: {deal_id}[/bold]")
 
@@ -154,6 +166,7 @@ def dealflow_diligence(
 ) -> None:
     """Run due diligence pipeline on a deal."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🔍 Due diligence ({depth}): {deal_id}[/bold]")
 
@@ -166,6 +179,7 @@ def dealflow_advance(
 ) -> None:
     """Move deal to next pipeline stage."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]✅ Deal {deal_id} advanced[/bold green]")
 
@@ -177,6 +191,7 @@ def dealflow_pass_cmd(
 ) -> None:
     """Pass on a deal."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold yellow]⏭️ Passed on deal {deal_id}: {reason}[/bold yellow]")
 
@@ -194,6 +209,7 @@ def expert_add(
 ) -> None:
     """Add expert to pool."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]✅ Expert '{name}' added to pool[/bold green]")
 
@@ -205,6 +221,7 @@ def expert_match(
 ) -> None:
     """AI-powered expert matching for a portfolio company."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🧠 Matching experts for {company}: {need}[/bold]")
 
@@ -218,6 +235,7 @@ def expert_dispatch(
 ) -> None:
     """Dispatch expert to portfolio company."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold green]✅ Expert {expert_id} dispatched to {company}[/bold green]")
 
@@ -228,6 +246,7 @@ def expert_pool(
 ) -> None:
     """View expert pool."""
     from rich.console import Console
+
     console = Console()
     console.print("[bold]🧠 Expert Pool[/bold] — empty pool.")
 
@@ -243,6 +262,7 @@ def venture_thesis(
 ) -> None:
     """Manage investment thesis."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]⚔️ Investment Thesis — {action}[/bold]")
 
@@ -253,6 +273,7 @@ def venture_terrain(
 ) -> None:
     """Sun Tzu terrain analysis for a market."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🗺️ Terrain Analysis: {market}[/bold]")
 
@@ -263,6 +284,7 @@ def venture_momentum(
 ) -> None:
     """Calculate momentum score for company or market."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]⚡ Momentum Score: {target or 'all'}[/bold]")
 
@@ -273,6 +295,7 @@ def venture_five_factors(
 ) -> None:
     """Run five-factor evaluation."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🏯 Five-Factor Evaluation: {target}[/bold]")
 
@@ -283,6 +306,7 @@ def venture_void_substance(
 ) -> None:
     """Void-substance analysis — find where competitors are hollow."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]👻 Void-Substance Map: {market}[/bold]")
 
@@ -299,6 +323,7 @@ def match_founder_idea(
 ) -> None:
     """AI-powered founder-idea matching."""
     from rich.console import Console
+
     console = Console()
     console.print("[bold]🤝 Founder-Idea Matching[/bold]")
 
@@ -309,6 +334,7 @@ def match_vc_startup(
 ) -> None:
     """Generate VC match recommendations for a portfolio company."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🤝 VC Match for: {company}[/bold]")
 
@@ -320,11 +346,13 @@ def match_expert_need(
 ) -> None:
     """Match expert to specific company need."""
     from rich.console import Console
+
     console = Console()
     console.print(f"[bold]🤝 Expert Match for {company}: {need}[/bold]")
 
 
 # === REGISTRATION ===
+
 
 def register_studio_commands(main_app: typer.Typer) -> None:
     """Register all studio commands with the main Typer app."""

@@ -24,8 +24,8 @@ from src.core.auth_jwt import (
 from src.core.auth_types import TenantContext, SessionCache
 from src.core.auth_session import SessionManager
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def _make_jwt(payload: dict, header: dict | None = None) -> str:
     """Build a minimal (unsigned) JWT for testing."""
@@ -55,6 +55,7 @@ def _past_exp(seconds: int = 3600) -> int:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  decode_jwt
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestDecodeJwt:
     """decode_jwt: base64url decoding without signature verification."""
@@ -110,6 +111,7 @@ class TestDecodeJwt:
 #  validate_jwt_expiry
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class TestValidateJwtExpiry:
     """validate_jwt_expiry: reject expired / missing exp claims."""
 
@@ -139,6 +141,7 @@ class TestValidateJwtExpiry:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  extract_tenant_from_jwt
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestExtractTenantFromJwt:
     """extract_tenant_from_jwt: tenant context extraction from JWT claims."""
@@ -205,6 +208,7 @@ class TestExtractTenantFromJwt:
 #  validate_jwt_format
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class TestValidateJwtFormat:
     """validate_jwt_format: combined format + expiry check."""
 
@@ -258,6 +262,7 @@ class TestValidateJwtFormat:
 #  SessionManager
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class TestSessionManager:
     """SessionManager: TTL, persistence, clear, refresh logic."""
 
@@ -269,6 +274,7 @@ class TestSessionManager:
 
     def teardown_method(self):
         import shutil
+
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def _make_cache(self, ttl_seconds: int = 300) -> SessionCache:
@@ -426,12 +432,15 @@ class TestSessionManager:
 #  SessionCache dataclass
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class TestSessionCacheDataclass:
     """Direct tests of SessionCache helper methods."""
 
     def test_is_valid_when_fresh(self):
         cache = SessionCache(
-            tenant_id="t", tier="pro", role="pro",
+            tenant_id="t",
+            tier="pro",
+            role="pro",
             ttl_seconds=300,
             cached_at=datetime.now(timezone.utc),
         )
@@ -439,7 +448,9 @@ class TestSessionCacheDataclass:
 
     def test_is_expired_when_old(self):
         cache = SessionCache(
-            tenant_id="t", tier="pro", role="pro",
+            tenant_id="t",
+            tier="pro",
+            role="pro",
             ttl_seconds=1,
             cached_at=datetime.now(timezone.utc) - timedelta(seconds=10),
         )
@@ -466,7 +477,9 @@ class TestSessionCacheDataclass:
 
     def test_refresh_boundary_is_before_expiry(self):
         cache = SessionCache(
-            tenant_id="t", tier="pro", role="pro",
+            tenant_id="t",
+            tier="pro",
+            role="pro",
             ttl_seconds=300,
             cached_at=datetime.now(timezone.utc),
         )
@@ -474,7 +487,9 @@ class TestSessionCacheDataclass:
 
     def test_should_refresh_false_when_just_created(self):
         cache = SessionCache(
-            tenant_id="t", tier="pro", role="pro",
+            tenant_id="t",
+            tier="pro",
+            role="pro",
             ttl_seconds=300,
             cached_at=datetime.now(timezone.utc),
         )

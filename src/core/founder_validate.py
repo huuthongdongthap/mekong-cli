@@ -15,9 +15,7 @@ from typing import Literal
 
 logger = logging.getLogger(__name__)
 
-InterviewVerdict = Literal[
-    "PROBLEM CONFIRMED", "WEAK SIGNAL", "PIVOT NEEDED"
-]
+InterviewVerdict = Literal["PROBLEM CONFIRMED", "WEAK SIGNAL", "PIVOT NEEDED"]
 PMFLevel = Literal["STRONG", "MODERATE", "WEAK", "PIVOT"]
 
 
@@ -102,9 +100,7 @@ class ValidationAnalysis:
 # ── Framework Generation ─────────────────────────────────────────────
 
 
-def generate_framework(
-    company_name: str, idea: str
-) -> ValidationFramework:
+def generate_framework(company_name: str, idea: str) -> ValidationFramework:
     """Generate hypothesis framework from idea description."""
     if not idea or not idea.strip():
         raise ValueError("Idea description is required")
@@ -188,9 +184,7 @@ CORE_QUESTIONS = [
 ]
 
 
-def generate_interview_script(
-    problem_space: str, hypothesis_focus: str = "H1 + H2"
-) -> dict:
+def generate_interview_script(problem_space: str, hypothesis_focus: str = "H1 + H2") -> dict:
     """Generate Mom Test-style interview script."""
     if not problem_space.strip():
         raise ValueError("Problem space description is required")
@@ -205,13 +199,9 @@ def generate_interview_script(
             "the last time you dealt with this problem?"
         ),
         "core_questions": CORE_QUESTIONS,
-        "closing_wtp": (
-            "If there were a perfect solution, how much would you "
-            "pay per month?"
-        ),
+        "closing_wtp": ("If there were a perfect solution, how much would you " "pay per month?"),
         "closing_referral": (
-            "Do you know anyone else dealing with a similar problem? "
-            "Could I talk to them?"
+            "Do you know anyone else dealing with a similar problem? " "Could I talk to them?"
         ),
         "post_interview_fields": [
             "pain_level (1-10)",
@@ -227,9 +217,7 @@ def generate_interview_script(
 # ── Outreach Messages ───────────────────────────────────────────────
 
 
-def generate_outreach_variants(
-    problem_space: str, role: str = "founder"
-) -> list[dict[str, str]]:
+def generate_outreach_variants(problem_space: str, role: str = "founder") -> list[dict[str, str]]:
     """Generate 3 outreach message variants."""
     return [
         {
@@ -327,12 +315,8 @@ def analyze_pmf_responses(
 
     total = len(responses)
     very = sum(1 for r in responses if r.get("q1") == "Very disappointed")
-    somewhat = sum(
-        1 for r in responses if r.get("q1") == "Somewhat disappointed"
-    )
-    not_d = sum(
-        1 for r in responses if r.get("q1") == "Not disappointed"
-    )
+    somewhat = sum(1 for r in responses if r.get("q1") == "Somewhat disappointed")
+    not_d = sum(1 for r in responses if r.get("q1") == "Not disappointed")
 
     very_pct = (very / total) * 100
     somewhat_pct = (somewhat / total) * 100
@@ -348,9 +332,7 @@ def analyze_pmf_responses(
         level = "PIVOT"
 
     # Extract use cases from Q2 open text
-    use_cases = [
-        r["q2"] for r in responses if r.get("q2") and r["q2"].strip()
-    ]
+    use_cases = [r["q2"] for r in responses if r.get("q2") and r["q2"].strip()]
 
     return PMFResult(
         total_responses=total,
@@ -374,9 +356,7 @@ def analyze_interviews(
 
     n = len(notes)
     avg_pain = sum(note.pain_level for note in notes) / n
-    confirmed = sum(
-        1 for note in notes if note.verdict == "PROBLEM CONFIRMED"
-    )
+    confirmed = sum(1 for note in notes if note.verdict == "PROBLEM CONFIRMED")
 
     # Most common current solution
     solutions = [note.current_solution for note in notes if note.current_solution]
@@ -391,7 +371,11 @@ def analyze_interviews(
 
     # Budget signals
     budgets = [note.budget_signal for note in notes if note.budget_signal]
-    avg_budget = budgets[0] if len(budgets) == 1 else f"{budgets[0]} - {budgets[-1]}" if budgets else "Unknown"
+    avg_budget = (
+        budgets[0]
+        if len(budgets) == 1
+        else f"{budgets[0]} - {budgets[-1]}" if budgets else "Unknown"
+    )
 
     # Referral rate
     referral_rate = sum(1 for n in notes if n.referral_given) / len(notes) * 100
@@ -419,8 +403,7 @@ def analyze_interviews(
         problem_confirmed=confirmed / n >= 0.5,
         key_quotes=key_quotes[:5],
         positioning_insight=(
-            f"Customers describe pain at {avg_pain:.1f}/10, "
-            f"referral rate {referral_rate:.0f}%"
+            f"Customers describe pain at {avg_pain:.1f}/10, " f"referral rate {referral_rate:.0f}%"
         ),
         icp_refinement=f"Based on {n} interviews, focus on personas with pain >= 7",
         pmf_signal=signal,

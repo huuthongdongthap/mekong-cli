@@ -1,0 +1,18 @@
+{
+  "dealflow": [],
+  "pipeline": {
+    "sourced": 0,
+    "screening": 0,
+    "due_diligence": 0,
+    "term_sheet": 0,
+    "closed": 0
+  },
+  "criteria": {
+    "market_size_min": "$100M TAM",
+    "team_min": "1 technical founder + 1 industry expert",
+    "traction_min": "MVP or pilot customers",
+    "geography": "Vietnam primary, SEA secondary",
+    "focus": "Solar, energy tech, manufacturing tech, ESG"
+  },
+  "thesis": "Invest in companies that leverage AI + IoT to optimize solar integration for manufacturing and production in Vietnam"
+}

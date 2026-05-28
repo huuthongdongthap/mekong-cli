@@ -481,7 +481,9 @@ class TestVerifyQualityGates(unittest.TestCase):
 
     def test_vulnerability_fail_security_gate(self):
         """Output with vulnerability warning should fail security gate."""
-        result = ExecutionResult(exit_code=0, stdout="found 1 high severity vulnerability", stderr="")
+        result = ExecutionResult(
+            exit_code=0, stdout="found 1 high severity vulnerability", stderr=""
+        )
         report = self.verifier.verify_quality_gates(result)
         self.assertFalse(report.passed)
         security_check = next((c for c in report.checks if "security" in c.name), None)

@@ -63,9 +63,7 @@ class ErrorResponse:
 
 
 def error_response(
-    code: ErrorCode,
-    message: str,
-    details: list[ErrorDetail] = None
+    code: ErrorCode, message: str, details: list[ErrorDetail] = None
 ) -> ErrorResponse:
     """Factory function to create ErrorResponse with auto-generated metadata."""
     return ErrorResponse(

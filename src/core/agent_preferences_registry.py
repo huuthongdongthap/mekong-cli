@@ -135,10 +135,7 @@ class PreferencesRegistry:
             filepath: Absolute or relative path to write the JSON config.
 
         """
-        data = {
-            agent_type: asdict(prefs)
-            for agent_type, prefs in self._registry.items()
-        }
+        data = {agent_type: asdict(prefs) for agent_type, prefs in self._registry.items()}
         with open(filepath, "w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=2)
 

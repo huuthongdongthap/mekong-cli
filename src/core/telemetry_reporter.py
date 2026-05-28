@@ -47,9 +47,7 @@ class TelemetryReporter:
         Args:
             gateway_url: Optional gateway URL for flushing
         """
-        self.gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", "https://raas.agencyos.network"
-        )
+        self.gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", "https://api.cashclaw.cc")
         self.db_path = Path(self.DB_PATH).expanduser()
         self._buffer: list[UsageRecord] = []
         self._last_flush = time.time()
@@ -172,6 +170,7 @@ class TelemetryReporter:
 
         except Exception as e:
             import logging
+
             logging.debug(f"Failed to flush telemetry: {e}")
             pass  # Best effort - records saved locally
 
@@ -184,6 +183,7 @@ class TelemetryReporter:
                     return json.load(f).get("token")
             except (json.JSONDecodeError, OSError) as e:
                 import logging
+
                 logging.debug(f"Failed to load credentials: {e}")
         return os.getenv("RAAS_LICENSE_KEY")
 
@@ -231,12 +231,12 @@ class TelemetryReporter:
                 "total_requests": row[0] or 0,
                 "total_payload_bytes": row[1] or 0,
                 "avg_status_code": row[2] or 0,
-                "first_request": datetime.fromtimestamp(row[3], tz=timezone.utc).isoformat()
-                if row[3]
-                else None,
-                "last_request": datetime.fromtimestamp(row[4], tz=timezone.utc).isoformat()
-                if row[4]
-                else None,
+                "first_request": (
+                    datetime.fromtimestamp(row[3], tz=timezone.utc).isoformat() if row[3] else None
+                ),
+                "last_request": (
+                    datetime.fromtimestamp(row[4], tz=timezone.utc).isoformat() if row[4] else None
+                ),
             }
 
     def get_metrics(self) -> list[dict[str, Any]]:
@@ -248,13 +248,11 @@ class TelemetryReporter:
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute(
-                """
+            cursor = conn.execute("""
                 SELECT * FROM usage_records
                 ORDER BY timestamp ASC
                 LIMIT 1000
-                """
-            )
+                """)
             return [dict(row) for row in cursor.fetchall()]
 
     def get_hourly_metrics(self) -> list[dict[str, Any]]:
@@ -265,8 +263,7 @@ class TelemetryReporter:
             List of hourly bucket metrics
         """
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute(
-                """
+            cursor = conn.execute("""
                 SELECT
                     strftime('%Y-%m-%d-%H', datetime(timestamp, 'unixepoch')) as hour_bucket,
                     COUNT(*) as request_count,
@@ -276,8 +273,7 @@ class TelemetryReporter:
                 FROM usage_records
                 GROUP BY hour_bucket, endpoint, method
                 ORDER BY hour_bucket ASC
-                """
-            )
+                """)
             return [
                 {
                     "hour_bucket": row[0],

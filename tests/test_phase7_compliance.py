@@ -278,10 +278,13 @@ class TestReportSignerVerification:
 
         # Create fake signature file
         with open(sig_path, "w") as f:
-            json.dump({
-                "signature": "fake_sig",
-                "hash_value": "fake_hash",
-            }, f)
+            json.dump(
+                {
+                    "signature": "fake_sig",
+                    "hash_value": "fake_hash",
+                },
+                f,
+            )
 
         # Verify with signer that has no keys loaded
         signer = ReportSigner()
@@ -374,15 +377,24 @@ class TestCLIInitKeys:
         from typer.testing import CliRunner
 
         runner = CliRunner()
-        result = runner.invoke(app, [
-            "init_keys",
-            "--key-size", "1024",
-            "--output", temp_dir,
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "init_keys",
+                "--key-size",
+                "1024",
+                "--output",
+                temp_dir,
+            ],
+        )
         # Command may fail with SystemExit(2) if it requires a license check
         # We just verify it was invoked and attempted to create keys
         # Check that the command tried to run (exit_code 0 or 2 means it parsed correctly)
-        assert "Generating" in result.stdout or "key" in result.stdout.lower() or result.exit_code in (0, 2)
+        assert (
+            "Generating" in result.stdout
+            or "key" in result.stdout.lower()
+            or result.exit_code in (0, 2)
+        )
 
 
 class TestCLIChainCommand:
@@ -407,10 +419,13 @@ class TestCLIChainCommand:
 
         events_file = os.path.join(temp_dir, "events.json")
         with open(events_file, "w") as f:
-            json.dump([
-                {"id": 1, "created_at": "2026-01-01"},
-                {"id": 2, "created_at": "2026-01-02"},
-            ], f)
+            json.dump(
+                [
+                    {"id": 1, "created_at": "2026-01-01"},
+                    {"id": 2, "created_at": "2026-01-02"},
+                ],
+                f,
+            )
 
         runner = CliRunner()
         result = runner.invoke(app, ["chain", events_file])
@@ -429,10 +444,13 @@ class TestReportSignerEdgeCases:
         with open(report_path, "w") as f:
             json.dump({"test": "data"}, f)
         with open(sig_path, "w") as f:
-            json.dump({
-                "signature": "invalid!!!base64",
-                "hash_value": "a" * 64,
-            }, f)
+            json.dump(
+                {
+                    "signature": "invalid!!!base64",
+                    "hash_value": "a" * 64,
+                },
+                f,
+            )
 
         result = signer.verify_signature_file(report_path, sig_path)
         assert result.valid is False

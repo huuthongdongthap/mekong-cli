@@ -7,6 +7,7 @@ Requires: At least one LLM provider configured:
   - or LLM_BASE_URL + LLM_API_KEY + LLM_MODEL
   - or OPENROUTER_API_KEY
 """
+
 import asyncio
 import sys
 import os
@@ -22,6 +23,7 @@ async def test_full_journey():
     print("▸ 1. Create tenant")
     try:
         from src.raas.tenant import TenantStore
+
         store = TenantStore()
         tenant = store.create_tenant("e2e_test_customer")
         print(f"  ID: {tenant.id[:12]}...")
@@ -36,6 +38,7 @@ async def test_full_journey():
     print("\n▸ 2. Fund credits")
     try:
         from src.raas.credits import CreditStore
+
         credits = CreditStore()
         credits.add(tenant.id, 100, "e2e_test_funding")
         bal = credits.get_balance(tenant.id)
@@ -50,6 +53,7 @@ async def test_full_journey():
     print("\n▸ 3. Classify task")
     try:
         from src.core.task_classifier import classify_task
+
         goal = "Write a one-paragraph marketing pitch for a Vietnamese coffee brand"
         profile = classify_task(goal)
         print(f"  Goal: {goal[:60]}...")

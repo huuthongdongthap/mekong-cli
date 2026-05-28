@@ -13,8 +13,10 @@ router = APIRouter(prefix="/api", tags=["Tier Configuration"])
 
 # ========== Request/Response Models ==========
 
+
 class RateLimitConfigResponse(BaseModel):
     """Rate limit configuration response."""
+
     preset: str
     rate_limit: int = Field(..., description="Requests per window")
     window_seconds: int = Field(..., description="Window size in seconds")
@@ -23,6 +25,7 @@ class RateLimitConfigResponse(BaseModel):
 
 class TierConfigResponse(BaseModel):
     """Tier configuration response."""
+
     id: Optional[str]
     tier: str
     preset: str
@@ -32,17 +35,20 @@ class TierConfigResponse(BaseModel):
 
 class TierConfigsListResponse(BaseModel):
     """List of all tier configurations."""
+
     configs: dict[str, dict[str, TierConfigResponse]]
 
 
 class UpdateTierConfigRequest(BaseModel):
     """Request to update tier configuration."""
+
     rate_limit: int = Field(..., gt=0, description="New rate limit (requests per window)")
     window_seconds: int = Field(60, gt=0, description="Window size in seconds")
 
 
 class TenantOverrideResponse(BaseModel):
     """Tenant rate limit override response."""
+
     id: Optional[str]
     tenant_id: str
     tier: Optional[str]
@@ -54,11 +60,13 @@ class TenantOverrideResponse(BaseModel):
 
 class TenantOverrideListResponse(BaseModel):
     """List of tenant overrides."""
+
     overrides: List[TenantOverrideResponse]
 
 
 class CreateTenantOverrideRequest(BaseModel):
     """Request to create tenant override."""
+
     preset: str = Field(..., description="Preset name")
     custom_limit: int = Field(..., gt=0, description="Custom rate limit")
     custom_window: int = Field(60, gt=0, description="Custom window in seconds")
@@ -67,6 +75,7 @@ class CreateTenantOverrideRequest(BaseModel):
 
 
 # ========== Tier Config Endpoints ==========
+
 
 @router.get("/tier-configs", response_model=TierConfigsListResponse)
 async def list_tier_configs() -> TierConfigsListResponse:
@@ -117,17 +126,20 @@ async def get_tier_config(tier: str) -> List[TierConfigResponse]:
     for preset in presets:
         config = await repo.get_config(tier.lower(), preset)
         if config:
-            configs.append(TierConfigResponse(
-                id=config.id,
-                tier=config.tier,
-                preset=config.preset,
-                rate_limit=config.rate_limit,
-                window_seconds=config.window_seconds,
-            ))
+            configs.append(
+                TierConfigResponse(
+                    id=config.id,
+                    tier=config.tier,
+                    preset=config.preset,
+                    rate_limit=config.rate_limit,
+                    window_seconds=config.window_seconds,
+                )
+            )
 
     if not configs:
         # Return default configs if database has none
         from src.lib.tier_config import get_tier_config as get_default_config
+
         try:
             default = get_default_config(tier)
             return [
@@ -221,6 +233,7 @@ async def update_tier_config(
 
     # Invalidate cache
     from src.lib.rate_limiter_factory import invalidate_cache
+
     invalidate_cache(tier.lower())
 
     return TierConfigResponse(
@@ -233,6 +246,7 @@ async def update_tier_config(
 
 
 # ========== Tenant Override Endpoints ==========
+
 
 @router.get("/tenant-overrides", response_model=TenantOverrideListResponse)
 async def list_tenant_overrides(
@@ -300,7 +314,9 @@ async def get_tenant_overrides(tenant_id: str) -> TenantOverrideListResponse:
     )
 
 
-@router.post("/tenant-overrides", response_model=TenantOverrideResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/tenant-overrides", response_model=TenantOverrideResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_tenant_override(request: CreateTenantOverrideRequest) -> TenantOverrideResponse:
     """
     Create a new tenant rate limit override.
@@ -325,7 +341,7 @@ async def create_tenant_override(request: CreateTenantOverrideRequest) -> Tenant
 
     try:
         override = await repo.set_tenant_override(
-            tenant_id=request.tenant_id if hasattr(request, 'tenant_id') else "default",
+            tenant_id=request.tenant_id if hasattr(request, "tenant_id") else "default",
             preset=request.preset.lower(),
             custom_limit=request.custom_limit,
             custom_window=request.custom_window,

@@ -119,9 +119,13 @@ class HookRegistry:
                 current_step = result.modified_step
             if not result.proceed:
                 return result
-        return HookResult(proceed=True, modified_step=current_step if current_step is not step else None)
+        return HookResult(
+            proceed=True, modified_step=current_step if current_step is not step else None
+        )
 
-    def run_after(self, step: RecipeStep, context: ExecutionContext, result: ExecutionResult) -> None:
+    def run_after(
+        self, step: RecipeStep, context: ExecutionContext, result: ExecutionResult
+    ) -> None:
         """Run all after-hooks. Errors are swallowed.
 
         Args:
@@ -167,13 +171,16 @@ class HookRegistry:
 
 # --- Built-in hooks ---
 
+
 def logging_before_hook(step: RecipeStep, ctx: ExecutionContext) -> HookResult:  # noqa: ARG001
     """Log step title before execution."""
     logger.debug("[Step %d] Starting: %s", step.order, step.title)
     return HookResult(proceed=True)
 
 
-def logging_after_hook(step: RecipeStep, ctx: ExecutionContext, result: ExecutionResult) -> None:  # noqa: ARG001
+def logging_after_hook(
+    step: RecipeStep, ctx: ExecutionContext, result: ExecutionResult
+) -> None:  # noqa: ARG001
     """Log step completion with exit code."""
     logger.debug("[Step %d] Finished: %s (exit=%d)", step.order, step.title, result.exit_code)
 
@@ -199,6 +206,7 @@ def env_injection_hook(step: RecipeStep, ctx: ExecutionContext) -> HookResult:
 
     # Build a modified step with env merged into params
     import copy
+
     new_params: dict[str, Any] = copy.deepcopy(step.params or {})
     existing_env: dict[str, str] = new_params.get("env", {})
     merged_env = {**existing_env, **env_overrides}

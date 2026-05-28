@@ -48,9 +48,7 @@ class SessionManager:
             ttl_seconds: Session TTL in seconds (default: 300)
             refresh_buffer: Refresh buffer in seconds (default: 60)
         """
-        self.session_cache_path = Path(
-            cache_path or "~/.mekong/session.json"
-        ).expanduser()
+        self.session_cache_path = Path(cache_path or "~/.mekong/session.json").expanduser()
         self.ttl_seconds = ttl_seconds or self.DEFAULT_TTL_SECONDS
         self.refresh_buffer = refresh_buffer or self.DEFAULT_REFRESH_BUFFER
         self._in_memory_cache: Optional[SessionCache] = None

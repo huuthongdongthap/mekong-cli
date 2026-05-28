@@ -17,6 +17,7 @@ def telegram_start() -> None:
 
     # Get token from env
     import os
+
     token_val = os.environ.get("MEKONG_TELEGRAM_TOKEN", "")
 
     if not token_val:
@@ -64,7 +65,7 @@ def telegram_status() -> None:
     configured = bool(token)
     status_style = "green" if configured else "red"
 
-    token_display = '*' * 8 + token[-4:] if token else 'not set'
+    token_display = "*" * 8 + token[-4:] if token else "not set"
 
     console.print(
         Panel(

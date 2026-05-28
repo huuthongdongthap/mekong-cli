@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class OrderSide(Enum):
     """CLOB order side."""
+
     BUY = "BUY"
     SELL = "SELL"
 
@@ -28,6 +29,7 @@ class OrderSide(Enum):
 @dataclass
 class OrderRequest:
     """Request to place an order on the CLOB."""
+
     market_id: str
     side: OrderSide
     direction: TradeDirection
@@ -39,6 +41,7 @@ class OrderRequest:
 @dataclass
 class OrderResponse:
     """Response from order placement."""
+
     order_id: str
     market_id: str
     side: OrderSide
@@ -57,6 +60,7 @@ class OrderResponse:
 @dataclass
 class MarketData:
     """Real-time market data from CLOB."""
+
     market_id: str
     best_bid: float
     best_ask: float

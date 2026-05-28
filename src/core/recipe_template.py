@@ -90,9 +90,7 @@ class RecipeTemplate:
 
     def _render_step(self, step: StepTemplate, variables: dict[str, str]) -> RecipeStep:
         """Render a single step template with variable substitution."""
-        rendered_params = {
-            k: self._substitute(str(v), variables) for k, v in step.params.items()
-        }
+        rendered_params = {k: self._substitute(str(v), variables) for k, v in step.params.items()}
         return RecipeStep(
             order=step.order,
             title=self._substitute(step.title, variables),
@@ -104,9 +102,11 @@ class RecipeTemplate:
     @staticmethod
     def _substitute(text: str, variables: dict[str, str]) -> str:
         """Replace {{var}} placeholders with values."""
+
         def replacer(match: re.Match) -> str:  # type: ignore[type-arg]
             key = match.group(1).strip()
             return variables.get(key, match.group(0))
+
         return re.sub(r"\{\{([^}]+)\}\}", replacer, text)
 
 
@@ -175,9 +175,7 @@ class TemplateRegistry:
     def _load_json(file: Path) -> RecipeTemplate:
         """Parse a JSON template file into RecipeTemplate."""
         data = json.loads(file.read_text(encoding="utf-8"))
-        variables = {
-            k: TemplateVariable(**v) for k, v in data.get("variables", {}).items()
-        }
+        variables = {k: TemplateVariable(**v) for k, v in data.get("variables", {}).items()}
         steps = [StepTemplate(**s) for s in data.get("template_steps", [])]
         return RecipeTemplate(
             name=data["name"],
@@ -248,7 +246,9 @@ TEST_TEMPLATE = RecipeTemplate(
             title="Check coverage",
             description="python3 -m pytest {{test_path}} --cov=src --cov-report=term-missing",
             agent="shell",
-            params={"command": "python3 -m pytest {{test_path}} --cov=src --cov-report=term-missing"},
+            params={
+                "command": "python3 -m pytest {{test_path}} --cov=src --cov-report=term-missing"
+            },
         ),
     ],
 )
@@ -268,7 +268,9 @@ SECURITY_AUDIT_TEMPLATE = RecipeTemplate(
             title="Check for secrets in {{src_path}}",
             description="Scan for hardcoded credentials",
             agent="shell",
-            params={"command": "grep -r 'API_KEY\\|SECRET\\|PASSWORD' {{src_path}} || echo 'Clean'"},
+            params={
+                "command": "grep -r 'API_KEY\\|SECRET\\|PASSWORD' {{src_path}} || echo 'Clean'"
+            },
         ),
         StepTemplate(
             order=2,
@@ -282,7 +284,9 @@ SECURITY_AUDIT_TEMPLATE = RecipeTemplate(
             title="Run dependency audit",
             description="Check for vulnerable dependencies",
             agent="shell",
-            params={"command": "npm audit --audit-level=high 2>/dev/null || echo 'No auditor found'"},
+            params={
+                "command": "npm audit --audit-level=high 2>/dev/null || echo 'No auditor found'"
+            },
         ),
     ],
 )

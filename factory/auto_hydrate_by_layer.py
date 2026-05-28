@@ -20,7 +20,11 @@ LAYER_TEMPLATES: dict[str, dict] = {
         "hub": "founder-hub",
         "input_extra": {
             "context": {"type": "string", "description": "Business context or background"},
-            "urgency": {"type": "string", "enum": ["low", "medium", "high"], "description": "Priority level"},
+            "urgency": {
+                "type": "string",
+                "enum": ["low", "medium", "high"],
+                "description": "Priority level",
+            },
         },
         "output_template": {
             "summary": {"type": "string", "description": "Executive summary"},
@@ -47,7 +51,11 @@ LAYER_TEMPLATES: dict[str, dict] = {
         "execution_agents": ["pm", "planner"],
         "hub": "product-hub",
         "input_extra": {
-            "scope": {"type": "string", "enum": ["feature", "module", "system"], "description": "Scope level"},
+            "scope": {
+                "type": "string",
+                "enum": ["feature", "module", "system"],
+                "description": "Scope level",
+            },
             "priority": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
         },
         "output_template": {
@@ -61,7 +69,11 @@ LAYER_TEMPLATES: dict[str, dict] = {
         "execution_agents": ["fullstack-developer", "code-reviewer"],
         "hub": "engineering-hub",
         "input_extra": {
-            "file_paths": {"type": "array", "items": {"type": "string"}, "description": "Target files"},
+            "file_paths": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Target files",
+            },
             "language": {"type": "string", "description": "Programming language"},
         },
         "output_template": {
@@ -75,7 +87,11 @@ LAYER_TEMPLATES: dict[str, dict] = {
         "execution_agents": ["devops"],
         "hub": "ops-hub",
         "input_extra": {
-            "services": {"type": "array", "items": {"type": "string"}, "description": "Target services"},
+            "services": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Target services",
+            },
             "environment": {"type": "string", "enum": ["local", "staging", "production"]},
         },
         "output_template": {

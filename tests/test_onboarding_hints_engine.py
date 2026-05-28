@@ -1,4 +1,5 @@
 """Tests for OnboardingHintsEngine — personalized hints and dismissals."""
+
 from __future__ import annotations
 
 from pathlib import Path

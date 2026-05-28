@@ -160,7 +160,12 @@ def check_status(
         return
 
     # Rich table output
-    console.print(Panel(f"[bold cyan]Rate Limit Status[/bold cyan]\n[cyan]Tenant:[/cyan] {tenant_id}", border_style="cyan"))
+    console.print(
+        Panel(
+            f"[bold cyan]Rate Limit Status[/bold cyan]\n[cyan]Tenant:[/cyan] {tenant_id}",
+            border_style="cyan",
+        )
+    )
 
     # Tier info
     tier_display = _format_tier_display(result["effective_tier"])
@@ -206,7 +211,9 @@ def check_status(
 
         for preset, data in result["presets"].items():
             utilization_pct = data["utilization"]
-            utilization_color = "green" if utilization_pct < 50 else "yellow" if utilization_pct < 80 else "red"
+            utilization_color = (
+                "green" if utilization_pct < 50 else "yellow" if utilization_pct < 80 else "red"
+            )
 
             table.add_row(
                 preset,
@@ -307,7 +314,12 @@ def view_history(
         console.print(f"[yellow]No events found for tenant '{tenant_id}' in last {hours}h[/yellow]")
         return
 
-    console.print(Panel(f"[bold cyan]Rate Limit History[/bold cyan]\n[cyan]Tenant:[/cyan] {tenant_id} | [cyan]Period:[/cyan] Last {hours}h | [cyan]Events:[/cyan] {len(events)}", border_style="cyan"))
+    console.print(
+        Panel(
+            f"[bold cyan]Rate Limit History[/bold cyan]\n[cyan]Tenant:[/cyan] {tenant_id} | [cyan]Period:[/cyan] Last {hours}h | [cyan]Events:[/cyan] {len(events)}",
+            border_style="cyan",
+        )
+    )
 
     table = Table(show_header=True, show_lines=True)
     table.add_column("Time", style="dim", width=19)
@@ -450,7 +462,12 @@ def list_violations(
         return
 
     # Summary output
-    console.print(Panel(f"[bold red]Rate Limit Violations[/bold red]\n[cyan]Period:[/cyan] Last {hours}h | [cyan]Total:[/cyan] {result['total']} violations", border_style="red"))
+    console.print(
+        Panel(
+            f"[bold red]Rate Limit Violations[/bold red]\n[cyan]Period:[/cyan] Last {hours}h | [cyan]Total:[/cyan] {result['total']} violations",
+            border_style="red",
+        )
+    )
 
     if result["total"] == 0:
         console.print("[green]No violations in this period![/green]")
@@ -489,7 +506,9 @@ def list_violations(
 
     # Recent violations
     if result["events"]:
-        console.print(f"\n[bold yellow]Recent Violations (Last {len(result['events'])})[/bold yellow]:")
+        console.print(
+            f"\n[bold yellow]Recent Violations (Last {len(result['events'])})[/bold yellow]:"
+        )
         table = Table(show_header=True, show_lines=True)
         table.add_column("Time", style="dim", width=19)
         table.add_column("Tenant", style="cyan", width=20)
@@ -562,7 +581,12 @@ def list_overrides(
         console.print("[yellow]No tenant overrides configured.[/yellow]")
         return
 
-    console.print(Panel(f"[bold cyan]Tenant Rate Limit Overrides[/bold cyan]\n[cyan]Total:[/cyan] {len(overrides)}", border_style="cyan"))
+    console.print(
+        Panel(
+            f"[bold cyan]Tenant Rate Limit Overrides[/bold cyan]\n[cyan]Total:[/cyan] {len(overrides)}",
+            border_style="cyan",
+        )
+    )
 
     table = Table(show_header=True, show_lines=True)
     table.add_column("Tenant ID", style="cyan")

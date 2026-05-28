@@ -9,7 +9,13 @@ from .tiered_store import TieredTelemetryStore
 from .event_bus import EventType
 
 # License monitoring (Phase 2)
-from .license_monitor import LicenseMonitor, LicenseFailure, FailureThreshold, get_monitor, record_failure
+from .license_monitor import (
+    LicenseMonitor,
+    LicenseFailure,
+    FailureThreshold,
+    get_monitor,
+    record_failure,
+)
 
 # Usage anomaly detection (Phase 3)
 from .anomaly_detector import (

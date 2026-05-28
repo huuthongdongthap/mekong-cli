@@ -178,7 +178,6 @@ class TestDecomposeGoal(unittest.TestCase):
         self.assertGreater(len(tasks), 0)
 
 
-
 class TestRuleBasedDecompose(unittest.TestCase):
     """Test _rule_based_decompose() - patterns: implement, fix, shell."""
 
@@ -449,7 +448,9 @@ class TestValidatePlan(unittest.TestCase):
     def test_multiple_future_dependencies(self):
         """Multiple future dependencies should all be flagged."""
         steps = [
-            RecipeStep(order=1, title="Step 1", description="First", params={"dependencies": [2, 3]}),
+            RecipeStep(
+                order=1, title="Step 1", description="First", params={"dependencies": [2, 3]}
+            ),
             RecipeStep(order=2, title="Step 2", description="Second", params={"dependencies": []}),
             RecipeStep(order=3, title="Step 3", description="Third", params={"dependencies": []}),
         ]
@@ -471,8 +472,12 @@ class TestValidatePlan(unittest.TestCase):
         steps = [
             RecipeStep(order=1, title="Setup", description="Install", params={"dependencies": []}),
             RecipeStep(order=2, title="Build", description="Compile", params={"dependencies": [1]}),
-            RecipeStep(order=3, title="Test", description="Run tests", params={"dependencies": [2]}),
-            RecipeStep(order=4, title="Deploy", description="Publish", params={"dependencies": [3]}),
+            RecipeStep(
+                order=3, title="Test", description="Run tests", params={"dependencies": [2]}
+            ),
+            RecipeStep(
+                order=4, title="Deploy", description="Publish", params={"dependencies": [3]}
+            ),
         ]
         recipe = Recipe(name="Test", description="Test", steps=steps)
 
@@ -483,7 +488,9 @@ class TestValidatePlan(unittest.TestCase):
         """Step depending on non-existent step should be flagged."""
         steps = [
             RecipeStep(order=1, title="Step 1", description="First", params={"dependencies": []}),
-            RecipeStep(order=2, title="Step 2", description="Second", params={"dependencies": [99]}),
+            RecipeStep(
+                order=2, title="Step 2", description="Second", params={"dependencies": [99]}
+            ),
         ]
         recipe = Recipe(name="Test", description="Test", steps=steps)
 
@@ -495,7 +502,9 @@ class TestValidatePlan(unittest.TestCase):
         """Step with duplicate deps should be flagged."""
         steps = [
             RecipeStep(order=1, title="Step 1", description="First", params={"dependencies": []}),
-            RecipeStep(order=2, title="Step 2", description="Second", params={"dependencies": [1, 1]}),
+            RecipeStep(
+                order=2, title="Step 2", description="Second", params={"dependencies": [1, 1]}
+            ),
         ]
         recipe = Recipe(name="Test", description="Test", steps=steps)
 
@@ -591,9 +600,7 @@ class TestLLMDecompose(unittest.TestCase):
         mock_client = MagicMock()
         mock_client.is_available = True
         mock_client.generate_json.return_value = {
-            "tasks": [
-                {"title": "A", "description": "X", "dependencies": []}
-            ]
+            "tasks": [{"title": "A", "description": "X", "dependencies": []}]
         }
         mock_get_client.return_value = mock_client
 
@@ -693,7 +700,9 @@ class TestReplanFailedBranch(unittest.TestCase):
             steps=[
                 RecipeStep(order=1, title="Step 1", description="echo ok", params={}),
                 RecipeStep(order=2, title="Step 2", description="exit 1", params={}),
-                RecipeStep(order=3, title="Step 3", description="echo done", params={"dependencies": [2]}),
+                RecipeStep(
+                    order=3, title="Step 3", description="echo done", params={"dependencies": [2]}
+                ),
             ],
         )
         new_recipe = self.planner.replan_failed_branch(original, failed_step_order=2)

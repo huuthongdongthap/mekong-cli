@@ -64,7 +64,8 @@ class TestToolRegistry(unittest.TestCase):
     def test_execute_with_handler(self):
         reg = self._make_registry()
         reg.register(
-            "add", "Add numbers",
+            "add",
+            "Add numbers",
             handler=lambda a=1, b=2: a + b,
         )
         result = reg.execute("add", {"a": 3, "b": 4})

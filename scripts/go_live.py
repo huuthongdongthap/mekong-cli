@@ -12,6 +12,7 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+
 def log(msg, status="INFO"):
     icons = {"INFO": "ℹ️", "SUCCESS": "✅", "ERROR": "❌", "WARN": "⚠️"}
     print(f"{icons.get(status, '')} [{status}] {msg}")

@@ -29,8 +29,12 @@ def marketplace(db_path):
 class TestListings:
     def test_create_listing(self, marketplace) -> None:
         listing = marketplace.create_listing(
-            "strat-001", "creator_1", "Alpha Hunter",
-            "Mean reversion strategy", "prediction", 29.0,
+            "strat-001",
+            "creator_1",
+            "Alpha Hunter",
+            "Mean reversion strategy",
+            "prediction",
+            29.0,
         )
         assert listing.listing_id.startswith("mkt-")
         assert listing.published is False
@@ -48,9 +52,15 @@ class TestListings:
     def test_publish_with_passing_backtest(self, marketplace) -> None:
         listing = marketplace.create_listing("s1", "c1", "S1", "desc")
         bt = BacktestResult(
-            strategy_id="s1", period_days=30, total_trades=50,
-            win_rate=0.60, total_pnl_pct=8.5, sharpe_ratio=1.5,
-            max_drawdown=0.03, brier_score=0.18, passed=True,
+            strategy_id="s1",
+            period_days=30,
+            total_trades=50,
+            win_rate=0.60,
+            total_pnl_pct=8.5,
+            sharpe_ratio=1.5,
+            max_drawdown=0.03,
+            brier_score=0.18,
+            passed=True,
         )
         marketplace.save_backtest(bt)
         assert marketplace.publish_listing(listing.listing_id) is True
@@ -59,9 +69,15 @@ class TestListings:
         l1 = marketplace.create_listing("s1", "c1", "Published", "desc")
         marketplace.create_listing("s2", "c2", "Draft", "desc")
         bt = BacktestResult(
-            strategy_id="s1", period_days=30, total_trades=50,
-            win_rate=0.60, total_pnl_pct=8.5, sharpe_ratio=1.5,
-            max_drawdown=0.03, brier_score=0.18, passed=True,
+            strategy_id="s1",
+            period_days=30,
+            total_trades=50,
+            win_rate=0.60,
+            total_pnl_pct=8.5,
+            sharpe_ratio=1.5,
+            max_drawdown=0.03,
+            brier_score=0.18,
+            passed=True,
         )
         marketplace.save_backtest(bt)
         marketplace.publish_listing(l1.listing_id)
@@ -80,9 +96,15 @@ class TestListings:
 class TestBacktesting:
     def test_save_and_retrieve(self, marketplace) -> None:
         bt = BacktestResult(
-            strategy_id="s1", period_days=30, total_trades=50,
-            win_rate=0.60, total_pnl_pct=8.5, sharpe_ratio=1.5,
-            max_drawdown=0.03, brier_score=0.18, passed=True,
+            strategy_id="s1",
+            period_days=30,
+            total_trades=50,
+            win_rate=0.60,
+            total_pnl_pct=8.5,
+            sharpe_ratio=1.5,
+            max_drawdown=0.03,
+            brier_score=0.18,
+            passed=True,
         )
         marketplace.save_backtest(bt)
         results = marketplace.get_backtests("s1")
@@ -91,9 +113,15 @@ class TestBacktesting:
 
     def test_backtest_summary(self) -> None:
         bt = BacktestResult(
-            strategy_id="s1", period_days=30, total_trades=50,
-            win_rate=0.60, total_pnl_pct=8.5, sharpe_ratio=1.5,
-            max_drawdown=0.03, brier_score=0.18, passed=True,
+            strategy_id="s1",
+            period_days=30,
+            total_trades=50,
+            win_rate=0.60,
+            total_pnl_pct=8.5,
+            sharpe_ratio=1.5,
+            max_drawdown=0.03,
+            brier_score=0.18,
+            passed=True,
         )
         assert "PASS" in bt.summary
         bt.passed = False
@@ -132,9 +160,15 @@ class TestRevenue:
     def test_revenue_calculation(self, marketplace) -> None:
         l1 = marketplace.create_listing("s1", "c1", "S1", "desc", price_monthly=29.0)
         bt = BacktestResult(
-            strategy_id="s1", period_days=30, total_trades=50,
-            win_rate=0.60, total_pnl_pct=8.5, sharpe_ratio=1.5,
-            max_drawdown=0.03, brier_score=0.18, passed=True,
+            strategy_id="s1",
+            period_days=30,
+            total_trades=50,
+            win_rate=0.60,
+            total_pnl_pct=8.5,
+            sharpe_ratio=1.5,
+            max_drawdown=0.03,
+            brier_score=0.18,
+            passed=True,
         )
         marketplace.save_backtest(bt)
         marketplace.publish_listing(l1.listing_id)
@@ -148,10 +182,16 @@ class TestRevenue:
 
     def test_listing_revenue_properties(self) -> None:
         from src.polymarket.strategy_marketplace import StrategyListing
+
         listing = StrategyListing(
-            listing_id="l1", strategy_id="s1", creator_id="c1",
-            name="S1", description="d", category="g",
-            price_monthly=29.0, subscribers=10,
+            listing_id="l1",
+            strategy_id="s1",
+            creator_id="c1",
+            name="S1",
+            description="d",
+            category="g",
+            price_monthly=29.0,
+            subscribers=10,
         )
         assert listing.creator_revenue == 29.0 * 10 * 0.70
         assert listing.platform_revenue == 29.0 * 10 * 0.30

@@ -37,10 +37,7 @@ class ActivationSync:
     - Webhook signature for security
     """
 
-    DASHBOARD_URL = os.getenv(
-        "AGENCYOS_DASHBOARD_URL",
-        "https://agencyos.network"
-    )
+    DASHBOARD_URL = os.getenv("AGENCYOS_DASHBOARD_URL", "https://www.mekongmind.com")
     SYNC_ENDPOINT = "/api/v1/dashboard/sync"
     MAX_RETRIES = 3
     RETRY_DELAY = 5  # seconds
@@ -141,11 +138,13 @@ class ActivationSync:
     def _queue_event(self, event: Dict[str, Any]) -> None:
         """Queue event for retry."""
         queue = self._load_queue()
-        queue["events"].append({
-            "event": event,
-            "queued_at": datetime.now(timezone.utc).isoformat(),
-            "retries": 0,
-        })
+        queue["events"].append(
+            {
+                "event": event,
+                "queued_at": datetime.now(timezone.utc).isoformat(),
+                "retries": 0,
+            }
+        )
         self._save_queue(queue)
 
     def _load_queue(self) -> Dict[str, Any]:
@@ -166,6 +165,7 @@ class ActivationSync:
     def _generate_idempotency_key(self, tenant_id: str, agency_id: str) -> str:
         """Generate idempotency key to prevent duplicate events."""
         import hashlib
+
         data = f"{tenant_id}:{agency_id}:{int(time.time() / 3600)}"  # Hourly granularity
         return hashlib.sha256(data.encode()).hexdigest()[:32]
 
@@ -177,11 +177,7 @@ class ActivationSync:
         # Use a shared secret (in production, this would be configured)
         secret = os.getenv("DASHBOARD_WEBHOOK_SECRET", "mekong-webhook-secret")
         payload = json.dumps(event, sort_keys=True)
-        signature = hmac.new(
-            secret.encode(),
-            payload.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
         return f"sha256={signature}"
 
     def _mask_key(self, license_key: str) -> str:

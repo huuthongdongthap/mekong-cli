@@ -100,7 +100,9 @@ class EventBus:
         self._subscribers.setdefault(event_type, []).append(callback)
 
     def unsubscribe(
-        self, event_type: EventType, callback: Subscriber,
+        self,
+        event_type: EventType,
+        callback: Subscriber,
     ) -> None:
         """Remove a callback for an event type."""
         listeners = self._subscribers.get(event_type, [])
@@ -161,7 +163,7 @@ class EventStream:
         buffer_start = self._total_emitted - len(self._buffer)
         skip = max(0, since_cursor - buffer_start)
         events = list(self._buffer)
-        return events[skip:skip + limit]
+        return events[skip : skip + limit]
 
     @property
     def cursor(self) -> int:

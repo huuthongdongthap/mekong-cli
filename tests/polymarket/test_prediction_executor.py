@@ -68,7 +68,9 @@ class TestExecuteSignal:
         assert "filled" in result.reason.lower() or "paper" in result.order_id.lower()
 
     def test_no_edge_skipped(self, executor: PredictionExecutor) -> None:
-        result = executor.execute_signal(_make_signal(edge=0.0, predicted_prob=0.55, market_price=0.55))
+        result = executor.execute_signal(
+            _make_signal(edge=0.0, predicted_prob=0.55, market_price=0.55)
+        )
         assert result.status == "skipped"
         assert "zero" in result.reason.lower() or "edge" in result.reason.lower()
 

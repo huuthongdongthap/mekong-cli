@@ -53,7 +53,10 @@ async def complete_phase6(
         help="Export completion certificate to path",
     ),
     no_browser: bool = typer.Option(
-        False, "--no-browser", "-n", help="Don't open certificate in browser",
+        False,
+        "--no-browser",
+        "-n",
+        help="Don't open certificate in browser",
     ),
 ) -> None:
     """Complete Phase 6: Terminal Validation + Completion Certificate.
@@ -75,7 +78,8 @@ async def complete_phase6(
         phases_status = {
             f"Phase {i}": info.status == PhaseStatus.OPERATIONAL
             for i, (phase_id, info) in enumerate(
-                detector.get_all_phases_status().items(), 1,
+                detector.get_all_phases_status().items(),
+                1,
             )
         }
 

@@ -34,10 +34,10 @@ from src.core.verifier import (
     VerificationStatus,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures / helpers
 # ---------------------------------------------------------------------------
+
 
 def make_recipe(name: str = "test-recipe", steps: list | None = None) -> Recipe:
     return Recipe(
@@ -67,26 +67,30 @@ def make_step(
 def passed_report() -> VerificationReport:
     return VerificationReport(
         passed=True,
-        checks=[VerificationCheck(
-            name="exit_code",
-            status=VerificationStatus.PASSED,
-            message="ok",
-            expected=0,
-            actual=0,
-        )],
+        checks=[
+            VerificationCheck(
+                name="exit_code",
+                status=VerificationStatus.PASSED,
+                message="ok",
+                expected=0,
+                actual=0,
+            )
+        ],
     )
 
 
 def failed_report(error: str = "step failed") -> VerificationReport:
     return VerificationReport(
         passed=False,
-        checks=[VerificationCheck(
-            name="exit_code",
-            status=VerificationStatus.FAILED,
-            message=error,
-            expected=0,
-            actual=1,
-        )],
+        checks=[
+            VerificationCheck(
+                name="exit_code",
+                status=VerificationStatus.FAILED,
+                message=error,
+                expected=0,
+                actual=1,
+            )
+        ],
         errors=[error],
     )
 
@@ -120,6 +124,7 @@ def make_step_executor(
 # ---------------------------------------------------------------------------
 # OrchestrationResult
 # ---------------------------------------------------------------------------
+
 
 class TestOrchestrationResult:
     def test_success_rate_zero_total(self):
@@ -186,6 +191,7 @@ class TestOrchestrationResult:
 # ---------------------------------------------------------------------------
 # StepExecutor — success path
 # ---------------------------------------------------------------------------
+
 
 class TestStepExecutorSuccess:
     def test_execute_and_verify_success(self):
@@ -263,6 +269,7 @@ class TestStepExecutorSuccess:
 # StepExecutor — failure without self-healing
 # ---------------------------------------------------------------------------
 
+
 class TestStepExecutorFailureNoHealing:
     def test_failed_step_no_llm_client(self):
         """Shell step fails, no llm_client → StepResult.self_healed=False."""
@@ -309,6 +316,7 @@ class TestStepExecutorFailureNoHealing:
 # ---------------------------------------------------------------------------
 # StepExecutor — self-healing paths
 # ---------------------------------------------------------------------------
+
 
 class TestStepExecutorSelfHealing:
     """Tests for the self-healing code path.
@@ -456,8 +464,7 @@ class TestStepExecutorSelfHealing:
 
         # History should have at least one SELF_HEAL_ATTEMPTED event
         heal_events = [
-            e for e in history
-            if hasattr(e, "kind") and e.kind == EventKind.SELF_HEAL_ATTEMPTED
+            e for e in history if hasattr(e, "kind") and e.kind == EventKind.SELF_HEAL_ATTEMPTED
         ]
         assert len(heal_events) >= 1
 
@@ -465,6 +472,7 @@ class TestStepExecutorSelfHealing:
 # ---------------------------------------------------------------------------
 # RollbackHandler
 # ---------------------------------------------------------------------------
+
 
 class TestRollbackHandlerDisabled:
     def test_rollback_disabled_is_noop(self):
@@ -494,9 +502,7 @@ class TestRollbackHandlerDisabled:
     def test_rollback_disabled_no_subprocess(self):
         """No subprocess.run calls when rollback is disabled."""
         handler = RollbackHandler(enable_rollback=False)
-        result = OrchestrationResult(
-            status=OrchestrationStatus.FAILED, recipe=make_recipe()
-        )
+        result = OrchestrationResult(status=OrchestrationStatus.FAILED, recipe=make_recipe())
 
         with patch("subprocess.run") as mock_run:
             handler.rollback(result, make_step())
@@ -557,8 +563,12 @@ class TestRollbackHandlerEnabled:
             status=OrchestrationStatus.FAILED,
             recipe=make_recipe(),
             step_results=[
-                StepResult(step=passed_step, execution=ok_execution(), verification=passed_report()),
-                StepResult(step=failed_step, execution=fail_execution(), verification=failed_report()),
+                StepResult(
+                    step=passed_step, execution=ok_execution(), verification=passed_report()
+                ),
+                StepResult(
+                    step=failed_step, execution=fail_execution(), verification=failed_report()
+                ),
             ],
         )
 
@@ -572,9 +582,7 @@ class TestRollbackHandlerEnabled:
         """Failed rollback command adds to result.errors."""
         handler = RollbackHandler(enable_rollback=True)
         step = make_step(order=1, params={"rollback": "echo undo"})
-        step_result = StepResult(
-            step=step, execution=ok_execution(), verification=passed_report()
-        )
+        step_result = StepResult(step=step, execution=ok_execution(), verification=passed_report())
         result = OrchestrationResult(
             status=OrchestrationStatus.FAILED,
             recipe=make_recipe(),
@@ -591,9 +599,7 @@ class TestRollbackHandlerEnabled:
         """subprocess.TimeoutExpired during rollback → error recorded."""
         handler = RollbackHandler(enable_rollback=True)
         step = make_step(order=1, params={"rollback": "echo undo"})
-        step_result = StepResult(
-            step=step, execution=ok_execution(), verification=passed_report()
-        )
+        step_result = StepResult(step=step, execution=ok_execution(), verification=passed_report())
         result = OrchestrationResult(
             status=OrchestrationStatus.FAILED,
             recipe=make_recipe(),
@@ -610,9 +616,7 @@ class TestRollbackHandlerEnabled:
         handler = RollbackHandler(enable_rollback=True)
         # rm -rf /* is dangerous — sanitizer should block
         step = make_step(order=1, params={"rollback": "rm -rf /*"})
-        step_result = StepResult(
-            step=step, execution=ok_execution(), verification=passed_report()
-        )
+        step_result = StepResult(step=step, execution=ok_execution(), verification=passed_report())
         result = OrchestrationResult(
             status=OrchestrationStatus.FAILED,
             recipe=make_recipe(),
@@ -631,9 +635,7 @@ class TestRollbackHandlerEnabled:
         """Rollback with errors adds a warning to result.warnings."""
         handler = RollbackHandler(enable_rollback=True)
         step = make_step(order=1, params={"rollback": "echo undo"})
-        step_result = StepResult(
-            step=step, execution=ok_execution(), verification=passed_report()
-        )
+        step_result = StepResult(step=step, execution=ok_execution(), verification=passed_report())
         result = OrchestrationResult(
             status=OrchestrationStatus.FAILED,
             recipe=make_recipe(),
@@ -682,6 +684,7 @@ class TestRollbackHandlerEnabled:
 # ---------------------------------------------------------------------------
 # ReportFormatter
 # ---------------------------------------------------------------------------
+
 
 class TestReportFormatter:
     def test_format_status_success(self):

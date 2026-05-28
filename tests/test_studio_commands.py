@@ -44,16 +44,32 @@ class TestStudioCommands:
 
 class TestPortfolioCommands:
     def test_portfolio_create(self):
-        result = runner.invoke(portfolio_app, [
-            "create", "test-co", "--sector", "ai", "--stage", "mvp",
-        ])
+        result = runner.invoke(
+            portfolio_app,
+            [
+                "create",
+                "test-co",
+                "--sector",
+                "ai",
+                "--stage",
+                "mvp",
+            ],
+        )
         assert result.exit_code == 0
         assert "test-co" in result.output
 
     def test_portfolio_create_with_equity(self):
-        result = runner.invoke(portfolio_app, [
-            "create", "co2", "--sector", "fintech", "--equity", "25.0",
-        ])
+        result = runner.invoke(
+            portfolio_app,
+            [
+                "create",
+                "co2",
+                "--sector",
+                "fintech",
+                "--equity",
+                "25.0",
+            ],
+        )
         assert result.exit_code == 0
         assert "25.0" in result.output
 
@@ -71,9 +87,15 @@ class TestPortfolioCommands:
         assert "test-co" in result.output
 
     def test_portfolio_update(self):
-        result = runner.invoke(portfolio_app, [
-            "update", "test-co", "--mrr", "5000",
-        ])
+        result = runner.invoke(
+            portfolio_app,
+            [
+                "update",
+                "test-co",
+                "--mrr",
+                "5000",
+            ],
+        )
         assert result.exit_code == 0
         assert "test-co" in result.output
 
@@ -90,12 +112,19 @@ class TestPortfolioCommands:
 
 class TestDealflowCommands:
     def test_dealflow_add(self):
-        result = runner.invoke(dealflow_app, [
-            "add", "NewDeal",
-            "--sector", "ai",
-            "--source", "referral",
-            "--one-liner", "AI platform",
-        ])
+        result = runner.invoke(
+            dealflow_app,
+            [
+                "add",
+                "NewDeal",
+                "--sector",
+                "ai",
+                "--source",
+                "referral",
+                "--one-liner",
+                "AI platform",
+            ],
+        )
         assert result.exit_code == 0
         assert "NewDeal" in result.output
 
@@ -109,9 +138,15 @@ class TestDealflowCommands:
         assert "deal-123" in result.output
 
     def test_dealflow_diligence(self):
-        result = runner.invoke(dealflow_app, [
-            "diligence", "deal-123", "--depth", "deep",
-        ])
+        result = runner.invoke(
+            dealflow_app,
+            [
+                "diligence",
+                "deal-123",
+                "--depth",
+                "deep",
+            ],
+        )
         assert result.exit_code == 0
         assert "deep" in result.output
 
@@ -121,37 +156,62 @@ class TestDealflowCommands:
         assert "deal-123" in result.output
 
     def test_dealflow_pass(self):
-        result = runner.invoke(dealflow_app, [
-            "pass", "deal-456", "--reason", "Outside thesis",
-        ])
+        result = runner.invoke(
+            dealflow_app,
+            [
+                "pass",
+                "deal-456",
+                "--reason",
+                "Outside thesis",
+            ],
+        )
         assert result.exit_code == 0
         assert "deal-456" in result.output
 
 
 class TestExpertCommands:
     def test_expert_add(self):
-        result = runner.invoke(expert_app, [
-            "add", "John Doe",
-            "--email", "john@example.com",
-            "--specialties", "backend,devops",
-        ])
+        result = runner.invoke(
+            expert_app,
+            [
+                "add",
+                "John Doe",
+                "--email",
+                "john@example.com",
+                "--specialties",
+                "backend,devops",
+            ],
+        )
         assert result.exit_code == 0
         assert "John Doe" in result.output
 
     def test_expert_match(self):
-        result = runner.invoke(expert_app, [
-            "match", "test-co", "--need", "Backend architecture",
-        ])
+        result = runner.invoke(
+            expert_app,
+            [
+                "match",
+                "test-co",
+                "--need",
+                "Backend architecture",
+            ],
+        )
         assert result.exit_code == 0
         assert "test-co" in result.output
 
     def test_expert_dispatch(self):
-        result = runner.invoke(expert_app, [
-            "dispatch", "exp-123",
-            "--company", "test-co",
-            "--scope", "Architecture review",
-            "--type", "advisory",
-        ])
+        result = runner.invoke(
+            expert_app,
+            [
+                "dispatch",
+                "exp-123",
+                "--company",
+                "test-co",
+                "--scope",
+                "Architecture review",
+                "--type",
+                "advisory",
+            ],
+        )
         assert result.exit_code == 0
         assert "exp-123" in result.output
 
@@ -203,9 +263,15 @@ class TestMatchCommands:
         assert "test-co" in result.output
 
     def test_match_expert_need(self):
-        result = runner.invoke(match_app, [
-            "expert-need", "test-co", "--need", "DevOps setup",
-        ])
+        result = runner.invoke(
+            match_app,
+            [
+                "expert-need",
+                "test-co",
+                "--need",
+                "DevOps setup",
+            ],
+        )
         assert result.exit_code == 0
         assert "test-co" in result.output
 

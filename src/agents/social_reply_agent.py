@@ -36,16 +36,45 @@ _SYSTEM_PROMPT = (
 
 # Comment patterns that indicate the reply is worthwhile
 _REPLY_TRIGGERS = [
-    "how", "why", "what", "can i", "does it", "support", "feature",
-    "compare", "vs", "alternative", "integrate", "install", "setup",
-    "error", "issue", "problem", "bug", "broken", "help", "try",
-    "interested", "love", "awesome", "great", "nice", "?",
+    "how",
+    "why",
+    "what",
+    "can i",
+    "does it",
+    "support",
+    "feature",
+    "compare",
+    "vs",
+    "alternative",
+    "integrate",
+    "install",
+    "setup",
+    "error",
+    "issue",
+    "problem",
+    "bug",
+    "broken",
+    "help",
+    "try",
+    "interested",
+    "love",
+    "awesome",
+    "great",
+    "nice",
+    "?",
 ]
 
 # Patterns that indicate spam or bot noise
 _SKIP_TRIGGERS = [
-    "http://", "https://", "click here", "buy now", "subscribe",
-    "follow me", "check out my", "promo", "discount",
+    "http://",
+    "https://",
+    "click here",
+    "buy now",
+    "subscribe",
+    "follow me",
+    "check out my",
+    "promo",
+    "discount",
 ]
 
 
@@ -59,7 +88,7 @@ class SocialReplyAgent:
             llm_client: Configured LLMClient (from src.core.llm_client.get_client).
         """
         self.llm = llm_client
-        self.raas_url = os.getenv("RAAS_URL", "https://agencyos.network")
+        self.raas_url = os.getenv("RAAS_URL", "https://www.mekongmind.com")
         self._reply_log = Path.home() / ".mekong" / "social" / "reply-log.jsonl"
         self._reply_log.parent.mkdir(parents=True, exist_ok=True)
         self._replied_ids = self._load_replied_ids()
@@ -115,7 +144,7 @@ class SocialReplyAgent:
         user_msg = (
             f"Platform: {platform}\n"
             f"Article/Post: {context.get('title', 'Mekong CLI')}\n"
-            f"Comment to reply to:\n\"\"\"\n{body}\n\"\"\"\n\n"
+            f'Comment to reply to:\n"""\n{body}\n"""\n\n'
             f"Write a reply under {max_chars} characters. "
             f"Be helpful and technical. If naturally relevant, mention {self.raas_url}."
         )

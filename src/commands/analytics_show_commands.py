@@ -23,16 +23,16 @@ console = Console()
 # Time estimates (minutes) for manual vs CLI — synced with src/analytics/roi_dashboard.py
 TIME_ESTIMATES: Dict[str, Dict[str, int]] = {
     # Commands
-    "cook": {"manual": 120, "cli": 5},      # 2h → 5min = 24x faster
-    "plan": {"manual": 60, "cli": 2},        # 1h → 2min = 30x faster
-    "fix": {"manual": 90, "cli": 10},        # 1.5h → 10min = 9x faster
-    "code": {"manual": 180, "cli": 15},      # 3h → 15min = 12x faster
-    "test": {"manual": 60, "cli": 5},        # 1h → 5min = 12x faster
-    "review": {"manual": 45, "cli": 3},      # 45min → 3min = 15x faster
-    "deploy": {"manual": 30, "cli": 2},      # 30min → 2min = 15x faster
-    "debug": {"manual": 120, "cli": 15},      # 2h → 15min = 8x faster
+    "cook": {"manual": 120, "cli": 5},  # 2h → 5min = 24x faster
+    "plan": {"manual": 60, "cli": 2},  # 1h → 2min = 30x faster
+    "fix": {"manual": 90, "cli": 10},  # 1.5h → 10min = 9x faster
+    "code": {"manual": 180, "cli": 15},  # 3h → 15min = 12x faster
+    "test": {"manual": 60, "cli": 5},  # 1h → 5min = 12x faster
+    "review": {"manual": 45, "cli": 3},  # 45min → 3min = 15x faster
+    "deploy": {"manual": 30, "cli": 2},  # 30min → 2min = 15x faster
+    "debug": {"manual": 120, "cli": 15},  # 2h → 15min = 8x faster
     # Agents
-    "planner": {"manual": 90, "cli": 3},      # 1.5h → 3min = 30x faster
+    "planner": {"manual": 90, "cli": 3},  # 1.5h → 3min = 30x faster
     "researcher": {"manual": 180, "cli": 5},  # 3h → 5min = 36x faster
     "fullstack-developer": {"manual": 240, "cli": 10},
     "tester": {"manual": 60, "cli": 3},
@@ -68,8 +68,7 @@ def analytics_show(
     days: int = typer.Option(30, "--days", "-d", help="Number of days to analyze"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Export as JSON"),
     license_key: Optional[str] = typer.Option(
-        None, "--license", "-l",
-        help="License key (defaults to RAAS_LICENSE_KEY env var)"
+        None, "--license", "-l", help="License key (defaults to RAAS_LICENSE_KEY env var)"
     ),
 ) -> None:
     """
@@ -116,14 +115,11 @@ def analytics_show(
 @app.command(name="export")
 def analytics_export(
     output: str = typer.Option(
-        "~/.mekong/raas/roi-export.json",
-        "--output", "-o",
-        help="Output file path"
+        "~/.mekong/raas/roi-export.json", "--output", "-o", help="Output file path"
     ),
     days: int = typer.Option(30, "--days", "-d", help="Number of days to export"),
     license_key: Optional[str] = typer.Option(
-        None, "--license", "-l",
-        help="License key (defaults to RAAS_LICENSE_KEY env var)"
+        None, "--license", "-l", help="License key (defaults to RAAS_LICENSE_KEY env var)"
     ),
 ) -> None:
     """
@@ -147,7 +143,7 @@ def analytics_export(
         output_path = Path(output).expanduser()
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write(json_str)
 
         console.print(

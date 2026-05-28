@@ -63,9 +63,7 @@ class PayloadEncryptor:
         """
         if key is not None:
             if len(key) != self.KEY_LENGTH:
-                raise EncryptionError(
-                    f"Key must be {self.KEY_LENGTH} bytes, got {len(key)}"
-                )
+                raise EncryptionError(f"Key must be {self.KEY_LENGTH} bytes, got {len(key)}")
             self.key = key
         else:
             self.key = self._load_or_generate_key()
@@ -216,9 +214,7 @@ class PayloadEncryptor:
             new_key: New 32-byte encryption key
         """
         if len(new_key) != self.KEY_LENGTH:
-            raise EncryptionError(
-                f"Key must be {self.KEY_LENGTH} bytes, got {len(new_key)}"
-            )
+            raise EncryptionError(f"Key must be {self.KEY_LENGTH} bytes, got {len(new_key)}")
 
         self.key = new_key
         self.aesgcm = AESGCM(self.key)
@@ -326,9 +322,7 @@ class PayloadBuilder:
         # Build bucket summaries
         result = []
         for hour_bucket, events in sorted(buckets.items()):
-            total_tokens = sum(
-                e.get("input_tokens", 0) + e.get("output_tokens", 0) for e in events
-            )
+            total_tokens = sum(e.get("input_tokens", 0) + e.get("output_tokens", 0) for e in events)
 
             # Count by type
             events_by_type: dict[str, int] = {}

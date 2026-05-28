@@ -286,9 +286,7 @@ class TestGracefulShutdownHandler:
 
         handler.register_cleanup_handler(failing_cleanup, "failing_cleanup")
 
-        await handler.initiate_shutdown(
-            reason=ShutdownReason.USER_REQUESTED
-        )
+        await handler.initiate_shutdown(reason=ShutdownReason.USER_REQUESTED)
 
         # Should have errors but still complete
         assert handler._shutdown_context is not None
@@ -320,9 +318,7 @@ class TestGracefulShutdownHandler:
 
         handler.register_cleanup_handler(failing_cleanup, "failing_cleanup")
 
-        exit_code = await handler.initiate_shutdown(
-            reason=ShutdownReason.USER_REQUESTED
-        )
+        exit_code = await handler.initiate_shutdown(reason=ShutdownReason.USER_REQUESTED)
 
         assert exit_code == 1
 

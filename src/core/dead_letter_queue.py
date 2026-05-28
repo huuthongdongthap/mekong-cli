@@ -112,7 +112,8 @@ class DeadLetterQueue:
             data = json.loads(filepath.read_text(encoding="utf-8"))
             data["retried"] = True
             filepath.write_text(
-                json.dumps(data, indent=2, default=str), encoding="utf-8",
+                json.dumps(data, indent=2, default=str),
+                encoding="utf-8",
             )
             return True
         except (json.JSONDecodeError, TypeError):

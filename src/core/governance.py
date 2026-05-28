@@ -55,14 +55,19 @@ class Governance:
     """Safety governance layer for autonomous operations."""
 
     FORBIDDEN_PATTERNS: list[str] = [
-        r"\brm\s+-rf\b", r"\bdrop\s+(database|table)\b",
-        r"\bdelete\s+all\b", r"\bdestroy\b", r"\bformat\b",
+        r"\brm\s+-rf\b",
+        r"\bdrop\s+(database|table)\b",
+        r"\bdelete\s+all\b",
+        r"\bdestroy\b",
+        r"\bformat\b",
         r"\btruncate\b",
     ]
 
     REVIEW_PATTERNS: list[str] = [
-        r"\bdeploy\b.*\bprod", r"\bpush\b.*\bmain\b",
-        r"\bmodify\b.*\bconfig\b", r"\bupdate\b.*\bdns\b",
+        r"\bdeploy\b.*\bprod",
+        r"\bpush\b.*\bmain\b",
+        r"\bmodify\b.*\bconfig\b",
+        r"\bupdate\b.*\bdns\b",
         r"\bmigrate\b",
     ]
 
@@ -108,7 +113,7 @@ class Governance:
         """Record an audit entry with FIFO eviction."""
         self._audit.append(entry)
         if len(self._audit) > self.MAX_AUDIT:
-            self._audit = self._audit[-self.MAX_AUDIT:]
+            self._audit = self._audit[-self.MAX_AUDIT :]
         self._save_audit()
 
     def get_audit_trail(self, limit: int = 50) -> list[AuditEntry]:

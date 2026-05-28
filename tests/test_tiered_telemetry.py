@@ -17,8 +17,9 @@ class TestTieredTelemetryStore:
             goal=goal,
             steps=[
                 StepTrace(step_order=1, title="step1", duration_seconds=1.5, exit_code=0),
-                StepTrace(step_order=2, title="step2", duration_seconds=2.0, exit_code=0,
-                          self_healed=True),
+                StepTrace(
+                    step_order=2, title="step2", duration_seconds=2.0, exit_code=0, self_healed=True
+                ),
                 StepTrace(step_order=3, title="step3", duration_seconds=0.5, exit_code=1),
             ],
             total_duration=4.0,
@@ -74,6 +75,7 @@ class TestTieredTelemetryStore:
 
     def test_cleanup_expired_removes_old_files(self, tmp_path):
         import time
+
         store = TieredTelemetryStore(str(tmp_path))
         # Create a tier0 file
         tier0 = tmp_path / "tier0"
@@ -83,6 +85,7 @@ class TestTieredTelemetryStore:
         # Set modification time to 30 days ago (beyond 14-day retention)
         old_mtime = time.time() - (30 * 86400)
         import os
+
         os.utime(old_file, (old_mtime, old_mtime))
         removed = store.cleanup_expired()
         assert removed == 1

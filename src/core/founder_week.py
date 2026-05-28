@@ -144,7 +144,9 @@ def collect_git_velocity(base_dir: str, days: int = 7) -> int:
     try:
         result = subprocess.run(
             ["git", "log", "--oneline", f"--since={days} days ago"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True,
+            text=True,
+            timeout=10,
             cwd=base_dir,
         )
         if result.returncode == 0:
@@ -174,9 +176,7 @@ def collect_task_stats(base_dir: str) -> dict:
     return stats
 
 
-def collect_mcu_stats(
-    base_dir: str, mcu_gate=None, tenant_id: str = "default"
-) -> dict:
+def collect_mcu_stats(base_dir: str, mcu_gate=None, tenant_id: str = "default") -> dict:
     """Collect MCU usage stats."""
     stats = {"balance": 0, "used_week": 0, "cost": 0.0}
 
@@ -245,31 +245,36 @@ def generate_monday_brief(
     )
 
 
-def _suggest_priorities(
-    task_stats: dict, mcu_stats: dict, commits: int
-) -> list[Priority]:
+def _suggest_priorities(task_stats: dict, mcu_stats: dict, commits: int) -> list[Priority]:
     """Suggest weekly priorities based on current state."""
     priorities: list[Priority] = []
 
     if task_stats["success_rate"] < 90:
-        priorities.append(Priority(
-            "P1", "Improve agent success rate",
-            f"Current: {task_stats['success_rate']}%, target: >90%",
-        ))
+        priorities.append(
+            Priority(
+                "P1",
+                "Improve agent success rate",
+                f"Current: {task_stats['success_rate']}%, target: >90%",
+            )
+        )
 
     if commits < 5:
-        priorities.append(Priority(
-            f"P{len(priorities) + 1}",
-            "Increase shipping velocity",
-            f"Only {commits} commits last week — ship more",
-        ))
+        priorities.append(
+            Priority(
+                f"P{len(priorities) + 1}",
+                "Increase shipping velocity",
+                f"Only {commits} commits last week — ship more",
+            )
+        )
 
     if mcu_stats["balance"] < 50:
-        priorities.append(Priority(
-            f"P{len(priorities) + 1}",
-            "Top up MCU balance",
-            f"Balance: {mcu_stats['balance']} MCU — running low",
-        ))
+        priorities.append(
+            Priority(
+                f"P{len(priorities) + 1}",
+                "Top up MCU balance",
+                f"Balance: {mcu_stats['balance']} MCU — running low",
+            )
+        )
 
     # Fill to at least 3 priorities
     defaults = [
@@ -280,16 +285,18 @@ def _suggest_priorities(
     for desc, reason in defaults:
         if len(priorities) >= 3:
             break
-        priorities.append(Priority(
-            f"P{len(priorities) + 1}", desc, reason,
-        ))
+        priorities.append(
+            Priority(
+                f"P{len(priorities) + 1}",
+                desc,
+                reason,
+            )
+        )
 
     return priorities[:3]
 
 
-def _queue_daily_tasks(
-    task_stats: dict, mcu_stats: dict
-) -> list[DailyTask]:
+def _queue_daily_tasks(task_stats: dict, mcu_stats: dict) -> list[DailyTask]:
     """Pre-queue tasks for each day of the week."""
     return [
         DailyTask("Mon", "Monday brief + approve priorities", "/founder week"),
@@ -300,29 +307,33 @@ def _queue_daily_tasks(
     ]
 
 
-def _flag_human_actions(
-    task_stats: dict, mcu_stats: dict
-) -> list[HumanAction]:
+def _flag_human_actions(task_stats: dict, mcu_stats: dict) -> list[HumanAction]:
     """Flag items needing human attention."""
     actions: list[HumanAction] = []
 
     if mcu_stats["balance"] < 20:
-        actions.append(HumanAction(
-            f"MCU balance critically low ({mcu_stats['balance']}). Top up now.",
-            priority=1,
-        ))
+        actions.append(
+            HumanAction(
+                f"MCU balance critically low ({mcu_stats['balance']}). Top up now.",
+                priority=1,
+            )
+        )
 
     if task_stats["success_rate"] < 80:
-        actions.append(HumanAction(
-            f"Agent success rate dropped to {task_stats['success_rate']}%.",
-            priority=2,
-        ))
+        actions.append(
+            HumanAction(
+                f"Agent success rate dropped to {task_stats['success_rate']}%.",
+                priority=2,
+            )
+        )
 
     if not actions:
-        actions.append(HumanAction(
-            "All systems normal. Review priorities and approve.",
-            priority=3,
-        ))
+        actions.append(
+            HumanAction(
+                "All systems normal. Review priorities and approve.",
+                priority=3,
+            )
+        )
 
     return actions
 
@@ -383,7 +394,9 @@ def generate_daily_standup(
         date=today,
         yesterday=f"Shipped {commits} commit(s), {task_stats['done']} task(s) completed",
         today="Continue priority tasks from weekly queue",
-        blocker="None" if task_stats["success_rate"] >= 80 else "Agent success rate needs attention",
+        blocker=(
+            "None" if task_stats["success_rate"] >= 80 else "Agent success rate needs attention"
+        ),
     )
 
 
@@ -438,10 +451,13 @@ def save_priorities(base_dir: str, week_num: int, priorities: list[Priority]) ->
     founder_dir.mkdir(parents=True, exist_ok=True)
 
     path = founder_dir / f"priorities-week-{week_num}.json"
-    path.write_text(json.dumps(
-        [asdict(p) for p in priorities],
-        indent=2, ensure_ascii=False,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(p) for p in priorities],
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     return str(path)
 
 

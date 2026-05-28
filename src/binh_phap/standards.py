@@ -37,14 +37,26 @@ CTO_FRAMEWORK_PHASES = {
         "chapter": "第七篇 軍爭",
         "description": "Build in stages, explain as you go, test everything, check-in at key decisions",
         "actions": ["staged_build", "continuous_testing", "decision_checkpoints"],
-        "skills": ["cook", "coding-agent", "cc-godmode", "frontend-development", "backend-development"],
+        "skills": [
+            "cook",
+            "coding-agent",
+            "cc-godmode",
+            "frontend-development",
+            "backend-development",
+        ],
     },
     "polish": {
         "name": "Polish",
         "chapter": "第五篇 兵勢",
         "description": "Professional not hackathon, handle edge cases, responsive, finished feel",
         "actions": ["edge_case_handling", "responsive_design", "professional_finish"],
-        "skills": ["code-review", "heimdall-security", "openclaw-sec", "web-testing", "ui-ux-pro-max"],
+        "skills": [
+            "code-review",
+            "heimdall-security",
+            "openclaw-sec",
+            "web-testing",
+            "ui-ux-pro-max",
+        ],
     },
     "handoff": {
         "name": "Handoff",
@@ -199,9 +211,7 @@ class TypeSafetyCheck(StandardCheck):
                 capture_output=True,
                 text=True,
             )
-            count = (
-                len(result.stdout.strip().splitlines()) if result.stdout.strip() else 0
-            )
+            count = len(result.stdout.strip().splitlines()) if result.stdout.strip() else 0
             if count == 0:
                 self.status = True
                 self.details = "No ': Any' types found in Python files."

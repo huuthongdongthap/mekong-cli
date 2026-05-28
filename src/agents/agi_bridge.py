@@ -1,4 +1,5 @@
 """Bridge to Tom Hum AGI daemon (apps/openclaw-worker/)."""
+
 import subprocess
 import pathlib
 import time
@@ -116,9 +117,7 @@ class AGIBridge:
         if not log_path.exists():
             return "Log file not found: ~/tom_hum_cto.log"
         try:
-            all_lines = log_path.read_text(
-                encoding="utf-8", errors="replace"
-            ).splitlines()
+            all_lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
             return "\n".join(all_lines[-lines:])
         except OSError as e:
             return f"Error reading log: {e}"

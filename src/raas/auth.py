@@ -1,4 +1,5 @@
 """FastAPI auth middleware for RaaS multi-tenant request isolation."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -8,7 +9,6 @@ from fastapi import HTTPException, Request
 from pydantic import BaseModel
 
 from src.raas.tenant import Tenant, TenantStore
-
 
 # Module-level singleton so the connection pool is shared across requests.
 _store = TenantStore()

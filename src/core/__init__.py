@@ -1,6 +1,7 @@
 # Mekong CLI - Core Module
 # Lazy imports — modules loaded on first access, not at import time.
 
+
 def __getattr__(name: str):
     """Lazy import core modules on first access."""
     _imports = {
@@ -73,30 +74,87 @@ def __getattr__(name: str):
 
     if name in _imports:
         import importlib
+
         module = importlib.import_module(_imports[name], __package__)
         return getattr(module, name)
+
+    # Fallback: expose submodules by name (enables patch("src.core.<mod>.<attr>"))
+    try:
+        import importlib
+
+        submod = importlib.import_module(f".{name}", __package__)
+        globals()[name] = submod  # cache for subsequent access
+        return submod
+    except (ImportError, ModuleNotFoundError):
+        pass
+
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = [
-    "AgentBase", "Result", "Task", "TaskStatus",
-    "AgentProtocol", "AgentRegistry", "StreamingMixin",
-    "Alert", "AlertConfig", "AlertRouter", "AlertSeverity",
-    "DAGScheduler", "DAGStepResult", "validate_dag",
-    "RecipeExecutor", "ExecutionResult",
-    "OrchestrationResult", "OrchestrationStatus", "RecipeOrchestrator", "StepResult",
-    "Recipe", "RecipeParser", "RecipeStep",
-    "PipelineManager", "PipelineResult", "PipelineStage", "PipelineStatus",
-    "PlanningContext", "RecipePlanner", "TaskComplexity", "VerificationCriteria",
-    "ProgressCallback", "ProgressPhase", "ProgressSnapshot", "ProgressTracker",
-    "PriorityTaskQueue", "QueueTaskPriority",
-    "PluginLoader", "PluginManifest", "PluginRegistry", "PluginStatus", "PluginType",
-    "GeminiProvider", "LLMProvider", "LLMResponse", "OfflineProvider", "OpenAICompatibleProvider",
-    "RecipeRegistry", "RegistryIndex",
-    "TelegramClient", "TelegramConfig", "send_alert", "get_alert_router",
-    "PEVStructuredLogger", "get_pev_logger",
-    "PEVMetricsCollector", "get_pev_metrics",
-    "PEVDashboardData", "get_dashboard_data",
-    "register_pev_health_checks", "get_pev_health_summary",
-    "RecipeVerifier", "VerificationCheck", "VerificationReport", "VerificationStatus",
+    "AgentBase",
+    "Result",
+    "Task",
+    "TaskStatus",
+    "AgentProtocol",
+    "AgentRegistry",
+    "StreamingMixin",
+    "Alert",
+    "AlertConfig",
+    "AlertRouter",
+    "AlertSeverity",
+    "DAGScheduler",
+    "DAGStepResult",
+    "validate_dag",
+    "RecipeExecutor",
+    "ExecutionResult",
+    "OrchestrationResult",
+    "OrchestrationStatus",
+    "RecipeOrchestrator",
+    "StepResult",
+    "Recipe",
+    "RecipeParser",
+    "RecipeStep",
+    "PipelineManager",
+    "PipelineResult",
+    "PipelineStage",
+    "PipelineStatus",
+    "PlanningContext",
+    "RecipePlanner",
+    "TaskComplexity",
+    "VerificationCriteria",
+    "ProgressCallback",
+    "ProgressPhase",
+    "ProgressSnapshot",
+    "ProgressTracker",
+    "PriorityTaskQueue",
+    "QueueTaskPriority",
+    "PluginLoader",
+    "PluginManifest",
+    "PluginRegistry",
+    "PluginStatus",
+    "PluginType",
+    "GeminiProvider",
+    "LLMProvider",
+    "LLMResponse",
+    "OfflineProvider",
+    "OpenAICompatibleProvider",
+    "RecipeRegistry",
+    "RegistryIndex",
+    "TelegramClient",
+    "TelegramConfig",
+    "send_alert",
+    "get_alert_router",
+    "PEVStructuredLogger",
+    "get_pev_logger",
+    "PEVMetricsCollector",
+    "get_pev_metrics",
+    "PEVDashboardData",
+    "get_dashboard_data",
+    "register_pev_health_checks",
+    "get_pev_health_summary",
+    "RecipeVerifier",
+    "VerificationCheck",
+    "VerificationReport",
+    "VerificationStatus",
 ]

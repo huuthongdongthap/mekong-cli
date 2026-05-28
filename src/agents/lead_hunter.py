@@ -33,18 +33,18 @@ class LeadHunter(AgentBase):
             Task(
                 id="search_company",
                 description=f"Search for company information for {domain}",
-                input={"domain": domain}
+                input={"domain": domain},
             ),
             Task(
                 id="identify_ceo",
                 description="Identify CEO or Founder name",
-                input={"domain": domain}  # Will be enriched with company info
+                input={"domain": domain},  # Will be enriched with company info
             ),
             Task(
                 id="find_email",
                 description="Find email pattern and generate specific email",
-                input={"domain": domain}
-            )
+                input={"domain": domain},
+            ),
         ]
 
     def execute(self, task: Task) -> Result:
@@ -66,8 +66,8 @@ class LeadHunter(AgentBase):
                     output={
                         "company_name": f"{domain.split('.')[0].capitalize()} Inc.",
                         "domain": domain,
-                        "linkedin_url": f"https://linkedin.com/company/{domain.split('.')[0]}"
-                    }
+                        "linkedin_url": f"https://linkedin.com/company/{domain.split('.')[0]}",
+                    },
                 )
 
             elif task.id == "identify_ceo":
@@ -75,10 +75,7 @@ class LeadHunter(AgentBase):
                 return Result(
                     task_id=task.id,
                     success=True,
-                    output={
-                        "name": "John Doe",
-                        "title": "CEO & Founder"
-                    }
+                    output={"name": "John Doe", "title": "CEO & Founder"},
                 )
 
             elif task.id == "find_email":
@@ -89,27 +86,16 @@ class LeadHunter(AgentBase):
                 return Result(
                     task_id=task.id,
                     success=True,
-                    output={
-                        "email": f"ceo@{domain}",
-                        "confidence": 0.85
-                    }
+                    output={"email": f"ceo@{domain}", "confidence": 0.85},
                 )
 
             else:
                 return Result(
-                    task_id=task.id,
-                    success=False,
-                    output=None,
-                    error=f"Unknown task: {task.id}"
+                    task_id=task.id, success=False, output=None, error=f"Unknown task: {task.id}"
                 )
 
         except Exception as e:
-            return Result(
-                task_id=task.id,
-                success=False,
-                output=None,
-                error=str(e)
-            )
+            return Result(task_id=task.id, success=False, output=None, error=str(e))
 
     def verify(self, result: Result) -> bool:
         """Verify results are valid"""

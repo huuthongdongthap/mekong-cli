@@ -126,19 +126,18 @@ class RaaSAuthClient:
         Environment variables:
             RAAS_LOCAL_TEST: If "true", skip gateway calls and use local mock
         """
-        self.gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL
-        )
+        self.gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL)
         self.credentials_path = Path(
             credentials_file or os.getenv("RAAS_CREDENTIALS_FILE", self.CREDENTIALS_FILE)
         ).expanduser()
 
-        self.use_secure_storage = use_secure_storage and os.getenv(
-            "RAAS_USE_SECURE_STORAGE", "true"
-        ).lower() != "false"
-        self.use_certificate_auth = use_certificate_auth and os.getenv(
-            "RAAS_USE_CERTIFICATE_AUTH", "true"
-        ).lower() != "false"
+        self.use_secure_storage = (
+            use_secure_storage and os.getenv("RAAS_USE_SECURE_STORAGE", "true").lower() != "false"
+        )
+        self.use_certificate_auth = (
+            use_certificate_auth
+            and os.getenv("RAAS_USE_CERTIFICATE_AUTH", "true").lower() != "false"
+        )
 
         # Local testing mode (Phase 6.3)
         self.local_test_mode = os.getenv("RAAS_LOCAL_TEST", "").lower() == "true"
@@ -348,15 +347,14 @@ class RaaSAuthClient:
             }
 
         from datetime import datetime
+
         return {
             "has_certificate": True,
             "certificate_id": metadata.certificate_id,
             "device_id": metadata.device_id[:16] + "...",
             "valid_from": metadata.valid_from.isoformat(),
             "valid_until": metadata.valid_until.isoformat(),
-            "days_until_expiry": (
-                metadata.valid_until.day - datetime.now(timezone.utc).day
-            ),
+            "days_until_expiry": (metadata.valid_until.day - datetime.now(timezone.utc).day),
             "should_rotate": metadata.should_rotate,
             "is_expired": metadata.is_expired,
             "rotated_count": metadata.rotated_count,
@@ -376,13 +374,12 @@ class RaaSAuthClient:
             new_cert = self._certificate_store.rotate_certificate()
             if new_cert:
                 from datetime import datetime, timezone
+
                 return {
                     "success": True,
                     "certificate_id": new_cert.certificate_id,
                     "valid_until": new_cert.valid_until.isoformat(),
-                    "days_valid": (
-                        new_cert.valid_until - datetime.now(timezone.utc)
-                    ).days,
+                    "days_valid": (new_cert.valid_until - datetime.now(timezone.utc)).days,
                 }
             else:
                 return {
@@ -434,9 +431,7 @@ class RaaSAuthClient:
                     license_key=token if token.startswith("mk_") else None,
                     features=data.get("features", []),
                     expires_at=(
-                        datetime.fromtimestamp(
-                            data.get("expires_at", 0), tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(data.get("expires_at", 0), tz=timezone.utc)
                         if data.get("expires_at")
                         else None
                     ),

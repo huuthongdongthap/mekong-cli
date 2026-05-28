@@ -40,6 +40,8 @@ _POLAR_PRICE_DEFAULTS = {
     "pro": "polar_cl_zi7LHdaPk93V0xbNVQZgqum96gWCFDTVzpDNR2kfN3j",
 }
 
+_POLAR_PRODUCT_TO_TIER = {v: k for k, v in _POLAR_PRICE_DEFAULTS.items()}
+
 _PRICING_TIERS = [
     {"name": "Starter", "tier": "starter", "price_usd": 49, "credits": 200},
     {"name": "Growth", "tier": "growth", "price_usd": 149, "credits": 1000},
@@ -62,6 +64,7 @@ class OnboardResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _polar_checkout_base() -> str:
     """Return the Polar.sh organisation checkout base URL."""
@@ -92,6 +95,7 @@ def _tier_from_session(session_id: str) -> str:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.post("/v1/onboard", response_model=OnboardResponse)
 async def onboard_tenant(req: OnboardRequest):
@@ -128,9 +132,8 @@ async def polar_webhook(request: Request):
             raise HTTPException(status_code=500, detail="Webhook secret not configured")
     else:
         # Polar uses Svix-based webhooks. Check multiple header formats.
-        signature = (
-            request.headers.get("webhook-signature", "")
-            or request.headers.get("X-Polar-Signature", "")
+        signature = request.headers.get("webhook-signature", "") or request.headers.get(
+            "X-Polar-Signature", ""
         )
         if not signature:
             raise HTTPException(status_code=401, detail="Missing webhook signature")
@@ -141,14 +144,14 @@ async def polar_webhook(request: Request):
 
         # Try both hex and base64 comparison
         import base64
+
         expected_hex = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
         expected_b64 = base64.b64encode(
             hmac.new(secret.encode(), body, hashlib.sha256).digest()
         ).decode()
 
         if not (
-            hmac.compare_digest(raw_sig, expected_hex)
-            or hmac.compare_digest(raw_sig, expected_b64)
+            hmac.compare_digest(raw_sig, expected_hex) or hmac.compare_digest(raw_sig, expected_b64)
         ):
             logger.warning("Webhook signature mismatch: got=%s", signature[:20])
             raise HTTPException(status_code=401, detail="Invalid signature")
@@ -161,8 +164,8 @@ async def polar_webhook(request: Request):
         product_id = data.get("product_id", "")
         customer_email = data.get("customer", {}).get("email", "")
 
-        # Map product UUID back to tier, then look up credits
-        _PRODUCT_TO_TIER = {v: k for k, v in _POLAR_PRICE_DEFAULTS.items()}
+        # Map product UUID back to tier (module-level constant)
+        _PRODUCT_TO_TIER = _POLAR_PRODUCT_TO_TIER
         tier = _PRODUCT_TO_TIER.get(product_id, "")
         # Fallback: check Polar metadata for explicit tier
         if not tier:
@@ -183,7 +186,9 @@ async def polar_webhook(request: Request):
             )
             logger.info(
                 "Provisioned %d credits for %s (balance: %d)",
-                credits, customer_email, new_balance,
+                credits,
+                customer_email,
+                new_balance,
             )
 
     return {"status": "ok"}
@@ -195,7 +200,7 @@ async def get_pricing(tenant: str | None = None):
     from src.api.tenant_config_loader import get_tenant_config
 
     tenant_config = get_tenant_config(tenant) if tenant else None
-    base = (
+    checkout_base = (
         tenant_config.get("polar_checkout_url") or _polar_checkout_base()
         if tenant_config
         else _polar_checkout_base()
@@ -205,12 +210,14 @@ async def get_pricing(tenant: str | None = None):
     for tier_info in _PRICING_TIERS:
         price_id = _polar_price_id(tier_info["tier"])
         # Polar checkout link format: api.polar.sh/v1/checkout-links/{id}/redirect
-        tiers_with_urls.append({
-            **tier_info,
-            "checkout_url": f"https://api.polar.sh/v1/checkout-links/{price_id}/redirect",
-        })
+        tiers_with_urls.append(
+            {
+                **tier_info,
+                "checkout_url": f"https://api.polar.sh/v1/checkout-links/{price_id}/redirect",
+            }
+        )
 
-    result = {"tiers": tiers_with_urls, "checkout_url": "https://polar.sh"}
+    result = {"tiers": tiers_with_urls, "checkout_url": checkout_base}
     if tenant_config:
         result["tenant"] = tenant_config["slug"]
     return result

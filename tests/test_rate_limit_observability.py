@@ -24,7 +24,6 @@ from src.telemetry.rate_limit_metrics import (
     TelemetryIntegration,
 )
 
-
 # ============================================================================
 # FIXTURES
 # ============================================================================
@@ -365,7 +364,11 @@ class TestMetricsEmitterGetQuotaUtilization:
     @pytest.mark.asyncio
     async def test_get_quota_utilization_default_24_hours(self, metrics_emitter, mock_db):
         """Test default 24 hour window."""
-        mock_db.fetch_one.return_value = {"avg_utilization": 0, "max_utilization": 0, "total_requests": 0}
+        mock_db.fetch_one.return_value = {
+            "avg_utilization": 0,
+            "max_utilization": 0,
+            "total_requests": 0,
+        }
 
         await metrics_emitter.get_quota_utilization("tenant-default")
 
@@ -535,7 +538,9 @@ class TestMetricsEmitterGetViolationsSummary:
         await metrics_emitter.get_violations_summary()
 
         # Check all queries use 24 hours
-        assert all("INTERVAL '24 hours'" in str(call[0][0]) for call in mock_db.fetch_all.call_args_list)
+        assert all(
+            "INTERVAL '24 hours'" in str(call[0][0]) for call in mock_db.fetch_all.call_args_list
+        )
         assert "INTERVAL '24 hours'" in str(mock_db.fetch_one.call_args[0][0])
 
 
@@ -851,7 +856,12 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_cli_integration_full(self):
         """Test CLI command integration."""
-        from src.commands.debug_rate_limits import check_status, view_history, list_violations, list_overrides
+        from src.commands.debug_rate_limits import (
+            check_status,
+            view_history,
+            list_violations,
+            list_overrides,
+        )
 
         # Verify CLI functions exist
         assert callable(check_status)

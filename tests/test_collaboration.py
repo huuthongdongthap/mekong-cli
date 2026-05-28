@@ -82,8 +82,10 @@ class TestCollaborationProtocol(unittest.TestCase):
         proto = CollaborationProtocol()
         proto.register_agent("reviewer", AgentRole.REVIEWER)
         review = proto.submit_review(
-            "reviewer", "code.py",
-            approved=True, score=0.9,
+            "reviewer",
+            "code.py",
+            approved=True,
+            score=0.9,
             feedback=["Looks good"],
         )
         self.assertTrue(review.approved)

@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 class CommandTier(str, Enum):
     """Command tier levels."""
+
     FREE = "free"
     PRO = "pro"
     ENTERPRISE = "enterprise"
@@ -48,6 +49,7 @@ class CommandTier(str, Enum):
 
 class AuthorizationReason(str, Enum):
     """Reasons for authorization decisions."""
+
     FREE_COMMAND = "free_command"
     LICENSE_VALID = "license_valid"
     GRACE_PERIOD = "grace_period"
@@ -62,6 +64,7 @@ class AuthorizationReason(str, Enum):
 @dataclass
 class AuthorizationResult:
     """Result of command authorization check."""
+
     allowed: bool
     reason: AuthorizationReason
     message: Optional[str] = None
@@ -76,6 +79,7 @@ class AuthorizationResult:
 @dataclass
 class CommandConfig:
     """Configuration for a command."""
+
     tier: CommandTier
     requires_license: bool = True
     rate_limit_weight: int = 1  # Rate limit cost
@@ -86,6 +90,8 @@ class CommandConfig:
 COMMAND_TIER_MAP: Dict[str, CommandConfig] = {
     # FREE commands - no license required
     "cook": CommandConfig(CommandTier.FREE, requires_license=False),
+    "mekong-cli": CommandConfig(CommandTier.FREE, requires_license=False),
+    "goals": CommandConfig(CommandTier.FREE, requires_license=False),
     "plan": CommandConfig(CommandTier.FREE, requires_license=False),
     "status": CommandConfig(CommandTier.FREE, requires_license=False),
     "config": CommandConfig(CommandTier.FREE, requires_license=False),
@@ -122,7 +128,6 @@ COMMAND_TIER_MAP: Dict[str, CommandConfig] = {
     "complete-phase6": CommandConfig(CommandTier.FREE, requires_license=False),
     "raas-debug-export": CommandConfig(CommandTier.FREE, requires_license=False),
     "health": CommandConfig(CommandTier.FREE, requires_license=False),
-
     # PRO commands - require valid license
     "binh-phap": CommandConfig(CommandTier.PRO, requires_license=True),
     "agi": CommandConfig(CommandTier.PRO, requires_license=True),
@@ -135,7 +140,6 @@ COMMAND_TIER_MAP: Dict[str, CommandConfig] = {
     "env": CommandConfig(CommandTier.PRO, requires_license=True),
     "test-advanced": CommandConfig(CommandTier.PRO, requires_license=True),
     "renewal": CommandConfig(CommandTier.PRO, requires_license=True),
-
     # ClaudeKit skill commands (PRO)
     "popup-cro": CommandConfig(CommandTier.PRO, requires_license=True),
     "trading:ceo": CommandConfig(CommandTier.PRO, requires_license=True),
@@ -258,7 +262,6 @@ COMMAND_TIER_MAP: Dict[str, CommandConfig] = {
     "email-campaign": CommandConfig(CommandTier.PRO, requires_license=True),
     "social-media": CommandConfig(CommandTier.PRO, requires_license=True),
     "product-manager": CommandConfig(CommandTier.PRO, requires_license=True),
-
     # ENTERPRISE commands - admin & maintenance
     "license-admin": CommandConfig(CommandTier.ENTERPRISE, requires_license=True),
     "tier-admin": CommandConfig(CommandTier.ENTERPRISE, requires_license=True),
@@ -348,6 +351,7 @@ class CommandAuthorizer:
                 return False, None
 
             import json
+
             grace_state = json.loads(state)
 
             grace_until = grace_state.get("grace_until")
@@ -371,6 +375,7 @@ class CommandAuthorizer:
         """Enter grace period for specified hours."""
         try:
             import json
+
             grace_until = datetime.now(timezone.utc) + timedelta(hours=hours)
 
             state = {
@@ -602,6 +607,7 @@ class CommandAuthorizer:
         try:
             # Import usage instrumentor
             from src.cli.usage_auto_instrument import emit_usage_event
+
             emit_usage_event(command)
         except Exception as e:
             logger.debug(f"Failed to record usage for {command}: {e}")
@@ -620,13 +626,16 @@ class CommandAuthorizer:
             "license_valid": license_valid,
             "in_grace_period": in_grace,
             "grace_period_remaining_hours": remaining,
-            "last_validated_at": self._last_validated_at.isoformat() if self._last_validated_at else None,
+            "last_validated_at": (
+                self._last_validated_at.isoformat() if self._last_validated_at else None
+            ),
             "cache_ttl_seconds": self._validation_cache_ttl_seconds,
         }
 
 
 class GatewayValidationError(Exception):
     """Gateway validation error."""
+
     pass
 
 

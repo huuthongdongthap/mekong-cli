@@ -49,9 +49,7 @@ class FileAgent(AgentBase):
             ]
 
         elif command == "read":
-            return [
-                Task(id="file_read", description=f"Read: {args}", input={"path": args})
-            ]
+            return [Task(id="file_read", description=f"Read: {args}", input={"path": args})]
 
         elif command == "write":
             # Format: write <path> <content>
@@ -77,23 +75,13 @@ class FileAgent(AgentBase):
             ]
 
         elif command == "stats":
-            return [
-                Task(id="file_stats", description="Project file statistics", input={})
-            ]
+            return [Task(id="file_stats", description="Project file statistics", input={})]
 
         elif command == "grep":
-            return [
-                Task(
-                    id="file_grep", description=f"Grep: {args}", input={"pattern": args}
-                )
-            ]
+            return [Task(id="file_grep", description=f"Grep: {args}", input={"pattern": args})]
 
         else:
-            return [
-                Task(
-                    id="file_custom", description=input_data, input={"raw": input_data}
-                )
-            ]
+            return [Task(id="file_custom", description=input_data, input={"raw": input_data})]
 
     def execute(self, task: Task) -> Result:
         """Execute file operation."""
@@ -118,9 +106,7 @@ class FileAgent(AgentBase):
                 result = subprocess.run(
                     cmd, cwd=self.cwd, capture_output=True, text=True, timeout=15
                 )
-                files = [f for f in result.stdout.strip().split("\n") if f][
-                    :50
-                ]  # Cap at 50
+                files = [f for f in result.stdout.strip().split("\n") if f][:50]  # Cap at 50
                 return Result(
                     task_id=task.id,
                     success=True,
@@ -280,9 +266,7 @@ class FileAgent(AgentBase):
                 )
 
         except subprocess.TimeoutExpired:
-            return Result(
-                task_id=task.id, success=False, output=None, error="Command timed out"
-            )
+            return Result(task_id=task.id, success=False, output=None, error="Command timed out")
         except Exception as e:
             return Result(task_id=task.id, success=False, output=None, error=str(e))
 

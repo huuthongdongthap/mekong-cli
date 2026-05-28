@@ -13,6 +13,7 @@ from typing import Optional, Union
 
 class Tier(Enum):
     """License tier enumeration."""
+
     FREE = "free"
     TRIAL = "trial"
     PRO = "pro"
@@ -22,6 +23,7 @@ class Tier(Enum):
 @dataclass
 class RateLimitConfig:
     """Rate limit configuration for a single endpoint."""
+
     requests_per_minute: int
     burst_size: Optional[int] = None  # Token bucket burst size (default = rpm)
     window_seconds: Optional[int] = None  # Time window in seconds (default: 60)
@@ -36,6 +38,7 @@ class RateLimitConfig:
 @dataclass
 class TierRateLimitConfig:
     """Complete rate limit configuration for a tier."""
+
     tier: Tier
     auth_login: RateLimitConfig
     auth_callback: RateLimitConfig
@@ -125,9 +128,7 @@ def get_preset_config(tier: Union[str, Tier], preset: str) -> RateLimitConfig:
     }
 
     if preset not in preset_map:
-        raise ValueError(
-            f"Invalid preset: {preset}. Must be one of: {list(preset_map.keys())}"
-        )
+        raise ValueError(f"Invalid preset: {preset}. Must be one of: {list(preset_map.keys())}")
 
     return preset_map[preset]
 

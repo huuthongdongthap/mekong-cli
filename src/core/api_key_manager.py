@@ -153,6 +153,7 @@ class ApiKeyManager:
         """Get secure storage for encryption."""
         try:
             from src.auth.secure_storage import get_secure_storage
+
             return get_secure_storage()
         except ImportError:
             return None
@@ -437,10 +438,7 @@ class ApiKeyManager:
             List of ApiKey (without secrets)
         """
         keys_data = self._load_all_keys()
-        return [
-            key for key in keys_data.values()
-            if key.tenant_id == tenant_id
-        ]
+        return [key for key in keys_data.values() if key.tenant_id == tenant_id]
 
     def get_key(self, key_id: str) -> Optional[ApiKey]:
         """
@@ -538,6 +536,7 @@ class ApiKeyManager:
 
         try:
             import json
+
             with open(self.keys_path, "r") as f:
                 data = json.load(f)
 
@@ -562,6 +561,7 @@ class ApiKeyManager:
 
         try:
             import json
+
             data = {k: v.to_public_dict() for k, v in keys_data.items()}
 
             with open(self.keys_path, "w") as f:

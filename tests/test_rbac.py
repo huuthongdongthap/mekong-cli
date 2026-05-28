@@ -3,6 +3,7 @@
 Tests role permissions mapping, decorator behavior, access control,
 require_role/require_permission decorators, and environment-aware bypass.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -370,6 +371,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         result = asyncio.run(admin_route(mock_request))
 
         assert result == {"success": True}
@@ -386,6 +388,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         result = asyncio.run(admin_route(mock_request))
 
         assert result == {"success": True}
@@ -403,6 +406,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(admin_route(mock_request))
 
@@ -422,6 +426,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(admin_route(mock_request))
 
@@ -439,6 +444,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(admin_route(mock_request))
 
@@ -457,6 +463,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(admin_route(mock_request))
 
@@ -474,6 +481,7 @@ class TestRequireRoleDecorator:
             return {"success": True}
 
         import asyncio
+
         result = asyncio.run(multi_role_route(mock_request))
 
         assert result == {"success": True}
@@ -489,6 +497,7 @@ class TestRequireRoleDecorator:
             return {"user_id": user_id}
 
         import asyncio
+
         result = asyncio.run(route_with_args(mock_request, user_id=123))
 
         assert result == {"user_id": 123}
@@ -509,6 +518,7 @@ class TestRequirePermissionDecorator:
             return {"success": True}
 
         import asyncio
+
         result = asyncio.run(manage_users_route(mock_request))
 
         assert result == {"success": True}
@@ -526,6 +536,7 @@ class TestRequirePermissionDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(manage_users_route(mock_request))
 
@@ -543,6 +554,7 @@ class TestRequirePermissionDecorator:
             return {"success": True}
 
         import asyncio
+
         result = asyncio.run(view_dashboard_route(mock_request))
 
         assert result == {"success": True}
@@ -560,6 +572,7 @@ class TestRequirePermissionDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(delete_route(mock_request))
 
@@ -577,6 +590,7 @@ class TestRequirePermissionDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(manage_users_route(mock_request))
 
@@ -595,6 +609,7 @@ class TestRequirePermissionDecorator:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(manage_users_route(mock_request))
 
@@ -728,6 +743,7 @@ class TestRBACMiddleware:
             return PlainTextResponse("OK")
 
         import asyncio
+
         # Mind the async nature
         asyncio.run(middleware.dispatch(mock_request, call_next))
 
@@ -743,6 +759,7 @@ class TestRBACMiddleware:
             return PlainTextResponse("OK")
 
         import asyncio
+
         asyncio.run(RBACMiddleware(app=None).dispatch(mock_request, call_next))
 
     def test_middleware_handles_no_role(self):
@@ -759,6 +776,7 @@ class TestRBACMiddleware:
             return PlainTextResponse("OK")
 
         import asyncio
+
         asyncio.run(RBACMiddleware(app=None).dispatch(mock_request, call_next))
 
     def test_middleware_handles_invalid_role(self):
@@ -776,6 +794,7 @@ class TestRBACMiddleware:
             return PlainTextResponse("OK")
 
         import asyncio
+
         asyncio.run(RBACMiddleware(app=None).dispatch(mock_request, call_next))
 
     def test_middleware_preserves_request_state(self):
@@ -794,6 +813,7 @@ class TestRBACMiddleware:
             return MagicMock()
 
         import asyncio
+
         asyncio.run(RBACMiddleware(app=None).dispatch(mock_request, call_next))
 
 
@@ -809,6 +829,7 @@ class TestDecoratorsRequireRequest:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(route_without_request())
 
@@ -824,6 +845,7 @@ class TestDecoratorsRequireRequest:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(route_without_request())
 
@@ -847,6 +869,7 @@ class TestInvalidRoleHandling:
             return {"success": True}
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc_info:
             asyncio.run(route(mock_request))
 
@@ -867,6 +890,7 @@ class TestRequestInKwargs:
             return {"success": True}
 
         import asyncio
+
         result = asyncio.run(route(request=mock_request))
 
         assert result == {"success": True}

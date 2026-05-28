@@ -326,7 +326,9 @@ class TestSessionCachePersistence:
         assert not temp_session_file.exists()
 
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_load_session_cache_corrupted(self, mock_get_storage, temp_session_file, temp_creds_file):
+    def test_load_session_cache_corrupted(
+        self, mock_get_storage, temp_session_file, temp_creds_file
+    ):
         """Test loading corrupted cache returns None."""
         mock_get_storage.return_value = None
 
@@ -369,7 +371,9 @@ class TestSessionCachePersistence:
         assert not temp_session_file.exists()
 
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_clear_session_cache_nonexistent(self, mock_get_storage, temp_session_file, temp_creds_file):
+    def test_clear_session_cache_nonexistent(
+        self, mock_get_storage, temp_session_file, temp_creds_file
+    ):
         """Test clearing non-existent cache returns False."""
         mock_get_storage.return_value = None
 
@@ -403,9 +407,7 @@ class TestAutoRefresh:
 
     @patch("src.core.raas_auth.requests.post")
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_refresh_session(
-        self, mock_get_storage, mock_post, mock_gateway_response, tmp_path
-    ):
+    def test_refresh_session(self, mock_get_storage, mock_post, mock_gateway_response, tmp_path):
         """Test _refresh_session method."""
         mock_get_storage.return_value = None
         mock_post.return_value = mock_gateway_response
@@ -425,9 +427,7 @@ class TestAutoRefresh:
 
     @patch("src.core.raas_auth.requests.post")
     @patch("src.core.raas_auth.get_secure_storage")
-    def test_get_session_uses_cache(
-        self, mock_get_storage, mock_post, tmp_path
-    ):
+    def test_get_session_uses_cache(self, mock_get_storage, mock_post, tmp_path):
         """Test get_session uses valid cache."""
         mock_get_storage.return_value = None
 

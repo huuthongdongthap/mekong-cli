@@ -26,7 +26,9 @@ console = Console()
 def resources(
     interval: float = typer.Option(1.0, "--interval", "-i", help="Refresh interval in seconds"),
     count: int = typer.Option(10, "--count", "-c", help="Number of readings (0 for continuous)"),
-    show_processes: bool = typer.Option(False, "--processes", "-p", help="Show top processes by CPU/Memory"),
+    show_processes: bool = typer.Option(
+        False, "--processes", "-p", help="Show top processes by CPU/Memory"
+    ),
 ):
     """Monitor system resources (CPU, Memory, Disk, Network)"""
 
@@ -34,7 +36,9 @@ def resources(
         console.print("[red]❌ psutil not installed. Install with: pip install psutil[/red]")
         return
 
-    console.print(f"[bold]🖥️  Monitoring system resources (interval: {interval}s, count: {count})...[/bold]")
+    console.print(
+        f"[bold]🖥️  Monitoring system resources (interval: {interval}s, count: {count})...[/bold]"
+    )
 
     readings = 0
     try:
@@ -46,7 +50,7 @@ def resources(
             # Get system metrics
             cpu_percent = psutil.cpu_percent(interval=None)
             memory = psutil.virtual_memory()
-            disk_usage = psutil.disk_usage('/')
+            disk_usage = psutil.disk_usage("/")
             network = psutil.net_io_counters()
 
             # Create metrics table
@@ -56,9 +60,21 @@ def resources(
             table.add_column("Details", style="dim")
 
             table.add_row("CPU Usage", f"{cpu_percent}%", f"({psutil.cpu_count()} cores)")
-            table.add_row("Memory Usage", f"{memory.percent}%", f"{memory.used // 1024 // 1024} MB / {memory.total // 1024 // 1024} MB")
-            table.add_row("Disk Usage", f"{disk_usage.percent}%", f"{disk_usage.used // 1024 // 1024 // 1024} GB / {disk_usage.total // 1024 // 1024 // 1024} GB")
-            table.add_row("Network (Bytes)", f"↑ {network.bytes_sent // 1024} KB", f"↓ {network.bytes_recv // 1024} KB")
+            table.add_row(
+                "Memory Usage",
+                f"{memory.percent}%",
+                f"{memory.used // 1024 // 1024} MB / {memory.total // 1024 // 1024} MB",
+            )
+            table.add_row(
+                "Disk Usage",
+                f"{disk_usage.percent}%",
+                f"{disk_usage.used // 1024 // 1024 // 1024} GB / {disk_usage.total // 1024 // 1024 // 1024} GB",
+            )
+            table.add_row(
+                "Network (Bytes)",
+                f"↑ {network.bytes_sent // 1024} KB",
+                f"↓ {network.bytes_recv // 1024} KB",
+            )
 
             console.print(table)
 
@@ -79,17 +95,17 @@ def show_top_processes() -> None:
 
     # Get all processes and sort by CPU usage
     processes = []
-    for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
+    for proc in psutil.process_iter(["pid", "name", "cpu_percent", "memory_percent"]):
         try:
             processes.append(proc.info)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
 
     # Sort by CPU usage (descending)
-    cpu_sorted = sorted(processes, key=lambda p: p['cpu_percent'] or 0, reverse=True)[:5]
+    cpu_sorted = sorted(processes, key=lambda p: p["cpu_percent"] or 0, reverse=True)[:5]
 
     # Sort by memory usage (descending)
-    mem_sorted = sorted(processes, key=lambda p: p['memory_percent'] or 0, reverse=True)[:5]
+    mem_sorted = sorted(processes, key=lambda p: p["memory_percent"] or 0, reverse=True)[:5]
 
     # Show top CPU consumers
     cpu_table = Table(title="Top 5 CPU Consumers")
@@ -98,7 +114,7 @@ def show_top_processes() -> None:
     cpu_table.add_column("CPU %", style="magenta")
 
     for proc in cpu_sorted:
-        cpu_table.add_row(str(proc['pid']), proc['name'], f"{proc['cpu_percent'] or 0}%")
+        cpu_table.add_row(str(proc["pid"]), proc["name"], f"{proc['cpu_percent'] or 0}%")
 
     # Show top memory consumers
     mem_table = Table(title="Top 5 Memory Consumers")
@@ -107,7 +123,7 @@ def show_top_processes() -> None:
     mem_table.add_column("Mem %", style="magenta")
 
     for proc in mem_sorted:
-        mem_table.add_row(str(proc['pid']), proc['name'], f"{proc['memory_percent'] or 0}%")
+        mem_table.add_row(str(proc["pid"]), proc["name"], f"{proc['memory_percent'] or 0}%")
 
     console.print(cpu_table)
     console.print(mem_table)
@@ -115,7 +131,9 @@ def show_top_processes() -> None:
 
 @app.command()
 def health(
-    app_type: str = typer.Option("web", "--type", "-t", help="Application type: web, api, worker, custom"),
+    app_type: str = typer.Option(
+        "web", "--type", "-t", help="Application type: web, api, worker, custom"
+    ),
     port: int = typer.Option(8000, "--port", "-p", help="Port to check"),
     url: str = typer.Option("http://localhost", "--url", "-u", help="URL to check"),
     timeout: int = typer.Option(10, "--timeout", help="Timeout in seconds"),
@@ -142,20 +160,41 @@ def health(
     if psutil is not None:
         cpu_percent = psutil.cpu_percent()
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
 
-        resource_status = "✅ Healthy" if cpu_percent < 80 and memory.percent < 80 and disk.percent < 80 else "⚠️  Unhealthy"
-        health_checks.append(("System Resources", (resource_status, f"CPU: {cpu_percent}%, Memory: {memory.percent}%, Disk: {disk.percent}%")))
+        resource_status = (
+            "✅ Healthy"
+            if cpu_percent < 80 and memory.percent < 80 and disk.percent < 80
+            else "⚠️  Unhealthy"
+        )
+        health_checks.append(
+            (
+                "System Resources",
+                (
+                    resource_status,
+                    f"CPU: {cpu_percent}%, Memory: {memory.percent}%, Disk: {disk.percent}%",
+                ),
+            )
+        )
 
         # Check for common processes
         processes_to_check = ["python", "node", "nginx", "redis", "postgres"]
         for proc_name in processes_to_check:
-            proc_exists = any(proc_name in p.name().lower() for p in psutil.process_iter(['name']))
+            proc_exists = any(proc_name in p.name().lower() for p in psutil.process_iter(["name"]))
             proc_status = "✅ Running" if proc_exists else "❌ Not running"
-            health_checks.append((f"{proc_name.capitalize()} Process", (proc_status, "Found" if proc_exists else "Not found")))
+            health_checks.append(
+                (
+                    f"{proc_name.capitalize()} Process",
+                    (proc_status, "Found" if proc_exists else "Not found"),
+                )
+            )
     else:
-        health_checks.append(("System Resources", ("⚠️  Unavailable", "Install psutil for resource monitoring")))
-        health_checks.append(("Process Check", ("⚠️  Unavailable", "Install psutil for process monitoring")))
+        health_checks.append(
+            ("System Resources", ("⚠️  Unavailable", "Install psutil for resource monitoring"))
+        )
+        health_checks.append(
+            ("Process Check", ("⚠️  Unavailable", "Install psutil for process monitoring"))
+        )
 
     # Display health report
     table = Table(title="Health Check Results")
@@ -165,7 +204,11 @@ def health(
 
     all_healthy = True
     for name, (status, details) in health_checks:
-        status_icon = "✅" if "Healthy" in status or "Running" in status else "❌" if "Not" in status else "⚠️"
+        status_icon = (
+            "✅"
+            if "Healthy" in status or "Running" in status
+            else "❌" if "Not" in status else "⚠️"
+        )
         all_healthy = all_healthy and ("Healthy" in status or "Running" in status)
 
         table.add_row(name, f"{status_icon} {status}", details)
@@ -205,7 +248,7 @@ def check_endpoint(url: str, timeout: int) -> tuple[str, str]:
         import urllib.request
         import urllib.error
 
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mekong CLI Monitor'})
+        req = urllib.request.Request(url, headers={"User-Agent": "Mekong CLI Monitor"})
         start_time = time.time()
         response = urllib.request.urlopen(req, timeout=timeout)
         response_time = time.time() - start_time
@@ -220,7 +263,9 @@ def check_endpoint(url: str, timeout: int) -> tuple[str, str]:
 
 @app.command()
 def logs(
-    service: str = typer.Argument(..., help="Service to monitor: app, nginx, apache, docker, custom"),
+    service: str = typer.Argument(
+        ..., help="Service to monitor: app, nginx, apache, docker, custom"
+    ),
     lines: int = typer.Option(50, "--lines", "-n", help="Number of lines to show"),
     follow: bool = typer.Option(False, "--follow", "-f", help="Follow log output"),
     filter_pattern: str = typer.Option(None, "--filter", "-F", help="Filter logs by pattern"),
@@ -231,13 +276,7 @@ def logs(
 
     if service == "app":
         # Look for common log files
-        log_locations = [
-            "logs/app.log",
-            "log/app.log",
-            "/var/log/app.log",
-            "app.log",
-            "main.log"
-        ]
+        log_locations = ["logs/app.log", "log/app.log", "/var/log/app.log", "app.log", "main.log"]
 
         log_file = None
         for loc in log_locations:
@@ -247,20 +286,30 @@ def logs(
 
         if not log_file:
             console.print("[yellow]⚠️  App log file not found in common locations[/yellow]")
-            console.print("[dim]Expected locations: logs/app.log, log/app.log, /var/log/app.log, app.log[/dim]")
+            console.print(
+                "[dim]Expected locations: logs/app.log, log/app.log, /var/log/app.log, app.log[/dim]"
+            )
             return
 
         tail_log(log_file, lines, follow, filter_pattern)
 
     elif service == "nginx":
-        log_file = "/var/log/nginx/access.log" if Path("/var/log/nginx/access.log").exists() else "/var/log/nginx/error.log"
+        log_file = (
+            "/var/log/nginx/access.log"
+            if Path("/var/log/nginx/access.log").exists()
+            else "/var/log/nginx/error.log"
+        )
         if Path(log_file).exists():
             tail_log(log_file, lines, follow, filter_pattern)
         else:
             console.print(f"[red]❌ Nginx log file not found: {log_file}[/red]")
 
     elif service == "apache":
-        log_file = "/var/log/apache2/access.log" if Path("/var/log/apache2/access.log").exists() else "/var/log/apache2/error.log"
+        log_file = (
+            "/var/log/apache2/access.log"
+            if Path("/var/log/apache2/access.log").exists()
+            else "/var/log/apache2/error.log"
+        )
         if Path(log_file).exists():
             tail_log(log_file, lines, follow, filter_pattern)
         else:
@@ -289,7 +338,9 @@ def logs(
             tail_log(custom_log_path, lines, follow, filter_pattern)
         else:
             console.print(f"[red]❌ Custom log file not found: {custom_log_path}[/red]")
-            console.print("[dim]Set CUSTOM_LOG_PATH environment variable to specify log location[/dim]")
+            console.print(
+                "[dim]Set CUSTOM_LOG_PATH environment variable to specify log location[/dim]"
+            )
     else:
         console.print(f"[red]❌ Unknown service: {service}[/red]")
         console.print("[dim]Supported services: app, nginx, apache, docker, custom[/dim]")
@@ -299,6 +350,7 @@ def tail_log(log_file: str, lines: int, follow: bool, filter_pattern: Optional[s
     """Display log file contents"""
     try:
         import subprocess
+
         cmd = ["tail", "-n", str(lines)]
         if follow:
             cmd.append("-f")
@@ -311,7 +363,9 @@ def tail_log(log_file: str, lines: int, follow: bool, filter_pattern: Optional[s
             if follow:
                 grep_cmd.append("--line-buffered")
 
-            result = subprocess.run(grep_cmd, stdin=tail_process.stdout, capture_output=True, text=True)
+            result = subprocess.run(
+                grep_cmd, stdin=tail_process.stdout, capture_output=True, text=True
+            )
             output = result.stdout
         else:
             result = subprocess.run(cmd, capture_output=True, text=True)
@@ -337,6 +391,7 @@ def tail_log(log_file: str, lines: int, follow: bool, filter_pattern: Optional[s
 def is_command_available(command: str) -> bool:
     """Check if a command is available in PATH"""
     import shutil
+
     return shutil.which(command) is not None
 
 
@@ -389,8 +444,16 @@ def performance(
             time.sleep(1)  # Collect metrics every second
 
     # Calculate summary
-    avg_cpu = sum(m["cpu_percent"] for m in metrics_history) / len(metrics_history) if metrics_history else 0
-    avg_memory = sum(m["memory_percent"] for m in metrics_history) / len(metrics_history) if metrics_history else 0
+    avg_cpu = (
+        sum(m["cpu_percent"] for m in metrics_history) / len(metrics_history)
+        if metrics_history
+        else 0
+    )
+    avg_memory = (
+        sum(m["memory_percent"] for m in metrics_history) / len(metrics_history)
+        if metrics_history
+        else 0
+    )
     peak_cpu = max((m["cpu_percent"] for m in metrics_history), default=0)
     peak_memory = max((m["memory_percent"] for m in metrics_history), default=0)
 
@@ -420,14 +483,14 @@ def performance(
             time_table.add_row(
                 f"{metric['elapsed']:.0f}",
                 f"{metric['cpu_percent']:.1f}",
-                f"{metric['memory_percent']:.1f}"
+                f"{metric['memory_percent']:.1f}",
             )
 
         console.print(time_table)
 
     # Save to file if requested
     if output_file:
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(metrics_history, f, indent=2)
         console.print(f"\n[green]💾 Metrics saved to {output_file}[/green]")
 
@@ -444,7 +507,7 @@ def alerts() -> None:
         ("Memory Threshold", "90%", "Trigger when memory exceeds threshold"),
         ("Disk Threshold", "95%", "Trigger when disk usage exceeds threshold"),
         ("Response Time", "5s", "Trigger when response time exceeds threshold"),
-        ("Error Rate", "5%", "Trigger when error rate exceeds threshold")
+        ("Error Rate", "5%", "Trigger when error rate exceeds threshold"),
     ]
 
     table = Table(title="Current Alert Configuration")

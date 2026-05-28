@@ -5,6 +5,7 @@ Endpoints:
     GET  /v1/tenants       — list all use-case tenants
     GET  /v1/tenants/{slug} — get single tenant config
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

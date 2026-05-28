@@ -55,19 +55,28 @@ def build_s1_framework(
     """Build S-1 framework populated with company data."""
     filled: list[S1Section] = []
     subs = dict(
-        company_name=company_name, arr=f"{arr:.1f}", growth_pct=f"{growth_pct:.0f}",
-        gross_margin_pct=f"{gross_margin_pct:.0f}", customers=customers,
-        nrr_pct=f"{nrr_pct:.0f}", business_description="[business description]",
-        value_prop="[value proposition]", revenue_model="[revenue model]",
-        tam="[TAM]", net_proceeds="[net proceeds]", ceo_name="[CEO Name]", board_count="[N]",
+        company_name=company_name,
+        arr=f"{arr:.1f}",
+        growth_pct=f"{growth_pct:.0f}",
+        gross_margin_pct=f"{gross_margin_pct:.0f}",
+        customers=customers,
+        nrr_pct=f"{nrr_pct:.0f}",
+        business_description="[business description]",
+        value_prop="[value proposition]",
+        revenue_model="[revenue model]",
+        tam="[TAM]",
+        net_proceeds="[net proceeds]",
+        ceo_name="[CEO Name]",
+        board_count="[N]",
     )
     for sec in S1_SECTIONS:
         try:
             content = sec.content_template.format(**subs)
         except KeyError:
             content = sec.content_template
-        filled.append(S1Section(name=sec.name, content_template=content,
-                                key_points=list(sec.key_points)))
+        filled.append(
+            S1Section(name=sec.name, content_template=content, key_points=list(sec.key_points))
+        )
 
     risk_factors = generate_risk_factors(
         has_losses=arr < 50 or growth_pct > 100,  # arr in $M; <$50M = loss risk
@@ -109,7 +118,11 @@ def check_narrative_quality(framework: S1Framework) -> list[NarrativeCheck]:
     def get(name: str) -> "S1Section | None":
         return next((s for s in framework.sections if s.name == name), None)
 
-    summary, biz, metrics = get("Prospectus Summary"), get("Business Description"), get("Key Metrics")
+    summary, biz, metrics = (
+        get("Prospectus Summary"),
+        get("Business Description"),
+        get("Key Metrics"),
+    )
 
     return [
         NarrativeCheck(

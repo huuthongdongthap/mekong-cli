@@ -27,9 +27,7 @@ def tmp_plugin_dir(tmp_path: Path) -> Path:
     pdir = tmp_path / "plugins"
     pdir.mkdir()
     sample = pdir / "sample_plugin.py"
-    sample.write_text(
-        'def register(registry):\n    registry.register("sample", object)\n'
-    )
+    sample.write_text('def register(registry):\n    registry.register("sample", object)\n')
     return pdir
 
 
@@ -72,9 +70,7 @@ class TestPluginRegistry:
         assert registry.count == 0
         assert registry.list_plugins() == []
 
-    def test_discover_local(
-        self, tmp_index: Path, tmp_plugin_dir: Path
-    ) -> None:
+    def test_discover_local(self, tmp_index: Path, tmp_plugin_dir: Path) -> None:
         import src.core.plugin_registry as pr
 
         original = pr.DEFAULT_PLUGIN_DIR
@@ -88,9 +84,7 @@ class TestPluginRegistry:
         finally:
             pr.DEFAULT_PLUGIN_DIR = original
 
-    def test_install_local(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_install_local(self, registry: PluginRegistry, tmp_path: Path) -> None:
         plugin_file = tmp_path / "my_agent.py"
         plugin_file.write_text("def register(r): pass\n")
 
@@ -103,9 +97,7 @@ class TestPluginRegistry:
         with pytest.raises(FileNotFoundError):
             registry.install_local(Path("/nonexistent/plugin.py"))
 
-    def test_install_local_not_python(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_install_local_not_python(self, registry: PluginRegistry, tmp_path: Path) -> None:
         bad = tmp_path / "plugin.txt"
         bad.write_text("not python")
         with pytest.raises(ValueError, match="must be a .py file"):
@@ -116,9 +108,7 @@ class TestPluginRegistry:
         assert not valid
         assert "not found" in msg
 
-    def test_validate_local_plugin(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_validate_local_plugin(self, registry: PluginRegistry, tmp_path: Path) -> None:
         plugin_file = tmp_path / "valid_plugin.py"
         plugin_file.write_text("def register(r): pass\n")
         registry.install_local(plugin_file)
@@ -127,9 +117,7 @@ class TestPluginRegistry:
         assert valid
         assert "valid" in msg.lower()
 
-    def test_validate_missing_register(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_validate_missing_register(self, registry: PluginRegistry, tmp_path: Path) -> None:
         plugin_file = tmp_path / "no_register.py"
         plugin_file.write_text("x = 1\n")
         registry.install_local(plugin_file)
@@ -138,9 +126,7 @@ class TestPluginRegistry:
         assert not valid
         assert "register" in msg.lower()
 
-    def test_deactivate(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_deactivate(self, registry: PluginRegistry, tmp_path: Path) -> None:
         plugin_file = tmp_path / "deact.py"
         plugin_file.write_text("def register(r): pass\n")
         registry.install_local(plugin_file)
@@ -150,9 +136,7 @@ class TestPluginRegistry:
         assert manifest is not None
         assert manifest.status == PluginStatus.DISABLED
 
-    def test_uninstall_local(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_uninstall_local(self, registry: PluginRegistry, tmp_path: Path) -> None:
         plugin_file = tmp_path / "removeme.py"
         plugin_file.write_text("def register(r): pass\n")
         registry.install_local(plugin_file)
@@ -162,9 +146,7 @@ class TestPluginRegistry:
         assert registry.count == 0
         assert registry.get("removeme") is None
 
-    def test_list_plugins_filter(
-        self, registry: PluginRegistry, tmp_path: Path
-    ) -> None:
+    def test_list_plugins_filter(self, registry: PluginRegistry, tmp_path: Path) -> None:
         for name in ["a", "b", "c"]:
             f = tmp_path / f"{name}.py"
             f.write_text("def register(r): pass\n")

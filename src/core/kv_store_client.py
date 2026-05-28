@@ -83,14 +83,9 @@ class KVStoreClient:
 
     def _is_cache_valid(self) -> bool:
         """Check if cached state is still valid."""
-        return (
-            self._cache is not None
-            and (time.time() - self._cache_time) < self.CACHE_TTL_SECONDS
-        )
+        return self._cache is not None and (time.time() - self._cache_time) < self.CACHE_TTL_SECONDS
 
-    def get_rate_limit_state(
-        self, force_refresh: bool = False
-    ) -> RateLimitState:
+    def get_rate_limit_state(self, force_refresh: bool = False) -> RateLimitState:
         """
         Get rate limit state from KV store.
 

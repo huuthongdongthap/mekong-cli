@@ -23,10 +23,10 @@ from src.core.plan_constraints import (
     TimeBound,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_step(
     order: int,
@@ -52,6 +52,7 @@ def _make_recipe(*steps: RecipeStep) -> Recipe:
 # ---------------------------------------------------------------------------
 # Dataclass tests
 # ---------------------------------------------------------------------------
+
 
 class TestConstraintViolation(unittest.TestCase):
     def test_fields(self):
@@ -127,6 +128,7 @@ class TestPlanConstraints(unittest.TestCase):
 # ConstraintEngine — no violations
 # ---------------------------------------------------------------------------
 
+
 class TestConstraintEngineNoViolations(unittest.TestCase):
     def setUp(self):
         self.engine = ConstraintEngine()
@@ -199,6 +201,7 @@ class TestConstraintEngineNoViolations(unittest.TestCase):
 # ConstraintEngine — resource limit violations
 # ---------------------------------------------------------------------------
 
+
 class TestResourceLimitViolations(unittest.TestCase):
     def setUp(self):
         self.engine = ConstraintEngine()
@@ -247,9 +250,7 @@ class TestResourceLimitViolations(unittest.TestCase):
 
     def test_zero_limits_are_unlimited(self):
         """max_total_steps=0 and max_concurrent_steps=0 → no check."""
-        recipe = _make_recipe(
-            *(_make_step(i, f"step {i}") for i in range(1, 20))
-        )
+        recipe = _make_recipe(*(_make_step(i, f"step {i}") for i in range(1, 20)))
         constraints = PlanConstraints(
             resource_limit=ResourceLimit(max_total_steps=0, max_concurrent_steps=0),
         )
@@ -261,6 +262,7 @@ class TestResourceLimitViolations(unittest.TestCase):
 # ConstraintEngine — ordering violations
 # ---------------------------------------------------------------------------
 
+
 class TestOrderingViolations(unittest.TestCase):
     def setUp(self):
         self.engine = ConstraintEngine()
@@ -269,7 +271,7 @@ class TestOrderingViolations(unittest.TestCase):
         """Deploy exists but has NO dependency on Setup → violation."""
         recipe = _make_recipe(
             _make_step(1, "Setup environment"),
-            _make_step(2, "Deploy service"),   # no dep on step 1
+            _make_step(2, "Deploy service"),  # no dep on step 1
         )
         constraints = PlanConstraints(
             ordering=[OrderingConstraint(before_step="Setup", after_step="Deploy")],
@@ -324,6 +326,7 @@ class TestOrderingViolations(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # ConstraintEngine — mutual exclusion violations
 # ---------------------------------------------------------------------------
+
 
 class TestMutualExclusionViolations(unittest.TestCase):
     def setUp(self):
@@ -385,6 +388,7 @@ class TestMutualExclusionViolations(unittest.TestCase):
 # ConstraintEngine — time bound validation
 # ---------------------------------------------------------------------------
 
+
 class TestTimeBoundValidation(unittest.TestCase):
     def setUp(self):
         self.engine = ConstraintEngine()
@@ -425,6 +429,7 @@ class TestTimeBoundValidation(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # ConstraintEngine — DAG utility tests
 # ---------------------------------------------------------------------------
+
 
 class TestDAGUtilities(unittest.TestCase):
     def setUp(self):
@@ -488,6 +493,7 @@ class TestDAGUtilities(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Combined / integration
 # ---------------------------------------------------------------------------
+
 
 class TestCombinedConstraints(unittest.TestCase):
     def setUp(self):

@@ -25,9 +25,7 @@ def get_recent_commits(n=5):
         if line:
             parts = line.split("|")
             if len(parts) >= 3:
-                commits.append(
-                    {"hash": parts[0], "message": parts[1], "date": parts[2]}
-                )
+                commits.append({"hash": parts[0], "message": parts[1], "date": parts[2]})
     return commits
 
 
@@ -48,12 +46,7 @@ def generate_tweet(commit):
         emoji = "🧹"
 
     # Clean up message
-    clean_msg = (
-        msg.replace("🏯 ", "")
-        .replace("🚀 ", "")
-        .replace("feat: ", "")
-        .replace("fix: ", "")
-    )
+    clean_msg = msg.replace("🏯 ", "").replace("🚀 ", "").replace("feat: ", "").replace("fix: ", "")
 
     return f"{emoji} Just shipped: {clean_msg}\n\n#buildinpublic #agencyos"
 

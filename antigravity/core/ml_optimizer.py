@@ -351,9 +351,9 @@ class MLOptimizer:
             viral_multiplier=self._calculate_viral_multiplier(features),
             strategy_used="ai_agent_autonomous",
             optimization_features=["ai_decision", "quantum_optimization", "autonomous_learning"],
-            quantum_fingerprint=quantum_result.get("quantum_fingerprint")
-            if action == "quantum_jump"
-            else None,
+            quantum_fingerprint=(
+                quantum_result.get("quantum_fingerprint") if action == "quantum_jump" else None
+            ),
             training_data_points=len(self.training_data),
         )
 

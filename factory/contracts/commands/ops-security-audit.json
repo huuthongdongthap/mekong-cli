@@ -4,16 +4,13 @@
   "layer": "ops",
   "chapter": "九變 — Nine Variations",
   "display": {
-    "name_vi": "Ops Security Audit",
     "name_en": "Ops Security Audit",
     "icon": "",
-    "description_vi": "Execute Ops Security Audit command",
-    "description_en": "Execute Ops Security Audit command"
+    "description_en": "Security audit  vulnerability scan, code audit, remediation in 20 min"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "devops"
     ],
     "hub": "ops-hub",
     "complexity": "standard",
@@ -31,9 +28,20 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "project": {
+      "services": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Target services"
+      },
+      "environment": {
         "type": "string",
-        "description": "Target project path"
+        "enum": [
+          "local",
+          "staging",
+          "production"
+        ]
       }
     }
   },
@@ -43,14 +51,26 @@
       "summary": {
         "type": "string"
       },
-      "files_modified": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "healthy",
+          "degraded",
+          "down",
+          "completed"
+        ]
+      },
+      "findings": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "credits_used": {
-        "type": "integer"
+      "actions_taken": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     }
   },

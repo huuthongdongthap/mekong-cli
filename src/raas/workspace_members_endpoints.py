@@ -7,6 +7,7 @@ Provides REST API for managing workspace members:
 
 Uses existing WorkspaceRepository for data operations.
 """
+
 from __future__ import annotations
 
 import logging
@@ -26,8 +27,10 @@ router = APIRouter(prefix="/api/workspaces", tags=["workspace-members"])
 # Request/Response Models
 # =============================================================================
 
+
 class MemberResponse(BaseModel):
     """Member information response."""
+
     user_email: str
     role: Literal["owner", "admin", "member"]
     joined_at: str
@@ -35,18 +38,21 @@ class MemberResponse(BaseModel):
 
 class AddMemberRequest(BaseModel):
     """Request to add a new member."""
+
     user_email: EmailStr
     role: Literal["owner", "admin", "member"] = "member"
 
 
 class RemoveMemberResponse(BaseModel):
     """Response after removing a member."""
+
     success: bool
     message: str
 
 
 class WorkspaceMembersResponse(BaseModel):
     """Wrapper for list response."""
+
     members: List[MemberResponse]
     total: int
 
@@ -54,6 +60,7 @@ class WorkspaceMembersResponse(BaseModel):
 # =============================================================================
 # Dependency Injection
 # =============================================================================
+
 
 def get_workspace_repo() -> WorkspaceRepository:
     """Get workspace repository instance."""
@@ -64,14 +71,12 @@ def get_workspace_repo() -> WorkspaceRepository:
 # Helper Functions
 # =============================================================================
 
+
 def _validate_workspace_exists(repo: WorkspaceRepository, workspace_id: str) -> Workspace:
     """Validate workspace exists, raise 404 if not."""
     workspace = repo.get_by_id(workspace_id)
     if not workspace:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Workspace '{workspace_id}' not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Workspace '{workspace_id}' not found")
     return workspace
 
 
@@ -84,6 +89,7 @@ def _count_owners(repo: WorkspaceRepository, workspace_id: str) -> int:
 # =============================================================================
 # API Endpoints
 # =============================================================================
+
 
 @router.get("/{workspace_id}/members", response_model=WorkspaceMembersResponse)
 async def list_members(
@@ -151,8 +157,7 @@ async def add_member(
     existing_members = repo.list_members(workspace_id)
     if any(m.user_email == request.user_email for m in existing_members):
         raise HTTPException(
-            status_code=409,
-            detail=f"User '{request.user_email}' is already a member"
+            status_code=409, detail=f"User '{request.user_email}' is already a member"
         )
 
     # Add member
@@ -163,23 +168,14 @@ async def add_member(
     )
 
     if not success:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to add member"
-        )
+        raise HTTPException(status_code=500, detail="Failed to add member")
 
     # Get updated member list to find the new member
     members = repo.list_members(workspace_id)
-    new_member = next(
-        (m for m in members if m.user_email == request.user_email),
-        None
-    )
+    new_member = next((m for m in members if m.user_email == request.user_email), None)
 
     if not new_member:
-        raise HTTPException(
-            status_code=500,
-            detail="Member added but could not retrieve"
-        )
+        raise HTTPException(status_code=500, detail="Member added but could not retrieve")
 
     return MemberResponse(
         user_email=new_member.user_email,
@@ -215,18 +211,14 @@ async def remove_member(
     members = repo.list_members(workspace_id)
     member = next((m for m in members if m.user_email == user_email), None)
     if not member:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Member '{user_email}' not found in workspace"
-        )
+        raise HTTPException(status_code=404, detail=f"Member '{user_email}' not found in workspace")
 
     # Check if this is the last owner
     if member.role == "owner":
         owner_count = _count_owners(repo, workspace_id)
         if owner_count <= 1:
             raise HTTPException(
-                status_code=403,
-                detail="Cannot remove the last owner. Transfer ownership first."
+                status_code=403, detail="Cannot remove the last owner. Transfer ownership first."
             )
 
     # Remove member
@@ -236,10 +228,7 @@ async def remove_member(
     )
 
     if not success:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to remove member"
-        )
+        raise HTTPException(status_code=500, detail="Failed to remove member")
 
     return RemoveMemberResponse(
         success=True,

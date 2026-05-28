@@ -158,7 +158,9 @@ class TaskRouter:
             return task
 
         heapq.heappush(self._queue, task)
-        logger.info(f"[TaskRouter] Enqueued {task.task_id}: {description[:50]} (priority={priority})")
+        logger.info(
+            f"[TaskRouter] Enqueued {task.task_id}: {description[:50]} (priority={priority})"
+        )
 
         self._task_history.append(
             {
@@ -241,7 +243,9 @@ class TaskRouter:
         task.error = error
         task.retry_count += 1
 
-        logger.warning(f"[TaskRouter] Failed {task_id}: {error} (retry {task.retry_count}/{task.max_retries})")
+        logger.warning(
+            f"[TaskRouter] Failed {task_id}: {error} (retry {task.retry_count}/{task.max_retries})"
+        )
 
         if task.retry_count >= task.max_retries:
             # Move to dead letter queue
@@ -338,6 +342,7 @@ class TaskRouter:
         if JOURNAL_FILE.exists():
             try:
                 import json
+
                 data = json.loads(JOURNAL_FILE.read_text())
                 missions = data.get("missions", [])
             except (json.JSONDecodeError, KeyError):
@@ -349,6 +354,7 @@ class TaskRouter:
             missions = missions[-1000:]  # Keep last 1000
 
         import json
+
         JOURNAL_FILE.write_text(json.dumps({"missions": missions}, indent=2))
 
     def load_pending_from_journal(self) -> int:
@@ -363,6 +369,7 @@ class TaskRouter:
 
         try:
             import json
+
             data = json.loads(JOURNAL_FILE.read_text())
             missions = data.get("missions", [])
 

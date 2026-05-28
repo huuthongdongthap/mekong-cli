@@ -20,10 +20,10 @@ from src.daemon.journal import LearningJournal
 from src.daemon.heartbeat_scheduler import HeartbeatScheduler, ScheduledTask
 from src.daemon.worker_pool import WorkerPool, WorkerInfo, WorkerState
 
-
 # ---------------------------------------------------------------------------
 # LearningJournal
 # ---------------------------------------------------------------------------
+
 
 class TestLearningJournal:
     """Journal records missions and computes success rate."""
@@ -107,6 +107,7 @@ class TestLearningJournal:
 # ---------------------------------------------------------------------------
 # HeartbeatScheduler — parsing and scheduling
 # ---------------------------------------------------------------------------
+
 
 class TestHeartbeatSchedulerParseCron:
     """Cron expression parsing."""
@@ -370,14 +371,19 @@ class TestHeartbeatSchedulerAlert:
 # WorkerPool health_check (integrated health view)
 # ---------------------------------------------------------------------------
 
+
 class TestWorkerPoolHealthCheck:
     """Health check categorizes workers correctly."""
 
     def _add_worker(self, pool, name, state=WorkerState.IDLE, capability="general"):
         from datetime import datetime
+
         pool.workers[name] = WorkerInfo(
-            id=name, name=name, capability=capability,
-            state=state, started_at=datetime.now().isoformat(),
+            id=name,
+            name=name,
+            capability=capability,
+            state=state,
+            started_at=datetime.now().isoformat(),
         )
 
     @patch.object(WorkerPool, "refresh_status")

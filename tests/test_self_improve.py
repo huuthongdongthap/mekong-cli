@@ -24,9 +24,7 @@ class TestJournalEntryDataclass(unittest.TestCase):
 
     def test_fields_populated(self):
         """JournalEntry should store all fields."""
-        e = JournalEntry(
-            action="generated", target="deploy", reason="auto", data={"k": "v"}
-        )
+        e = JournalEntry(action="generated", target="deploy", reason="auto", data={"k": "v"})
         self.assertEqual(e.action, "generated")
         self.assertEqual(e.target, "deploy")
         self.assertEqual(e.reason, "auto")
@@ -57,9 +55,7 @@ class TestDeprecateBadRecipes(unittest.TestCase):
         entries = []
         for i in range(12):
             status = "failed" if i < 10 else "success"
-            entries.append(
-                MemoryEntry(goal="task", status=status, recipe_used="bad-recipe")
-            )
+            entries.append(MemoryEntry(goal="task", status=status, recipe_used="bad-recipe"))
 
         improver = self._make_improver(entries)
         deprecated = improver.deprecate_bad_recipes()
@@ -68,8 +64,7 @@ class TestDeprecateBadRecipes(unittest.TestCase):
     def test_no_deprecation_few_runs(self):
         """Recipe with <10 runs should not be deprecated."""
         entries = [
-            MemoryEntry(goal="task", status="failed", recipe_used="new-recipe")
-            for _ in range(5)
+            MemoryEntry(goal="task", status="failed", recipe_used="new-recipe") for _ in range(5)
         ]
 
         improver = self._make_improver(entries)
@@ -81,9 +76,7 @@ class TestDeprecateBadRecipes(unittest.TestCase):
         entries = []
         for i in range(12):
             status = "success" if i < 8 else "failed"
-            entries.append(
-                MemoryEntry(goal="task", status=status, recipe_used="good-recipe")
-            )
+            entries.append(MemoryEntry(goal="task", status=status, recipe_used="good-recipe"))
 
         improver = self._make_improver(entries)
         deprecated = improver.deprecate_bad_recipes()
@@ -92,8 +85,7 @@ class TestDeprecateBadRecipes(unittest.TestCase):
     def test_deprecation_emits_event(self):
         """Deprecation should emit RECIPE_DEPRECATED event."""
         entries = [
-            MemoryEntry(goal="task", status="failed", recipe_used="doomed")
-            for _ in range(15)
+            MemoryEntry(goal="task", status="failed", recipe_used="doomed") for _ in range(15)
         ]
 
         bus = EventBus()
@@ -122,9 +114,7 @@ class TestSuggestNewRecipes(unittest.TestCase):
         generator = MagicMock(spec=RecipeGenerator)
 
         tmpdir = tempfile.mkdtemp()
-        improver = SelfImprover(
-            memory, generator, journal_path=os.path.join(tmpdir, "j.yaml")
-        )
+        improver = SelfImprover(memory, generator, journal_path=os.path.join(tmpdir, "j.yaml"))
         suggestions = improver.suggest_new_recipes()
         self.assertIn("manual task", suggestions)
 
@@ -139,17 +129,14 @@ class TestSuggestNewRecipes(unittest.TestCase):
         generator = MagicMock(spec=RecipeGenerator)
 
         tmpdir = tempfile.mkdtemp()
-        improver = SelfImprover(
-            memory, generator, journal_path=os.path.join(tmpdir, "j.yaml")
-        )
+        improver = SelfImprover(memory, generator, journal_path=os.path.join(tmpdir, "j.yaml"))
         suggestions = improver.suggest_new_recipes()
         self.assertEqual(suggestions, [])
 
     def test_max_five_suggestions(self):
         """Should return at most 5 suggestions."""
         entries = [
-            MemoryEntry(goal=f"goal-{i}", status="success", recipe_used="")
-            for i in range(10)
+            MemoryEntry(goal=f"goal-{i}", status="success", recipe_used="") for i in range(10)
         ]
 
         memory = MagicMock(spec=MemoryStore)
@@ -157,9 +144,7 @@ class TestSuggestNewRecipes(unittest.TestCase):
         generator = MagicMock(spec=RecipeGenerator)
 
         tmpdir = tempfile.mkdtemp()
-        improver = SelfImprover(
-            memory, generator, journal_path=os.path.join(tmpdir, "j.yaml")
-        )
+        improver = SelfImprover(memory, generator, journal_path=os.path.join(tmpdir, "j.yaml"))
         suggestions = improver.suggest_new_recipes()
         self.assertLessEqual(len(suggestions), 5)
 
@@ -198,9 +183,7 @@ class TestJournalPersistence(unittest.TestCase):
         improver = SelfImprover(memory, generator, journal_path=path)
 
         for i in range(210):
-            improver._record(
-                JournalEntry(action="fill", target=f"t-{i}", reason="fill")
-            )
+            improver._record(JournalEntry(action="fill", target=f"t-{i}", reason="fill"))
 
         self.assertLessEqual(len(improver.get_journal(limit=999)), 200)
 

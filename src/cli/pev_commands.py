@@ -71,9 +71,7 @@ def pev_run(
 
 @pev_app.command(name="status")
 def pev_status(
-    pipeline_id: str = typer.Argument(
-        None, help="Pipeline ID (omit to list all)"
-    ),
+    pipeline_id: str = typer.Argument(None, help="Pipeline ID (omit to list all)"),
     json_output: bool = typer.Option(False, "--json", "-j", help="JSON output"),
 ) -> None:
     """Show status of pipelines (from persisted history)."""
@@ -95,9 +93,8 @@ def pev_status(
 
         if json_output:
             from dataclasses import asdict
-            console.print(json.dumps(
-                [asdict(e) for e in events], indent=2, default=str
-            ))
+
+            console.print(json.dumps([asdict(e) for e in events], indent=2, default=str))
             return
 
         _display_workflow_events(pipeline_id, events)
@@ -143,9 +140,7 @@ def pev_history(
         events = events[:limit]
 
     if json_output:
-        console.print(json.dumps(
-            [asdict(e) for e in events], indent=2, default=str
-        ))
+        console.print(json.dumps([asdict(e) for e in events], indent=2, default=str))
         return
 
     _display_workflow_events(workflow_id, events)
@@ -188,11 +183,13 @@ def _display_pipeline_result(result) -> None:
     )
 
     if result.errors:
-        console.print(Panel(
-            "\n".join(f"- {e}" for e in result.errors),
-            title="[red]Errors[/red]",
-            border_style="red",
-        ))
+        console.print(
+            Panel(
+                "\n".join(f"- {e}" for e in result.errors),
+                title="[red]Errors[/red]",
+                border_style="red",
+            )
+        )
 
 
 def _display_workflow_events(workflow_id: str, events) -> None:

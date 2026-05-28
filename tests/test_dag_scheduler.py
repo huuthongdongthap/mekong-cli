@@ -28,6 +28,7 @@ from src.core.dag_scheduler import DAGScheduler, DAGStepResult, validate_dag
 @dataclass
 class MockStep:
     """Mock recipe step for testing."""
+
     order: int
     title: str = ""
     description: str = ""

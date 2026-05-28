@@ -68,6 +68,7 @@ class LLMProvider(ABC):
 # GeminiProvider
 # ---------------------------------------------------------------------------
 
+
 class GeminiProvider(LLMProvider):
     """Google GenAI (Gemini) provider via google-genai SDK."""
 
@@ -116,6 +117,7 @@ class GeminiProvider(LLMProvider):
         # Ensure client is initialized (may be needed after key set post-init)
         if not self._client:
             from google import genai  # type: ignore
+
             self._client = genai.Client(api_key=self._api_key)
 
         system_instruction = None
@@ -149,7 +151,10 @@ class GeminiProvider(LLMProvider):
         for attempt in range(max_retries):
             try:
                 logger.debug(
-                    "[GeminiProvider] %s attempt %d/%d", model, attempt + 1, max_retries,
+                    "[GeminiProvider] %s attempt %d/%d",
+                    model,
+                    attempt + 1,
+                    max_retries,
                 )
                 response = self._client.models.generate_content(
                     model=model,
@@ -175,10 +180,11 @@ class GeminiProvider(LLMProvider):
                 if not text:
                     logger.warning(
                         "[GeminiProvider] Empty response (attempt %d), reason=%s",
-                        attempt + 1, finish_reason,
+                        attempt + 1,
+                        finish_reason,
                     )
                     if attempt < max_retries - 1:
-                        time.sleep(random.uniform(0, 2 ** attempt))
+                        time.sleep(random.uniform(0, 2**attempt))
                         continue
                     msg = f"Empty response after {max_retries} attempts"
                     raise RuntimeError(msg)
@@ -198,14 +204,24 @@ class GeminiProvider(LLMProvider):
                 error_str = str(e).lower()
                 retryable = any(
                     kw in error_str
-                    for kw in ["429", "resource_exhausted", "quota", "503", "500",
-                               "deadline", "timeout", "unavailable"]
+                    for kw in [
+                        "429",
+                        "resource_exhausted",
+                        "quota",
+                        "503",
+                        "500",
+                        "deadline",
+                        "timeout",
+                        "unavailable",
+                    ]
                 )
                 if retryable and attempt < max_retries - 1:
-                    delay = random.uniform(0, 2 ** attempt)
+                    delay = random.uniform(0, 2**attempt)
                     logger.warning(
                         "[GeminiProvider] Retryable error (attempt %d): %s. Retry in %.1fs",
-                        attempt + 1, e, delay,
+                        attempt + 1,
+                        e,
+                        delay,
                     )
                     time.sleep(delay)
                     continue
@@ -219,6 +235,7 @@ class GeminiProvider(LLMProvider):
 # ---------------------------------------------------------------------------
 # OpenAICompatibleProvider
 # ---------------------------------------------------------------------------
+
 
 class OpenAICompatibleProvider(LLMProvider):
     """OpenAI-compatible REST provider.
@@ -263,6 +280,7 @@ class OpenAICompatibleProvider(LLMProvider):
 
         # === MODEL ALIAS RESOLUTION ===
         from src.core.model_alias import resolve_model
+
         use_model = resolve_model(model or self._default_model, self._provider_name)
         # === END MODEL ALIAS ===
         payload: dict[str, Any] = {
@@ -311,6 +329,7 @@ class OpenAICompatibleProvider(LLMProvider):
 # OfflineProvider
 # ---------------------------------------------------------------------------
 
+
 class OfflineProvider(LLMProvider):
     """Placeholder provider — returns offline messages when no LLM is available."""
 
@@ -343,6 +362,7 @@ class OfflineProvider(LLMProvider):
 # LiteLLMProvider (Proxy)
 # ---------------------------------------------------------------------------
 
+
 class LiteLLMProvider(LLMProvider):
     """LiteLLM proxy provider — unified gateway with auto-failback."""
 
@@ -361,6 +381,7 @@ class LiteLLMProvider(LLMProvider):
         if self._base_url:
             try:
                 import httpx
+
                 resp = httpx.get(f"{self._base_url}/health", timeout=2.0)
                 self._available = resp.status_code == 200
             except Exception:

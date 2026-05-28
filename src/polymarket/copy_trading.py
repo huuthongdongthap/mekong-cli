@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 class CopyStatus(Enum):
     """Copy trading subscription status."""
+
     ACTIVE = "active"
     PAUSED = "paused"
     STOPPED = "stopped"
@@ -34,6 +35,7 @@ class CopyStatus(Enum):
 @dataclass
 class StrategyProfile:
     """A copyable strategy profile."""
+
     strategy_id: str
     name: str
     description: str
@@ -50,6 +52,7 @@ class StrategyProfile:
 @dataclass
 class CopySubscription:
     """A customer's copy trading subscription."""
+
     subscription_id: str
     copier_user_id: str
     strategy_id: str
@@ -65,6 +68,7 @@ class CopySubscription:
 @dataclass
 class CopiedTrade:
     """A trade executed by copy trading."""
+
     trade_id: str
     subscription_id: str
     original_trade_id: str
@@ -224,8 +228,7 @@ class CopyTradingEngine:
                    SET win_rate = ?, total_trades = ?, total_pnl_pct = ?,
                        sharpe_ratio = ?, max_drawdown = ?
                    WHERE strategy_id = ?""",
-                (win_rate, total_trades, total_pnl_pct,
-                 sharpe_ratio, max_drawdown, strategy_id),
+                (win_rate, total_trades, total_pnl_pct, sharpe_ratio, max_drawdown, strategy_id),
             )
 
     # --- Copy Subscriptions ---
@@ -260,8 +263,7 @@ class CopyTradingEngine:
                    (subscription_id, copier_user_id, strategy_id,
                     max_capital, status, created_at)
                    VALUES (?, ?, ?, ?, ?, ?)""",
-                (sub_id, copier_user_id, strategy_id,
-                 max_capital, "active", now),
+                (sub_id, copier_user_id, strategy_id, max_capital, "active", now),
             )
             conn.execute(
                 "UPDATE strategy_profiles SET copiers = copiers + 1 WHERE strategy_id = ?",
@@ -397,8 +399,16 @@ class CopyTradingEngine:
                    (trade_id, subscription_id, original_trade_id,
                     market_id, direction, size_usd, entry_price, timestamp)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (trade_id, subscription_id, original_trade_id,
-                 market_id, direction, size_usd, entry_price, now),
+                (
+                    trade_id,
+                    subscription_id,
+                    original_trade_id,
+                    market_id,
+                    direction,
+                    size_usd,
+                    entry_price,
+                    now,
+                ),
             )
             conn.execute(
                 """UPDATE copy_subscriptions

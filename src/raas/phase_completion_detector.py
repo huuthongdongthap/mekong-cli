@@ -24,6 +24,7 @@ from rich.console import Console
 
 class PhaseStatus(str, Enum):
     """Status of each ROIaaS phase."""
+
     NOT_STARTED = "not_started"
     INITIALIZING = "initializing"
     OPERATIONAL = "operational"
@@ -34,6 +35,7 @@ class PhaseStatus(str, Enum):
 @dataclass
 class PhaseInfo:
     """Information about a phase's status."""
+
     name: str
     status: PhaseStatus
     description: str
@@ -130,6 +132,7 @@ class PhaseCompletionDetector:
                 # Check 2: License validation module loads
                 try:
                     from src.lib.raas_gate_validator import RaasGateValidator  # noqa: F401
+
                     validator = RaasGateValidator()
                     is_valid, error = validator.validate()
 
@@ -173,6 +176,7 @@ class PhaseCompletionDetector:
             # Check 1: License admin module loads
             try:
                 from src.commands import license_admin  # noqa: F401
+
                 phase.details["admin_commands_loaded"] = True
             except ImportError:
                 phase.status = PhaseStatus.DEGRADED
@@ -182,6 +186,7 @@ class PhaseCompletionDetector:
             # Check 2: Dashboard module loads
             try:
                 from src.raas import dashboard  # noqa: F401
+
                 phase.details["dashboard_loaded"] = True
             except ImportError:
                 phase.status = PhaseStatus.DEGRADED
@@ -191,6 +196,7 @@ class PhaseCompletionDetector:
             # Check 3: License CLI available
             try:
                 from src.raas import license_cli  # noqa: F401
+
                 phase.details["license_cli_loaded"] = True
             except ImportError:
                 phase.details["license_cli_loaded"] = False
@@ -227,6 +233,7 @@ class PhaseCompletionDetector:
             # Check 1: RaaS billing module loads (handles payment-like functionality)
             try:
                 from src.api import raas_billing_middleware  # noqa: F401
+
                 phase.details["billing_middleware_loaded"] = True
             except ImportError:
                 phase.details["billing_middleware_loaded"] = False
@@ -241,6 +248,7 @@ class PhaseCompletionDetector:
             # Check 3: RaaS gateway available (handles payment routing)
             try:
                 from src.core import gateway_dashboard  # noqa: F401
+
                 phase.details["gateway_loaded"] = True
             except ImportError:
                 phase.details["gateway_loaded"] = False
@@ -281,6 +289,7 @@ class PhaseCompletionDetector:
             # Check 1: Usage meter module loads
             try:
                 from src.lib import usage_meter  # noqa: F401
+
                 phase.details["usage_meter_loaded"] = True
             except ImportError:
                 phase.status = PhaseStatus.DEGRADED
@@ -290,6 +299,7 @@ class PhaseCompletionDetector:
             # Check 2: Usage metering service available
             try:
                 from src.lib import usage_metering_service  # noqa: F401
+
                 phase.details["metering_service_loaded"] = True
             except ImportError:
                 phase.details["metering_service_loaded"] = False
@@ -297,6 +307,7 @@ class PhaseCompletionDetector:
             # Check 3: Usage tracker available
             try:
                 from src.usage import usage_tracker  # noqa: F401
+
                 phase.details["usage_tracker_loaded"] = True
             except ImportError:
                 phase.details["usage_tracker_loaded"] = False
@@ -304,16 +315,19 @@ class PhaseCompletionDetector:
             # Check 4: Credit rate limiter available
             try:
                 from src.raas import credit_rate_limiter  # noqa: F401
+
                 phase.details["rate_limiter_loaded"] = True
             except ImportError:
                 phase.details["rate_limiter_loaded"] = False
 
             # Consider operational if core components load
-            loaded_count = sum([
-                phase.details.get("usage_meter_loaded", False),
-                phase.details.get("metering_service_loaded", False),
-                phase.details.get("rate_limiter_loaded", False),
-            ])
+            loaded_count = sum(
+                [
+                    phase.details.get("usage_meter_loaded", False),
+                    phase.details.get("metering_service_loaded", False),
+                    phase.details.get("rate_limiter_loaded", False),
+                ]
+            )
 
             if loaded_count >= 2:
                 phase.status = PhaseStatus.OPERATIONAL
@@ -351,6 +365,7 @@ class PhaseCompletionDetector:
             # Check 1: Dashboard service loads
             try:
                 from src.analytics import dashboard_service  # noqa: F401
+
                 phase.details["dashboard_service_loaded"] = True
             except ImportError:
                 phase.status = PhaseStatus.DEGRADED
@@ -360,6 +375,7 @@ class PhaseCompletionDetector:
             # Check 2: Analytics queries available
             try:
                 from src.db.queries import analytics_queries  # noqa: F401
+
                 phase.details["analytics_queries_loaded"] = True
             except ImportError:
                 phase.details["analytics_queries_loaded"] = False
@@ -368,6 +384,7 @@ class PhaseCompletionDetector:
             try:
                 # Try to import dashboard API
                 import importlib.util
+
                 spec = importlib.util.find_spec("src.api.dashboard.app")
                 if spec is not None:
                     phase.details["dashboard_api_available"] = True
@@ -416,8 +433,13 @@ class PhaseCompletionDetector:
 
         try:
             # Import Phase 6 validator
-            from src.raas.final_phase_validator import get_validator as get_phase6_validator  # noqa: F401
-            from src.raas.completion_certificate import generate_certificate, save_certificate  # noqa: F401
+            from src.raas.final_phase_validator import (
+                get_validator as get_phase6_validator,
+            )  # noqa: F401
+            from src.raas.completion_certificate import (
+                generate_certificate,
+                save_certificate,
+            )  # noqa: F401
 
             # Run terminal validation
             validator = get_phase6_validator()
@@ -435,11 +457,18 @@ class PhaseCompletionDetector:
                 cert = generate_certificate(
                     validation_result,
                     phases_status={
-                        "Phase 1: License Gate": self._phases["phase_1_license_gate"].status == PhaseStatus.OPERATIONAL,
-                        "Phase 2: License UI": self._phases["phase_2_license_ui"].status == PhaseStatus.OPERATIONAL,
-                        "Phase 3: Payment Webhook": self._phases["phase_3_payment_webhook"].status == PhaseStatus.OPERATIONAL,
-                        "Phase 4: Usage Metering": self._phases["phase_4_usage_metering"].status == PhaseStatus.OPERATIONAL,
-                        "Phase 5: Analytics Dashboard": self._phases["phase_5_analytics_dashboard"].status == PhaseStatus.OPERATIONAL,
+                        "Phase 1: License Gate": self._phases["phase_1_license_gate"].status
+                        == PhaseStatus.OPERATIONAL,
+                        "Phase 2: License UI": self._phases["phase_2_license_ui"].status
+                        == PhaseStatus.OPERATIONAL,
+                        "Phase 3: Payment Webhook": self._phases["phase_3_payment_webhook"].status
+                        == PhaseStatus.OPERATIONAL,
+                        "Phase 4: Usage Metering": self._phases["phase_4_usage_metering"].status
+                        == PhaseStatus.OPERATIONAL,
+                        "Phase 5: Analytics Dashboard": self._phases[
+                            "phase_5_analytics_dashboard"
+                        ].status
+                        == PhaseStatus.OPERATIONAL,
                         "Phase 6: Terminal Validation": True,
                     },
                 )
@@ -476,7 +505,9 @@ class PhaseCompletionDetector:
         Returns:
             True if all phases are operational, False otherwise
         """
-        self.console.print("\n[bold cyan]=== ROIaaS Phase Completion Check (6 Phases) ===[/bold cyan]")
+        self.console.print(
+            "\n[bold cyan]=== ROIaaS Phase Completion Check (6 Phases) ===[/bold cyan]"
+        )
 
         # Check all phases in parallel
         results = await asyncio.gather(
@@ -490,10 +521,7 @@ class PhaseCompletionDetector:
         )
 
         # Determine if all phases are operational
-        all_operational = all(
-            phase.status == PhaseStatus.OPERATIONAL
-            for phase in results
-        )
+        all_operational = all(phase.status == PhaseStatus.OPERATIONAL for phase in results)
 
         was_operational = self._all_operational
         self._all_operational = all_operational
@@ -504,7 +532,9 @@ class PhaseCompletionDetector:
 
         # Trigger callbacks if transitioned to all operational
         if all_operational and not was_operational:
-            self.console.print("\n[bold green]✓ All phases operational! Triggering shutdown sequence...[/bold green]")
+            self.console.print(
+                "\n[bold green]✓ All phases operational! Triggering shutdown sequence...[/bold green]"
+            )
             await self._trigger_callbacks()
 
         return all_operational

@@ -138,7 +138,9 @@ class BridgeSync:
         console.print(f"Claude Agents:  {self.report.claude_agents}")
         console.print(f"Gemini Agents:  {self.report.gemini_agents}")
         if self.report.missing_in_gemini:
-            console.print(f"[yellow]⚠️  Missing in Gemini ({len(self.report.missing_in_gemini)}):[/yellow]")
+            console.print(
+                f"[yellow]⚠️  Missing in Gemini ({len(self.report.missing_in_gemini)}):[/yellow]"
+            )
             for a in self.report.missing_in_gemini[:5]:
                 console.print(f"   - {a}")
             if len(self.report.missing_in_gemini) > 5:

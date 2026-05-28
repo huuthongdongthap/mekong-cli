@@ -70,9 +70,7 @@ def seed_leads():
     # Just append new ones if not exist
     for l in LEADS_DATA:
         if not any(e["email"] == l["email"] for e in existing):
-            l["added"] = (
-                datetime.now() - timedelta(days=random.randint(0, 5))
-            ).isoformat()
+            l["added"] = (datetime.now() - timedelta(days=random.randint(0, 5))).isoformat()
             l["last_contact"] = datetime.now().isoformat()
             l["notes"] = "Seeded by Auto-Activator"
             existing.append(l)
@@ -87,9 +85,7 @@ def seed_sales():
     # Generate 10 random sales over last 7 days
     for i in range(10):
         product, price = random.choice(SALES_DATA)
-        date = (datetime.now() - timedelta(days=random.randint(0, 7))).strftime(
-            "%Y-%m-%d"
-        )
+        date = (datetime.now() - timedelta(days=random.randint(0, 7))).strftime("%Y-%m-%d")
         email = f"customer{i}@gmail.com"
         lines.append(f"{date}|{product}|{price}|{email}")
 

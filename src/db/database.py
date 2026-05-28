@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import asyncpg
+
     ASYNCPG_AVAILABLE = True
 except ImportError:
     ASYNCPG_AVAILABLE = False

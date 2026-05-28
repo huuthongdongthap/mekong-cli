@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GuardConfig:
     """Live mode guard configuration."""
+
     min_dry_run_days: int = 14
     db_path: str = "data/algo-trade.db"
     paper_trading: bool = True
@@ -52,7 +53,7 @@ class LiveModeGuard:
             return RiskCheckResult(
                 allowed=False,
                 reason=f"Position exceeds tier {tier.level} limit "
-                       f"(max ${tier.max_capital * 0.10:.2f})",
+                f"(max ${tier.max_capital * 0.10:.2f})",
             )
 
         # 3. Risk manager check (daily loss, circuit breaker, etc.)

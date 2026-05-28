@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class KalshiMarket:
     """A Kalshi event contract."""
+
     event_ticker: str
     title: str
     category: str
@@ -46,6 +47,7 @@ class KalshiMarket:
 @dataclass
 class ArbitrageOpportunity:
     """Cross-market arbitrage between Polymarket and Kalshi."""
+
     polymarket_id: str
     kalshi_ticker: str
     question: str

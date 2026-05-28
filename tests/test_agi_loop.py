@@ -106,7 +106,7 @@ class TestCooldownCalculation:
         """Test increased cooldown on failures."""
         agi_loop.consecutive_failures = 2
         cooldown = agi_loop._calculate_cooldown()
-        assert cooldown == min(agi_loop.cooldown * (2 ** 2), 600)
+        assert cooldown == min(agi_loop.cooldown * (2**2), 600)
 
     def test_cooldown_max_limit(self, agi_loop):
         """Test cooldown doesn't exceed 600 seconds."""
@@ -153,6 +153,7 @@ class TestExecuteStep:
     def test_execute_no_prompt(self, agi_loop):
         """Test execution with empty CC CLI prompt."""
         import asyncio
+
         improvement = {"cc_cli_prompt": "", "title": "Test"}
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -165,12 +166,15 @@ class TestExecuteStep:
     def test_execute_success(self, agi_loop, sample_improvement):
         """Test successful CC CLI execution."""
         import asyncio
+
         mock_session = MagicMock()
         mock_session.status.value = "completed"
         mock_session.exit_code = 0
         mock_session.error = None
+
         async def mock_spawn(*args, **kwargs):
             return mock_session
+
         with patch("src.core.cc_spawner.get_spawner") as mock_get_spawner:
             mock_spawner = MagicMock()
             mock_spawner.spawn = mock_spawn
@@ -186,11 +190,14 @@ class TestExecuteStep:
     def test_execute_failure(self, agi_loop, sample_improvement):
         """Test failed CC CLI execution."""
         import asyncio
+
         mock_session = MagicMock()
         mock_session.status.value = "failed"
         mock_session.error = "Session failed"
+
         async def mock_spawn(*args, **kwargs):
             return mock_session
+
         with patch("src.core.cc_spawner.get_spawner") as mock_get_spawner:
             mock_spawner = MagicMock()
             mock_spawner.spawn = mock_spawn
@@ -210,6 +217,7 @@ class TestMemorizeStep:
     def test_memorize_memory_unavailable(self, agi_loop, sample_improvement):
         """Test memorization when memory unavailable."""
         import asyncio
+
         with patch("src.core.memory_client.get_memory_client") as mock_get_mem:
             mock_mem = MagicMock()
             mock_mem.is_available = False
@@ -228,6 +236,7 @@ class TestReportStep:
     def test_report_telegram_disabled(self, agi_loop, sample_improvement):
         """Test report skips when Telegram disabled."""
         import asyncio
+
         agi_loop.telegram_notify = False
         with patch.object(agi_loop, "_send_telegram") as mock_send:
             loop = asyncio.new_event_loop()
@@ -241,6 +250,7 @@ class TestReportStep:
     def test_report_error(self, agi_loop):
         """Test error reporting."""
         import asyncio
+
         agi_loop.telegram_notify = True
         with patch.object(agi_loop, "_send_telegram") as mock_send:
             loop = asyncio.new_event_loop()

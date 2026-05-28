@@ -28,6 +28,7 @@ REPORT_PATH = FACTORY_DIR / "self-test-report.json"
 
 try:
     import jsonschema
+
     HAS_JSONSCHEMA = True
 except ImportError:
     HAS_JSONSCHEMA = False
@@ -61,7 +62,9 @@ def check_schemas_exist() -> CheckResult:
 def check_command_contracts(layers: dict[str, Any]) -> CheckResult:
     cmd_dir = CONTRACTS_DIR / "commands"
     if not cmd_dir.exists():
-        return CheckResult("command_contracts", False, "commands/ directory not found", ["commands/ missing"])
+        return CheckResult(
+            "command_contracts", False, "commands/ directory not found", ["commands/ missing"]
+        )
 
     schema_path = CONTRACTS_DIR / "commands.schema.json"
     schema = load_json(schema_path) if schema_path.exists() else {}
@@ -93,7 +96,9 @@ def check_command_contracts(layers: dict[str, Any]) -> CheckResult:
 def check_skills_registry() -> CheckResult:
     path = CONTRACTS_DIR / "skills.registry.json"
     if not path.exists():
-        return CheckResult("skills_registry", False, "skills.registry.json not found", ["file missing"])
+        return CheckResult(
+            "skills_registry", False, "skills.registry.json not found", ["file missing"]
+        )
 
     data = load_json(path)
     errors: list[str] = []
@@ -107,13 +112,20 @@ def check_skills_registry() -> CheckResult:
         if not ref.exists():
             errors.append(f"skill '{skill.get('id')}': file not found at {skill_path}")
 
-    return CheckResult("skills_registry", len(errors) == 0, f"{len(skills)} skills, {len(errors)} missing files", errors)
+    return CheckResult(
+        "skills_registry",
+        len(errors) == 0,
+        f"{len(skills)} skills, {len(errors)} missing files",
+        errors,
+    )
 
 
 def check_agents_registry() -> CheckResult:
     path = CONTRACTS_DIR / "agents.registry.json"
     if not path.exists():
-        return CheckResult("agents_registry", False, "agents.registry.json not found", ["file missing"])
+        return CheckResult(
+            "agents_registry", False, "agents.registry.json not found", ["file missing"]
+        )
 
     data = load_json(path)
     errors: list[str] = []
@@ -127,7 +139,12 @@ def check_agents_registry() -> CheckResult:
         if not ref.exists():
             errors.append(f"agent '{agent.get('id')}': file not found at {agent_path}")
 
-    return CheckResult("agents_registry", len(errors) == 0, f"{len(agents)} agents, {len(errors)} missing files", errors)
+    return CheckResult(
+        "agents_registry",
+        len(errors) == 0,
+        f"{len(agents)} agents, {len(errors)} missing files",
+        errors,
+    )
 
 
 def check_layers_consistency(layers: dict[str, Any]) -> CheckResult:
@@ -165,9 +182,9 @@ def check_contract_coverage(layers: dict[str, Any]) -> CheckResult:
     # Match both flat names (cook.json) and path-based names (founder__brand.json)
     contract_stems: set[str] = set()
     for p in cmd_dir.glob("*.json"):
-        contract_stems.add(p.stem)                          # e.g., "cook" or "founder-brand"
-        contract_stems.add(p.stem.replace("__", "-"))       # e.g., "founder-brand" from "founder__brand"
-        contract_stems.add(p.stem.split("__")[-1])          # e.g., "brand" from "founder__brand"
+        contract_stems.add(p.stem)  # e.g., "cook" or "founder-brand"
+        contract_stems.add(p.stem.replace("__", "-"))  # e.g., "founder-brand" from "founder__brand"
+        contract_stems.add(p.stem.split("__")[-1])  # e.g., "brand" from "founder__brand"
     missing: list[str] = []
     total = 0
     for layer_name, layer_data in layers.items():
@@ -193,7 +210,9 @@ def check_pricing_and_approval() -> CheckResult:
             load_json(p)
         except json.JSONDecodeError as e:
             errors.append(f"{fname}: invalid JSON — {e}")
-    return CheckResult("pricing_and_approval", len(errors) == 0, "pricing + approval_rules checked", errors)
+    return CheckResult(
+        "pricing_and_approval", len(errors) == 0, "pricing + approval_rules checked", errors
+    )
 
 
 def compute_score(results: list[CheckResult]) -> int:

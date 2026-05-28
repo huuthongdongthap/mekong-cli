@@ -43,6 +43,7 @@ CHECK_TIMEOUT_SECONDS = 2
 @dataclass
 class UpdateAvailable:
     """Update available info."""
+
     current_version: str
     latest_version: str
     download_url: str
@@ -58,6 +59,7 @@ class UpdateAvailable:
 @dataclass
 class UpdateCache:
     """Cached update check result."""
+
     checked_at: datetime
     latest_version: Optional[str] = None
     update_available: bool = False
@@ -156,6 +158,7 @@ class UpdateChecker:
         try:
             # Get current version from package
             import importlib.metadata
+
             current_version = importlib.metadata.version("mekong-cli")
         except importlib.metadata.PackageNotFoundError:
             current_version = "0.0.0"
@@ -163,10 +166,8 @@ class UpdateChecker:
         try:
             # Call gateway with timeout
             response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    self.gateway.get, "/v1/cli/version"
-                ),
-                timeout=CHECK_TIMEOUT_SECONDS
+                asyncio.to_thread(self.gateway.get, "/v1/cli/version"),
+                timeout=CHECK_TIMEOUT_SECONDS,
             )
 
             data = response.data
@@ -289,6 +290,7 @@ class UpdateChecker:
         """Get current CLI version."""
         try:
             import importlib.metadata
+
             return importlib.metadata.version("mekong-cli")
         except importlib.metadata.PackageNotFoundError:
             return "0.0.0"
@@ -296,10 +298,11 @@ class UpdateChecker:
     def _is_newer_version(self, latest: str, current: str) -> bool:
         """Compare version strings (semver-like)."""
         try:
+
             def parse_version(v: str) -> tuple[int, ...]:
                 # Remove 'v' prefix if present
-                v = v.lstrip('v')
-                return tuple(map(int, v.split('.')[:3]))
+                v = v.lstrip("v")
+                return tuple(map(int, v.split(".")[:3]))
 
             return parse_version(latest) > parse_version(current)
         except (ValueError, IndexError):
@@ -319,12 +322,16 @@ class UpdateChecker:
             return
 
         # Build notification message
-        msg_type = "🚨 CRITICAL" if update.is_critical else (
-            "🔒 SECURITY" if update.is_security_update else "📦 UPDATE"
+        msg_type = (
+            "🚨 CRITICAL"
+            if update.is_critical
+            else ("🔒 SECURITY" if update.is_security_update else "📦 UPDATE")
         )
 
-        console.print(f"\n[{self._get_color(update)}]{msg_type}[/]: "
-                      f"mekong-cli {update.current_version} → {update.latest_version}")
+        console.print(
+            f"\n[{self._get_color(update)}]{msg_type}[/]: "
+            f"mekong-cli {update.current_version} → {update.latest_version}"
+        )
 
         if update.release_notes:
             console.print(f"  {update.release_notes}")

@@ -10,10 +10,14 @@ from src.polymarket.types import CircuitBreakerState, Prediction, Signal
 def _make_signal(position_usd: float = 10.0) -> Signal:
     """Create a test signal."""
     pred = Prediction(
-        market_id="m1", question="Test",
-        predicted_probability=0.70, market_price=0.55,
-        edge=0.15, confidence=0.8,
-        model_used="test", ensemble_agreement=0.9,
+        market_id="m1",
+        question="Test",
+        predicted_probability=0.70,
+        market_price=0.55,
+        edge=0.15,
+        confidence=0.8,
+        model_used="test",
+        ensemble_agreement=0.9,
     )
     return Signal(
         prediction=pred,

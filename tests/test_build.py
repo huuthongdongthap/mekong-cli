@@ -2,7 +2,12 @@
 
 from unittest.mock import patch, MagicMock
 import sys
-from src.commands.build import clean_build, build_python_package, build_js_frontend, build_docker_image
+from src.commands.build import (
+    clean_build,
+    build_python_package,
+    build_js_frontend,
+    build_docker_image,
+)
 
 
 def test_clean_build():
@@ -29,8 +34,10 @@ def test_clean_build():
 
 def test_build_python_package():
     """Test that build_python_package calls poetry build"""
-    with patch("src.commands.build.subprocess.run") as mock_run, \
-         patch("src.commands.build.Path") as mock_path:
+    with (
+        patch("src.commands.build.subprocess.run") as mock_run,
+        patch("src.commands.build.Path") as mock_path,
+    ):
 
         # Mock dist directory exists and has files
         mock_dist = MagicMock()
@@ -59,8 +66,10 @@ def test_build_js_frontend_no_package_json():
 
 def test_build_js_frontend_with_npm():
     """Test that build_js_frontend calls npm run build"""
-    with patch("src.commands.build.Path") as mock_path, \
-         patch("src.commands.build.subprocess.run") as mock_run:
+    with (
+        patch("src.commands.build.Path") as mock_path,
+        patch("src.commands.build.subprocess.run") as mock_run,
+    ):
 
         mock_path.return_value.exists.return_value = True
 
@@ -81,8 +90,10 @@ def test_build_docker_image_no_dockerfile():
 
 def test_build_docker_image_with_docker():
     """Test that build_docker_image calls docker build"""
-    with patch("src.commands.build.Path") as mock_path, \
-         patch("src.commands.build.subprocess.run") as mock_run:
+    with (
+        patch("src.commands.build.Path") as mock_path,
+        patch("src.commands.build.subprocess.run") as mock_run,
+    ):
 
         mock_path.return_value.exists.return_value = True
 

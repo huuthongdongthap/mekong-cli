@@ -527,9 +527,11 @@ class EnhancedControlCenter:
 
         return {
             "avg_response_time": sum(response_times) / len(response_times) if response_times else 0,
-            "error_rate": (error_count / len(self.analytics.usage_history[-1000:])) * 100
-            if self.analytics.usage_history
-            else 0,
+            "error_rate": (
+                (error_count / len(self.analytics.usage_history[-1000:])) * 100
+                if self.analytics.usage_history
+                else 0
+            ),
         }
 
     def _generate_analytics_report(self) -> Dict[str, Any]:

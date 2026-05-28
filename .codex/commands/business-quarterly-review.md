@@ -1,0 +1,51 @@
+---
+codex-command: "/business-quarterly-review"
+source: ".claude/commands/business-quarterly-review.md"
+invocation: "mekong business-quarterly-review $ARGUMENTS"
+description: "QBR across all departments — revenue, expenses, KPIs, team, forecast. 6 commands, ~30 min."
+argument-hint: "[business context or goal]"
+allowed-tools: "default"
+content-sha256: "18cd0535be289a9ee8384a487f09e9f17c7921bcdccf27e75602c13c9ada3d62"
+---
+
+# /business-quarterly-review
+
+Run this Mekong command through the project CLI from `/Users/mac/mekong-cli`.
+
+```bash
+mekong business-quarterly-review $ARGUMENTS
+```
+
+## Source Command
+
+# Quarterly Business Review
+
+> Trigger: `/business:quarterly-review $ARGUMENTS`
+> Estimated: ~30 min
+
+## Execution
+
+Load recipe: `recipes/business/quarterly-review.json`
+
+Run the DAG workflow:
+
+### Financial Snapshot (parallel)
+- `revenue`
+- `cashflow`
+- `expense`
+
+### Performance Review (parallel)
+- `performance-review`
+- `pipeline`
+
+### Forward Planning (sequential)
+- `forecast`
+
+
+## Instructions
+
+1. Read recipe DAG definition
+2. Execute groups in dependency order
+3. Parallel groups run simultaneously
+4. Write outputs to `reports/qbr`
+5. Report completion with summary

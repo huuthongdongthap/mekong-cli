@@ -44,7 +44,9 @@ def test_analyze_term_sheet_option_pool_shuffle_danger():
 def test_analyze_term_sheet_participating_pref_danger():
     econ = _base_economic(participating=True, liquidation_pref_multiple=1.0)
     result = analyze_term_sheet(econ)
-    ratings = [c.rating for c in result.clause_analyses if c.clause_name == "Liquidation Preference"]
+    ratings = [
+        c.rating for c in result.clause_analyses if c.clause_name == "Liquidation Preference"
+    ]
     assert "DANGER" in ratings
 
 

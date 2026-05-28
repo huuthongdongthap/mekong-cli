@@ -9,10 +9,11 @@ User guide and onboarding.
 from rich.console import Console
 from rich.markdown import Markdown
 
+
 def main():
     """Show user guide."""
     console = Console()
-    
+
     guide_content = """
 # 🎯 AgencyOS User Guide
 
@@ -115,8 +116,9 @@ export ALLOWED_ORIGINS="http://localhost:3000"
 
 *"Không đánh mà thắng" - Win Without Fighting 🏯*
     """
-    
+
     console.print(Markdown(guide_content))
+
 
 if __name__ == "__main__":
     main()

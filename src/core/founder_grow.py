@@ -193,11 +193,13 @@ def generate_content_pillars(
     pillars = []
     for i, pain in enumerate(pain_points[:3]):
         stage = ["awareness", "consideration", "decision"][i % 3]
-        pillars.append({
-            "pillar": pain,
-            "stage": stage,
-            "content_types": "blog, thread, video",
-        })
+        pillars.append(
+            {
+                "pillar": pain,
+                "stage": stage,
+                "content_types": "blog, thread, video",
+            }
+        )
     return pillars
 
 
@@ -216,13 +218,15 @@ def build_keyword_map(
         intent = ["informational", "transactional", "navigational"][i % 3]
         priority = "HIGH" if diff == "low" else ("MEDIUM" if diff == "medium" else "SKIP")
 
-        keywords.append(SEOKeyword(
-            keyword=kw,
-            monthly_volume=500 * (len(seed_keywords) - i),
-            difficulty=diff,
-            intent=intent,
-            priority=priority,
-        ))
+        keywords.append(
+            SEOKeyword(
+                keyword=kw,
+                monthly_volume=500 * (len(seed_keywords) - i),
+                difficulty=diff,
+                intent=intent,
+                priority=priority,
+            )
+        )
 
     return keywords
 
@@ -233,8 +237,7 @@ def generate_seo_brief(keyword: SEOKeyword) -> dict:
         "keyword": keyword.keyword,
         "title_h1": f"How to {keyword.keyword}: Complete Guide",
         "meta_description": (
-            f"Learn {keyword.keyword} with practical steps. "
-            f"Updated guide with examples."
+            f"Learn {keyword.keyword} with practical steps. " f"Updated guide with examples."
         ),
         "target_word_count": 1500 if keyword.priority == "HIGH" else 1000,
         "outline": [
@@ -264,21 +267,21 @@ def generate_technical_seo_checklist() -> list[dict[str, str]]:
 # ── Community ────────────────────────────────────────────────────────
 
 
-def map_communities(
-    product_type: str, count: int = 10
-) -> list[CommunityTarget]:
+def map_communities(product_type: str, count: int = 10) -> list[CommunityTarget]:
     """Generate community target list template."""
     platforms = ["slack", "discord", "reddit", "linkedin_group", "facebook_group"]
     communities: list[CommunityTarget] = []
 
     for i in range(min(count, 20)):
-        communities.append(CommunityTarget(
-            name=f"{product_type}_community_{i + 1}",
-            platform=platforms[i % len(platforms)],
-            size=1000 * (count - i),
-            activity_level="high" if i < 3 else ("medium" if i < 7 else "low"),
-            relevance=f"Target audience for {product_type}",
-        ))
+        communities.append(
+            CommunityTarget(
+                name=f"{product_type}_community_{i + 1}",
+                platform=platforms[i % len(platforms)],
+                size=1000 * (count - i),
+                activity_level="high" if i < 3 else ("medium" if i < 7 else "low"),
+                relevance=f"Target audience for {product_type}",
+            )
+        )
 
     return communities
 
@@ -305,19 +308,19 @@ PARTNER_TYPES = [
 ]
 
 
-def build_partner_pipeline(
-    product_type: str, count: int = 5
-) -> list[PartnerLead]:
+def build_partner_pipeline(product_type: str, count: int = 5) -> list[PartnerLead]:
     """Build initial partner pipeline template."""
     leads: list[PartnerLead] = []
     for i in range(min(count, 20)):
         ptype, desc = PARTNER_TYPES[i % len(PARTNER_TYPES)]
-        leads.append(PartnerLead(
-            company=f"Partner_{i + 1}",
-            type=ptype,
-            contact=f"partner{i + 1}@example.com",
-            pitch_angle=desc,
-        ))
+        leads.append(
+            PartnerLead(
+                company=f"Partner_{i + 1}",
+                type=ptype,
+                contact=f"partner{i + 1}@example.com",
+                pitch_angle=desc,
+            )
+        )
     return leads
 
 

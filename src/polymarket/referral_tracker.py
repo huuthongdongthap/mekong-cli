@@ -39,6 +39,7 @@ TIER_PRICES: dict[str, float] = {
 @dataclass
 class ReferralCode:
     """A user's referral code."""
+
     code: str
     user_id: str
     created_at: str
@@ -49,6 +50,7 @@ class ReferralCode:
 @dataclass
 class Referral:
     """A referral record."""
+
     id: str
     referrer_code: str
     referrer_user_id: str
@@ -123,9 +125,7 @@ class ReferralTracker:
         """Look up a referral code."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            row = conn.execute(
-                "SELECT * FROM referral_codes WHERE code = ?", (code,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM referral_codes WHERE code = ?", (code,)).fetchone()
 
         if row is None:
             return None
@@ -199,9 +199,16 @@ class ReferralTracker:
                    (id, referrer_code, referrer_user_id, referred_user_id,
                     referred_email, referred_tier, reward_amount, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (referral.id, referral.referrer_code, referral.referrer_user_id,
-                 referral.referred_user_id, referral.referred_email,
-                 referral.referred_tier, referral.reward_amount, referral.created_at),
+                (
+                    referral.id,
+                    referral.referrer_code,
+                    referral.referrer_user_id,
+                    referral.referred_user_id,
+                    referral.referred_email,
+                    referral.referred_tier,
+                    referral.reward_amount,
+                    referral.created_at,
+                ),
             )
             # Update referrer stats
             conn.execute(
@@ -214,7 +221,9 @@ class ReferralTracker:
 
         logger.info(
             "Referral recorded: %s → %s (reward=$%.2f)",
-            referrer_code, referred_email, reward,
+            referrer_code,
+            referred_email,
+            reward,
         )
         return referral
 

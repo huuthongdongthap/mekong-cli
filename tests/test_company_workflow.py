@@ -177,7 +177,11 @@ class TestAddCustomWorkflow:
 class TestWorkflowBuilders:
     def test_all_builders_registered(self):
         assert set(WORKFLOW_BUILDERS.keys()) == {
-            "onboard", "upsell", "bug-pipeline", "weekly-brief", "deploy"
+            "onboard",
+            "upsell",
+            "bug-pipeline",
+            "weekly-brief",
+            "deploy",
         }
 
     def test_onboard_tiers(self):
@@ -188,6 +192,4 @@ class TestWorkflowBuilders:
     def test_all_steps_have_agent_role(self):
         wf = build_workflow("weekly-brief")
         for step in wf.steps:
-            assert step.agent_role in (
-                "cto", "cmo", "coo", "cfo", "cs", "sales", "editor", "data"
-            )
+            assert step.agent_role in ("cto", "cmo", "coo", "cfo", "cs", "sales", "editor", "data")

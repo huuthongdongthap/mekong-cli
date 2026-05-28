@@ -124,7 +124,8 @@ class StageRetryExecutor:
                 if attempt_num > 0:
                     logger.info(
                         "Stage '%s' succeeded on attempt %d",
-                        result.stage_name, attempt_num + 1,
+                        result.stage_name,
+                        attempt_num + 1,
                     )
                 return result
 
@@ -138,7 +139,8 @@ class StageRetryExecutor:
                 result.total_duration_ms = (time.time() - overall_start) * 1000
                 logger.warning(
                     "Stage '%s' blocked by circuit breaker: %s",
-                    result.stage_name, e,
+                    result.stage_name,
+                    e,
                 )
                 return result
 
@@ -155,7 +157,8 @@ class StageRetryExecutor:
                     result.total_duration_ms = (time.time() - overall_start) * 1000
                     logger.warning(
                         "Stage '%s' failed (non-retryable): %s",
-                        result.stage_name, error_msg,
+                        result.stage_name,
+                        error_msg,
                     )
                     return result
 
@@ -182,7 +185,8 @@ class StageRetryExecutor:
             result.final_error = result.attempts[-1].error
         logger.error(
             "Stage '%s' exhausted %d attempts",
-            result.stage_name, self.policy.max_attempts,
+            result.stage_name,
+            self.policy.max_attempts,
         )
         return result
 

@@ -10,7 +10,6 @@ import sys
 from io import StringIO
 from typing import Optional
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from rich.console import Console
@@ -33,10 +32,10 @@ from src.a2ui.components import (
     _render_column,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def make_renderer() -> tuple[A2UIRenderer, StringIO]:
     """Create renderer with captured output."""
@@ -49,12 +48,23 @@ def make_renderer() -> tuple[A2UIRenderer, StringIO]:
 # Component Registry
 # ---------------------------------------------------------------------------
 
+
 class TestComponentRegistry:
     def test_registry_has_all_required_types(self):
         required = [
-            "Text", "Card", "Row", "Column", "List",
-            "Button", "TextField", "CheckBox", "Divider",
-            "Image", "Icon", "Tabs", "Modal",
+            "Text",
+            "Card",
+            "Row",
+            "Column",
+            "List",
+            "Button",
+            "TextField",
+            "CheckBox",
+            "Divider",
+            "Image",
+            "Icon",
+            "Tabs",
+            "Modal",
         ]
         for ctype in required:
             assert ctype in COMPONENT_REGISTRY, f"Missing component: {ctype}"
@@ -70,6 +80,7 @@ class TestComponentRegistry:
 # ---------------------------------------------------------------------------
 # Text component
 # ---------------------------------------------------------------------------
+
 
 class TestTextComponent:
     def test_heading_variant(self):
@@ -97,10 +108,12 @@ class TestTextComponent:
 # Card component
 # ---------------------------------------------------------------------------
 
+
 class TestCardComponent:
     def test_card_with_title(self):
         result = _render_card({"type": "Card", "title": "My Card", "children": []}, {})
         from rich.panel import Panel
+
         assert isinstance(result, Panel)
 
     def test_card_with_children(self):
@@ -111,12 +124,14 @@ class TestCardComponent:
         }
         result = _render_card(component, {})
         from rich.panel import Panel
+
         assert isinstance(result, Panel)
 
 
 # ---------------------------------------------------------------------------
 # Button component
 # ---------------------------------------------------------------------------
+
 
 class TestButtonComponent:
     def test_button_label_present(self):
@@ -136,6 +151,7 @@ class TestButtonComponent:
 # List component
 # ---------------------------------------------------------------------------
 
+
 class TestListComponent:
     def test_list_renders_items(self):
         component = {
@@ -144,12 +160,14 @@ class TestListComponent:
         }
         result = _render_list(component, {})
         from rich.table import Table
+
         assert isinstance(result, Table)
 
     def test_list_with_string_items(self):
         component = {"type": "List", "items": ["Apple", "Banana"]}
         result = _render_list(component, {})
         from rich.table import Table
+
         assert isinstance(result, Table)
 
     def test_list_data_binding(self):
@@ -157,17 +175,20 @@ class TestListComponent:
         component = {"type": "List", "items": "$data.fruits"}
         result = _render_list(component, data)
         from rich.table import Table
+
         assert isinstance(result, Table)
 
     def test_empty_list(self):
         result = _render_list({"type": "List", "items": []}, {})
         from rich.table import Table
+
         assert isinstance(result, Table)
 
 
 # ---------------------------------------------------------------------------
 # CheckBox component
 # ---------------------------------------------------------------------------
+
 
 class TestCheckBoxComponent:
     def test_unchecked_symbol(self):
@@ -182,6 +203,7 @@ class TestCheckBoxComponent:
 # ---------------------------------------------------------------------------
 # TextField component
 # ---------------------------------------------------------------------------
+
 
 class TestTextFieldComponent:
     def test_placeholder_shown(self):
@@ -203,14 +225,17 @@ class TestTextFieldComponent:
 # Divider component
 # ---------------------------------------------------------------------------
 
+
 class TestDividerComponent:
     def test_divider_returns_rule(self):
         from rich.rule import Rule
+
         result = _render_divider({"type": "Divider"}, {})
         assert isinstance(result, Rule)
 
     def test_divider_with_title(self):
         from rich.rule import Rule
+
         result = _render_divider({"type": "Divider", "title": "Section"}, {})
         assert isinstance(result, Rule)
 
@@ -218,6 +243,7 @@ class TestDividerComponent:
 # ---------------------------------------------------------------------------
 # Image component
 # ---------------------------------------------------------------------------
+
 
 class TestImageComponent:
     def test_image_shows_alt(self):
@@ -234,6 +260,7 @@ class TestImageComponent:
 # ---------------------------------------------------------------------------
 # Icon component
 # ---------------------------------------------------------------------------
+
 
 class TestIconComponent:
     def test_known_icon(self):
@@ -253,9 +280,11 @@ class TestIconComponent:
 # Tabs component
 # ---------------------------------------------------------------------------
 
+
 class TestTabsComponent:
     def test_tabs_returns_table(self):
         from rich.table import Table
+
         component = {
             "type": "Tabs",
             "tabs": [{"label": "Home"}, {"label": "Settings"}],
@@ -266,6 +295,7 @@ class TestTabsComponent:
 
     def test_empty_tabs(self):
         from rich.table import Table
+
         result = _render_tabs({"type": "Tabs", "tabs": []}, {})
         assert isinstance(result, Table)
 
@@ -274,9 +304,11 @@ class TestTabsComponent:
 # Modal component
 # ---------------------------------------------------------------------------
 
+
 class TestModalComponent:
     def test_modal_is_panel(self):
         from rich.panel import Panel
+
         result = _render_modal({"type": "Modal", "title": "Confirm", "children": []}, {})
         assert isinstance(result, Panel)
 
@@ -284,6 +316,7 @@ class TestModalComponent:
 # ---------------------------------------------------------------------------
 # Row / Column layout
 # ---------------------------------------------------------------------------
+
 
 class TestLayoutComponents:
     def test_row_with_children(self):
@@ -296,10 +329,12 @@ class TestLayoutComponents:
         }
         result = _render_row(component, {})
         from rich.columns import Columns
+
         assert isinstance(result, Columns)
 
     def test_row_empty_children(self):
         from rich.text import Text
+
         result = _render_row({"type": "Row", "children": []}, {})
         assert isinstance(result, Text)
 
@@ -320,15 +355,18 @@ class TestLayoutComponents:
 # A2UIRenderer — protocol message handling
 # ---------------------------------------------------------------------------
 
+
 class TestA2UIRendererMessages:
     def test_surface_update_stores_components(self):
         renderer, _ = make_renderer()
-        renderer.process_message({
-            "surfaceUpdate": {
-                "surfaceId": "test",
-                "components": [{"type": "Text", "text": "Hello"}],
+        renderer.process_message(
+            {
+                "surfaceUpdate": {
+                    "surfaceId": "test",
+                    "components": [{"type": "Text", "text": "Hello"}],
+                }
             }
-        })
+        )
         assert "test" in renderer.surface_ids
         assert len(renderer.surfaces["test"]) == 1
 
@@ -366,6 +404,7 @@ class TestA2UIRendererMessages:
 # A2UIRenderer — render_surface integration
 # ---------------------------------------------------------------------------
 
+
 class TestA2UIRendererRender:
     def _render_and_capture(self, components: list, data: Optional[dict] = None) -> str:
         renderer, buf = make_renderer()
@@ -388,9 +427,9 @@ class TestA2UIRendererRender:
         assert "Submit" in output
 
     def test_renders_list_component(self):
-        output = self._render_and_capture([
-            {"type": "List", "items": [{"label": "Alpha"}, {"label": "Beta"}]}
-        ])
+        output = self._render_and_capture(
+            [{"type": "List", "items": [{"label": "Alpha"}, {"label": "Beta"}]}]
+        )
         assert "Alpha" in output
         assert "Beta" in output
 
@@ -403,18 +442,27 @@ class TestA2UIRendererRender:
 
     def test_renders_mixed_surface(self):
         """Render a realistic surface with multiple component types."""
-        output = self._render_and_capture([
-            {"type": "Text", "text": "Dashboard", "variant": "heading"},
-            {"type": "Divider"},
-            {"type": "Card", "title": "Stats", "children": [
-                {"type": "Text", "text": "100 users"},
-            ]},
-            {"type": "Row", "children": [
-                {"type": "Button", "label": "Refresh"},
-                {"type": "Button", "label": "Export", "variant": "secondary"},
-            ]},
-            {"type": "CheckBox", "label": "Auto-refresh", "checked": True},
-        ])
+        output = self._render_and_capture(
+            [
+                {"type": "Text", "text": "Dashboard", "variant": "heading"},
+                {"type": "Divider"},
+                {
+                    "type": "Card",
+                    "title": "Stats",
+                    "children": [
+                        {"type": "Text", "text": "100 users"},
+                    ],
+                },
+                {
+                    "type": "Row",
+                    "children": [
+                        {"type": "Button", "label": "Refresh"},
+                        {"type": "Button", "label": "Export", "variant": "secondary"},
+                    ],
+                },
+                {"type": "CheckBox", "label": "Auto-refresh", "checked": True},
+            ]
+        )
         assert "Dashboard" in output
         assert "Stats" in output
         assert "Refresh" in output
@@ -422,12 +470,14 @@ class TestA2UIRendererRender:
 
     def test_begin_rendering_message_triggers_render(self):
         renderer, buf = make_renderer()
-        renderer.process_message({
-            "surfaceUpdate": {
-                "surfaceId": "live",
-                "components": [{"type": "Text", "text": "Live Output"}],
+        renderer.process_message(
+            {
+                "surfaceUpdate": {
+                    "surfaceId": "live",
+                    "components": [{"type": "Text", "text": "Live Output"}],
+                }
             }
-        })
+        )
         renderer.process_message({"beginRendering": {"surfaceId": "live"}})
         assert "Live Output" in buf.getvalue()
 

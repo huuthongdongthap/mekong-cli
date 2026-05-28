@@ -30,6 +30,7 @@ class ViolationEvent:
         retry_after_seconds: Seconds until quota resets (if applicable)
         metadata: Additional context (IP, user agent, etc.)
     """
+
     key_id: str
     tier: str
     violation_type: str
@@ -48,7 +49,7 @@ class ViolationTracker:
     def __init__(
         self,
         repository: Optional[LicenseRepository] = None,
-        db: Optional[DatabaseConnection] = None
+        db: Optional[DatabaseConnection] = None,
     ) -> None:
         self._repo = repository or get_repository()
         self._db = db or get_database()
@@ -89,16 +90,13 @@ class ViolationTracker:
                 violation.retry_after_seconds,
                 metadata_json,
                 datetime.now(timezone.utc),
-            )
+            ),
         )
 
         return dict(result) if result else {}
 
     async def get_violations_by_key(
-        self,
-        key_id: str,
-        days: int = 30,
-        limit: int = 100
+        self, key_id: str, days: int = 30, limit: int = 100
     ) -> list[Dict[str, Any]]:
         """
         Get violation history for a specific key.
@@ -126,11 +124,7 @@ class ViolationTracker:
         results = await self._db.fetch_all(query, (key_id, limit))
         return [dict(row) for row in results]
 
-    async def get_violation_summary(
-        self,
-        key_id: str,
-        days: int = 30
-    ) -> Dict[str, Any]:
+    async def get_violation_summary(self, key_id: str, days: int = 30) -> Dict[str, Any]:
         """
         Get violation summary for analytics dashboard.
 
@@ -187,11 +181,7 @@ class ViolationTracker:
             "period_days": days,
         }
 
-    async def get_all_violations(
-        self,
-        days: int = 7,
-        limit: int = 500
-    ) -> list[Dict[str, Any]]:
+    async def get_all_violations(self, days: int = 7, limit: int = 500) -> list[Dict[str, Any]]:
         """
         Get all recent violations for admin dashboard.
 

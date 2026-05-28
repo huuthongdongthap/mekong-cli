@@ -15,6 +15,7 @@ from src.core.agent_base import AgentBase, Task, Result
 @dataclass
 class HealthCheckResult:
     """Result of a health check"""
+
     service: str
     status: str  # "healthy", "unhealthy", "unknown"
     response_time_ms: Optional[float] = None
@@ -55,32 +56,45 @@ class MonitorAgent(AgentBase):
         input_lower = input_data.lower()
 
         if "health" in input_lower and ("http" in input_lower or "endpoint" in input_lower):
-            tasks.append(Task(
-                id="health_check",
-                description="Check HTTP endpoint health",
-                input={"type": "http_health", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="health_check",
+                    description="Check HTTP endpoint health",
+                    input={"type": "http_health", "query": input_data},
+                )
+            )
 
         if "port" in input_lower:
-            tasks.append(Task(
-                id="port_check",
-                description="Check port availability",
-                input={"type": "port_check", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="port_check",
+                    description="Check port availability",
+                    input={"type": "port_check", "query": input_data},
+                )
+            )
 
-        if "system" in input_lower or "resource" in input_lower or "cpu" in input_lower or "memory" in input_lower:
-            tasks.append(Task(
-                id="system_resources",
-                description="Monitor system resources",
-                input={"type": "system_resources", "query": input_data},
-            ))
+        if (
+            "system" in input_lower
+            or "resource" in input_lower
+            or "cpu" in input_lower
+            or "memory" in input_lower
+        ):
+            tasks.append(
+                Task(
+                    id="system_resources",
+                    description="Monitor system resources",
+                    input={"type": "system_resources", "query": input_data},
+                )
+            )
 
         if not tasks:
-            tasks.append(Task(
-                id="full_health",
-                description="Run full system health check",
-                input={"type": "full_health", "query": input_data},
-            ))
+            tasks.append(
+                Task(
+                    id="full_health",
+                    description="Run full system health check",
+                    input={"type": "full_health", "query": input_data},
+                )
+            )
 
         return tasks
 
@@ -117,7 +131,7 @@ class MonitorAgent(AgentBase):
         import re
 
         # Extract URL from query
-        url_match = re.search(r'https?://\S+', task.input.get("query", ""))
+        url_match = re.search(r"https?://\S+", task.input.get("query", ""))
         if not url_match:
             return Result(
                 task_id=task.id,
@@ -129,7 +143,17 @@ class MonitorAgent(AgentBase):
         url = url_match.group(0).strip()
 
         # Use curl to check endpoint (safe: no shell=True)
-        cmd = ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code} %{time_total}", "--max-time", "10", url]
+        cmd = [
+            "curl",
+            "-s",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code} %{time_total}",
+            "--max-time",
+            "10",
+            url,
+        ]
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
             parts = proc.stdout.strip().split()
@@ -181,7 +205,7 @@ class MonitorAgent(AgentBase):
         import re
 
         # Extract port from query
-        port_match = re.search(r'\b(\d{2,5})\b', task.input.get("query", ""))
+        port_match = re.search(r"\b(\d{2,5})\b", task.input.get("query", ""))
         if not port_match:
             return Result(
                 task_id=task.id,
@@ -233,7 +257,8 @@ class MonitorAgent(AgentBase):
             cpu_result = subprocess.run(cpu_cmd, capture_output=True, text=True, timeout=5)
             if cpu_result.returncode == 0:
                 import re
-                cpu_match = re.search(r'(\d+\.?\d*)%\s+user', cpu_result.stdout)
+
+                cpu_match = re.search(r"(\d+\.?\d*)%\s+user", cpu_result.stdout)
                 if cpu_match:
                     cpu_percent = float(cpu_match.group(1))
                     metrics["cpu_percent"] = cpu_percent
@@ -246,12 +271,15 @@ class MonitorAgent(AgentBase):
             mem_result = subprocess.run(mem_cmd, capture_output=True, text=True, timeout=5)
             if mem_result.returncode == 0:
                 import re
-                pages_match = re.search(r'Pages active:\s+(\d+)', mem_result.stdout)
+
+                pages_match = re.search(r"Pages active:\s+(\d+)", mem_result.stdout)
                 if pages_match:
                     pages_active = int(pages_match.group(1))
                     page_size = 4096
                     total_mem_cmd = ["sysctl", "-n", "hw.memsize"]
-                    total_result = subprocess.run(total_mem_cmd, capture_output=True, text=True, timeout=5)
+                    total_result = subprocess.run(
+                        total_mem_cmd, capture_output=True, text=True, timeout=5
+                    )
                     if total_result.returncode == 0:
                         total_bytes = int(total_result.stdout.strip())
                         used_bytes = pages_active * page_size
@@ -265,7 +293,8 @@ class MonitorAgent(AgentBase):
             disk_result = subprocess.run(disk_cmd, capture_output=True, text=True, timeout=5)
             if disk_result.returncode == 0:
                 import re
-                disk_match = re.search(r'(\d+)%', disk_result.stdout)
+
+                disk_match = re.search(r"(\d+)%", disk_result.stdout)
                 if disk_match:
                     try:
                         disk_percent = float(disk_match.group(1))
@@ -300,8 +329,12 @@ class MonitorAgent(AgentBase):
         system_result = self._execute_system_resources(task)
 
         # Get UTC timestamp - safe: no shell=True
-        timestamp_result = subprocess.run(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], capture_output=True, text=True)
-        timestamp = timestamp_result.stdout.strip() if timestamp_result.returncode == 0 else "unknown"
+        timestamp_result = subprocess.run(
+            ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], capture_output=True, text=True
+        )
+        timestamp = (
+            timestamp_result.stdout.strip() if timestamp_result.returncode == 0 else "unknown"
+        )
 
         return Result(
             task_id=task.id,

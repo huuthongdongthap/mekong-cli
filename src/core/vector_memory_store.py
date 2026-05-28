@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 class MemoryType(str, Enum):
     """Categories of memory for the AGI system."""
 
-    EPISODIC = "episodic"      # Task execution history & context
-    SEMANTIC = "semantic"      # Knowledge/facts learned
+    EPISODIC = "episodic"  # Task execution history & context
+    SEMANTIC = "semantic"  # Knowledge/facts learned
     PROCEDURAL = "procedural"  # Skills/recipes/patterns
 
 
@@ -66,7 +66,9 @@ class VectorMemoryStore:
             self._load_snapshot()
 
     def create_collection(
-        self, name: str, dimension: int,
+        self,
+        name: str,
+        dimension: int,
     ) -> VectorCollection:
         """
         Create a new vector collection.
@@ -89,7 +91,9 @@ class VectorMemoryStore:
         return collection
 
     def get_or_create_collection(
-        self, name: str, dimension: int,
+        self,
+        name: str,
+        dimension: int,
     ) -> VectorCollection:
         """Get existing or create new collection."""
         if name in self._collections:
@@ -127,11 +131,12 @@ class VectorMemoryStore:
         col = self._get_collection(collection)
         if len(vector) != col.dimension:
             raise ValueError(
-                f"Vector dimension {len(vector)} != "
-                f"collection dimension {col.dimension}."
+                f"Vector dimension {len(vector)} != " f"collection dimension {col.dimension}."
             )
         entry = VectorEntry(
-            id=id, vector=vector, payload=payload or {},
+            id=id,
+            vector=vector,
+            payload=payload or {},
             memory_type=memory_type,
         )
         col.entries[id] = entry
@@ -160,8 +165,7 @@ class VectorMemoryStore:
         col = self._get_collection(collection)
         if len(query_vector) != col.dimension:
             raise ValueError(
-                f"Query dimension {len(query_vector)} != "
-                f"collection dimension {col.dimension}."
+                f"Query dimension {len(query_vector)} != " f"collection dimension {col.dimension}."
             )
         if not col.entries:
             return []
@@ -171,8 +175,7 @@ class VectorMemoryStore:
             entries = [e for e in entries if e.memory_type == memory_type]
 
         scored: List[Tuple[VectorEntry, float]] = [
-            (entry, self._cosine_similarity(query_vector, entry.vector))
-            for entry in entries
+            (entry, self._cosine_similarity(query_vector, entry.vector)) for entry in entries
         ]
         scored.sort(key=lambda x: x[1], reverse=True)
         return scored[:top_k]
@@ -197,9 +200,7 @@ class VectorMemoryStore:
         col = self._get_collection(collection)
         results: List[VectorEntry] = []
         for entry in col.entries.values():
-            match = all(
-                entry.payload.get(k) == v for k, v in filters.items()
-            )
+            match = all(entry.payload.get(k) == v for k, v in filters.items())
             if match:
                 results.append(entry)
                 if len(results) >= limit:
@@ -210,9 +211,7 @@ class VectorMemoryStore:
         """Remove a single entry from a collection."""
         col = self._get_collection(collection)
         if id not in col.entries:
-            raise KeyError(
-                f"Entry '{id}' not found in collection '{collection}'."
-            )
+            raise KeyError(f"Entry '{id}' not found in collection '{collection}'.")
         del col.entries[id]
         self._auto_persist()
 
@@ -262,13 +261,15 @@ class VectorMemoryStore:
         for col_name, col in self._collections.items():
             entries_data = []
             for entry in col.entries.values():
-                entries_data.append({
-                    "id": entry.id,
-                    "vector": entry.vector,
-                    "payload": entry.payload,
-                    "memory_type": entry.memory_type.value,
-                    "created_at": entry.created_at,
-                })
+                entries_data.append(
+                    {
+                        "id": entry.id,
+                        "vector": entry.vector,
+                        "payload": entry.payload,
+                        "memory_type": entry.memory_type.value,
+                        "created_at": entry.created_at,
+                    }
+                )
             data[col_name] = {
                 "dimension": col.dimension,
                 "metadata": col.metadata,
@@ -288,7 +289,9 @@ class VectorMemoryStore:
                 dimension = col_data["dimension"]
                 metadata = col_data.get("metadata", {})
                 col = VectorCollection(
-                    name=col_name, dimension=dimension, metadata=metadata,
+                    name=col_name,
+                    dimension=dimension,
+                    metadata=metadata,
                 )
                 for entry_data in col_data.get("entries", []):
                     try:
@@ -337,9 +340,7 @@ class VectorMemoryStore:
         # Extend hash if dimension > 32 bytes
         extended = hash_bytes
         while len(extended) < dimension * 4:
-            extended += hashlib.sha256(
-                extended + text_lower.encode()
-            ).digest()
+            extended += hashlib.sha256(extended + text_lower.encode()).digest()
 
         # Convert bytes to floats in [-1, 1]
         vector = []

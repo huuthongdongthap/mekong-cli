@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Position:
     """An open position in a market."""
+
     market_id: str
     direction: TradeDirection
     size_usd: float
@@ -64,7 +65,10 @@ class PositionTracker:
         self.positions[market_id] = position
         logger.info(
             "Opened position: %s %s $%.2f @ %.4f",
-            direction.value, market_id[:8], size_usd, entry_price,
+            direction.value,
+            market_id[:8],
+            size_usd,
+            entry_price,
         )
         return position
 
@@ -96,13 +100,19 @@ class PositionTracker:
         current_capital = self.current_capital
         if current_capital > self.peak_capital:
             self.peak_capital = current_capital
-        dd = (self.peak_capital - current_capital) / self.peak_capital if self.peak_capital > 0 else 0.0
+        dd = (
+            (self.peak_capital - current_capital) / self.peak_capital
+            if self.peak_capital > 0
+            else 0.0
+        )
         if dd > self.max_drawdown:
             self.max_drawdown = dd
 
         logger.info(
             "Closed position: %s P&L=$%.2f (total=$%.2f)",
-            market_id[:8], pnl, self.realized_pnl,
+            market_id[:8],
+            pnl,
+            self.realized_pnl,
         )
         return pnl
 

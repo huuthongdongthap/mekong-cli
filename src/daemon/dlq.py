@@ -39,7 +39,9 @@ class DeadLetterQueue:
 
     def list_dead_letters(self) -> List[Path]:
         """List all files in dead-letter queue."""
-        return sorted(f for f in self._dir.iterdir() if f.is_file() and not f.name.endswith(".reason"))
+        return sorted(
+            f for f in self._dir.iterdir() if f.is_file() and not f.name.endswith(".reason")
+        )
 
     @property
     def count(self) -> int:

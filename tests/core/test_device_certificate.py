@@ -115,11 +115,7 @@ class TestDeviceCertificate:
         assert len(signature) > 0
 
         # Verify signature
-        is_valid = DeviceCertificate.verify_signature(
-            cert.public_key_pem,
-            data,
-            signature
-        )
+        is_valid = DeviceCertificate.verify_signature(cert.public_key_pem, data, signature)
         assert is_valid is True
 
     def test_verify_invalid_signature(self):
@@ -131,11 +127,7 @@ class TestDeviceCertificate:
         signature = cert.sign_request(data)
 
         # Verify with wrong data should fail
-        is_valid = DeviceCertificate.verify_signature(
-            cert.public_key_pem,
-            wrong_data,
-            signature
-        )
+        is_valid = DeviceCertificate.verify_signature(cert.public_key_pem, wrong_data, signature)
         assert is_valid is False
 
     def test_serialize_to_dict(self):
@@ -324,8 +316,7 @@ class TestCertificateStore:
     def store(self, temp_cert_dir):
         """Create certificate store for tests."""
         return CertificateStore(
-            certificate_dir=temp_cert_dir,
-            use_secure_storage=False  # Use file fallback for tests
+            certificate_dir=temp_cert_dir, use_secure_storage=False  # Use file fallback for tests
         )
 
     def test_store_initialization(self, temp_cert_dir):
@@ -473,10 +464,7 @@ class TestCertificateStoreIntegration:
     def test_full_lifecycle(self, temp_cert_dir):
         """Test full certificate lifecycle."""
         # Create store with secure storage disabled for testing
-        store = CertificateStore(
-            certificate_dir=temp_cert_dir,
-            use_secure_storage=False
-        )
+        store = CertificateStore(certificate_dir=temp_cert_dir, use_secure_storage=False)
 
         # Generate certificate
         cert = store.generate_and_save()
@@ -496,7 +484,7 @@ class TestCertificateStoreIntegration:
         is_valid = DeviceCertificate.verify_signature(
             loaded.public_key_pem,
             f"{headers['X-Cert-ID']}:{headers['X-Cert-Timestamp']}".encode(),
-            bytes.fromhex(headers["X-Cert-Sig"])
+            bytes.fromhex(headers["X-Cert-Sig"]),
         )
         assert is_valid is True
 

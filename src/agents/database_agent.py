@@ -11,7 +11,6 @@ from pathlib import Path
 
 from ..core.agent_base import AgentBase, Task, Result
 
-
 # Type alias for database connection
 DbConnection = Optional[sqlite3.Connection]
 
@@ -51,58 +50,68 @@ class DatabaseAgent(AgentBase):
         args = parts[1] if len(parts) > 1 else ""
 
         if command == "connect":
-            return [Task(
-                id="db_connect",
-                description=f"Connect to database: {args}",
-                input={"db_url": args}
-            )]
+            return [
+                Task(
+                    id="db_connect",
+                    description=f"Connect to database: {args}",
+                    input={"db_url": args},
+                )
+            ]
 
         elif command == "query":
-            return [Task(
-                id="db_query",
-                description=f"Execute query: {args}",
-                input={"query": args}
-            )]
+            return [
+                Task(id="db_query", description=f"Execute query: {args}", input={"query": args})
+            ]
 
         elif command == "migrate":
             migration_path = args if args else "./migrations"
-            return [Task(
-                id="db_migrate",
-                description=f"Run migrations from: {migration_path}",
-                input={"migration_path": migration_path}
-            )]
+            return [
+                Task(
+                    id="db_migrate",
+                    description=f"Run migrations from: {migration_path}",
+                    input={"migration_path": migration_path},
+                )
+            ]
 
         elif command == "schema":
             table_name = args if args else None
-            return [Task(
-                id="db_schema",
-                description=f"Show schema{' for ' + table_name if table_name else ''}",
-                input={"table_name": table_name}
-            )]
+            return [
+                Task(
+                    id="db_schema",
+                    description=f"Show schema{' for ' + table_name if table_name else ''}",
+                    input={"table_name": table_name},
+                )
+            ]
 
         elif command == "backup":
             backup_path = args if args else "./backup.sql"
-            return [Task(
-                id="db_backup",
-                description=f"Backup database to: {backup_path}",
-                input={"backup_path": backup_path}
-            )]
+            return [
+                Task(
+                    id="db_backup",
+                    description=f"Backup database to: {backup_path}",
+                    input={"backup_path": backup_path},
+                )
+            ]
 
         elif command == "restore":
             backup_path = args if args else "./backup.sql"
-            return [Task(
-                id="db_restore",
-                description=f"Restore database from: {backup_path}",
-                input={"backup_path": backup_path}
-            )]
+            return [
+                Task(
+                    id="db_restore",
+                    description=f"Restore database from: {backup_path}",
+                    input={"backup_path": backup_path},
+                )
+            ]
 
         else:
             # Assume it's a raw SQL command
-            return [Task(
-                id="db_raw_sql",
-                description=f"Execute raw SQL: {input_data}",
-                input={"query": input_data}
-            )]
+            return [
+                Task(
+                    id="db_raw_sql",
+                    description=f"Execute raw SQL: {input_data}",
+                    input={"query": input_data},
+                )
+            ]
 
     def execute(self, task: Task) -> Result:
         """Execute database task."""
@@ -126,31 +135,23 @@ class DatabaseAgent(AgentBase):
                     task_id=task.id,
                     success=False,
                     output=None,
-                    error=f"Unknown task type: {task.id}"
+                    error=f"Unknown task type: {task.id}",
                 )
         except Exception as e:
-            return Result(
-                task_id=task.id,
-                success=False,
-                output=None,
-                error=str(e)
-            )
+            return Result(task_id=task.id, success=False, output=None, error=str(e))
 
     def _execute_connect(self, task: Task) -> Result:
         """Execute database connection."""
         db_url = cast(str, task.input.get("db_url", self.db_url))
         if not db_url:
             return Result(
-                task_id=task.id,
-                success=False,
-                output=None,
-                error="No database URL provided"
+                task_id=task.id, success=False, output=None, error="No database URL provided"
             )
 
         # Parse the database URL
         if db_url.startswith("sqlite:///"):
             # SQLite connection
-            db_path = db_url[len("sqlite:///"):]
+            db_path = db_url[len("sqlite:///") :]
             self.connection = sqlite3.connect(db_path)
             output = f"Connected to SQLite database: {db_path}"
         else:
@@ -158,23 +159,13 @@ class DatabaseAgent(AgentBase):
             # This is a simplified implementation
             output = f"Database connection configured: {db_url}"
 
-        return Result(
-            task_id=task.id,
-            success=True,
-            output=output,
-            error=None
-        )
+        return Result(task_id=task.id, success=True, output=output, error=None)
 
     def _execute_query(self, task: Task) -> Result:
         """Execute database query."""
         query = cast(str, task.input.get("query"))
         if not query:
-            return Result(
-                task_id=task.id,
-                success=False,
-                output=None,
-                error="No query provided"
-            )
+            return Result(task_id=task.id, success=False, output=None, error="No query provided")
 
         # For now, we'll use SQLite as the default implementation
         # In a real implementation, we'd support multiple database types
@@ -186,7 +177,7 @@ class DatabaseAgent(AgentBase):
             cursor = self.connection.cursor()
 
             # Check if this is a multi-statement query (contains semicolons)
-            statements = [stmt.strip() for stmt in query.split(';') if stmt.strip()]
+            statements = [stmt.strip() for stmt in query.split(";") if stmt.strip()]
 
             if len(statements) > 1:
                 # Execute multiple statements
@@ -202,13 +193,17 @@ class DatabaseAgent(AgentBase):
                 if last_stmt.strip().upper().startswith("SELECT"):
                     cursor.execute(last_stmt)
                     rows = cursor.fetchall()
-                    columns = [description[0] for description in cursor.description] if cursor.description else []
+                    columns = (
+                        [description[0] for description in cursor.description]
+                        if cursor.description
+                        else []
+                    )
 
                     # Format results
                     result_data = {
                         "columns": columns,
                         "rows": [dict(zip(columns, row)) for row in rows],
-                        "row_count": len(rows)
+                        "row_count": len(rows),
                     }
 
                     output = f"Multi-query executed successfully. Rows returned: {len(rows)}"
@@ -226,13 +221,17 @@ class DatabaseAgent(AgentBase):
                 if query.strip().upper().startswith("SELECT"):
                     # Fetch results for SELECT queries
                     rows = cursor.fetchall()
-                    columns = [description[0] for description in cursor.description] if cursor.description else []
+                    columns = (
+                        [description[0] for description in cursor.description]
+                        if cursor.description
+                        else []
+                    )
 
                     # Format results
                     result_data = {
                         "columns": columns,
                         "rows": [dict(zip(columns, row)) for row in rows],
-                        "row_count": len(rows)
+                        "row_count": len(rows),
                     }
 
                     output = f"Query executed successfully. Rows returned: {len(rows)}"
@@ -243,18 +242,13 @@ class DatabaseAgent(AgentBase):
                     self.connection.commit()
                     output = f"Query executed successfully. Rows affected: {cursor.rowcount}"
 
-            return Result(
-                task_id=task.id,
-                success=True,
-                output=output,
-                error=None
-            )
+            return Result(task_id=task.id, success=True, output=output, error=None)
         except Exception as e:
             return Result(
                 task_id=task.id,
                 success=False,
                 output=None,
-                error=f"Query execution failed: {str(e)}"
+                error=f"Query execution failed: {str(e)}",
             )
 
     def _execute_migrate(self, task: Task) -> Result:
@@ -269,19 +263,14 @@ class DatabaseAgent(AgentBase):
                 task_id=task.id,
                 success=False,
                 output=None,
-                error=f"Migration directory does not exist: {migration_path}"
+                error=f"Migration directory does not exist: {migration_path}",
             )
 
         migration_files = list(migration_dir.glob("*.sql"))
         output = f"Found {len(migration_files)} migration files in {migration_path}"
 
         # Would execute migrations in real implementation
-        return Result(
-            task_id=task.id,
-            success=True,
-            output=output,
-            error=None
-        )
+        return Result(task_id=task.id, success=True, output=output, error=None)
 
     def _execute_schema(self, task: Task) -> Result:
         """Execute schema query."""
@@ -304,8 +293,9 @@ class DatabaseAgent(AgentBase):
                         "type": col[2],
                         "not_null": bool(col[3]),
                         "default": col[4],
-                        "primary_key": bool(col[5])
-                    } for col in columns
+                        "primary_key": bool(col[5]),
+                    }
+                    for col in columns
                 ]
 
                 output = f"Schema for table '{table_name}': {schema_info}"
@@ -314,7 +304,7 @@ class DatabaseAgent(AgentBase):
                     task_id=task.id,
                     success=False,
                     output=None,
-                    error=f"Failed to get schema for table {table_name}: {str(e)}"
+                    error=f"Failed to get schema for table {table_name}: {str(e)}",
                 )
         else:
             # Get all table names
@@ -323,12 +313,7 @@ class DatabaseAgent(AgentBase):
 
             output = f"Database contains {len(tables)} tables: {tables}"
 
-        return Result(
-            task_id=task.id,
-            success=True,
-            output=output,
-            error=None
-        )
+        return Result(task_id=task.id, success=True, output=output, error=None)
 
     def _execute_backup(self, task: Task) -> Result:
         """Execute database backup."""
@@ -344,12 +329,7 @@ class DatabaseAgent(AgentBase):
             # Create a simple backup command for external databases
             output = f"Backup command prepared for: {backup_path}"
 
-        return Result(
-            task_id=task.id,
-            success=True,
-            output=output,
-            error=None
-        )
+        return Result(task_id=task.id, success=True, output=output, error=None)
 
     def _execute_restore(self, task: Task) -> Result:
         """Execute database restore."""
@@ -361,12 +341,12 @@ class DatabaseAgent(AgentBase):
                 task_id=task.id,
                 success=False,
                 output=None,
-                error=f"Backup file does not exist: {backup_path}"
+                error=f"Backup file does not exist: {backup_path}",
             )
 
         # For SQLite, we can restore by reading the SQL file
-        if backup_file.suffix.lower() == '.sql':
-            with open(backup_file, 'r') as f:
+        if backup_file.suffix.lower() == ".sql":
+            with open(backup_file, "r") as f:
                 sql_script = f.read()
 
             if self.connection is not None:
@@ -379,12 +359,7 @@ class DatabaseAgent(AgentBase):
         else:
             output = f"Restore command prepared for: {backup_path}"
 
-        return Result(
-            task_id=task.id,
-            success=True,
-            output=output,
-            error=None
-        )
+        return Result(task_id=task.id, success=True, output=output, error=None)
 
 
 __all__ = ["DatabaseAgent"]

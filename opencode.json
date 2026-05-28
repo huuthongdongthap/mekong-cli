@@ -1,6 +1,30 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "mlx-local": {
+      "name": "MLX Local (Qwen3.6-35B)",
+      "options": {
+        "baseURL": "http://localhost:8000/v1",
+        "apiKey": "none"
+      },
+      "models": {
+        "qwen3.6-35b": {
+          "model": "qwen3.6-35b",
+          "name": "Qwen3.6 35B A3B (MLX 4bit)",
+          "contextLength": 32768,
+          "maxOutputTokens": 8192,
+          "supportsToolUse": true
+        }
+      }
+    }
+  },
+  "model": "mlx-local/qwen3.6-35b",
   "command": {
+    "4-project": {
+      "template": "Execute Mekong command /4-project: $ARGUMENTS. See ~/mekong-cli/.claude/commands/4-project.md for full instructions.",
+      "description": "T\u1ee9 \u0110\u1ea1i Chi\u1ebfn \u2014 4 projects parallel dispatch. Start master view, dispatch missions, monitor status.",
+      "agent": "general"
+    },
     "accounting-daily": {
       "template": "Execute Mekong command /accounting-daily: $ARGUMENTS. See ~/mekong-cli/.claude/commands/accounting-daily.md for full instructions.",
       "description": "Transaction review, categorize, reconcile, flag anomalies. 2 commands, ~8 min.",
@@ -96,6 +120,11 @@
       "description": "Backend DB task \u2014 schema change, migration, seed, verify in 10 min",
       "agent": "general"
     },
+    "bhxh": {
+      "template": "Execute Mekong command /bhxh: $ARGUMENTS. See ~/mekong-cli/.claude/commands/bhxh.md for full instructions.",
+      "description": "T\u1ea1o file khai BHXH/BHYT/BHTN m\u1eabu D02-TS. Offline, user t\u1ef1 upload l\u00ean bhxh.gov.vn.",
+      "agent": "general"
+    },
     "board-compliance": {
       "template": "Execute Mekong command /board-compliance: $ARGUMENTS. See ~/mekong-cli/.claude/commands/board-compliance.md for full instructions.",
       "description": "Committee composition tracking vs exchange rules",
@@ -126,9 +155,39 @@
       "description": "Unified bridge for all AgencyOS CLI tools",
       "agent": "general"
     },
+    "business-campaign-launch": {
+      "template": "Execute Mekong command /business-campaign-launch: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-campaign-launch.md for full instructions.",
+      "description": "Multi-channel marketing campaign \u2014 content, ads, email, social, SEO. 6 commands, ~35 min.",
+      "agent": "general"
+    },
+    "business-client-onboard": {
+      "template": "Execute Mekong command /business-client-onboard: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-client-onboard.md for full instructions.",
+      "description": "New client setup \u2014 contract, project setup, kickoff deck, schedule. 4 commands, ~15 min.",
+      "agent": "general"
+    },
+    "business-financial-close": {
+      "template": "Execute Mekong command /business-financial-close: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-financial-close.md for full instructions.",
+      "description": "Monthly/quarterly close \u2014 reconcile, report, forecast, tax prep. 5 commands, ~25 min.",
+      "agent": "general"
+    },
+    "business-hiring-sprint": {
+      "template": "Execute Mekong command /business-hiring-sprint: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-hiring-sprint.md for full instructions.",
+      "description": "End-to-end recruiting \u2014 JD, sourcing, interview kit, comp benchmarking. 4 commands, ~20 min.",
+      "agent": "general"
+    },
+    "business-quarterly-review": {
+      "template": "Execute Mekong command /business-quarterly-review: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-quarterly-review.md for full instructions.",
+      "description": "QBR across all departments \u2014 revenue, expenses, KPIs, team, forecast. 6 commands, ~30 min.",
+      "agent": "general"
+    },
     "business-report": {
       "template": "Execute Mekong command /business-report: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-report.md for full instructions.",
       "description": "Business performance report \u2014 revenue, growth, operational metrics, recommendations. 3 steps, ~20 min.",
+      "agent": "general"
+    },
+    "business-revenue-engine": {
+      "template": "Execute Mekong command /business-revenue-engine: $ARGUMENTS. See ~/mekong-cli/.claude/commands/business-revenue-engine.md for full instructions.",
+      "description": "Build complete revenue pipeline \u2014 leads, CRM, sales, invoicing, analytics. 7 commands, ~40 min.",
       "agent": "general"
     },
     "cdp-identity": {
@@ -149,6 +208,16 @@
     "cdp-segment": {
       "template": "Execute Mekong command /cdp-segment: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cdp-segment.md for full instructions.",
       "description": "Dynamic customer segmentation by behavior and value",
+      "agent": "general"
+    },
+    "ck-binh-phap": {
+      "template": "Execute Mekong command /ck-binh-phap: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ck-binh-phap.md for full instructions.",
+      "description": "\u2694\ufe0f Binh Ph\u00e1p - Strategic execution framework (plan \u2192 implement \u2192 verify \u2192 ship)",
+      "agent": "general"
+    },
+    "ck-claude-mem": {
+      "template": "Execute Mekong command /ck-claude-mem: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ck-claude-mem.md for full instructions.",
+      "description": "Manage claude-mem operations and memory context (requires claude-mem MCP)",
       "agent": "general"
     },
     "ck-marketing-ads": {
@@ -186,9 +255,19 @@
       "description": "Marketing Constitution \u2014 universal marketing command for all projects",
       "agent": "general"
     },
+    "ck-raas-flow": {
+      "template": "Execute Mekong command /ck-raas-flow: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ck-raas-flow.md for full instructions.",
+      "description": "RAAS Pipeline Status Dashboard \u2014 view progress across all projects in plans/",
+      "agent": "general"
+    },
     "ck-remember": {
       "template": "Execute Mekong command /ck-remember: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ck-remember.md for full instructions.",
       "description": "Search claude-mem for context about current work",
+      "agent": "general"
+    },
+    "ck-save": {
+      "template": "Execute Mekong command /ck-save: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ck-save.md for full instructions.",
+      "description": "Write an overview and save with claude-mem",
       "agent": "general"
     },
     "ck-techdebt": {
@@ -286,9 +365,29 @@
       "description": "Synergy tracking and integration milestones",
       "agent": "general"
     },
+    "cto-architect": {
+      "template": "Execute Mekong command /cto-architect: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-architect.md for full instructions.",
+      "description": "Architecture decision record (ADR). 5 credits, ~15 min.",
+      "agent": "general"
+    },
+    "cto-archive": {
+      "template": "Execute Mekong command /cto-archive: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-archive.md for full instructions.",
+      "description": "Archive project. 3 credits, ~10 min.",
+      "agent": "general"
+    },
+    "cto-budget": {
+      "template": "Execute Mekong command /cto-budget: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-budget.md for full instructions.",
+      "description": "MCU budget allocation within project. 3 credits, ~10 min.",
+      "agent": "general"
+    },
     "cto-dashboard": {
       "template": "Show CTO brain dashboard: ROI scores, active missions, learning state, workforce status.",
       "description": "CTO brain health dashboard \u2014 ROI scores, active missions, learning state",
+      "agent": "general"
+    },
+    "cto-deploy": {
+      "template": "Execute Mekong command /cto-deploy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-deploy.md for full instructions.",
+      "description": "Production deployment decision + execution. 5 credits, ~15 min.",
       "agent": "general"
     },
     "cto-health": {
@@ -296,14 +395,44 @@
       "description": "Run CTO health check dashboard \u2014 all subsystems in one view",
       "agent": "general"
     },
+    "cto-incident": {
+      "template": "Execute Mekong command /cto-incident: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-incident.md for full instructions.",
+      "description": "Incident response orchestration. 8 credits, ~20 min.",
+      "agent": "general"
+    },
     "cto-observability": {
       "template": "Execute Mekong command /cto-observability: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-observability.md for full instructions.",
       "description": "Full CTO observability dashboard \u2014 telemetry, anomalies, dispatch health",
       "agent": "general"
     },
+    "cto-onboard": {
+      "template": "Execute Mekong command /cto-onboard: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-onboard.md for full instructions.",
+      "description": "Onboard new project to OpenClaw. 8 credits, ~30 min.",
+      "agent": "general"
+    },
+    "cto-review": {
+      "template": "Execute Mekong command /cto-review: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-review.md for full instructions.",
+      "description": "Full project health review. 5 credits, ~20 min.",
+      "agent": "general"
+    },
+    "cto-roadmap": {
+      "template": "Execute Mekong command /cto-roadmap: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-roadmap.md for full instructions.",
+      "description": "Technical roadmap generation. 5 credits, ~20 min.",
+      "agent": "general"
+    },
+    "cto-scorecard": {
+      "template": "Execute Mekong command /cto-scorecard: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-scorecard.md for full instructions.",
+      "description": "CTO ROI scorecard for single project. 3 credits, ~10 min.",
+      "agent": "general"
+    },
     "cto-selftest": {
       "template": "Execute Mekong command /cto-selftest: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-selftest.md for full instructions.",
       "description": "Run all CTO factory tests \u2014 unit + integration + dry-run as health check",
+      "agent": "general"
+    },
+    "cto-team": {
+      "template": "Execute Mekong command /cto-team: $ARGUMENTS. See ~/mekong-cli/.claude/commands/cto-team.md for full instructions.",
+      "description": "Team capacity planning and task routing. 3 credits, ~10 min.",
       "agent": "general"
     },
     "cto-workforce": {
@@ -426,9 +555,29 @@
       "description": "Wireframe generation \u2014 user flows, screen layouts, interaction specs. 3 steps, ~20 min.",
       "agent": "general"
     },
+    "dev-audit": {
+      "template": "Execute Mekong command /dev-audit: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-audit.md for full instructions.",
+      "description": "Dev audit command. Delegates to worker level.",
+      "agent": "general"
+    },
     "dev-bug-sprint": {
       "template": "Fix bugs: $ARGUMENTS. Debug root cause \u2192 Apply minimal fix \u2192 Test \u2192 Repeat. 2 STRIKES & MAX per bug.",
       "description": "Bug sprint \u2014 debug, fix, test. Batch bug fixes in 15 min",
+      "agent": "general"
+    },
+    "dev-debug": {
+      "template": "Execute Mekong command /dev-debug: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-debug.md for full instructions.",
+      "description": "Dev debug command. Delegates to worker level.",
+      "agent": "general"
+    },
+    "dev-deploy": {
+      "template": "Execute Mekong command /dev-deploy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-deploy.md for full instructions.",
+      "description": "Dev deploy command. Delegates to worker level.",
+      "agent": "general"
+    },
+    "dev-design": {
+      "template": "Execute Mekong command /dev-design: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-design.md for full instructions.",
+      "description": "Dev design command. Delegates to worker level.",
       "agent": "general"
     },
     "dev-feature": {
@@ -439,6 +588,21 @@
     "dev-pr-review": {
       "template": "Execute Mekong command /dev-pr-review: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-pr-review.md for full instructions.",
       "description": "PR review \u2014 code review and security check in parallel, 10 min",
+      "agent": "general"
+    },
+    "dev-refactor": {
+      "template": "Execute Mekong command /dev-refactor: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-refactor.md for full instructions.",
+      "description": "Dev refactor command. Delegates to worker level.",
+      "agent": "general"
+    },
+    "dev-review": {
+      "template": "Execute Mekong command /dev-review: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-review.md for full instructions.",
+      "description": "Dev review command. Delegates to worker level.",
+      "agent": "general"
+    },
+    "dev-scaffold": {
+      "template": "Execute Mekong command /dev-scaffold: $ARGUMENTS. See ~/mekong-cli/.claude/commands/dev-scaffold.md for full instructions.",
+      "description": "Dev scaffold command. Delegates to worker level.",
       "agent": "general"
     },
     "devops-deploy-pipeline": {
@@ -489,6 +653,16 @@
     "eng-tech-debt": {
       "template": "Execute Mekong command /eng-tech-debt: $ARGUMENTS. See ~/mekong-cli/.claude/commands/eng-tech-debt.md for full instructions.",
       "description": "Audit \u2192 prioritize \u2192 refactor \u2192 test \u2192 verify tech debt",
+      "agent": "general"
+    },
+    "engineering-new-service": {
+      "template": "Execute Mekong command /engineering-new-service: $ARGUMENTS. See ~/mekong-cli/.claude/commands/engineering-new-service.md for full instructions.",
+      "description": "Scaffold \u2192 implement \u2192 test \u2192 deploy. New microservice from zero. 6 commands, ~45 min.",
+      "agent": "general"
+    },
+    "engineering-refactor": {
+      "template": "Execute Mekong command /engineering-refactor: $ARGUMENTS. See ~/mekong-cli/.claude/commands/engineering-refactor.md for full instructions.",
+      "description": "Audit \u2192 plan \u2192 refactor \u2192 test \u2192 verify. Safe large-scale refactoring. 5 commands, ~40 min.",
       "agent": "general"
     },
     "escalation-map": {
@@ -571,6 +745,16 @@
       "description": "Reserved instance management and rightsizing",
       "agent": "general"
     },
+    "founder-ipo": {
+      "template": "Execute Mekong command /founder-ipo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/founder-ipo.md for full instructions.",
+      "description": "18-month IPO readiness \u2014 audit, S-1, roadshow, day-of execution. 7 commands, ~60 min.",
+      "agent": "general"
+    },
+    "founder-negotiate": {
+      "template": "Execute Mekong command /founder-negotiate: $ARGUMENTS. See ~/mekong-cli/.claude/commands/founder-negotiate.md for full instructions.",
+      "description": "Analyze term sheet + model dilution + plan negotiation strategy. 4 commands, ~20 min.",
+      "agent": "general"
+    },
     "founder-okr": {
       "template": "Execute Mekong command /founder-okr: $ARGUMENTS. See ~/mekong-cli/.claude/commands/founder-okr.md for full instructions.",
       "description": "Founder OKR setting \u2014 vision alignment, quarterly objectives, key results, scoring. 3 steps, ~15 min.",
@@ -579,6 +763,16 @@
     "founder-pitch": {
       "template": "Execute Mekong command /founder-pitch: $ARGUMENTS. See ~/mekong-cli/.claude/commands/founder-pitch.md for full instructions.",
       "description": "Pitch deck creation \u2014 problem, solution, market, traction, financials, ask. 6 steps, ~35 min.",
+      "agent": "general"
+    },
+    "founder-raise": {
+      "template": "Execute Mekong command /founder-raise: $ARGUMENTS. See ~/mekong-cli/.claude/commands/founder-raise.md for full instructions.",
+      "description": "Complete fundraise preparation \u2014 from unit economics to investor targeting. 8 commands, ~45 min.",
+      "agent": "general"
+    },
+    "founder-validate": {
+      "template": "Execute Mekong command /founder-validate: $ARGUMENTS. See ~/mekong-cli/.claude/commands/founder-validate.md for full instructions.",
+      "description": "Validate business model before spending money \u2014 PMF, economics, market, moat. 5 commands, ~25 min.",
       "agent": "general"
     },
     "frontend-responsive-fix": {
@@ -609,6 +803,11 @@
     "gemini": {
       "template": "Execute Mekong command /gemini: $ARGUMENTS. See ~/mekong-cli/.claude/commands/gemini.md for full instructions.",
       "description": "Control Gemini CLI with rate limiting and retry logic",
+      "agent": "general"
+    },
+    "goals": {
+      "template": "Execute Mekong command /goals: $ARGUMENTS. See ~/mekong-cli/.claude/commands/goals.md for full instructions.",
+      "description": "Founder goals deep configuration \u2014 translate a goal into operating rules, Codex auto mode, metrics, and next actions. 3 credits, ~10 min.",
       "agent": "general"
     },
     "governance-disclosure": {
@@ -856,6 +1055,21 @@
       "description": "Internal wiki creation, organization, and search",
       "agent": "general"
     },
+    "ke-toan-vn": {
+      "template": "Execute Mekong command /ke-toan-vn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ke-toan-vn.md for full instructions.",
+      "description": "K\u1ebf to\u00e1n VN to\u00e0n di\u1ec7n: h\u00f3a \u0111\u01a1n, b\u00fat to\u00e1n, MISA, b\u00e1o c\u00e1o t\u00e0i ch\u00ednh. VAS compliant.",
+      "agent": "general"
+    },
+    "ke-toan": {
+      "template": "Execute Mekong command /ke-toan: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ke-toan.md for full instructions.",
+      "description": "K\u1ebf to\u00e1n VN: t\u1ea1o h\u00f3a \u0111\u01a1n \u0111i\u1ec7n t\u1eed, b\u00fat to\u00e1n VAS, nh\u1eadp MISA. 1 command, ~3 ph\u00fat.",
+      "agent": "general"
+    },
+    "kinh-doanh-vn": {
+      "template": "Execute Mekong command /kinh-doanh-vn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/kinh-doanh-vn.md for full instructions.",
+      "description": "Kinh doanh VN: CRM, \u0111\u01a1n h\u00e0ng, kh\u00e1ch h\u00e0ng, b\u00e1o c\u00e1o doanh s\u1ed1. SME focused.",
+      "agent": "general"
+    },
     "legal-compliance-check": {
       "template": "Execute Mekong command /legal-compliance-check: $ARGUMENTS. See ~/mekong-cli/.claude/commands/legal-compliance-check.md for full instructions.",
       "description": "Compliance check \u2014 privacy policy \u2192 terms \u2192 data handling \u2192 regulatory gaps",
@@ -901,6 +1115,11 @@
       "description": "SEO analysis \u2014 keyword research, competitor analysis, on-page audit, content gaps. 3 steps, ~20 min.",
       "agent": "general"
     },
+    "marketing-vn": {
+      "template": "Execute Mekong command /marketing-vn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/marketing-vn.md for full instructions.",
+      "description": "Marketing VN: Zalo content, Facebook ads, TikTok script, SEO ti\u1ebfng Vi\u1ec7t.",
+      "agent": "general"
+    },
     "match-founder-idea": {
       "template": "Execute Mekong command /match-founder-idea: $ARGUMENTS. See ~/mekong-cli/.claude/commands/match-founder-idea.md for full instructions.",
       "description": "AI-powered founder-idea matching \u2014 pair founders with validated opportunities. 1 command, ~8 min.",
@@ -909,6 +1128,11 @@
     "match-vc-startup": {
       "template": "Execute Mekong command /match-vc-startup: $ARGUMENTS. See ~/mekong-cli/.claude/commands/match-vc-startup.md for full instructions.",
       "description": "Match VC investors to portfolio company for follow-on/co-invest. 1 command, ~5 min.",
+      "agent": "general"
+    },
+    "mekong-cli": {
+      "template": "Execute Mekong command /mekong-cli: $ARGUMENTS. See ~/mekong-cli/.claude/commands/mekong-cli.md for full instructions.",
+      "description": "Configure Mekong CLI command defaults, provider policy, and autonomous execution mode. 3 credits, ~10 min.",
       "agent": "general"
     },
     "ml-cost": {
@@ -1021,14 +1245,39 @@
       "description": "OpenTelemetry distributed tracing setup and analysis",
       "agent": "general"
     },
+    "ops-disaster-recovery": {
+      "template": "Execute Mekong command /ops-disaster-recovery: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ops-disaster-recovery.md for full instructions.",
+      "description": "Backup \u2192 test restore \u2192 verify integrity \u2192 document. 3 commands, ~15 min.",
+      "agent": "general"
+    },
+    "ops-health-sweep": {
+      "template": "Execute Mekong command /ops-health-sweep: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ops-health-sweep.md for full instructions.",
+      "description": "System-wide health audit \u2014 services, security, performance, sync status. 5 commands, ~15 min.",
+      "agent": "general"
+    },
     "ops-health": {
       "template": "Execute Mekong command /ops-health: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ops-health.md for full instructions.",
       "description": "Operations health check \u2014 system status, capacity planning, bottleneck analysis. 3 steps, ~15 min.",
       "agent": "general"
     },
+    "ops-security-audit": {
+      "template": "Execute Mekong command /ops-security-audit: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ops-security-audit.md for full instructions.",
+      "description": "Dependency scan \u2192 code audit \u2192 config review \u2192 remediation plan. 3 commands, ~20 min.",
+      "agent": "general"
+    },
     "ops-status": {
       "template": "Execute Mekong command /ops-status: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ops-status.md for full instructions.",
       "description": "Operations status report \u2014 uptime, incidents, SLA compliance, team velocity. 2 steps, ~10 min.",
+      "agent": "general"
+    },
+    "ops-sync-all": {
+      "template": "Execute Mekong command /ops-sync-all: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ops-sync-all.md for full instructions.",
+      "description": "Sync everything in parallel \u2014 agents, skills, MCP, artifacts, rules. 6 commands, ~10 min.",
+      "agent": "general"
+    },
+    "opus-tomhum-orchestrator": {
+      "template": "Execute Mekong command /opus-tomhum-orchestrator: $ARGUMENTS. See ~/mekong-cli/.claude/commands/opus-tomhum-orchestrator.md for full instructions.",
+      "description": "Opus T\u00f4m H\u00f9m Team \u2014 Self-orchestrate as 5-department company. Builds full-stack code multi-threaded. 30+ credits, ~90 min.",
       "agent": "general"
     },
     "people-offboard": {
@@ -1039,6 +1288,11 @@
     "people-onboard": {
       "template": "Execute Mekong command /people-onboard: $ARGUMENTS. See ~/mekong-cli/.claude/commands/people-onboard.md for full instructions.",
       "description": "Welcome email, access setup, day-1 schedule. 2 commands, ~5 min.",
+      "agent": "general"
+    },
+    "phap-ly-vn": {
+      "template": "Execute Mekong command /phap-ly-vn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/phap-ly-vn.md for full instructions.",
+      "description": "Ph\u00e1p l\u00fd VN: h\u1ee3p \u0111\u1ed3ng, gi\u1ea5y ph\u00e9p, tu\u00e2n th\u1ee7, tranh ch\u1ea5p. SME & OPC focused.",
       "agent": "general"
     },
     "plan": {
@@ -1076,6 +1330,11 @@
       "description": "Competitive intelligence tracking",
       "agent": "general"
     },
+    "pm-delegate": {
+      "template": "Execute Mekong command /pm-delegate: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-delegate.md for full instructions.",
+      "description": "Break task and delegate to dev level. 3 credits, ~10 min.",
+      "agent": "general"
+    },
     "pm-feature-flag": {
       "template": "Execute Mekong command /pm-feature-flag: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-feature-flag.md for full instructions.",
       "description": "Progressive rollout and kill switches",
@@ -1086,14 +1345,49 @@
       "description": "User feedback collection routed to backlog",
       "agent": "general"
     },
+    "pm-milestone": {
+      "template": "Execute Mekong command /pm-milestone: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-milestone.md for full instructions.",
+      "description": "Milestone tracking and status. 2 credits, ~5 min.",
+      "agent": "general"
+    },
+    "pm-okr": {
+      "template": "Execute Mekong command /pm-okr: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-okr.md for full instructions.",
+      "description": "Set/review OKRs and key results. 3 credits, ~10 min.",
+      "agent": "general"
+    },
+    "pm-plan": {
+      "template": "Execute Mekong command /pm-plan: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-plan.md for full instructions.",
+      "description": "Create implementation plan with phases. 5 credits, ~15 min.",
+      "agent": "general"
+    },
     "pm-release-note": {
       "template": "Execute Mekong command /pm-release-note: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-release-note.md for full instructions.",
       "description": "Changelog generation and stakeholder communication",
       "agent": "general"
     },
+    "pm-retro": {
+      "template": "Execute Mekong command /pm-retro: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-retro.md for full instructions.",
+      "description": "Sprint retrospective. 3 credits, ~10 min.",
+      "agent": "general"
+    },
     "pm-roadmap": {
       "template": "Execute Mekong command /pm-roadmap: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-roadmap.md for full instructions.",
       "description": "Roadmap visibility and prioritization with RICE/ICE scoring",
+      "agent": "general"
+    },
+    "pm-scope": {
+      "template": "Execute Mekong command /pm-scope: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-scope.md for full instructions.",
+      "description": "Scope definition and boundary setting. 3 credits, ~10 min.",
+      "agent": "general"
+    },
+    "pm-sprint": {
+      "template": "Execute Mekong command /pm-sprint: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-sprint.md for full instructions.",
+      "description": "Sprint planning \u2014 backlog to sprint tasks. 3 credits, ~15 min.",
+      "agent": "general"
+    },
+    "pm-standup": {
+      "template": "Execute Mekong command /pm-standup: $ARGUMENTS. See ~/mekong-cli/.claude/commands/pm-standup.md for full instructions.",
+      "description": "Daily standup report. 1 credit, ~5 min.",
       "agent": "general"
     },
     "portfolio-create": {
@@ -1114,6 +1408,31 @@
     "prime": {
       "template": "Quick context load. Read CLAUDE.md + package.json + top-level dirs.",
       "description": "Quick prime \u2014 load essential project context (CLAUDE.md + package.json + dir tree) in under 5 seconds",
+      "agent": "general"
+    },
+    "product-competitive-intel": {
+      "template": "Execute Mekong command /product-competitive-intel: $ARGUMENTS. See ~/mekong-cli/.claude/commands/product-competitive-intel.md for full instructions.",
+      "description": "Market scan + competitor deep dive + positioning strategy. 4 commands, ~25 min.",
+      "agent": "general"
+    },
+    "product-discovery": {
+      "template": "Execute Mekong command /product-discovery: $ARGUMENTS. See ~/mekong-cli/.claude/commands/product-discovery.md for full instructions.",
+      "description": "Problem \u2192 persona \u2192 solution \u2192 validation. 5 commands, ~30 min.",
+      "agent": "general"
+    },
+    "product-launch-feature": {
+      "template": "Execute Mekong command /product-launch-feature: $ARGUMENTS. See ~/mekong-cli/.claude/commands/product-launch-feature.md for full instructions.",
+      "description": "Spec \u2192 build \u2192 test \u2192 ship \u2192 announce. 5 commands, ~40 min.",
+      "agent": "general"
+    },
+    "product-retrospective": {
+      "template": "Execute Mekong command /product-retrospective: $ARGUMENTS. See ~/mekong-cli/.claude/commands/product-retrospective.md for full instructions.",
+      "description": "Review sprint \u2192 gather feedback \u2192 improvement plan \u2192 next sprint prep. 3 commands, ~15 min.",
+      "agent": "general"
+    },
+    "product-sprint-plan": {
+      "template": "Execute Mekong command /product-sprint-plan: $ARGUMENTS. See ~/mekong-cli/.claude/commands/product-sprint-plan.md for full instructions.",
+      "description": "Backlog grooming \u2192 sprint scope \u2192 task breakdown \u2192 assignments. 4 commands, ~20 min.",
       "agent": "general"
     },
     "production-status": {
@@ -1296,6 +1615,11 @@
       "description": "Pipeline health, revenue tracking, weekly forecast and action items. 3 commands, ~10 min.",
       "agent": "general"
     },
+    "sdlc": {
+      "template": "Execute Mekong command /sdlc: $ARGUMENTS. See ~/mekong-cli/.claude/commands/sdlc.md for full instructions.",
+      "description": "4-phase AI-SDLC scaffold \u2014 Spec \u2192 Design \u2192 Code \u2192 Deploy. Run a feature through the full agentic lifecycle. ~30-90min total depending on feature scope.",
+      "agent": "general"
+    },
     "sdr-lead-qualify": {
       "template": "Execute Mekong command /sdr-lead-qualify: $ARGUMENTS. See ~/mekong-cli/.claude/commands/sdr-lead-qualify.md for full instructions.",
       "description": "Lead qualify & handoff \u2014 score lead then prep AE handoff brief. 2 commands, ~8 min.",
@@ -1391,6 +1715,16 @@
       "description": "SRE morning check \u2014 health, status, benchmark in parallel, 5 min",
       "agent": "general"
     },
+    "studio-allocate": {
+      "template": "Execute Mekong command /studio-allocate: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-allocate.md for full instructions.",
+      "description": "Reallocate MCU budget across projects. 3 credits, ~10 min.",
+      "agent": "general"
+    },
+    "studio-audit": {
+      "template": "Execute Mekong command /studio-audit: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-audit.md for full instructions.",
+      "description": "Full portfolio ROI audit across all projects. Delegates cto:review per project. 10 credits, ~60 min.",
+      "agent": "general"
+    },
     "studio-bootstrap": {
       "template": "Execute Mekong command /studio-bootstrap: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-bootstrap.md for full instructions.",
       "description": "Bootstrap venture studio \u2014 call mekong CLI engine. 1 command, ~15 min.",
@@ -1399,6 +1733,16 @@
     "studio-diligence-deep": {
       "template": "Execute Mekong command /studio-diligence-deep: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-diligence-deep.md for full instructions.",
       "description": "Deep due diligence \u2014 market + team + tech + financial + legal analysis. 5 parallel agents, ~25 min.",
+      "agent": "general"
+    },
+    "studio-divest": {
+      "template": "Execute Mekong command /studio-divest: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-divest.md for full instructions.",
+      "description": "Archive/sunset a portfolio project. 5 credits, ~15 min.",
+      "agent": "general"
+    },
+    "studio-invest": {
+      "template": "Execute Mekong command /studio-invest: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-invest.md for full instructions.",
+      "description": "Add new project to portfolio. 8 credits, ~30 min.",
       "agent": "general"
     },
     "studio-launch-full": {
@@ -1411,9 +1755,34 @@
       "description": "Daily studio ops \u2014 standup, tickets, invoices, metrics across all portfolio companies. 4 commands, ~10 min.",
       "agent": "general"
     },
+    "studio-portfolio": {
+      "template": "Execute Mekong command /studio-portfolio: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-portfolio.md for full instructions.",
+      "description": "Portfolio dashboard \u2014 P&L, MRR, runway. 5 credits, ~15 min.",
+      "agent": "general"
+    },
+    "studio-report": {
+      "template": "Execute Mekong command /studio-report: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-report.md for full instructions.",
+      "description": "Generate investor report (weekly/monthly). 5 credits, ~20 min.",
+      "agent": "general"
+    },
+    "studio-roi": {
+      "template": "Execute Mekong command /studio-roi: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-roi.md for full instructions.",
+      "description": "ROI scorecard across all projects. 3 credits, ~10 min.",
+      "agent": "general"
+    },
     "studio-sprint-weekly": {
       "template": "Execute Mekong command /studio-sprint-weekly: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-sprint-weekly.md for full instructions.",
       "description": "Weekly studio sprint \u2014 portfolio status, follow-ups, cross-portfolio insights, report. 5 commands, ~20 min.",
+      "agent": "general"
+    },
+    "studio-strategy": {
+      "template": "Execute Mekong command /studio-strategy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/studio-strategy.md for full instructions.",
+      "description": "Strategic planning session. 8 credits, ~30 min.",
+      "agent": "general"
+    },
+    "tai-chinh-vn": {
+      "template": "Execute Mekong command /tai-chinh-vn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/tai-chinh-vn.md for full instructions.",
+      "description": "T\u00e0i ch\u00ednh VN: d\u00f2ng ti\u1ec1n, \u0111\u1ecbnh gi\u00e1, vay v\u1ed1n, ph\u00e2n t\u00edch t\u00e0i ch\u00ednh. SME focused.",
       "agent": "general"
     },
     "tech-api-design": {
@@ -1461,6 +1830,11 @@
       "description": "Test generation \u2014 unit tests, integration tests, edge cases, coverage report. 3 steps, ~15 min.",
       "agent": "general"
     },
+    "thue-dnvn": {
+      "template": "Execute Mekong command /thue-dnvn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/thue-dnvn.md for full instructions.",
+      "description": "T\u00ednh thu\u1ebf VN: TNCN l\u0169y ti\u1ebfn, TNDN, GTGT, xu\u1ea5t file HTKK. Offline, kh\u00f4ng c\u1ea7n API.",
+      "agent": "general"
+    },
     "treasury-forecast": {
       "template": "Execute Mekong command /treasury-forecast: $ARGUMENTS. See ~/mekong-cli/.claude/commands/treasury-forecast.md for full instructions.",
       "description": "13-week rolling cash forecast",
@@ -1494,6 +1868,11 @@
     "ux-usability": {
       "template": "Execute Mekong command /ux-usability: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ux-usability.md for full instructions.",
       "description": "Usability test \u2014 test plan, task scenarios, findings, recommendations in 10 min",
+      "agent": "general"
+    },
+    "van-hanh-vn": {
+      "template": "Execute Mekong command /van-hanh-vn: $ARGUMENTS. See ~/mekong-cli/.claude/commands/van-hanh-vn.md for full instructions.",
+      "description": "V\u1eadn h\u00e0nh VN: nh\u00e2n s\u1ef1, BHXH, kho h\u00e0ng, l\u1ecbch l\u00e0m vi\u1ec7c. SME focused.",
       "agent": "general"
     },
     "vendor-assess": {
@@ -1554,6 +1933,16 @@
     "venture-void-substance": {
       "template": "Execute Mekong command /venture-void-substance: $ARGUMENTS. See ~/mekong-cli/.claude/commands/venture-void-substance.md for full instructions.",
       "description": "Void-substance analysis (\u865a\u5b9f) \u2014 find where competitors are hollow. 1 command, ~8 min.",
+      "agent": "general"
+    },
+    "vercel-debug": {
+      "template": "Execute Mekong command /vercel-debug: $ARGUMENTS. See ~/mekong-cli/.claude/commands/vercel-debug.md for full instructions.",
+      "description": "Debug Vercel CI/CD deployments \u2014 check status, fix errors, verify production GREEN",
+      "agent": "general"
+    },
+    "vietqr": {
+      "template": "Execute Mekong command /vietqr: $ARGUMENTS. See ~/mekong-cli/.claude/commands/vietqr.md for full instructions.",
+      "description": "T\u1ea1o QR code VietQR chu\u1ea9n VN cho thanh to\u00e1n ng\u00e2n h\u00e0ng. 40+ ng\u00e2n h\u00e0ng h\u1ed7 tr\u1ee3.",
       "agent": "general"
     },
     "worker-backup": {
@@ -1644,6 +2033,516 @@
     "writer-social-batch": {
       "template": "Execute Mekong command /writer-social-batch: $ARGUMENTS. See ~/mekong-cli/.claude/commands/writer-social-batch.md for full instructions.",
       "description": "Social batch \u2014 7-day posts + posting schedule in parallel. 2 commands, ~10 min.",
+      "agent": "general"
+    },
+    "zalo-oa": {
+      "template": "Execute Mekong command /zalo-oa: $ARGUMENTS. See ~/mekong-cli/.claude/commands/zalo-oa.md for full instructions.",
+      "description": "Zalo OA: vi\u1ebft caption VN, l\u00ean l\u1ecbch broadcast, ph\u00e2n t\u00edch followers. C\u1ea7n OA Access Token.",
+      "agent": "general"
+    },
+    "ci:ci-status": {
+      "template": "Execute Mekong command /ci:ci-status: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ci/ci-status.md for full instructions.",
+      "description": "Real-time GitHub Actions CI status check",
+      "agent": "general"
+    },
+    "ci:debugger": {
+      "template": "Execute Mekong command /ci:debugger: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ci/debugger.md for full instructions.",
+      "description": "CI/CD debugger - diagnose Vercel, GitHub, and Supabase issues",
+      "agent": "general"
+    },
+    "ci:deploy": {
+      "template": "Execute Mekong command /ci:deploy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ci/deploy.md for full instructions.",
+      "description": "Production deployment with safety checks",
+      "agent": "general"
+    },
+    "ci:run-ci": {
+      "template": "Execute Mekong command /ci:run-ci: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ci/run-ci.md for full instructions.",
+      "description": "Run CI pipeline locally before pushing",
+      "agent": "general"
+    },
+    "ci:supabase-sync": {
+      "template": "Execute Mekong command /ci:supabase-sync: $ARGUMENTS. See ~/mekong-cli/.claude/commands/ci/supabase-sync.md for full instructions.",
+      "description": "Supabase debugger - diagnose database and sync issues",
+      "agent": "general"
+    },
+    "code:check": {
+      "template": "Execute Mekong command /code:check: $ARGUMENTS. See ~/mekong-cli/.claude/commands/code/check.md for full instructions.",
+      "description": "Comprehensive code quality and security check",
+      "agent": "general"
+    },
+    "code:code-analysis": {
+      "template": "Execute Mekong command /code:code-analysis: $ARGUMENTS. See ~/mekong-cli/.claude/commands/code/code-analysis.md for full instructions.",
+      "description": "Deep code analysis with knowledge graph generation",
+      "agent": "general"
+    },
+    "code:optimize": {
+      "template": "Execute Mekong command /code:optimize: $ARGUMENTS. See ~/mekong-cli/.claude/commands/code/optimize.md for full instructions.",
+      "description": "Performance optimization suggestions with implementation",
+      "agent": "general"
+    },
+    "code:repro-issue": {
+      "template": "Execute Mekong command /code:repro-issue: $ARGUMENTS. See ~/mekong-cli/.claude/commands/code/repro-issue.md for full instructions.",
+      "description": "Create reproducible test case for GitHub issue",
+      "agent": "general"
+    },
+    "code:tdd-implement": {
+      "template": "Execute Mekong command /code:tdd-implement: $ARGUMENTS. See ~/mekong-cli/.claude/commands/code/tdd-implement.md for full instructions.",
+      "description": "Implement feature using TDD methodology",
+      "agent": "general"
+    },
+    "code:tdd": {
+      "template": "Execute Mekong command /code:tdd: $ARGUMENTS. See ~/mekong-cli/.claude/commands/code/tdd.md for full instructions.",
+      "description": "Guide development with Test-Driven Development principles",
+      "agent": "general"
+    },
+    "context:agency-prime": {
+      "template": "Execute Mekong command /context:agency-prime: $ARGUMENTS. See ~/mekong-cli/.claude/commands/context/agency-prime.md for full instructions.",
+      "description": "Load AgencyOS-specific context and Binh Ph\u00e1p framework",
+      "agent": "general"
+    },
+    "context:context-prime": {
+      "template": "Execute Mekong command /context:context-prime: $ARGUMENTS. See ~/mekong-cli/.claude/commands/context/context-prime.md for full instructions.",
+      "description": "Prime Claude with comprehensive project understanding",
+      "agent": "general"
+    },
+    "context:prime": {
+      "template": "Execute Mekong command /context:prime: $ARGUMENTS. See ~/mekong-cli/.claude/commands/context/prime.md for full instructions.",
+      "description": "Quick project prime - structure and key files",
+      "agent": "general"
+    },
+    "docs:add-changelog": {
+      "template": "Execute Mekong command /docs:add-changelog: $ARGUMENTS. See ~/mekong-cli/.claude/commands/docs/add-changelog.md for full instructions.",
+      "description": "Add entry to changelog following Keep a Changelog format",
+      "agent": "general"
+    },
+    "docs:create-docs": {
+      "template": "Execute Mekong command /docs:create-docs: $ARGUMENTS. See ~/mekong-cli/.claude/commands/docs/create-docs.md for full instructions.",
+      "description": "Generate comprehensive documentation for code",
+      "agent": "general"
+    },
+    "finance:payout": {
+      "template": "Execute Mekong command /finance:payout: $ARGUMENTS. See ~/mekong-cli/.claude/commands/finance/payout.md for full instructions.",
+      "description": "\ud83d\udcb8 Payout Command - R\u00fat ti\u1ec1n t\u1eeb Polar.sh v\u1ec1 PayPal/USD",
+      "agent": "general"
+    },
+    "git:analyze-issue": {
+      "template": "Execute Mekong command /git:analyze-issue: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/analyze-issue.md for full instructions.",
+      "description": "Create implementation specification from GitHub issue",
+      "agent": "general"
+    },
+    "git:commit-fast": {
+      "template": "Execute Mekong command /git:commit-fast: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/commit-fast.md for full instructions.",
+      "description": "Auto-select first commit suggestion and commit immediately",
+      "agent": "general"
+    },
+    "git:commit": {
+      "template": "Execute Mekong command /git:commit: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/commit.md for full instructions.",
+      "description": "Create git commit with conventional format and emoji",
+      "agent": "general"
+    },
+    "git:create-pr": {
+      "template": "Execute Mekong command /git:create-pr: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/create-pr.md for full instructions.",
+      "description": "Create branch, commit, and submit pull request",
+      "agent": "general"
+    },
+    "git:create-worktrees": {
+      "template": "Execute Mekong command /git:create-worktrees: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/create-worktrees.md for full instructions.",
+      "description": "Create git worktrees for all open PRs or specific branch",
+      "agent": "general"
+    },
+    "git:fix-issue": {
+      "template": "Execute Mekong command /git:fix-issue: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/fix-issue.md for full instructions.",
+      "description": "Analyze and fix a GitHub issue with structured approach",
+      "agent": "general"
+    },
+    "git:fix-pr": {
+      "template": "Execute Mekong command /git:fix-pr: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/fix-pr.md for full instructions.",
+      "description": "Address unresolved PR review comments",
+      "agent": "general"
+    },
+    "git:husky": {
+      "template": "Execute Mekong command /git:husky: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/husky.md for full instructions.",
+      "description": "Setup and manage Husky Git hooks",
+      "agent": "general"
+    },
+    "git:rebase": {
+      "template": "Execute Mekong command /git:rebase: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/rebase.md for full instructions.",
+      "description": "Interactive rebase helper with commit squashing",
+      "agent": "general"
+    },
+    "git:update-branch": {
+      "template": "Execute Mekong command /git:update-branch: $ARGUMENTS. See ~/mekong-cli/.claude/commands/git/update-branch.md for full instructions.",
+      "description": "Update branch name with proper prefix and format",
+      "agent": "general"
+    },
+    "legal:legal": {
+      "template": "Execute Mekong command /legal:legal: $ARGUMENTS. See ~/mekong-cli/.claude/commands/legal/legal.md for full instructions.",
+      "description": "\u2696\ufe0f Legal Command - Tu\u00e2n th\u1ee7 ph\u00e1p lu\u1eadt kinh doanh online",
+      "agent": "general"
+    },
+    "raas:audit": {
+      "template": "Execute Mekong command /raas:audit: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/audit.md for full instructions.",
+      "description": "Run comprehensive codebase or system audit. 1 command, ~30-60 min.",
+      "agent": "general"
+    },
+    "raas:backlog": {
+      "template": "Execute Mekong command /raas:backlog: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/backlog.md for full instructions.",
+      "description": "Manage and prioritize backlog. 1 command, ~15-20 min.",
+      "agent": "general"
+    },
+    "raas:cook": {
+      "template": "Execute Mekong command /raas:cook: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/cook.md for full instructions.",
+      "description": "Build/implement features end-to-end. 1 command, ~30-60 min.",
+      "agent": "general"
+    },
+    "raas:crm": {
+      "template": "Execute Mekong command /raas:crm: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/crm.md for full instructions.",
+      "description": "CRM operations and contact management. 1 command, ~15-20 min.",
+      "agent": "general"
+    },
+    "raas:debug": {
+      "template": "Execute Mekong command /raas:debug: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/debug.md for full instructions.",
+      "description": "Debug errors and issues. 1 command, ~15-30 min.",
+      "agent": "general"
+    },
+    "raas:deploy": {
+      "template": "Execute Mekong command /raas:deploy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/deploy.md for full instructions.",
+      "description": "Deploy to production \u2014 build, push, verify CI/CD, confirm green. Engineering deploy command.",
+      "agent": "general"
+    },
+    "raas:finance-budget-plan": {
+      "template": "Execute Mekong command /raas:finance-budget-plan: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/finance-budget-plan.md for full instructions.",
+      "description": "Create and manage budgets. 1 command, ~20-30 min.",
+      "agent": "general"
+    },
+    "raas:marketing-campaign-run": {
+      "template": "Execute Mekong command /raas:marketing-campaign-run: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/marketing-campaign-run.md for full instructions.",
+      "description": "Launch and monitor marketing campaigns. 1 command, ~30-45 min.",
+      "agent": "general"
+    },
+    "raas:ops-health-sweep": {
+      "template": "Execute Mekong command /raas:ops-health-sweep: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/ops-health-sweep.md for full instructions.",
+      "description": "Run operational health checks across systems. 1 command, ~15-20 min.",
+      "agent": "general"
+    },
+    "raas:outreach": {
+      "template": "Execute Mekong command /raas:outreach: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/outreach.md for full instructions.",
+      "description": "Run sales outreach campaigns. 1 command, ~20-30 min.",
+      "agent": "general"
+    },
+    "raas:pipeline": {
+      "template": "Execute Mekong command /raas:pipeline: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/pipeline.md for full instructions.",
+      "description": "Build and manage sales pipeline. 1 command, ~20-30 min.",
+      "agent": "general"
+    },
+    "raas:plan": {
+      "template": "Execute Mekong command /raas:plan: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/plan.md for full instructions.",
+      "description": "Create implementation plans with TODO tasks. 1 command, ~5-10 min.",
+      "agent": "general"
+    },
+    "raas:retro": {
+      "template": "Execute Mekong command /raas:retro: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/retro.md for full instructions.",
+      "description": "Run sprint retrospectives. 1 command, ~15-20 min.",
+      "agent": "general"
+    },
+    "raas:review": {
+      "template": "Execute Mekong command /raas:review: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/review.md for full instructions.",
+      "description": "Code review with scout-based edge case detection. 1 command, ~10-20 min.",
+      "agent": "general"
+    },
+    "raas:roadmap": {
+      "template": "Execute Mekong command /raas:roadmap: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/roadmap.md for full instructions.",
+      "description": "Create and manage product roadmap. 1 command, ~20-30 min.",
+      "agent": "general"
+    },
+    "raas:sales-pipeline-build": {
+      "template": "Execute Mekong command /raas:sales-pipeline-build: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/sales-pipeline-build.md for full instructions.",
+      "description": "Build and optimize sales pipeline. 1 command, ~30-45 min.",
+      "agent": "general"
+    },
+    "raas:security": {
+      "template": "Execute Mekong command /raas:security: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/security.md for full instructions.",
+      "description": "Security audit and hardening. 1 command, ~30-45 min.",
+      "agent": "general"
+    },
+    "raas:sprint": {
+      "template": "Execute Mekong command /raas:sprint: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/sprint.md for full instructions.",
+      "description": "Plan and execute sprints. 1 command, ~15-20 min.",
+      "agent": "general"
+    },
+    "raas:status": {
+      "template": "Execute Mekong command /raas:status: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/status.md for full instructions.",
+      "description": "Check system status and metrics. 1 command, ~5-10 min.",
+      "agent": "general"
+    },
+    "raas:test": {
+      "template": "Execute Mekong command /raas:test: $ARGUMENTS. See ~/mekong-cli/.claude/commands/raas/test.md for full instructions.",
+      "description": "Run tests and validate code quality. 1 command, ~10-20 min.",
+      "agent": "general"
+    },
+    "sdlc:code": {
+      "template": "Execute Mekong command /sdlc:code: $ARGUMENTS. See ~/mekong-cli/.claude/commands/sdlc/code.md for full instructions.",
+      "description": "SDLC phase 3 \u2014 Code: architecture \u2192 task backlog. Reads DESIGN_OUTPUT.md, scaffolds TASKS.todo, prints fullstack-developer agent prompt.",
+      "agent": "general"
+    },
+    "sdlc:deploy": {
+      "template": "Execute Mekong command /sdlc:deploy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/sdlc/deploy.md for full instructions.",
+      "description": "SDLC phase 4 \u2014 Deploy: verify gates \u2192 ship or hold. Queries GitHub Actions gates.yml, scaffolds DEPLOY_REPORT.md, prints tester agent prompt.",
+      "agent": "general"
+    },
+    "sdlc:design": {
+      "template": "Execute Mekong command /sdlc:design: $ARGUMENTS. See ~/mekong-cli/.claude/commands/sdlc/design.md for full instructions.",
+      "description": "SDLC phase 2 \u2014 Design: requirements \u2192 architecture. Reads SPEC_OUTPUT.md, scaffolds DESIGN_OUTPUT.md, prints architect agent prompt.",
+      "agent": "general"
+    },
+    "sdlc:spec": {
+      "template": "Execute Mekong command /sdlc:spec: $ARGUMENTS. See ~/mekong-cli/.claude/commands/sdlc/spec.md for full instructions.",
+      "description": "SDLC phase 1 \u2014 Spec: feature idea \u2192 requirements. Dispatches to `mekong spec new <feature>`. Scaffolds .mekong/SPEC_OUTPUT.md, prints planner agent prompt.",
+      "agent": "general"
+    },
+    "tasks:create-prd": {
+      "template": "Execute Mekong command /tasks:create-prd: $ARGUMENTS. See ~/mekong-cli/.claude/commands/tasks/create-prd.md for full instructions.",
+      "description": "Create Product Requirement Document",
+      "agent": "general"
+    },
+    "tasks:todo": {
+      "template": "Execute Mekong command /tasks:todo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/tasks/todo.md for full instructions.",
+      "description": "Manage project TODO items",
+      "agent": "general"
+    },
+    "trading:all": {
+      "template": "Execute Mekong command /trading:all: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/all.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 MASTER COMMAND \u2014 Orchestrate ALL 14 roles (C-Suite + Founder + Trader) in parallel, full system review",
+      "agent": "general"
+    },
+    "trading:auto": {
+      "template": "Execute Mekong command /trading:auto: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/auto.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Full trading pipeline (sequential) \u2014 AutonomyController-driven, single-pair focus",
+      "agent": "general"
+    },
+    "trading:backend": {
+      "template": "Execute Mekong command /trading:backend: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/backend.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Backend Engineer \u2014 core engine audit, architecture review, code quality, module ownership",
+      "agent": "general"
+    },
+    "trading:caio": {
+      "template": "Execute Mekong command /trading:caio: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/caio.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 CAIO AI Command \u2014 signal quality audit, self-learning review, model performance, strategy weight optimization",
+      "agent": "general"
+    },
+    "trading:cco": {
+      "template": "Execute Mekong command /trading:cco: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cco.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CCO Commercial Command \u2014 revenue tracking, sales pipeline, pricing strategy, B2B opportunities, MRR dashboard",
+      "agent": "general"
+    },
+    "trading:cdo": {
+      "template": "Execute Mekong command /trading:cdo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cdo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 CDO Data Command \u2014 data quality audit, price feed integrity, analytics pipeline, backtesting data, historical management",
+      "agent": "general"
+    },
+    "trading:ceo": {
+      "template": "Execute Mekong command /trading:ceo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/ceo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 CEO Strategic Command \u2014 full portfolio oversight, quarterly review, capital allocation, risk governance, exit strategy",
+      "agent": "general"
+    },
+    "trading:cfo": {
+      "template": "Execute Mekong command /trading:cfo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cfo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 CFO Financial Command \u2014 P&L tracking, fee analysis, tax optimization, financial modeling, cost dashboard",
+      "agent": "general"
+    },
+    "trading:chro": {
+      "template": "Execute Mekong command /trading:chro: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/chro.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CHRO Command \u2014 team building, contributor onboarding, hiring triggers, culture management",
+      "agent": "general"
+    },
+    "trading:cmo": {
+      "template": "Execute Mekong command /trading:cmo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cmo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 CMO Marketing Command \u2014 brand, community, content, growth, revenue, competitive analysis",
+      "agent": "general"
+    },
+    "trading:coo": {
+      "template": "Execute Mekong command /trading:coo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/coo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 COO Operations Command \u2014 system health, incident response, performance optimization, capacity planning",
+      "agent": "general"
+    },
+    "trading:cpo": {
+      "template": "Execute Mekong command /trading:cpo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cpo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 CPO Product Command \u2014 product roadmap, feature prioritization (ICE), release management, user feedback loop",
+      "agent": "general"
+    },
+    "trading:cso": {
+      "template": "Execute Mekong command /trading:cso: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cso.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 CSO Security Command \u2014 API key audit, exchange security, stealth risk, vulnerability scan, secrets detection",
+      "agent": "general"
+    },
+    "trading:cto": {
+      "template": "Execute Mekong command /trading:cto: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cto.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1 CTO Tech Command \u2014 architecture, code quality, tech debt, performance, infrastructure, testing strategy",
+      "agent": "general"
+    },
+    "trading:cxo": {
+      "template": "Execute Mekong command /trading:cxo: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cxo.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CXO Experience Command \u2014 trader UX audit, CLI usability, A2UI quality, onboarding flow",
+      "agent": "general"
+    },
+    "trading:data-eng": {
+      "template": "Execute Mekong command /trading:data-eng: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/data-eng.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Data Engineer \u2014 data pipeline health, ETL monitoring, feed ingestion, storage management",
+      "agent": "general"
+    },
+    "trading:exec-spec": {
+      "template": "Execute Mekong command /trading:exec-spec: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/exec-spec.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Execution Specialist \u2014 order routing, fill rate, slippage analysis, exchange health, stealth execution",
+      "agent": "general"
+    },
+    "trading:fin-analyst": {
+      "template": "Execute Mekong command /trading:fin-analyst: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/fin-analyst.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Financial Analyst \u2014 P&L attribution, per-strategy breakdown, cost modeling, break-even analysis",
+      "agent": "general"
+    },
+    "trading:founder": {
+      "template": "Execute Mekong command /trading:founder: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/founder.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 Founder Command \u2014 budget management, risk oversight, strategy lifecycle, scaling decisions, emergency protocols",
+      "agent": "general"
+    },
+    "trading:growth": {
+      "template": "Execute Mekong command /trading:growth: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/growth.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Growth Hacker \u2014 AARRR funnel optimization, growth experiments, viral loops, conversion analysis",
+      "agent": "general"
+    },
+    "trading:market-analyst": {
+      "template": "Execute Mekong command /trading:market-analyst: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/market-analyst.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Market Analyst \u2014 regime detection, macro analysis, sentiment scoring, market intelligence",
+      "agent": "general"
+    },
+    "trading:ml-eng": {
+      "template": "Execute Mekong command /trading:ml-eng: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/ml-eng.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 ML Engineer \u2014 self-learning loop, strategy weight optimization, signal model performance, feature engineering",
+      "agent": "general"
+    },
+    "trading:product-analyst": {
+      "template": "Execute Mekong command /trading:product-analyst: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/product-analyst.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Product Analyst \u2014 product metrics, feature adoption, user segmentation, impact analysis",
+      "agent": "general"
+    },
+    "trading:quant": {
+      "template": "Execute Mekong command /trading:quant: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/quant.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Quant Researcher \u2014 strategy discovery, backtest validation, alpha research, new signal candidates",
+      "agent": "general"
+    },
+    "trading:risk-analyst": {
+      "template": "Execute Mekong command /trading:risk-analyst: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/risk-analyst.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Risk Analyst \u2014 VaR modeling, correlation matrix, stress testing, Monte Carlo, portfolio risk",
+      "agent": "general"
+    },
+    "trading:sec-analyst": {
+      "template": "Execute Mekong command /trading:sec-analyst: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/sec-analyst.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Security Analyst \u2014 vulnerability scan, secrets detection, stealth module integrity, API key audit",
+      "agent": "general"
+    },
+    "trading:sre": {
+      "template": "Execute Mekong command /trading:sre: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/sre.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 SRE Engineer \u2014 uptime monitoring, auto-recovery, alerting, circuit breaker status, health endpoints",
+      "agent": "general"
+    },
+    "trading:auto:agi": {
+      "template": "Execute Mekong command /trading:auto:agi: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/auto/agi.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 AGI Trading \u2014 full autonomous loop, self-learning, auto-escalation, circuit breakers only safety",
+      "agent": "general"
+    },
+    "trading:auto:fast": {
+      "template": "Execute Mekong command /trading:auto:fast: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/auto/fast.md for full instructions.",
+      "description": "\u26a1 Quick trade analysis \u2014 scan + signal + risk in <1min, NO execution",
+      "agent": "general"
+    },
+    "trading:auto:parallel": {
+      "template": "Execute Mekong command /trading:auto:parallel: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/auto/parallel.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1 Deep Trading Pipeline \u2014 auto c\u00f3 ki\u1ec3m so\u00e1t, multi-pair parallel, AutonomyController-driven",
+      "agent": "general"
+    },
+    "trading:auto:stealth": {
+      "template": "Execute Mekong command /trading:auto:stealth: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/auto/stealth.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1\u26a1\u26a1 Phantom Stealth Arbitrage \u2014 \u1ea9n danh t\u00e0ng h\u00ecnh, multi-exchange arb, kh\u00f4ng b\u1ecb s\u00e0n ph\u00e1t hi\u1ec7n",
+      "agent": "general"
+    },
+    "trading:ceo:allocate": {
+      "template": "Execute Mekong command /trading:ceo:allocate: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/ceo/allocate.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CEO Capital Allocation \u2014 portfolio rebalancing, tier management, asset class optimization",
+      "agent": "general"
+    },
+    "trading:ceo:dashboard": {
+      "template": "Execute Mekong command /trading:ceo:dashboard: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/ceo/dashboard.md for full instructions.",
+      "description": "\u26a1\u26a1 CEO Dashboard \u2014 8 KPI metrics real-time, traffic light status",
+      "agent": "general"
+    },
+    "trading:ceo:risk": {
+      "template": "Execute Mekong command /trading:ceo:risk: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/ceo/risk.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CEO Risk Governance \u2014 risk appetite levels, audit, circuit breaker review, concentration analysis",
+      "agent": "general"
+    },
+    "trading:cmo:content": {
+      "template": "Execute Mekong command /trading:cmo:content: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cmo/content.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CMO Content Strategy \u2014 calendar planning, content creation, pillar balance, SEO optimization",
+      "agent": "general"
+    },
+    "trading:cmo:growth": {
+      "template": "Execute Mekong command /trading:cmo:growth: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cmo/growth.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 CMO Growth Metrics \u2014 AARRR funnel analysis, channel performance, WAT tracking, optimization",
+      "agent": "general"
+    },
+    "trading:cmo:launch": {
+      "template": "Execute Mekong command /trading:cmo:launch: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/cmo/launch.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 CMO Launch Playbook \u2014 Product Hunt, Hacker News, social media launch orchestration",
+      "agent": "general"
+    },
+    "trading:coo:health": {
+      "template": "Execute Mekong command /trading:coo:health: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/coo/health.md for full instructions.",
+      "description": "\u26a1\u26a1 COO Health Check \u2014 5-pillar system health, exchange/bot/strategy/infra/data status",
+      "agent": "general"
+    },
+    "trading:coo:incident": {
+      "template": "Execute Mekong command /trading:coo:incident: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/coo/incident.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 COO Incident Response \u2014 structured P0-P3 incident workflow, root cause, resolution, prevention",
+      "agent": "general"
+    },
+    "trading:coo:perf": {
+      "template": "Execute Mekong command /trading:coo:perf: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/coo/perf.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 COO Performance Analysis \u2014 execution metrics, strategy alpha, optimization recommendations",
+      "agent": "general"
+    },
+    "trading:founder:budget": {
+      "template": "Execute Mekong command /trading:founder:budget: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/founder/budget.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Founder Budget \u2014 5-tier allocation management, rebalancing triggers, P&L tracking per tier",
+      "agent": "general"
+    },
+    "trading:founder:emergency": {
+      "template": "Execute Mekong command /trading:founder:emergency: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/founder/emergency.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1\u26a1 Founder Emergency Protocols \u2014 Red/Orange/Yellow alerts, halt trading, capital preservation, recovery plan",
+      "agent": "general"
+    },
+    "trading:founder:scale": {
+      "template": "Execute Mekong command /trading:founder:scale: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/founder/scale.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Founder Scaling \u2014 milestone tracking, scale up/down decisions, budget progression, AGI/stealth enablement",
+      "agent": "general"
+    },
+    "trading:founder:strategy": {
+      "template": "Execute Mekong command /trading:founder:strategy: $ARGUMENTS. See ~/mekong-cli/.claude/commands/trading/founder/strategy.md for full instructions.",
+      "description": "\u26a1\u26a1\u26a1 Founder Strategy Lifecycle \u2014 promote/demote/kill strategies, phase transitions, weight optimization",
+      "agent": "general"
+    },
+    "utils:mermaid": {
+      "template": "Execute Mekong command /utils:mermaid: $ARGUMENTS. See ~/mekong-cli/.claude/commands/utils/mermaid.md for full instructions.",
+      "description": "Generate Mermaid diagrams from code or description",
+      "agent": "general"
+    },
+    "utils:refactor": {
+      "template": "Execute Mekong command /utils:refactor: $ARGUMENTS. See ~/mekong-cli/.claude/commands/utils/refactor.md for full instructions.",
+      "description": "Refactor file for better readability and performance",
+      "agent": "general"
+    },
+    "utils:search": {
+      "template": "Execute Mekong command /utils:search: $ARGUMENTS. See ~/mekong-cli/.claude/commands/utils/search.md for full instructions.",
+      "description": "Search codebase with smart filtering",
       "agent": "general"
     }
   }

@@ -232,15 +232,17 @@ class AnalyticsDashboard:
                 "quarter": sum(f["projected_total"] for f in forecast[:3]),
             },
             "health_indicators": {
-                "revenue_trend": "🟢 Growing"
-                if revenue_month["growth_percent"] > 0
-                else "🔴 Declining",
-                "client_health": "🟢 Healthy"
-                if client_overview.get("avg_health_score", 0) >= 80
-                else "🟡 Needs Attention",
-                "forecast_confidence": "🟢 High"
-                if forecast and forecast[0]["confidence"] >= 80
-                else "🟡 Medium",
+                "revenue_trend": (
+                    "🟢 Growing" if revenue_month["growth_percent"] > 0 else "🔴 Declining"
+                ),
+                "client_health": (
+                    "🟢 Healthy"
+                    if client_overview.get("avg_health_score", 0) >= 80
+                    else "🟡 Needs Attention"
+                ),
+                "forecast_confidence": (
+                    "🟢 High" if forecast and forecast[0]["confidence"] >= 80 else "🟡 Medium"
+                ),
             },
         }
 

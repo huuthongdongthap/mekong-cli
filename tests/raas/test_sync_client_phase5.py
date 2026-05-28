@@ -107,10 +107,22 @@ class TestSyncClientGetUsageSummary:
         client = SyncClient()
 
         # Mock telemetry to return metrics
-        client.telemetry.get_metrics = Mock(return_value=[
-            {"endpoint": "/api/test", "method": "POST", "payload_size": 100, "timestamp": "2024-01-01T10:00:00Z"},
-            {"endpoint": "/api/test", "method": "GET", "payload_size": 200, "timestamp": "2024-01-01T10:30:00Z"},
-        ])
+        client.telemetry.get_metrics = Mock(
+            return_value=[
+                {
+                    "endpoint": "/api/test",
+                    "method": "POST",
+                    "payload_size": 100,
+                    "timestamp": "2024-01-01T10:00:00Z",
+                },
+                {
+                    "endpoint": "/api/test",
+                    "method": "GET",
+                    "payload_size": 200,
+                    "timestamp": "2024-01-01T10:30:00Z",
+                },
+            ]
+        )
 
         summary = client.get_usage_summary()
 
@@ -171,9 +183,7 @@ class TestSyncClientSyncMetricsEncrypted:
 
     @patch("src.raas.sync_client.GatewayClient")
     @patch("src.raas.sync_client.RaasGateValidator")
-    def test_sync_metrics_encrypted_dry_run(
-        self, mock_validator_class, mock_gateway_class
-    ):
+    def test_sync_metrics_encrypted_dry_run(self, mock_validator_class, mock_gateway_class):
         """Test encrypted sync in dry run mode."""
         # Mock validator
         mock_validator = Mock()
@@ -187,9 +197,16 @@ class TestSyncClientSyncMetricsEncrypted:
 
         # Mock telemetry
         client = SyncClient()
-        client.telemetry.get_metrics = Mock(return_value=[
-            {"endpoint": "/api/test", "method": "POST", "payload_size": 100, "timestamp": "2024-01-01T10:00:00Z"},
-        ])
+        client.telemetry.get_metrics = Mock(
+            return_value=[
+                {
+                    "endpoint": "/api/test",
+                    "method": "POST",
+                    "payload_size": 100,
+                    "timestamp": "2024-01-01T10:00:00Z",
+                },
+            ]
+        )
 
         result = client.sync_metrics_encrypted(dry_run=True)
 
@@ -199,9 +216,7 @@ class TestSyncClientSyncMetricsEncrypted:
 
     @patch("src.raas.sync_client.GatewayClient")
     @patch("src.raas.sync_client.RaasGateValidator")
-    def test_sync_metrics_encrypted_invalid_license(
-        self, mock_validator_class, mock_gateway_class
-    ):
+    def test_sync_metrics_encrypted_invalid_license(self, mock_validator_class, mock_gateway_class):
         """Test encrypted sync with invalid license."""
         # Mock validator
         mock_validator = Mock()
@@ -217,9 +232,7 @@ class TestSyncClientSyncMetricsEncrypted:
 
     @patch("src.raas.sync_client.GatewayClient")
     @patch("src.raas.sync_client.RaasGateValidator")
-    def test_sync_metrics_encrypted_no_tenant(
-        self, mock_validator_class, mock_gateway_class
-    ):
+    def test_sync_metrics_encrypted_no_tenant(self, mock_validator_class, mock_gateway_class):
         """Test encrypted sync without tenant ID."""
         # Mock validator
         mock_validator = Mock()
@@ -308,16 +321,18 @@ class TestSyncClientPhase5Summary:
     def test_get_phase5_summary_with_metrics(self):
         """Test getting Phase 5 summary with metrics."""
         client = SyncClient()
-        client.telemetry.get_metrics = Mock(return_value=[
-            {
-                "endpoint": "/api/test",
-                "method": "POST",
-                "payload_size": 100,
-                "timestamp": "2024-01-01T10:00:00Z",
-                "input_tokens": 50,
-                "output_tokens": 25,
-            },
-        ])
+        client.telemetry.get_metrics = Mock(
+            return_value=[
+                {
+                    "endpoint": "/api/test",
+                    "method": "POST",
+                    "payload_size": 100,
+                    "timestamp": "2024-01-01T10:00:00Z",
+                    "input_tokens": 50,
+                    "output_tokens": 25,
+                },
+            ]
+        )
 
         summary = client._get_phase5_summary()
 

@@ -19,7 +19,12 @@ from .task_router import TaskRouter, Task, TaskPriority, TaskStatus
 from .dispatcher import Dispatcher, DispatchResult, LoadBalanceStrategy
 
 # Session 12: Jidoka Autonomous Response
-from .circuit_breaker import CircuitBreaker, CircuitBreakerRegistry, CircuitState, CircuitBreakerStats
+from .circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerRegistry,
+    CircuitState,
+    CircuitBreakerStats,
+)
 from .jidoka import JidokaMonitor, ErrorSeverity, ErrorPattern, JidokaEvent
 
 # Session 13: Learning Journal + Memory

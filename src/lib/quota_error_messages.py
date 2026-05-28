@@ -12,6 +12,7 @@ from dataclasses import dataclass
 @dataclass
 class QuotaErrorContext:
     """Context for formatting quota errors."""
+
     tier: str
     daily_used: int
     daily_limit: int
@@ -35,6 +36,7 @@ class QuotaWarningContext:
         command: Current command being executed
         threshold: Warning threshold (80 or 90)
     """
+
     tier: str
     daily_used: int
     daily_limit: int
@@ -347,10 +349,7 @@ def format_quota_error(ctx: QuotaErrorContext) -> str:
             "revoked": "This license has been revoked.",
         }.get(ctx.violation_type, "License validation failed.")
 
-        return LICENSE_ERROR_TEMPLATE.format(
-            message=message,
-            command=ctx.command
-        ).strip()
+        return LICENSE_ERROR_TEMPLATE.format(message=message, command=ctx.command).strip()
 
     # Get template for tier
     template = QUOTA_TEMPLATES.get(ctx.tier, QUOTA_TEMPLATES["free"])
@@ -438,10 +437,7 @@ def format_license_expired_with_renewal(expiry_date: str = "", renewal_url: str 
 
 
 def format_simple_error(
-    tier: str,
-    daily_used: int,
-    daily_limit: int,
-    retry_after_seconds: Optional[int] = None
+    tier: str, daily_used: int, daily_limit: int, retry_after_seconds: Optional[int] = None
 ) -> str:
     """Format a simple one-line error for quick display.
 

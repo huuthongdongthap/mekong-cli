@@ -114,11 +114,15 @@ class BillingService:
                 return True
             # Check if tier allows overage
             from src.raas.credit_rate_limiter import get_overage_config
+
             overage_cfg = get_overage_config(ledger.plan)
             if overage_cfg.allow_overage:
                 # Check max overage cap
                 current_overage = ledger.mcu_used - ledger.mcu_limit
-                if overage_cfg.max_overage_credits > 0 and current_overage >= overage_cfg.max_overage_credits:
+                if (
+                    overage_cfg.max_overage_credits > 0
+                    and current_overage >= overage_cfg.max_overage_credits
+                ):
                     return False  # Hit overage cap
                 return True  # Allow overage
             return False  # Hard block
@@ -140,6 +144,7 @@ class BillingService:
             # Track overage if usage exceeds limit
             if ledger.mcu_used > ledger.mcu_limit:
                 from src.raas.credit_rate_limiter import get_overage_config
+
                 overage_cfg = get_overage_config(ledger.plan)
                 if overage_cfg.allow_overage:
                     new_overage = ledger.mcu_used - ledger.mcu_limit

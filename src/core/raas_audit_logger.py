@@ -2,7 +2,7 @@
 RaaS Audit Logger — Compliance & Observability
 
 Posts audit events to RaaS Gateway:
-  POST https://raas.agencyos.network/v2/audit
+  POST https://api.cashclaw.cc/v2/audit
   Headers: Authorization: Bearer {mk_...}, X-JWT-Attribution: {jwt}
   Payload: {
     "project": "mekong-cli",
@@ -95,13 +95,13 @@ class RAASAuditLogger:
     - Full interaction tracing for --raas-debug
 
     Environment variables:
-    - RAAS_GATEWAY_URL: Gateway endpoint (default: https://raas.agencyos.network)
+    - RAAS_GATEWAY_URL: Gateway endpoint (default: https://api.cashclaw.cc)
     - RAAS_LICENSE_KEY: mk_ API key for authentication
     - RAAS_DEBUG: Enable debug tracing (default: False)
     - GITHUB_SHA: Commit SHA for audit events
     """
 
-    DEFAULT_GATEWAY_URL = "https://raas.agencyos.network"
+    DEFAULT_GATEWAY_URL = "https://api.cashclaw.cc"
     AUDIT_ENDPOINT = "/v2/audit"
 
     def __init__(
@@ -118,9 +118,7 @@ class RAASAuditLogger:
             auth_client: Optional auth client instance
             debug_mode: Enable debug tracing
         """
-        self.gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL
-        )
+        self.gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL)
         self.auth = auth_client or get_auth_client()
         self.debug_mode = debug_mode or os.getenv("RAAS_DEBUG", "false").lower() == "true"
         self._trace_log: List[RaaSInteractionTrace] = []
@@ -211,7 +209,9 @@ class RAASAuditLogger:
         start = time.perf_counter()
 
         headers, tenant = self._get_auth_headers()  # noqa: F841 (used in trace)
-        payload, tenant_id = self._build_payload(event, commit_sha, session_id, metadata)  # noqa: F841 (tenant_id used)
+        payload, tenant_id = self._build_payload(
+            event, commit_sha, session_id, metadata
+        )  # noqa: F841 (tenant_id used)
 
         trace = RaaSInteractionTrace(
             timestamp=datetime.now(timezone.utc).isoformat(),

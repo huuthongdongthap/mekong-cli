@@ -72,6 +72,7 @@ class StripeReconciliationAdapter:
 
         try:
             import stripe
+
             stripe.api_key = self._api_key
             self._stripe = stripe
             self._initialized = True
@@ -126,27 +127,29 @@ class StripeReconciliationAdapter:
 
             invoice_data = []
             for invoice in invoices.data:
-                invoice_data.append({
-                    "id": invoice.id,
-                    "invoice_pdf": invoice.invoice_pdf,
-                    "hosted_invoice_url": invoice.hosted_invoice_url,
-                    "amount_due": invoice.amount_due / 100,  # Convert cents to dollars
-                    "amount_paid": invoice.amount_paid / 100,
-                    "status": invoice.status,
-                    "created": datetime.fromtimestamp(invoice.created),
-                    "period_start": datetime.fromtimestamp(invoice.period_start),
-                    "period_end": datetime.fromtimestamp(invoice.period_end),
-                    "line_items": [
-                        {
-                            "description": item.description,
-                            "amount": item.amount / 100 if item.amount else 0,
-                            "quantity": item.quantity,
-                            "unit_amount": item.unit_amount / 100 if item.unit_amount else None,
-                            "type": item.type,
-                        }
-                        for item in invoice.lines.data
-                    ],
-                })
+                invoice_data.append(
+                    {
+                        "id": invoice.id,
+                        "invoice_pdf": invoice.invoice_pdf,
+                        "hosted_invoice_url": invoice.hosted_invoice_url,
+                        "amount_due": invoice.amount_due / 100,  # Convert cents to dollars
+                        "amount_paid": invoice.amount_paid / 100,
+                        "status": invoice.status,
+                        "created": datetime.fromtimestamp(invoice.created),
+                        "period_start": datetime.fromtimestamp(invoice.period_start),
+                        "period_end": datetime.fromtimestamp(invoice.period_end),
+                        "line_items": [
+                            {
+                                "description": item.description,
+                                "amount": item.amount / 100 if item.amount else 0,
+                                "quantity": item.quantity,
+                                "unit_amount": item.unit_amount / 100 if item.unit_amount else None,
+                                "type": item.type,
+                            }
+                            for item in invoice.lines.data
+                        ],
+                    }
+                )
 
             logger.info(f"Found {len(invoice_data)} invoices for {customer_email}")
             return invoice_data
@@ -311,6 +314,7 @@ class NightlyReconciliationService:
             ReconciliationReport
         """
         import time
+
         start_time = time.time()
 
         if audit_date is None:
@@ -379,8 +383,7 @@ class NightlyReconciliationService:
         # Calculate totals
         total_variance = sum(d.variance for d in discrepancies)
         critical_count = sum(
-            1 for d in discrepancies
-            if d.variance_percent > 10  # >10% variance is critical
+            1 for d in discrepancies if d.variance_percent > 10  # >10% variance is critical
         )
 
         duration = time.time() - start_time
@@ -422,10 +425,7 @@ class NightlyReconciliationService:
         results = await service.run_daily_reconciliation(audit_date=audit_date)
 
         # Find result for this license
-        result = next(
-            (r for r in results if r.license_key == license_key),
-            None
-        )
+        result = next((r for r in results if r.license_key == license_key), None)
 
         if not result:
             # Create a default matched result
@@ -667,7 +667,9 @@ async def main_async(dry_run: bool = False, audit_date: Optional[str] = None) ->
 
     # Exit with error if critical discrepancies
     if report.critical_count > 0:
-        console.print(f"\n[bold red]⚠ {report.critical_count} critical discrepancies require attention[/bold red]")
+        console.print(
+            f"\n[bold red]⚠ {report.critical_count} critical discrepancies require attention[/bold red]"
+        )
         raise SystemExit(1)
 
 

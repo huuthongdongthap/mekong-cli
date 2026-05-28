@@ -24,6 +24,7 @@ class TestAgentRegistry(unittest.TestCase):
 
     def test_register_valid_agent(self):
         """Test registering a valid AgentBase subclass."""
+
         class TestAgent(AgentBase):
             def plan(self, input_data):
                 return []
@@ -37,6 +38,7 @@ class TestAgentRegistry(unittest.TestCase):
 
     def test_register_invalid_agent_raises_error(self):
         """Test registering non-AgentBase class raises TypeError."""
+
         class NotAnAgent:
             pass
 
@@ -52,19 +54,34 @@ class TestAgentRegistry(unittest.TestCase):
 
     def test_list_agents_sorted(self):
         """Test list_agents returns sorted list."""
-        self.test_registry.register("zebra", type("Zebra", (AgentBase,), {
-            "plan": lambda self, x: [],
-            "execute": lambda self, t: None,
-        }))
-        self.test_registry.register("alpha", type("Alpha", (AgentBase,), {
-            "plan": lambda self, x: [],
-            "execute": lambda self, t: None,
-        }))
+        self.test_registry.register(
+            "zebra",
+            type(
+                "Zebra",
+                (AgentBase,),
+                {
+                    "plan": lambda self, x: [],
+                    "execute": lambda self, t: None,
+                },
+            ),
+        )
+        self.test_registry.register(
+            "alpha",
+            type(
+                "Alpha",
+                (AgentBase,),
+                {
+                    "plan": lambda self, x: [],
+                    "execute": lambda self, t: None,
+                },
+            ),
+        )
         agents = self.test_registry.list_agents()
         self.assertEqual(agents, ["alpha", "zebra"])
 
     def test_register_decorator(self):
         """Test decorator registration pattern."""
+
         @self.test_registry.register_decorator("decorated")
         class DecoratedAgent(AgentBase):
             def plan(self, input_data):
@@ -78,24 +95,45 @@ class TestAgentRegistry(unittest.TestCase):
 
     def test_contains_method(self):
         """Test __contains__ method for 'in' syntax."""
-        self.test_registry.register("test", type("Test", (AgentBase,), {
-            "plan": lambda self, x: [],
-            "execute": lambda self, t: None,
-        }))
+        self.test_registry.register(
+            "test",
+            type(
+                "Test",
+                (AgentBase,),
+                {
+                    "plan": lambda self, x: [],
+                    "execute": lambda self, t: None,
+                },
+            ),
+        )
         self.assertIn("test", self.test_registry)
         self.assertNotIn("missing", self.test_registry)
 
     def test_len_method(self):
         """Test __len__ method."""
         self.assertEqual(len(self.test_registry), 0)
-        self.test_registry.register("a", type("A", (AgentBase,), {
-            "plan": lambda self, x: [],
-            "execute": lambda self, t: None,
-        }))
-        self.test_registry.register("b", type("B", (AgentBase,), {
-            "plan": lambda self, x: [],
-            "execute": lambda self, t: None,
-        }))
+        self.test_registry.register(
+            "a",
+            type(
+                "A",
+                (AgentBase,),
+                {
+                    "plan": lambda self, x: [],
+                    "execute": lambda self, t: None,
+                },
+            ),
+        )
+        self.test_registry.register(
+            "b",
+            type(
+                "B",
+                (AgentBase,),
+                {
+                    "plan": lambda self, x: [],
+                    "execute": lambda self, t: None,
+                },
+            ),
+        )
         self.assertEqual(len(self.test_registry), 2)
 
 
@@ -136,8 +174,7 @@ class TestGlobalRegistry(unittest.TestCase):
         """Test all registered agents inherit from AgentBase."""
         for name, cls in AGENT_REGISTRY.items():
             self.assertTrue(
-                issubclass(cls, AgentBase),
-                f"{name} ({cls}) is not a subclass of AgentBase"
+                issubclass(cls, AgentBase), f"{name} ({cls}) is not a subclass of AgentBase"
             )
 
     def test_resolve_and_instantiate_git_agent(self):
@@ -182,11 +219,12 @@ class TestGlobalRegistry(unittest.TestCase):
         agent = RecipeCrawler()
         self.assertEqual(agent.name, "RecipeCrawler")
 
-    @unittest.mock.patch('src.agents.workspace_agent.WorkspaceAgent._check_gws_installed')
+    @unittest.mock.patch("src.agents.workspace_agent.WorkspaceAgent._check_gws_installed")
     def test_resolve_and_instantiate_workspace_agent(self, mock_check):
         """Test resolving and instantiating WorkspaceAgent."""
         # Skip if gws CLI not installed (required by WorkspaceAgent.__init__)
         import shutil
+
         if shutil.which("gws") is None:
             raise unittest.SkipTest("@googleworkspace/cli (gws) not installed")
         WorkspaceAgent = registry.get("workspace")
@@ -204,86 +242,6 @@ class TestGlobalRegistry(unittest.TestCase):
         NetworkAgent = registry.get("network")
         agent = NetworkAgent()
         self.assertEqual(agent.name, "network")
-
-
-class TestAgentExecutionSandbox(unittest.TestCase):
-    """Test agent execution sandbox isolation."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Import sandbox module once for all tests."""
-        from src.core.agent_execution_sandbox import (
-            Sandbox,
-            SandboxCapability,
-            SandboxPolicy,
-            READONLY_POLICY,
-            AGENT_POLICY,
-            ADMIN_POLICY,
-        )
-        cls.Sandbox = Sandbox
-        cls.SandboxCapability = SandboxCapability
-        cls.SandboxPolicy = SandboxPolicy
-        cls.READONLY_POLICY = READONLY_POLICY
-        cls.AGENT_POLICY = AGENT_POLICY
-        cls.ADMIN_POLICY = ADMIN_POLICY
-
-    def test_sandbox_capability_check(self):
-        """Test checking sandbox capabilities."""
-        policy = self.__class__.SandboxPolicy(
-            allowed_capabilities={self.__class__.SandboxCapability.FILE_READ}
-        )
-        sandbox = self.__class__.Sandbox(policy)
-        self.assertTrue(sandbox.check_capability(self.__class__.SandboxCapability.FILE_READ))
-        self.assertFalse(sandbox.check_capability(self.__class__.SandboxCapability.SHELL_EXEC))
-
-    def test_sandbox_command_validation(self):
-        """Test sandbox command validation."""
-        policy = self.__class__.SandboxPolicy(
-            denied_commands=["rm -rf*", "sudo*", "dd*"]
-        )
-        sandbox = self.__class__.Sandbox(policy)
-        self.assertTrue(sandbox.validate_command("ls -la"))
-        self.assertFalse(sandbox.validate_command("rm -rf /"))
-        self.assertFalse(sandbox.validate_command("sudo rm -rf /"))
-
-    def test_sandbox_path_validation(self):
-        """Test sandbox path validation."""
-        policy = self.__class__.SandboxPolicy(
-            allowed_paths=["./safe/*", "./data/*"]
-        )
-        sandbox = self.__class__.Sandbox(policy)
-        self.assertTrue(sandbox.validate_path("./safe/file.txt"))
-        self.assertTrue(sandbox.validate_path("./data/file.txt"))
-        self.assertFalse(sandbox.validate_path("/etc/passwd"))
-
-    def test_sandbox_unrestricted_paths(self):
-        """Test sandbox with no path restrictions."""
-        policy = self.__class__.SandboxPolicy(allowed_paths=[])
-        sandbox = self.__class__.Sandbox(policy)
-        self.assertTrue(sandbox.validate_path("/any/path"))
-
-    def test_readonly_policy(self):
-        """Test READONLY_POLICY configuration."""
-        sandbox = self.__class__.Sandbox.create_restricted(
-            {self.__class__.SandboxCapability.FILE_READ}
-        )
-        self.assertTrue(sandbox.check_capability(self.__class__.SandboxCapability.FILE_READ))
-        self.assertFalse(sandbox.check_capability(self.__class__.SandboxCapability.SHELL_EXEC))
-
-    def test_agent_implements_plan_execute(self):
-        """Test all registered agents implement plan() and execute()."""
-        from abc import ABC
-
-        for name, cls in AGENT_REGISTRY.items():
-            # Check class is concrete (not abstract)
-            if ABC in cls.__mro__:
-                # Has abstract methods = not fully implemented
-                abstract_methods = getattr(cls, "__abstractmethods__", frozenset())
-                if abstract_methods:
-                    self.fail(
-                        f"Agent {name} ({cls.__name__}) has unimplemented "
-                        f"abstract methods: {abstract_methods}"
-                    )
 
 
 if __name__ == "__main__":

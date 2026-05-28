@@ -70,18 +70,13 @@ class DeviceCertificate:
     def private_key(self) -> ec.EllipticCurvePrivateKey:
         """Load private key from PEM bytes."""
         return serialization.load_pem_private_key(
-            self.private_key_pem,
-            password=None,
-            backend=default_backend()
+            self.private_key_pem, password=None, backend=default_backend()
         )
 
     @property
     def public_key(self) -> ec.EllipticCurvePublicKey:
         """Load public key from PEM bytes."""
-        return serialization.load_pem_public_key(
-            self.public_key_pem,
-            backend=default_backend()
-        )
+        return serialization.load_pem_public_key(self.public_key_pem, backend=default_backend())
 
     @property
     def is_valid(self) -> bool:
@@ -137,10 +132,7 @@ class DeviceCertificate:
         Returns:
             ECDSA signature in DER format
         """
-        return self.private_key.sign(
-            data,
-            ec.ECDSA(hashes.SHA256())
-        )
+        return self.private_key.sign(data, ec.ECDSA(hashes.SHA256()))
 
     @staticmethod
     def verify_signature(public_key_pem: bytes, data: bytes, signature: bytes) -> bool:
@@ -157,14 +149,9 @@ class DeviceCertificate:
         """
         try:
             public_key = serialization.load_pem_public_key(
-                public_key_pem,
-                backend=default_backend()
+                public_key_pem, backend=default_backend()
             )
-            public_key.verify(
-                signature,
-                data,
-                ec.ECDSA(hashes.SHA256())
-            )
+            public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
             return True
         except Exception as e:
             logger.debug("Certificate signature verification failed: %s", e)
@@ -175,7 +162,7 @@ class DeviceCertificate:
         cls,
         device_fingerprint: Optional[str] = None,
         valid_days: int = 30,
-        certificate_id: Optional[str] = None
+        certificate_id: Optional[str] = None,
     ) -> "DeviceCertificate":
         """
         Generate a new device certificate.
@@ -204,16 +191,18 @@ class DeviceCertificate:
         private_key_pem = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.NoEncryption(),
         )
 
         public_key_pem = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
 
         # Generate serial number (random 160-bit integer, max 2^159 for X.509)
-        serial_number = int.from_bytes(os.urandom(19), byteorder='big') | (1 << 152)  # Ensure 159 bits
+        serial_number = int.from_bytes(os.urandom(19), byteorder="big") | (
+            1 << 152
+        )  # Ensure 159 bits
 
         # Calculate validity dates
         now = datetime.now(timezone.utc)
@@ -253,10 +242,9 @@ class DeviceCertificate:
             try:
                 mac = uuid.getnode()
                 if mac:
-                    mac_address = ':'.join([
-                        f'{(mac >> elements) & 0xff:02x}'
-                        for elements in range(0, 48, 8)
-                    ])
+                    mac_address = ":".join(
+                        [f"{(mac >> elements) & 0xff:02x}" for elements in range(0, 48, 8)]
+                    )
                     break
             except Exception as e:
                 logger.debug("MAC address retrieval attempt failed: %s", e)
@@ -275,9 +263,7 @@ class DeviceCertificate:
         return fingerprint_hash
 
     def build_x509_certificate(
-        self,
-        subject_name: Optional[str] = None,
-        issuer_name: Optional[str] = None
+        self, subject_name: Optional[str] = None, issuer_name: Optional[str] = None
     ) -> bytes:
         """
         Build X.509 certificate in PEM format.
@@ -296,12 +282,10 @@ class DeviceCertificate:
 
         # Build certificate
         builder = CertificateBuilder()
-        builder = builder.subject_name(Name([
-            NameAttribute(ObjectIdentifier("2.5.4.3"), subject)  # Common Name
-        ]))
-        builder = builder.issuer_name(Name([
-            NameAttribute(ObjectIdentifier("2.5.4.3"), issuer)
-        ]))
+        builder = builder.subject_name(
+            Name([NameAttribute(ObjectIdentifier("2.5.4.3"), subject)])  # Common Name
+        )
+        builder = builder.issuer_name(Name([NameAttribute(ObjectIdentifier("2.5.4.3"), issuer)]))
         builder = builder.public_key(self.public_key)
         builder = builder.serial_number(self.serial_number)
         builder = builder.not_valid_before(self.valid_from)
@@ -309,15 +293,12 @@ class DeviceCertificate:
 
         # Add subject alternative name using proper extension wrapper
         builder = builder.add_extension(
-            SubjectAlternativeName([DNSName(f"device-{short_id}.mekong.local")]),
-            critical=False
+            SubjectAlternativeName([DNSName(f"device-{short_id}.mekong.local")]), critical=False
         )
 
         # Sign certificate with private key
         certificate = builder.sign(
-            private_key=self.private_key,
-            algorithm=hashes.SHA256(),
-            backend=default_backend()
+            private_key=self.private_key, algorithm=hashes.SHA256(), backend=default_backend()
         )
 
         # Serialize to PEM
@@ -343,16 +324,11 @@ class CertificateSigner:
         """
         if ca_private_key_pem:
             self.ca_private_key = serialization.load_pem_private_key(
-                ca_private_key_pem,
-                password=None,
-                backend=default_backend()
+                ca_private_key_pem, password=None, backend=default_backend()
             )
         else:
             # Generate ephemeral CA key for self-signing
-            self.ca_private_key = ec.generate_private_key(
-                ec.SECP256R1(),
-                default_backend()
-            )
+            self.ca_private_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
 
         self.ca_public_key = self.ca_private_key.public_key()
 
@@ -367,13 +343,12 @@ class CertificateSigner:
             Signature bytes (ECDSA P-256 in DER format)
         """
         # Create data to sign: certificate_id + device_id + serial + validity
-        data_to_sign = f"{cert.certificate_id}:{cert.device_id}:{cert.serial_number}:{cert.valid_until.isoformat()}".encode("utf-8")
+        data_to_sign = f"{cert.certificate_id}:{cert.device_id}:{cert.serial_number}:{cert.valid_until.isoformat()}".encode(
+            "utf-8"
+        )
 
         # Sign with CA key
-        signature = self.ca_private_key.sign(
-            data_to_sign,
-            ec.ECDSA(hashes.SHA256())
-        )
+        signature = self.ca_private_key.sign(data_to_sign, ec.ECDSA(hashes.SHA256()))
 
         return signature
 
@@ -388,14 +363,12 @@ class CertificateSigner:
         Returns:
             True if signature is valid
         """
-        data_to_sign = f"{cert.certificate_id}:{cert.device_id}:{cert.serial_number}:{cert.valid_until.isoformat()}".encode("utf-8")
+        data_to_sign = f"{cert.certificate_id}:{cert.device_id}:{cert.serial_number}:{cert.valid_until.isoformat()}".encode(
+            "utf-8"
+        )
 
         try:
-            self.ca_public_key.verify(
-                signature,
-                data_to_sign,
-                ec.ECDSA(hashes.SHA256())
-            )
+            self.ca_public_key.verify(signature, data_to_sign, ec.ECDSA(hashes.SHA256()))
             return True
         except Exception as e:
             logger.debug("CA certificate signature verification failed: %s", e)
@@ -403,8 +376,7 @@ class CertificateSigner:
 
 
 def generate_device_certificate(
-    device_fingerprint: Optional[str] = None,
-    valid_days: int = 30
+    device_fingerprint: Optional[str] = None, valid_days: int = 30
 ) -> Tuple[DeviceCertificate, bytes]:
     """
     Convenience function to generate and sign a device certificate.
@@ -417,10 +389,7 @@ def generate_device_certificate(
         Tuple of (DeviceCertificate, signature)
     """
     # Generate certificate
-    cert = DeviceCertificate.generate(
-        device_fingerprint=device_fingerprint,
-        valid_days=valid_days
-    )
+    cert = DeviceCertificate.generate(device_fingerprint=device_fingerprint, valid_days=valid_days)
 
     # Sign certificate
     signer = CertificateSigner()

@@ -36,7 +36,7 @@ def sync_service(test_db_path):
     """Create BillingSyncService instance for testing."""
     config = SyncConfig(
         db_path=test_db_path,
-        gateway_url="https://raas.agencyos.network/v2/usage",
+        gateway_url="https://api.cashclaw.cc/v2/usage",
         api_key="mk_test_key_12345",
         batch_size=10,
         max_retries=3,
@@ -193,15 +193,26 @@ class TestDatabaseOperations:
 
         # Insert test records
         for record in sample_records:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                     endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                record.event_id, record.event_type, record.tenant_id, record.timestamp,
-                record.endpoint, record.model, record.input_tokens, record.output_tokens,
-                record.duration_ms, json.dumps(record.metadata), 0
-            ))
+            """,
+                (
+                    record.event_id,
+                    record.event_type,
+                    record.tenant_id,
+                    record.timestamp,
+                    record.endpoint,
+                    record.model,
+                    record.input_tokens,
+                    record.output_tokens,
+                    record.duration_ms,
+                    json.dumps(record.metadata),
+                    0,
+                ),
+            )
         conn.commit()
 
         # Fetch unsynced
@@ -213,15 +224,26 @@ class TestDatabaseOperations:
         conn = sync_service._get_connection()
 
         for record in sample_records:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                     endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                record.event_id, record.event_type, record.tenant_id, record.timestamp,
-                record.endpoint, record.model, record.input_tokens, record.output_tokens,
-                record.duration_ms, json.dumps(record.metadata), 0
-            ))
+            """,
+                (
+                    record.event_id,
+                    record.event_type,
+                    record.tenant_id,
+                    record.timestamp,
+                    record.endpoint,
+                    record.model,
+                    record.input_tokens,
+                    record.output_tokens,
+                    record.duration_ms,
+                    json.dumps(record.metadata),
+                    0,
+                ),
+            )
         conn.commit()
 
         records = sync_service.fetch_unsynced_records(limit=1)
@@ -233,15 +255,26 @@ class TestDatabaseOperations:
 
         # Insert record
         record = sample_records[0]
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                 endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            record.event_id, record.event_type, record.tenant_id, record.timestamp,
-            record.endpoint, record.model, record.input_tokens, record.output_tokens,
-            record.duration_ms, json.dumps(record.metadata), 0
-        ))
+        """,
+            (
+                record.event_id,
+                record.event_type,
+                record.tenant_id,
+                record.timestamp,
+                record.endpoint,
+                record.model,
+                record.input_tokens,
+                record.output_tokens,
+                record.duration_ms,
+                json.dumps(record.metadata),
+                0,
+            ),
+        )
         conn.commit()
 
         # Mark as synced
@@ -260,15 +293,26 @@ class TestDatabaseOperations:
         conn = sync_service._get_connection()
 
         record = sample_records[0]
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                 endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            record.event_id, record.event_type, record.tenant_id, record.timestamp,
-            record.endpoint, record.model, record.input_tokens, record.output_tokens,
-            record.duration_ms, json.dumps(record.metadata), 0
-        ))
+        """,
+            (
+                record.event_id,
+                record.event_type,
+                record.tenant_id,
+                record.timestamp,
+                record.endpoint,
+                record.model,
+                record.input_tokens,
+                record.output_tokens,
+                record.duration_ms,
+                json.dumps(record.metadata),
+                0,
+            ),
+        )
         conn.commit()
 
         # Mark as failed
@@ -276,8 +320,7 @@ class TestDatabaseOperations:
 
         # Verify
         cursor = conn.execute(
-            "SELECT sync_attempts, last_sync_error FROM usage_records WHERE id = ?",
-            (record.id,)
+            "SELECT sync_attempts, last_sync_error FROM usage_records WHERE id = ?", (record.id,)
         )
         row = cursor.fetchone()
         assert row["sync_attempts"] >= 1
@@ -301,7 +344,7 @@ class TestRetryLogic:
         backoff = sync_service._calculate_backoff(10)  # 0.01 * 2^10 = 10.24
         assert backoff == 0.1  # Capped at max
 
-    @patch('httpx.Client')
+    @patch("httpx.Client")
     def test_retry_on_server_error(self, mock_client_class, sync_service):
         """Should retry on 5xx errors."""
         mock_response = MagicMock()
@@ -323,7 +366,7 @@ class TestRetryLogic:
         assert mock_client.post.call_count == 3
         assert success is False
 
-    @patch('httpx.Client')
+    @patch("httpx.Client")
     def test_no_retry_on_client_error(self, mock_client_class, sync_service):
         """Should NOT retry on 4xx errors."""
         mock_response = MagicMock()
@@ -345,7 +388,7 @@ class TestRetryLogic:
         assert mock_client.post.call_count == 1
         assert success is False
 
-    @patch('httpx.Client')
+    @patch("httpx.Client")
     def test_success_on_first_try(self, mock_client_class, sync_service):
         """Should return immediately on success."""
         mock_response = MagicMock()
@@ -372,7 +415,7 @@ class TestRetryLogic:
 class TestSyncToGateway:
     """Test full sync workflow."""
 
-    @patch.object(BillingSyncService, 'send_to_gateway')
+    @patch.object(BillingSyncService, "send_to_gateway")
     def test_successful_sync(self, mock_send, sync_service, sample_records):
         """Should sync records successfully."""
         # Mock successful send
@@ -381,15 +424,26 @@ class TestSyncToGateway:
         # Insert records
         conn = sync_service._get_connection()
         for record in sample_records:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                     endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                record.event_id, record.event_type, record.tenant_id, record.timestamp,
-                record.endpoint, record.model, record.input_tokens, record.output_tokens,
-                record.duration_ms, json.dumps(record.metadata), 0
-            ))
+            """,
+                (
+                    record.event_id,
+                    record.event_type,
+                    record.tenant_id,
+                    record.timestamp,
+                    record.endpoint,
+                    record.model,
+                    record.input_tokens,
+                    record.output_tokens,
+                    record.duration_ms,
+                    json.dumps(record.metadata),
+                    0,
+                ),
+            )
         conn.commit()
 
         # Sync
@@ -400,7 +454,7 @@ class TestSyncToGateway:
         assert result.records_failed == 0
         assert result.error is None
 
-    @patch.object(BillingSyncService, 'send_to_gateway')
+    @patch.object(BillingSyncService, "send_to_gateway")
     def test_failed_sync(self, mock_send, sync_service, sample_records):
         """Should handle sync failure."""
         # Mock failed send
@@ -409,15 +463,26 @@ class TestSyncToGateway:
         # Insert records
         conn = sync_service._get_connection()
         for record in sample_records:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                     endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                record.event_id, record.event_type, record.tenant_id, record.timestamp,
-                record.endpoint, record.model, record.input_tokens, record.output_tokens,
-                record.duration_ms, json.dumps(record.metadata), 0
-            ))
+            """,
+                (
+                    record.event_id,
+                    record.event_type,
+                    record.tenant_id,
+                    record.timestamp,
+                    record.endpoint,
+                    record.model,
+                    record.input_tokens,
+                    record.output_tokens,
+                    record.duration_ms,
+                    json.dumps(record.metadata),
+                    0,
+                ),
+            )
         conn.commit()
 
         # Sync
@@ -452,8 +517,7 @@ class TestSyncHistory:
 
         conn = sync_service._get_connection()
         cursor = conn.execute(
-            "SELECT * FROM sync_history WHERE idempotency_key = ?",
-            ("mk_idem_test",)
+            "SELECT * FROM sync_history WHERE idempotency_key = ?", ("mk_idem_test",)
         )
         row = cursor.fetchone()
 
@@ -468,15 +532,26 @@ class TestSyncHistory:
         conn = sync_service._get_connection()
         for i, record in enumerate(sample_records):
             synced = 1 if i == 0 else 0
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO usage_records (event_id, event_type, tenant_id, timestamp,
                     endpoint, model, input_tokens, output_tokens, duration_ms, metadata, synced)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                record.event_id, record.event_type, record.tenant_id, record.timestamp,
-                record.endpoint, record.model, record.input_tokens, record.output_tokens,
-                record.duration_ms, json.dumps(record.metadata), synced
-            ))
+            """,
+                (
+                    record.event_id,
+                    record.event_type,
+                    record.tenant_id,
+                    record.timestamp,
+                    record.endpoint,
+                    record.model,
+                    record.input_tokens,
+                    record.output_tokens,
+                    record.duration_ms,
+                    json.dumps(record.metadata),
+                    synced,
+                ),
+            )
         conn.commit()
 
         status = sync_service.get_sync_status()
@@ -547,8 +622,7 @@ class TestEdgeCases:
 
         conn = sync_service._get_connection()
         cursor = conn.execute(
-            "SELECT * FROM sync_history WHERE idempotency_key = ?",
-            ("mk_idem_test2",)
+            "SELECT * FROM sync_history WHERE idempotency_key = ?", ("mk_idem_test2",)
         )
         row = cursor.fetchone()
 

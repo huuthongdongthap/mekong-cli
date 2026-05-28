@@ -8,6 +8,7 @@ alias mekong='bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
 alias mekong-claude='MEKONG_TOOL=claude bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
 alias mekong-gemini='MEKONG_TOOL=gemini bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
 alias mekong-opencode='MEKONG_TOOL=opencode bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
+alias mekong-codex='codex --ask-for-approval never --sandbox workspace-write -C $MEKONG_ROOT'
 alias mekong-aider='MEKONG_TOOL=aider bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
 
 # Model shortcuts (Claude Max subscription — 20x rate, no API key)
@@ -24,26 +25,9 @@ alias mekong-local='python3 $MEKONG_ROOT/src/daemon/agent_loop.py'
 # RaaS Gateway bridge
 alias mekong-raas='bash $MEKONG_ROOT/scripts/raas-bridge.sh'
 
-# Qwopus Worker (Local M1 Max MLX — FREE, 24/7)
-alias claude-qwopus='CLAUDE_CONFIG_DIR=~/.claude-qwopus claude'
-alias mekong-qwopus='CLAUDE_CONFIG_DIR=~/.claude-qwopus MEKONG_TOOL=claude bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
-alias start-qwopus='bash $MEKONG_ROOT/scripts/start-qwopus-worker.sh'
-
-# DashScope Singapore (Qwen 3.6-Plus — FREE quota, 90 days)
-alias claude-dashscope='CLAUDE_CONFIG_DIR=~/.claude-dashscope claude'
-alias mekong-dashscope='CLAUDE_CONFIG_DIR=~/.claude-dashscope MEKONG_TOOL=claude bash $MEKONG_ROOT/scripts/mekong-wrapper.sh'
-
-# Multi-Profile Login Menu
-alias mekong-login='bash $MEKONG_ROOT/scripts/mekong-login.sh'
-
-# Claude Subscription Account Profiles
-alias claude-sub1='CLAUDE_CONFIG_DIR=~/.claude-sub1 claude'   # phanhuuthong.mekong@gmail.com
-alias claude-sub2='CLAUDE_CONFIG_DIR=~/.claude-sub2 claude'   # huuthong.dongthap@gmail.com
-
 # Quick
-alias mek='mekong' mkc='mekong-claude' mkg='mekong-gemini' mkq='mekong-qwen'
-alias mekong-cto='bash $MEKONG_ROOT/scripts/cto-worker.sh'
-alias cto-worker='bash $MEKONG_ROOT/scripts/cto-worker.sh'
+alias mek='mekong' mkc='mekong-claude' mkg='mekong-gemini' mkq='mekong-qwen' mkx='mekong-codex'
+alias mekong-cto='bash $MEKONG_ROOT/cto-daemon.sh'
 alias mekong-health='bash $MEKONG_ROOT/scripts/cto-health-check.sh'
 
 # Completion
@@ -54,27 +38,4 @@ _mekong_comp() {
 }
 complete -F _mekong_comp mekong mekong-claude mekong-gemini mekong-opencode mekong-aider mek 2>/dev/null
 
-# OpenCode CLI — deep Mekong integration (global commands at ~/.config/opencode/)
-alias oc='opencode'
-alias oc-fnb='opencode ~/mekong-cli/FnB-Container-Caffe'
-alias oc-book='opencode ~/mekong-cli/BookScout'
-alias oc-sophia='opencode ~/mekong-cli/sophia-ai-factory'
-alias oc-mekong='opencode ~/mekong-cli'
-alias oc-sync='bash $MEKONG_ROOT/scripts/sync-commands.sh --all'
-
-# oc <project> — quick open any mekong sub-project in opencode
-oc-project() {
-  local proj="$1"
-  if [ -d "$MEKONG_ROOT/$proj" ]; then
-    opencode "$MEKONG_ROOT/$proj"
-  else
-    echo "❌ Project not found: $MEKONG_ROOT/$proj"
-    echo "Available:" && ls -d "$MEKONG_ROOT"/*/ 2>/dev/null | sed "s|$MEKONG_ROOT/||;s|/||" | grep -v node_modules | column
-  fi
-}
-
-# Auto-sync commands to global config on shell load (background, non-blocking)
-( bash "$MEKONG_ROOT/scripts/sync-commands.sh" --global >/dev/null 2>&1 & )
-
 echo "🏯 Mekong CLI loaded. $(source $MEKONG_ROOT/mekong/adapters/registry.sh 2>/dev/null && echo "Tools: $(list_available_tools)" || echo "")"
-

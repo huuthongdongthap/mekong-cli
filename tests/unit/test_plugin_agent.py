@@ -365,12 +365,14 @@ class TestPluginAgentListPlugins:
     def test_list_plugins_formats_output(self, agent: PluginAgent) -> None:
         """Test list plugins formats output correctly."""
         # Install plugins
-        agent._write_registry({
-            "plugins": {
-                "plugin-a": {"version": "1.0.0"},
-                "plugin-b": {"version": "2.5.0"},
+        agent._write_registry(
+            {
+                "plugins": {
+                    "plugin-a": {"version": "1.0.0"},
+                    "plugin-b": {"version": "2.5.0"},
+                }
             }
-        })
+        )
 
         task = Task(id="list_plugins", description="List", input={})
         result = agent._list_plugins(task)
@@ -471,11 +473,13 @@ class TestPluginAgentUpdatePlugin:
 
     def test_update_plugin_updates_version(self, agent: PluginAgent) -> None:
         """Test update changes plugin version."""
-        agent._write_registry({
-            "plugins": {
-                "outdated": {"version": "0.1.0"},
+        agent._write_registry(
+            {
+                "plugins": {
+                    "outdated": {"version": "0.1.0"},
+                }
             }
-        })
+        )
 
         task = Task(
             id="update_plugin",
@@ -490,12 +494,14 @@ class TestPluginAgentUpdatePlugin:
 
     def test_update_all_updates_all_plugins(self, agent: PluginAgent) -> None:
         """Test update all updates every plugin."""
-        agent._write_registry({
-            "plugins": {
-                "plugin-a": {"version": "0.1.0"},
-                "plugin-b": {"version": "0.2.0"},
+        agent._write_registry(
+            {
+                "plugins": {
+                    "plugin-a": {"version": "0.1.0"},
+                    "plugin-b": {"version": "0.2.0"},
+                }
             }
-        })
+        )
 
         task = Task(
             id="update_plugin",
@@ -624,33 +630,41 @@ class TestPluginAgentEdgeCases:
     def test_remove_then_install_again(self, agent: PluginAgent) -> None:
         """Test removing then reinstalling same plugin."""
         # Install
-        agent.execute(Task(
-            id="install_plugin",
-            description="Install",
-            input={"plugin": "test-plugin"},
-        ))
+        agent.execute(
+            Task(
+                id="install_plugin",
+                description="Install",
+                input={"plugin": "test-plugin"},
+            )
+        )
         # Remove
-        agent.execute(Task(
-            id="remove_plugin",
-            description="Remove",
-            input={"plugin": "test-plugin"},
-        ))
+        agent.execute(
+            Task(
+                id="remove_plugin",
+                description="Remove",
+                input={"plugin": "test-plugin"},
+            )
+        )
         # Install again - should succeed
-        result = agent.execute(Task(
-            id="install_plugin",
-            description="Install",
-            input={"plugin": "test-plugin"},
-        ))
+        result = agent.execute(
+            Task(
+                id="install_plugin",
+                description="Install",
+                input={"plugin": "test-plugin"},
+            )
+        )
         assert result.success is True
 
     def test_update_preserves_other_plugins(self, agent: PluginAgent) -> None:
         """Test update only changes target plugin."""
-        agent._write_registry({
-            "plugins": {
-                "plugin-a": {"version": "0.1.0"},
-                "plugin-b": {"version": "0.2.0"},
+        agent._write_registry(
+            {
+                "plugins": {
+                    "plugin-a": {"version": "0.1.0"},
+                    "plugin-b": {"version": "0.2.0"},
+                }
             }
-        })
+        )
 
         task = Task(
             id="update_plugin",
@@ -665,12 +679,14 @@ class TestPluginAgentEdgeCases:
 
     def test_list_plugins_with_special_characters(self, agent: PluginAgent) -> None:
         """Test listing plugins with special characters in names."""
-        agent._write_registry({
-            "plugins": {
-                "@scope/plugin-name": {"version": "1.0.0"},
-                "plugin_with_underscore": {"version": "2.0.0"},
+        agent._write_registry(
+            {
+                "plugins": {
+                    "@scope/plugin-name": {"version": "1.0.0"},
+                    "plugin_with_underscore": {"version": "2.0.0"},
+                }
             }
-        })
+        )
 
         task = Task(id="list_plugins", description="List", input={})
         result = agent._list_plugins(task)
@@ -746,19 +762,23 @@ class TestPluginAgentEdgeCases:
         """Test removing all plugins one by one."""
         # Install multiple
         for name in ["a", "b", "c"]:
-            agent.execute(Task(
-                id="install_plugin",
-                description="Install",
-                input={"plugin": name},
-            ))
+            agent.execute(
+                Task(
+                    id="install_plugin",
+                    description="Install",
+                    input={"plugin": name},
+                )
+            )
 
         # Remove all
         for name in ["a", "b", "c"]:
-            result = agent.execute(Task(
-                id="remove_plugin",
-                description="Remove",
-                input={"plugin": name},
-            ))
+            result = agent.execute(
+                Task(
+                    id="remove_plugin",
+                    description="Remove",
+                    input={"plugin": name},
+                )
+            )
             assert result.success is True
 
         # Verify empty
@@ -768,18 +788,22 @@ class TestPluginAgentEdgeCases:
     def test_update_nonexistent_after_installs(self, agent: PluginAgent) -> None:
         """Test update nonexistent plugin after some installs."""
         # Install one plugin
-        agent.execute(Task(
-            id="install_plugin",
-            description="Install",
-            input={"plugin": "existing"},
-        ))
+        agent.execute(
+            Task(
+                id="install_plugin",
+                description="Install",
+                input={"plugin": "existing"},
+            )
+        )
 
         # Try update nonexistent
-        result = agent.execute(Task(
-            id="update_plugin",
-            description="Update",
-            input={"plugin": "ghost-plugin"},
-        ))
+        result = agent.execute(
+            Task(
+                id="update_plugin",
+                description="Update",
+                input={"plugin": "ghost-plugin"},
+            )
+        )
         assert result.success is False
         assert "not installed" in result.error
 

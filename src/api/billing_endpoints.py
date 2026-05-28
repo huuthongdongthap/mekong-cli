@@ -240,7 +240,11 @@ async def submit_batch_billing(
                 category="usage",
                 metric=e["metric"],
                 value=e["value"],
-                timestamp=e["timestamp"].timestamp() if isinstance(e["timestamp"], datetime) else e["timestamp"],
+                timestamp=(
+                    e["timestamp"].timestamp()
+                    if isinstance(e["timestamp"], datetime)
+                    else e["timestamp"]
+                ),
                 metadata=e.get("metadata", {}),
             )
             for e in events
@@ -333,8 +337,16 @@ async def get_billing_period(
     return BillingPeriodResponse(
         period_id=period["id"],
         license_key=period["license_key"],
-        start_date=period["start_date"].isoformat() if isinstance(period["start_date"], date) else str(period["start_date"]),
-        end_date=period["end_date"].isoformat() if isinstance(period["end_date"], date) else str(period["end_date"]),
+        start_date=(
+            period["start_date"].isoformat()
+            if isinstance(period["start_date"], date)
+            else str(period["start_date"])
+        ),
+        end_date=(
+            period["end_date"].isoformat()
+            if isinstance(period["end_date"], date)
+            else str(period["end_date"])
+        ),
         status=period["status"],
         total_amount=str(period["total_amount"]),
         base_fee=str(period["base_fee"]),
@@ -514,9 +526,7 @@ async def stripe_webhook(
 
     # Verify signature if secret configured
     if webhook_secret and signature:
-        expected_sig = (
-            f"sha256={hmac.new(webhook_secret.encode(), payload, sha256).hexdigest()}"
-        )
+        expected_sig = f"sha256={hmac.new(webhook_secret.encode(), payload, sha256).hexdigest()}"
         if not hmac.compare_digest(expected_sig, signature):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -562,9 +572,7 @@ async def polar_webhook(
 
     # Verify signature if secret configured
     if webhook_secret and signature:
-        expected_sig = (
-            f"sha256={hmac.new(webhook_secret.encode(), payload, sha256).hexdigest()}"
-        )
+        expected_sig = f"sha256={hmac.new(webhook_secret.encode(), payload, sha256).hexdigest()}"
         if not hmac.compare_digest(expected_sig, signature):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

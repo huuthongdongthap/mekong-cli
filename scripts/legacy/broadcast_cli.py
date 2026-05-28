@@ -97,9 +97,7 @@ def post_to_twitter(meta, content):
         tweets.append(f"📌 {h}")
 
     # CTA
-    tweets.append(
-        f"Read the full article:\n{meta.get('url', 'https://blog.billmentor.com')}"
-    )
+    tweets.append(f"Read the full article:\n{meta.get('url', 'https://blog.billmentor.com')}")
 
     print(f"   Generated {len(tweets)} tweets.")
 
@@ -170,7 +168,9 @@ Here are the key takeaways:
     for h in headers:
         post += f"✅ {h}\n"
 
-    post += f"\nRead full guide here: {meta.get('url', 'Link in comments 👇')}\n\n#tech #coding #agency"
+    post += (
+        f"\nRead full guide here: {meta.get('url', 'Link in comments 👇')}\n\n#tech #coding #agency"
+    )
 
     print(f"   {GREEN}✅ Content ready for LinkedIn!{RESET}")
     print(f"   {DIM}(Copy link copied to clipboard){RESET}")
@@ -186,9 +186,7 @@ def cmd_setup():
     if devto:
         creds["devto_api_key"] = devto
 
-    twitter = input(
-        f"Enter Twitter Bearer Token [{creds.get('twitter_bearer', '')}]: "
-    ).strip()
+    twitter = input(f"Enter Twitter Bearer Token [{creds.get('twitter_bearer', '')}]: ").strip()
     if twitter:
         creds["twitter_bearer"] = twitter
 

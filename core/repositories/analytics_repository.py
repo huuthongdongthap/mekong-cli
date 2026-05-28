@@ -308,9 +308,11 @@ class AnalyticsRepository:
                         id=f"REV-{len(revenue_entries):04d}",
                         amount=amount,
                         type=rev_type,
-                        client_id=f"CLI-{random.randint(1, 10):04d}"
-                        if rev_type in [RevenueType.SERVICE, RevenueType.RETAINER]
-                        else None,
+                        client_id=(
+                            f"CLI-{random.randint(1, 10):04d}"
+                            if rev_type in [RevenueType.SERVICE, RevenueType.RETAINER]
+                            else None
+                        ),
                         description=f"{rev_type.value.title()} revenue",
                         date=date,
                         recurring=rev_type == RevenueType.RETAINER,
@@ -361,12 +363,12 @@ class AnalyticsRepository:
             "client_metrics_count": len(client_metrics),
             "total_revenue": sum(e.amount for e in revenue_entries),
             "date_range": {
-                "earliest": min(e.date for e in revenue_entries).isoformat()
-                if revenue_entries
-                else None,
-                "latest": max(e.date for e in revenue_entries).isoformat()
-                if revenue_entries
-                else None,
+                "earliest": (
+                    min(e.date for e in revenue_entries).isoformat() if revenue_entries else None
+                ),
+                "latest": (
+                    max(e.date for e in revenue_entries).isoformat() if revenue_entries else None
+                ),
             },
             "cache_info": self.get_cache_info(),
         }

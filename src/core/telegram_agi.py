@@ -110,7 +110,8 @@ async def _agi_history(update: Update) -> None:
             icon = "✅" if d.get("success") else "❌"
             lines.append(f"{icon} `{d.get('id', '?')}` — {d.get('title', '?')}")
         await update.message.reply_text(
-            "\n".join(lines), parse_mode="Markdown",
+            "\n".join(lines),
+            parse_mode="Markdown",
         )
     except Exception as e:
         await update.message.reply_text(f"❌ AGI history error: {e}")

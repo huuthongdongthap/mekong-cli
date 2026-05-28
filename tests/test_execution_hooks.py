@@ -19,10 +19,10 @@ from src.core.execution_hooks import (
 from src.core.parser import RecipeStep
 from src.core.verifier import ExecutionResult
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _step(order: int = 1, title: str = "test-step") -> RecipeStep:
     return RecipeStep(order=order, title=title, description="desc")
@@ -40,6 +40,7 @@ def _result(exit_code: int = 0) -> ExecutionResult:
 # HookResult dataclass
 # ---------------------------------------------------------------------------
 
+
 class TestHookResult:
     def test_defaults(self) -> None:
         r = HookResult()
@@ -54,6 +55,7 @@ class TestHookResult:
 # ---------------------------------------------------------------------------
 # HookRegistry – registration
 # ---------------------------------------------------------------------------
+
 
 class TestHookRegistryRegistration:
     def test_register_before_appears_in_list(self) -> None:
@@ -93,6 +95,7 @@ class TestHookRegistryRegistration:
 # ---------------------------------------------------------------------------
 # HookRegistry – run_before
 # ---------------------------------------------------------------------------
+
 
 class TestRunBefore:
     def test_returns_proceed_true_when_no_hooks(self) -> None:
@@ -149,6 +152,7 @@ class TestRunBefore:
 # HookRegistry – run_after
 # ---------------------------------------------------------------------------
 
+
 class TestRunAfter:
     def test_hooks_run_in_registration_order(self) -> None:
         order: list[str] = []
@@ -173,6 +177,7 @@ class TestRunAfter:
 # HookRegistry – run_error_hooks
 # ---------------------------------------------------------------------------
 
+
 class TestRunErrorHooks:
     def test_error_hook_receives_exception(self) -> None:
         received: list[Exception] = []
@@ -195,6 +200,7 @@ class TestRunErrorHooks:
 # ---------------------------------------------------------------------------
 # Built-in hooks
 # ---------------------------------------------------------------------------
+
 
 class TestLoggingBeforeHook:
     def test_returns_proceed_true(self) -> None:
@@ -260,6 +266,7 @@ class TestTimingAfterHook:
 # ---------------------------------------------------------------------------
 # Integration: registry with built-in hooks
 # ---------------------------------------------------------------------------
+
 
 class TestRegistryWithBuiltins:
     def test_full_before_after_cycle(self) -> None:

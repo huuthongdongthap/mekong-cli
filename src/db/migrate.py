@@ -20,7 +20,6 @@ from src.db.migrations import (
     MIGRATION_008_BILLING_SYSTEM,
 )
 
-
 MIGRATIONS = [
     ("001", "Initial schema", MIGRATION_001),
     ("002", "Webhook events table", MIGRATION_002),
@@ -152,9 +151,7 @@ class MigrationRunner:
         db = await self._ensure_db()
         applied = await self._get_applied_migrations(db)
 
-        pending = [
-            (v, n) for v, n, _ in MIGRATIONS if v not in applied
-        ]
+        pending = [(v, n) for v, n, _ in MIGRATIONS if v not in applied]
 
         return {
             "applied": list(applied),

@@ -11,7 +11,6 @@ from typer.testing import CliRunner
 from src.commands.raas_validate import app
 from src.core.raas_auth import AuthResult, TenantContext
 
-
 runner = CliRunner()
 
 
@@ -28,6 +27,7 @@ class TestValidateLicenseCommand:
     def mock_valid_result(self):
         """Mock valid auth result."""
         from datetime import datetime, timezone, timedelta
+
         return AuthResult(
             valid=True,
             tenant=TenantContext(
@@ -173,6 +173,7 @@ class TestValidateLicenseCommand:
     def test_validate_license_expiring_soon(self, mock_auth_client):
         """Test validation with expiring license."""
         from datetime import datetime, timezone, timedelta
+
         result = AuthResult(
             valid=True,
             tenant=TenantContext(
@@ -197,6 +198,7 @@ class TestValidateLicenseCommand:
     def test_validate_license_expired(self, mock_auth_client):
         """Test validation with expired license."""
         from datetime import datetime, timezone, timedelta
+
         result = AuthResult(
             valid=True,
             tenant=TenantContext(
@@ -326,6 +328,7 @@ class TestValidateLicenseErrors:
     def test_missing_credentials_error(self, mock_auth_client):
         """Test missing credentials error."""
         from src.core.raas_auth import AuthResult
+
         result = AuthResult(
             valid=False,
             error="No credentials provided",
@@ -346,6 +349,7 @@ class TestValidateLicenseErrors:
     def test_invalid_api_key_format_error(self, mock_auth_client):
         """Test invalid API key format error."""
         from src.core.raas_auth import AuthResult
+
         result = AuthResult(
             valid=False,
             error="Invalid API key format",
@@ -366,6 +370,7 @@ class TestValidateLicenseErrors:
     def test_token_expired_error(self, mock_auth_client):
         """Test expired token error."""
         from src.core.raas_auth import AuthResult
+
         result = AuthResult(
             valid=False,
             error="Token expired",
@@ -386,6 +391,7 @@ class TestValidateLicenseErrors:
     def test_unknown_format_error(self, mock_auth_client):
         """Test unknown license format error."""
         from src.core.raas_auth import AuthResult
+
         result = AuthResult(
             valid=False,
             error="Unrecognized credential format",

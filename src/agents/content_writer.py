@@ -33,23 +33,23 @@ class ContentWriter(AgentBase):
             Task(
                 id="keyword_research",
                 description=f"Analyze intent and related keywords for '{keyword}'",
-                input={"keyword": keyword}
+                input={"keyword": keyword},
             ),
             Task(
                 id="generate_outline",
                 description="Create article structure (H1, H2, H3)",
-                input={"keyword": keyword}
+                input={"keyword": keyword},
             ),
             Task(
                 id="write_draft",
                 description="Write first draft based on outline",
-                input={"keyword": keyword}
+                input={"keyword": keyword},
             ),
             Task(
                 id="seo_optimize",
                 description="Optimize content for SEO (density, meta tags)",
-                input={"keyword": keyword}
-            )
+                input={"keyword": keyword},
+            ),
         ]
 
     def execute(self, task: Task) -> Result:
@@ -68,9 +68,13 @@ class ContentWriter(AgentBase):
                     success=True,
                     output={
                         "primary_keyword": keyword,
-                        "secondary_keywords": [f"best {keyword}", f"{keyword} guide", f"{keyword} 2026"],
-                        "intent": "Informational"
-                    }
+                        "secondary_keywords": [
+                            f"best {keyword}",
+                            f"{keyword} guide",
+                            f"{keyword} 2026",
+                        ],
+                        "intent": "Informational",
+                    },
                 )
 
             elif task.id == "generate_outline":
@@ -84,9 +88,9 @@ class ContentWriter(AgentBase):
                             f"What is {keyword}?",
                             "Benefits",
                             "Top Tools",
-                            "Conclusion"
-                        ]
-                    }
+                            "Conclusion",
+                        ],
+                    },
                 )
 
             elif task.id == "write_draft":
@@ -96,7 +100,7 @@ class ContentWriter(AgentBase):
                     success=True,
                     output={
                         "content": f"# The Ultimate Guide to {keyword.title()}\n\nIntroduction...\n\nWhat is {keyword}?\nIt is..."
-                    }
+                    },
                 )
 
             elif task.id == "seo_optimize":
@@ -107,25 +111,17 @@ class ContentWriter(AgentBase):
                     output={
                         "score": 95,
                         "meta_title": f"Best {keyword.title()} Guide (2026)",
-                        "meta_description": f"Learn everything about {keyword} in this comprehensive guide."
-                    }
+                        "meta_description": f"Learn everything about {keyword} in this comprehensive guide.",
+                    },
                 )
 
             else:
                 return Result(
-                    task_id=task.id,
-                    success=False,
-                    output=None,
-                    error=f"Unknown task: {task.id}"
+                    task_id=task.id, success=False, output=None, error=f"Unknown task: {task.id}"
                 )
 
         except Exception as e:
-            return Result(
-                task_id=task.id,
-                success=False,
-                output=None,
-                error=str(e)
-            )
+            return Result(task_id=task.id, success=False, output=None, error=str(e))
 
     def verify(self, result: Result) -> bool:
         """Verify results are valid"""

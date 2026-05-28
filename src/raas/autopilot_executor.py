@@ -6,6 +6,7 @@ Called by the OpenClaw daemon every cycle. For each tenant with active autopilot
 3. Record results
 4. Deliver via webhook/email if configured
 """
+
 from __future__ import annotations
 
 import json
@@ -54,10 +55,14 @@ def _get_daemon_key() -> str:
     if key_file.exists():
         return key_file.read_text().strip()
     try:
-        r = requests.post(f"{GATEWAY_URL}/v1/onboard", json={
-            "name": "Autopilot Daemon",
-            "email": "autopilot@mekong.local",
-        }, timeout=10)
+        r = requests.post(
+            f"{GATEWAY_URL}/v1/onboard",
+            json={
+                "name": "Autopilot Daemon",
+                "email": "autopilot@mekong.local",
+            },
+            timeout=10,
+        )
         if r.status_code == 200:
             key = r.json()["api_key"]
             key_file.write_text(key)
@@ -90,16 +95,25 @@ def _get_last_run_time(tenant_id: str, department: str, goal: str) -> float:
         conn.close()
 
 
-def _record_run(tenant_id: str, dept: str, goal: str, status: str,
-                output: str = "", credits: int = 0):
+def _record_run(
+    tenant_id: str, dept: str, goal: str, status: str, output: str = "", credits: int = 0
+):
     """Record an autopilot run."""
     conn = sqlite3.connect(str(_DB_PATH))
     try:
         conn.execute(
             """INSERT INTO autopilot_runs (id, tenant_id, department, goal, status, output, credits_used, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (str(uuid.uuid4()), tenant_id, dept, goal, status, output, credits,
-             datetime.now(timezone.utc).isoformat()),
+            (
+                str(uuid.uuid4()),
+                tenant_id,
+                dept,
+                goal,
+                status,
+                output,
+                credits,
+                datetime.now(timezone.utc).isoformat(),
+            ),
         )
         conn.commit()
     finally:
@@ -109,10 +123,12 @@ def _record_run(tenant_id: str, dept: str, goal: str, status: str,
 def _submit_mission(goal: str, api_key: str) -> tuple[str, str]:
     """Submit mission via gateway API. Returns (status, output)."""
     try:
-        r = requests.post(f"{GATEWAY_URL}/raas/missions",
+        r = requests.post(
+            f"{GATEWAY_URL}/raas/missions",
             json={"goal": goal},
             headers={"Authorization": f"Bearer {api_key}"},
-            timeout=10)
+            timeout=10,
+        )
 
         if r.status_code == 402:
             return "no_credits", ""
@@ -123,12 +139,14 @@ def _submit_mission(goal: str, api_key: str) -> tuple[str, str]:
 
         # Poll for completion (max 3 min)
         import time
+
         for _ in range(18):
             time.sleep(10)
             sr = requests.get(
                 f"{GATEWAY_URL}/raas/missions/{mission_id}",
                 headers={"Authorization": f"Bearer {api_key}"},
-                timeout=10)
+                timeout=10,
+            )
             if sr.status_code == 200:
                 data = sr.json()
                 if data["status"] == "completed":
@@ -145,13 +163,17 @@ def _deliver_results(config: dict, dept: str, goal: str, output: str):
     webhook_url = config.get("webhook_url")
     if webhook_url:
         try:
-            requests.post(webhook_url, json={
-                "type": "autopilot.result",
-                "department": dept,
-                "goal": goal,
-                "output": output,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }, timeout=10)
+            requests.post(
+                webhook_url,
+                json={
+                    "type": "autopilot.result",
+                    "department": dept,
+                    "goal": goal,
+                    "output": output,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                },
+                timeout=10,
+            )
         except Exception as e:
             logger.warning("Webhook delivery failed: %s", e)
 
@@ -183,7 +205,9 @@ def execute_tenant_cycle(tenant_id: str) -> int:
     for dept_id, goals in departments.items():
         for goal_item in goals:
             goal_text = goal_item.get("goal", "") if isinstance(goal_item, dict) else str(goal_item)
-            schedule = goal_item.get("schedule", "weekly") if isinstance(goal_item, dict) else "weekly"
+            schedule = (
+                goal_item.get("schedule", "weekly") if isinstance(goal_item, dict) else "weekly"
+            )
 
             last_run = _get_last_run_time(tenant_id, dept_id, goal_text)
             if not _is_due(schedule, last_run, now):
@@ -191,7 +215,14 @@ def execute_tenant_cycle(tenant_id: str) -> int:
 
             logger.info("Autopilot [%s/%s]: %s", tenant_id[:8], dept_id, goal_text[:50])
             status, output = _submit_mission(goal_text, api_key)
-            _record_run(tenant_id, dept_id, goal_text, status, output, credits=1 if status == "completed" else 0)
+            _record_run(
+                tenant_id,
+                dept_id,
+                goal_text,
+                status,
+                output,
+                credits=1 if status == "completed" else 0,
+            )
 
             if output and status == "completed":
                 _deliver_results(config, dept_id, goal_text, output)
@@ -208,9 +239,7 @@ def execute_all_tenants() -> dict:
 
     conn = sqlite3.connect(str(_DB_PATH))
     try:
-        rows = conn.execute(
-            "SELECT tenant_id FROM autopilot_configs WHERE active = 1"
-        ).fetchall()
+        rows = conn.execute("SELECT tenant_id FROM autopilot_configs WHERE active = 1").fetchall()
     finally:
         conn.close()
 

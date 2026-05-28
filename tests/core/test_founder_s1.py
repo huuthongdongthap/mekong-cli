@@ -2,7 +2,8 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.core.founder_ipo.founder_s1 import (
     build_s1_framework,

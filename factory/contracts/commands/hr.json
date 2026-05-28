@@ -4,21 +4,18 @@
   "layer": "business",
   "chapter": "作戰 — Waging War",
   "display": {
-    "name_vi": "Hr",
     "name_en": "Hr",
     "icon": "",
-    "description_vi": "Execute Hr command",
-    "description_en": "Execute Hr command"
+    "description_en": "HR operations — hiring, onboarding, team management"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "coo"
     ],
-    "hub": "business-hub",
+    "hub": "hr-hub",
     "complexity": "standard",
     "timeout_ms": 120000,
-    "credit_cost": 3,
+    "credit_cost": 2,
     "requires_approval": false
   },
   "input": {
@@ -28,29 +25,36 @@
     ],
     "properties": {
       "goal": {
-        "type": "string",
-        "description": "Natural language task description"
+        "type": "string"
       },
-      "project": {
+      "action": {
         "type": "string",
-        "description": "Target project path"
+        "enum": [
+          "hire",
+          "onboard",
+          "review",
+          "offboard"
+        ]
       }
     }
   },
   "output": {
     "type": "object",
     "properties": {
-      "summary": {
-        "type": "string"
-      },
-      "files_modified": {
+      "action_items": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "credits_used": {
-        "type": "integer"
+      "documents": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "timeline": {
+        "type": "string"
       }
     }
   },

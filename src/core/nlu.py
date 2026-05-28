@@ -26,6 +26,12 @@ class Intent(str, Enum):
     OPTIMIZE = "optimize"
     MIGRATE = "migrate"
     REPORT = "report"
+    # VN Business intents (Mekong VN Hub)
+    KE_TOAN = "ke-toan"
+    THUE = "thue"
+    ZALO_OA = "zalo-oa"
+    VIETQR = "vietqr"
+    BHXH = "bhxh"
     UNKNOWN = "unknown"
 
 
@@ -63,7 +69,7 @@ class ConversationContext:
         """Record a conversation turn."""
         self._turns.append(ConversationTurn(role=role, content=content))
         if len(self._turns) > self.MAX_TURNS:
-            self._turns = self._turns[-self.MAX_TURNS:]
+            self._turns = self._turns[-self.MAX_TURNS :]
 
     def get_context_summary(self) -> str:
         """Format recent turns for LLM context injection."""
@@ -90,47 +96,235 @@ class ConversationContext:
         self._turns.clear()
 
 
+# VN language detection — common Vietnamese words/patterns
+_VN_MARKERS = [
+    "tạo",
+    "tao",
+    "sửa",
+    "sua",
+    "xem",
+    "kiểm tra",
+    "kiem tra",
+    "hóa đơn",
+    "hoa don",
+    "thuế",
+    "thue",
+    "kế toán",
+    "ke toan",
+    "báo cáo",
+    "bao cao",
+    "phân tích",
+    "phan tich",
+    "tính",
+    "tinh",
+    "zalo",
+    "vietqr",
+    "bhxh",
+    "bhyt",
+    "bhtn",
+    "misa",
+    "doanh nghiệp",
+    "doanh nghiep",
+    "đơn hàng",
+    "don hang",
+    "khách hàng",
+    "khach hang",
+    "nhân viên",
+    "nhan vien",
+    "lương",
+    "luong",
+    "lợi nhuận",
+    "loi nhuan",
+]
+
+
+def detect_lang(text: str) -> str:
+    """Detect if text is Vietnamese. Returns 'vi' or 'en'."""
+    text_lower = text.lower()
+    for marker in _VN_MARKERS:
+        if marker in text_lower:
+            return "vi"
+    # Detect VN diacritics
+    vn_chars = set("àáâãèéêìíòóôõùúăđơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹý")
+    if any(c in vn_chars for c in text):
+        return "vi"
+    return "en"
+
+
+# VN business command routing map
+VN_COMMAND_MAP: Dict[str, Intent] = {
+    "ke-toan": Intent.KE_TOAN,
+    "ke toan": Intent.KE_TOAN,
+    "kế toán": Intent.KE_TOAN,
+    "hóa đơn": Intent.KE_TOAN,
+    "thue": Intent.THUE,
+    "thuế": Intent.THUE,
+    "tncn": Intent.THUE,
+    "tndn": Intent.THUE,
+    "gtgt": Intent.THUE,
+    "zalo": Intent.ZALO_OA,
+    "zalo-oa": Intent.ZALO_OA,
+    "vietqr": Intent.VIETQR,
+    "qr code": Intent.VIETQR,
+    "bhxh": Intent.BHXH,
+    "bảo hiểm": Intent.BHXH,
+    "bao hiem": Intent.BHXH,
+}
+
+
 # Keyword mapping: intent -> list of trigger words (EN + VN)
 KEYWORD_MAP: Dict[Intent, List[str]] = {
     Intent.DEPLOY: [
-        "deploy", "ship", "push", "publish",
-        "trien khai", "triển khai", "đẩy lên",
+        "deploy",
+        "ship",
+        "push",
+        "publish",
+        "trien khai",
+        "triển khai",
+        "đẩy lên",
     ],
     Intent.AUDIT: [
-        "audit", "check", "scan", "inspect", "review",
-        "kiem tra", "kiểm tra", "rà soát",
+        "audit",
+        "check",
+        "scan",
+        "inspect",
+        "review",
+        "kiem tra",
+        "kiểm tra",
+        "rà soát",
     ],
     Intent.CREATE: [
-        "create", "new", "init", "generate", "build", "make",
-        "tao", "tạo", "xây", "khởi tạo",
+        "create",
+        "new",
+        "init",
+        "generate",
+        "build",
+        "make",
+        "tao",
+        "tạo",
+        "xây",
+        "khởi tạo",
     ],
     Intent.FIX: [
-        "fix", "repair", "debug", "patch", "resolve", "hotfix",
-        "sua", "sửa", "vá", "khắc phục",
+        "fix",
+        "repair",
+        "debug",
+        "patch",
+        "resolve",
+        "hotfix",
+        "sua",
+        "sửa",
+        "vá",
+        "khắc phục",
     ],
     Intent.STATUS: [
-        "status", "health", "info", "monitor",
-        "trang thai", "trạng thái", "tình trạng",
+        "status",
+        "health",
+        "info",
+        "monitor",
+        "trang thai",
+        "trạng thái",
+        "tình trạng",
     ],
     Intent.SCHEDULE: [
-        "schedule", "every", "daily", "cron", "periodic",
-        "len lich", "lên lịch", "định kỳ",
+        "schedule",
+        "every",
+        "daily",
+        "cron",
+        "periodic",
+        "len lich",
+        "lên lịch",
+        "định kỳ",
     ],
     Intent.REFACTOR: [
-        "refactor", "restructure", "clean up", "reorganize",
-        "tái cấu trúc", "dọn dẹp", "cải tổ",
+        "refactor",
+        "restructure",
+        "clean up",
+        "reorganize",
+        "tái cấu trúc",
+        "dọn dẹp",
+        "cải tổ",
     ],
     Intent.OPTIMIZE: [
-        "optimize", "speed up", "performance", "faster", "cache",
-        "tối ưu", "tăng tốc", "nhanh hơn",
+        "optimize",
+        "speed up",
+        "performance",
+        "faster",
+        "cache",
+        "tối ưu",
+        "tăng tốc",
+        "nhanh hơn",
     ],
     Intent.MIGRATE: [
-        "migrate", "upgrade", "move", "transfer", "port",
-        "di chuyển", "nâng cấp", "chuyển đổi",
+        "migrate",
+        "upgrade",
+        "move",
+        "transfer",
+        "port",
+        "di chuyển",
+        "nâng cấp",
+        "chuyển đổi",
     ],
     Intent.REPORT: [
-        "report", "summary", "analyze", "analytics", "dashboard",
-        "báo cáo", "tổng hợp", "phân tích", "thống kê",
+        "report",
+        "summary",
+        "analyze",
+        "analytics",
+        "dashboard",
+        "báo cáo",
+        "tổng hợp",
+        "phân tích",
+        "thống kê",
+    ],
+    # VN Business
+    Intent.KE_TOAN: [
+        "ke-toan",
+        "ke toan",
+        "kế toán",
+        "hóa đơn",
+        "hoa don",
+        "accounting",
+        "invoice",
+        "bookkeeping",
+        "misa",
+    ],
+    Intent.THUE: [
+        "thue",
+        "thuế",
+        "tncn",
+        "tndn",
+        "gtgt",
+        "vat",
+        "tax",
+        "htkk",
+        "khai thuế",
+        "khai thue",
+    ],
+    Intent.ZALO_OA: [
+        "zalo",
+        "zalo-oa",
+        "oa",
+        "broadcast",
+        "zalo content",
+    ],
+    Intent.VIETQR: [
+        "vietqr",
+        "qr",
+        "qr code",
+        "thanh toán",
+        "thanh toan",
+        "payment qr",
+        "ngân hàng",
+        "ngan hang",
+    ],
+    Intent.BHXH: [
+        "bhxh",
+        "bhyt",
+        "bhtn",
+        "bảo hiểm",
+        "bao hiem",
+        "social insurance",
+        "d02-ts",
     ],
 }
 
@@ -155,9 +349,14 @@ _FILE_RE = re.compile(
 
 # Interval normalization multipliers
 _INTERVAL_MULTIPLIERS = {
-    "s": 1, "sec": 1, "seconds": 1,
-    "min": 60, "mins": 60, "minutes": 60,
-    "hour": 3600, "hours": 3600,
+    "s": 1,
+    "sec": 1,
+    "seconds": 1,
+    "min": 60,
+    "mins": 60,
+    "minutes": 60,
+    "hour": 3600,
+    "hours": 3600,
 }
 
 # LLM classification prompt template
@@ -261,10 +460,7 @@ class IntentClassifier:
 
     def _has_llm(self) -> bool:
         """Check if LLM client is available and functional."""
-        return (
-            self.llm_client is not None
-            and hasattr(self.llm_client, "generate")
-        )
+        return self.llm_client is not None and hasattr(self.llm_client, "generate")
 
     def _keyword_match(self, goal: str) -> Tuple[Intent, float]:
         """Match goal against keyword map. Returns (intent, confidence)."""
@@ -350,7 +546,9 @@ class IntentClassifier:
             response_text = self.llm_client.generate(prompt).strip()
         else:
             return IntentResult(
-                intent=Intent.UNKNOWN, confidence=0.1, raw_goal=goal,
+                intent=Intent.UNKNOWN,
+                confidence=0.1,
+                raw_goal=goal,
             )
 
         # Parse JSON from response
@@ -368,18 +566,24 @@ class IntentClassifier:
         try:
             intent = Intent(response_upper.lower())
             return IntentResult(
-                intent=intent, confidence=0.6, raw_goal=goal,
+                intent=intent,
+                confidence=0.6,
+                raw_goal=goal,
                 entities=self._extract_entities(goal, intent),
             )
         except ValueError:
             pass
 
         return IntentResult(
-            intent=Intent.UNKNOWN, confidence=0.1, raw_goal=goal,
+            intent=Intent.UNKNOWN,
+            confidence=0.1,
+            raw_goal=goal,
         )
 
     def _parse_llm_response(
-        self, data: Dict[str, Any], goal: str,
+        self,
+        data: Dict[str, Any],
+        goal: str,
     ) -> IntentResult:
         """Parse structured LLM response into IntentResult."""
         try:

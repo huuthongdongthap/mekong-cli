@@ -8,6 +8,7 @@ Env vars:
     NOWPAYMENTS_IPN_SECRET — IPN webhook secret
     NOWPAYMENTS_PAYOUT_ADDRESS — USDT TRC20 wallet address
 """
+
 from __future__ import annotations
 
 import json
@@ -28,9 +29,9 @@ PAYOUT_ADDRESS = os.getenv(
 
 # Subscription tiers — price in USD, credits per month, NOWPayments plan IDs
 TIERS: dict[str, dict[str, Any]] = {
-    "starter":    {"price_usd": 49,  "credits": 200,   "name": "Starter",    "plan_id": "16183071"},
-    "pro":        {"price_usd": 149, "credits": 1000,  "name": "Pro",        "plan_id": "1588854077"},
-    "growth":     {"price_usd": 299, "credits": 3000,  "name": "Growth",     "plan_id": "803179736"},
+    "starter": {"price_usd": 49, "credits": 200, "name": "Starter", "plan_id": "16183071"},
+    "pro": {"price_usd": 149, "credits": 1000, "name": "Pro", "plan_id": "1588854077"},
+    "growth": {"price_usd": 299, "credits": 3000, "name": "Growth", "plan_id": "803179736"},
     "enterprise": {"price_usd": 499, "credits": 10000, "name": "Enterprise", "plan_id": "90085897"},
 }
 
@@ -62,9 +63,7 @@ def get_estimated_price(
     currency_to: str = "usdttrc20",
 ) -> dict:
     """Get estimated price in crypto for a given USD amount."""
-    return _api_request(
-        f"estimate?amount={amount_usd}&currency_from=usd&currency_to={currency_to}"
-    )
+    return _api_request(f"estimate?amount={amount_usd}&currency_from=usd&currency_to={currency_to}")
 
 
 def create_payment(

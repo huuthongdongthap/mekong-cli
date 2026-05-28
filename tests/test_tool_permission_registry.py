@@ -3,7 +3,6 @@
 import os
 import sys
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core.tool_permission_registry import (
@@ -58,20 +57,26 @@ class TestToolPermissionRegistry:
     def test_blocked_agent(self):
         """Blocked agents cannot use tools."""
         reg = ToolPermissionRegistry(PermissionMode.BYPASS)
-        reg.register(ToolSpec(
-            "dangerous_tool", ToolRisk.DESTRUCTIVE,
-            blocked_agents={"untrusted-agent"},
-        ))
+        reg.register(
+            ToolSpec(
+                "dangerous_tool",
+                ToolRisk.DESTRUCTIVE,
+                blocked_agents={"untrusted-agent"},
+            )
+        )
         assert reg.check_permission("dangerous_tool", "untrusted-agent") is False
         assert reg.check_permission("dangerous_tool", "trusted-agent") is True
 
     def test_allowed_agents_whitelist(self):
         """Only whitelisted agents can use restricted tools."""
         reg = ToolPermissionRegistry(PermissionMode.BYPASS)
-        reg.register(ToolSpec(
-            "admin_tool", ToolRisk.WRITE,
-            allowed_agents={"admin-agent"},
-        ))
+        reg.register(
+            ToolSpec(
+                "admin_tool",
+                ToolRisk.WRITE,
+                allowed_agents={"admin-agent"},
+            )
+        )
         assert reg.check_permission("admin_tool", "admin-agent") is True
         assert reg.check_permission("admin_tool", "random-agent") is False
 

@@ -215,9 +215,7 @@ class PluginValidator:
 
         return result
 
-    def validate_dependencies(
-        self, dependencies: list[str]
-    ) -> PluginValidationResult:
+    def validate_dependencies(self, dependencies: list[str]) -> PluginValidationResult:
         """Check if all plugin dependencies are installed.
 
         Args:

@@ -9,9 +9,9 @@ from .auto_responder import AutoResponder
 
 __all__ = [
     "TermSheetParser",
-    "RedFlagDetector", 
+    "RedFlagDetector",
     "NegotiationAdvisor",
     "MarketComparator",
     "RiskScorer",
-    "AutoResponder"
+    "AutoResponder",
 ]

@@ -39,14 +39,15 @@ router = APIRouter(tags=["CashClaw Trading API"])
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
 
 TIER_RATE_LIMITS: dict[str, int] = {
-    "starter": 100,   # 100 req/hr
-    "pro": 500,       # 500 req/hr
-    "elite": 2000,    # 2000 req/hr
+    "starter": 100,  # 100 req/hr
+    "pro": 500,  # 500 req/hr
+    "elite": 2000,  # 2000 req/hr
 }
 
 
 class APIKeyInfo(BaseModel):
     """Resolved API key information."""
+
     key: str
     tier: str
     user_id: str
@@ -107,8 +108,10 @@ async def require_auth(request: Request) -> APIKeyInfo:
 # Response Models
 # ---------------------------------------------------------------------------
 
+
 class HealthResponse(BaseModel):
     """Health check response."""
+
     status: str = "ok"
     version: str = "1.0.0"
     timestamp: str = ""
@@ -116,6 +119,7 @@ class HealthResponse(BaseModel):
 
 class MarketResponse(BaseModel):
     """Market data response."""
+
     market_id: str
     question: str
     volume_24h: float
@@ -126,6 +130,7 @@ class MarketResponse(BaseModel):
 
 class SignalResponse(BaseModel):
     """Trading signal response."""
+
     market_id: str
     question: str
     direction: str
@@ -140,6 +145,7 @@ class SignalResponse(BaseModel):
 
 class PipelineStatusResponse(BaseModel):
     """Pipeline status response."""
+
     mode: str
     capital: float
     pnl: float
@@ -161,6 +167,7 @@ def _get_pipeline():
     global _pipeline
     if _pipeline is None:
         from src.polymarket.trading_pipeline import PipelineConfig, TradingPipeline
+
         config = PipelineConfig(
             initial_capital=float(os.getenv("CAPITAL_USDC", "200")),
             paper_trading=os.getenv("PAPER_TRADING", "true").lower() == "true",
@@ -173,6 +180,7 @@ def _get_pipeline():
 # ---------------------------------------------------------------------------
 # Public Endpoints (no auth)
 # ---------------------------------------------------------------------------
+
 
 @router.get("/v1/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
@@ -215,6 +223,7 @@ async def public_signals(request: Request) -> dict:
 # ---------------------------------------------------------------------------
 # Authenticated Endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("/v1/markets")
 async def get_markets(auth: APIKeyInfo = Depends(require_auth)) -> dict:

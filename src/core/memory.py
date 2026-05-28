@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from packages.memory.memory_facade import get_memory_facade as _get_facade
+
     _FACADE_AVAILABLE = True
 except ImportError:
     _FACADE_AVAILABLE = False
@@ -64,10 +65,13 @@ class MemoryStore:
         self._vector_store = VectorMemoryStore(persist_path=vector_path)
         try:
             self._vector_store.get_or_create_collection(
-                self.VECTOR_COLLECTION, self.VECTOR_DIM,
+                self.VECTOR_COLLECTION,
+                self.VECTOR_DIM,
             )
         except Exception as _exc:
-            logger.warning("Vector store collection init failed, semantic search disabled: %s", _exc)
+            logger.warning(
+                "Vector store collection init failed, semantic search disabled: %s", _exc
+            )
 
     def record(self, entry: MemoryEntry) -> None:
         """Record an execution outcome and persist."""
@@ -119,8 +123,7 @@ class MemoryStore:
                 hits = facade.search(goal_pattern, user_id="mekong:memory")
                 if hits:
                     matched_goals = {
-                        h.get("memory", "").split("goal=")[-1].split(" status=")[0]
-                        for h in hits
+                        h.get("memory", "").split("goal=")[-1].split(" status=")[0] for h in hits
                     }
                     matched = [e for e in self._entries if e.goal in matched_goals]
                     if matched:
@@ -133,7 +136,9 @@ class MemoryStore:
         return [e for e in self._entries if pattern in e.goal.lower()]
 
     def semantic_search(
-        self, query: str, top_k: int = 5,
+        self,
+        query: str,
+        top_k: int = 5,
     ) -> List[MemoryEntry]:
         """
         Explicit semantic search using vector similarity.
@@ -189,11 +194,11 @@ class MemoryStore:
         for e in self._entries:
             goal_counts[e.goal] = goal_counts.get(e.goal, 0) + 1
         top_goals = sorted(
-            goal_counts, key=lambda k: goal_counts[k], reverse=True,
+            goal_counts,
+            key=lambda k: goal_counts[k],
+            reverse=True,
         )[:5]
-        recent_failures = sum(
-            1 for e in self._entries[-20:] if e.status != "success"
-        )
+        recent_failures = sum(1 for e in self._entries[-20:] if e.status != "success")
 
         # Vector store stats
         vector_info: Dict[str, Any] = {}
@@ -214,7 +219,9 @@ class MemoryStore:
         }
 
     def compress_old_memories(
-        self, days_threshold: int = 7, keep_recent: int = 100,
+        self,
+        days_threshold: int = 7,
+        keep_recent: int = 100,
     ) -> int:
         """
         Compress old memories by summarizing them.
@@ -233,10 +240,7 @@ class MemoryStore:
             return 0
 
         cutoff = time.time() - (days_threshold * 86400)
-        old_entries = [
-            e for e in self._entries[:-keep_recent]
-            if e.timestamp < cutoff
-        ]
+        old_entries = [e for e in self._entries[:-keep_recent] if e.timestamp < cutoff]
 
         if not old_entries:
             return 0
@@ -264,8 +268,7 @@ class MemoryStore:
                 duration_ms=sum(e.duration_ms for e in entries) / len(entries),
                 error_summary=(
                     f"[compressed {len(entries)} runs: "
-                    f"{successes} ok, {failures} fail] "
-                    + "; ".join(unique_errors)
+                    f"{successes} ok, {failures} fail] " + "; ".join(unique_errors)
                 ),
                 context={
                     "compressed": True,
@@ -297,7 +300,8 @@ class MemoryStore:
         try:
             self._vector_store.delete_collection(self.VECTOR_COLLECTION)
             self._vector_store.create_collection(
-                self.VECTOR_COLLECTION, self.VECTOR_DIM,
+                self.VECTOR_COLLECTION,
+                self.VECTOR_DIM,
             )
         except (KeyError, Exception):
             pass
@@ -309,7 +313,8 @@ class MemoryStore:
         try:
             text = f"{entry.goal} {entry.status} {entry.error_summary}"
             vector = VectorMemoryStore.text_to_hash_vector(
-                text, self.VECTOR_DIM,
+                text,
+                self.VECTOR_DIM,
             )
             entry_id = hashlib.md5(
                 f"{entry.goal}:{entry.timestamp}".encode(),
@@ -336,15 +341,20 @@ class MemoryStore:
             pass  # Vector indexing failure never breaks YAML persistence
 
     def _semantic_search(
-        self, query: str, top_k: int = 5,
+        self,
+        query: str,
+        top_k: int = 5,
     ) -> List[MemoryEntry]:
         """Search entries using vector similarity."""
         try:
             query_vector = VectorMemoryStore.text_to_hash_vector(
-                query, self.VECTOR_DIM,
+                query,
+                self.VECTOR_DIM,
             )
             results = self._vector_store.search(
-                self.VECTOR_COLLECTION, query_vector, top_k=top_k,
+                self.VECTOR_COLLECTION,
+                query_vector,
+                top_k=top_k,
             )
             if not results:
                 return []
@@ -382,7 +392,7 @@ class MemoryStore:
     def _evict(self) -> None:
         """Remove oldest entries when exceeding MAX_ENTRIES (FIFO)."""
         if len(self._entries) > self.MAX_ENTRIES:
-            self._entries = self._entries[-self.MAX_ENTRIES:]
+            self._entries = self._entries[-self.MAX_ENTRIES :]
 
 
 __all__ = [

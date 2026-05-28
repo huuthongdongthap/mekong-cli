@@ -36,23 +36,23 @@ def mock_valid_response():
             "avg_commands_per_day": 50.5,
             "daily_active_users": 50,
             "monthly_active_users": 200,
-            "unique_projects": 25
+            "unique_projects": 25,
         },
         "quota": {
             "commands": {"used": 100, "total": 1000},
             "api_calls": {"used": 500, "total": 5000},
             "storage": {"used": 100, "total": 1000},
-            "email_sends": {"used": 200, "total": 2000}
+            "email_sends": {"used": 200, "total": 2000},
         },
         "features": [
             {"name": "cook", "count": 500},
             {"name": "plan", "count": 300},
-            {"name": "build", "count": 200}
+            {"name": "build", "count": 200},
         ],
         "projects": [
             {"id": "1", "name": "Project 1", "command_count": 100, "last_activity": "2026-03-08"},
-            {"id": "2", "name": "Project 2", "command_count": 50, "last_activity": "2026-03-07"}
-        ]
+            {"id": "2", "name": "Project 2", "command_count": 50, "last_activity": "2026-03-07"},
+        ],
     }
 
 
@@ -91,7 +91,7 @@ class TestSyncRaasNoCache:
         # Save mock data to cache with timestamp in the past
         cache_data = {
             "timestamp": int(time.time()) - (CACHE_TTL + 60),  # Expired by 60 seconds
-            "data": mock_valid_response
+            "data": mock_valid_response,
         }
 
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -157,7 +157,9 @@ class TestSyncRaasNoCache:
             CACHE_FILE.unlink()
 
     @patch("requests.get")
-    def test_no_cache_behavior_when_cache_exists(self, mock_get, mock_license_key, mock_valid_response):
+    def test_no_cache_behavior_when_cache_exists(
+        self, mock_get, mock_license_key, mock_valid_response
+    ):
         """Test that --no-cache ignores existing cache and fetches fresh data"""
         # Remove existing cache file
         if CACHE_FILE.exists():
@@ -219,7 +221,14 @@ class TestSyncRaasCommandLine:
     @patch("src.commands.sync_raas.register_cli_instance")
     @patch("src.commands.sync_raas.track_usage")
     def test_sync_command_with_no_cache_flag(
-        self, mock_track, mock_register, mock_validate, mock_get_key, mock_fetch, mock_license_key, mock_valid_response
+        self,
+        mock_track,
+        mock_register,
+        mock_validate,
+        mock_get_key,
+        mock_fetch,
+        mock_license_key,
+        mock_valid_response,
     ):
         """Test that sync command accepts --no-cache flag"""
         from src.commands.sync_raas import sync
@@ -245,7 +254,14 @@ class TestSyncRaasCommandLine:
     @patch("src.commands.sync_raas.register_cli_instance")
     @patch("src.commands.sync_raas.track_usage")
     def test_sync_command_without_no_cache_flag(
-        self, mock_track, mock_register, mock_validate, mock_get_key, mock_fetch, mock_license_key, mock_valid_response
+        self,
+        mock_track,
+        mock_register,
+        mock_validate,
+        mock_get_key,
+        mock_fetch,
+        mock_license_key,
+        mock_valid_response,
     ):
         """Test that sync command uses cache when --no-cache flag not provided"""
         from src.commands.sync_raas import sync

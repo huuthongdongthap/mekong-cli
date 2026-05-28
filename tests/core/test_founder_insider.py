@@ -2,7 +2,8 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.core.founder_ipo.founder_insider import (
     build_trading_windows,
@@ -11,7 +12,6 @@ from src.core.founder_ipo.founder_insider import (
     build_insider_policy,
     INSIDER_POLICY_RULES,
 )
-
 
 _EARNINGS_DATES = ["2026-03-15", "2026-06-15", "2026-09-15", "2026-12-15"]
 
@@ -34,6 +34,7 @@ def test_build_trading_windows_blackout_before_earnings():
     windows = build_trading_windows(["2026-06-30"])
     blackout = next(w for w in windows if not w.is_open)
     from datetime import date
+
     blackout_open = date.fromisoformat(blackout.open_date)
     earnings = date(2026, 6, 30)
     assert blackout_open < earnings
@@ -54,7 +55,7 @@ def test_create_10b5_1_plan_shares_per_month():
         duration_months=12,
     )
     assert plan.holder_name == "Jane Founder"
-    assert plan.shares_per_month == 1_000   # 12_000 / 12
+    assert plan.shares_per_month == 1_000  # 12_000 / 12
     assert plan.price_floor == 15.0
     assert plan.cooling_off_days == 90
 

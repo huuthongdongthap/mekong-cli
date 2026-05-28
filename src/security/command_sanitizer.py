@@ -14,6 +14,7 @@ from dataclasses import dataclass
 @dataclass
 class SanitizationResult:
     """Result of command sanitization."""
+
     is_safe: bool
     sanitized_command: str
     warnings: list[str]

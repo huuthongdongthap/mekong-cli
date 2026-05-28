@@ -32,9 +32,7 @@ class CIHealer:
     """
 
     # Pattern for GitHub Actions run URLs
-    _URL_PATTERN = re.compile(
-        r"https://github\.com/([^/]+)/([^/]+)/actions/runs/(\d+)"
-    )
+    _URL_PATTERN = re.compile(r"https://github\.com/([^/]+)/([^/]+)/actions/runs/(\d+)")
 
     def __init__(self, llm_client: Optional[object] = None) -> None:
         """Initialize CIHealer.
@@ -103,16 +101,15 @@ class CIHealer:
 
         # Pattern-based analysis
         patterns = [
-            (r"ModuleNotFoundError: No module named '(\S+)'",
-             "Missing dependency: {0}", "pip install {0}"),
-            (r"error TS\d+: (.+)",
-             "TypeScript error: {0}", "Fix the TypeScript error"),
-            (r"FAIL\s+(.+\.test\.\w+)",
-             "Test failure: {0}", "Fix the failing test"),
-            (r"npm ERR! (.+)",
-             "NPM error: {0}", "Check package.json and node_modules"),
-            (r"exit code (\d+)",
-             "Process exited with code {0}", "Check the failing step"),
+            (
+                r"ModuleNotFoundError: No module named '(\S+)'",
+                "Missing dependency: {0}",
+                "pip install {0}",
+            ),
+            (r"error TS\d+: (.+)", "TypeScript error: {0}", "Fix the TypeScript error"),
+            (r"FAIL\s+(.+\.test\.\w+)", "Test failure: {0}", "Fix the failing test"),
+            (r"npm ERR! (.+)", "NPM error: {0}", "Check package.json and node_modules"),
+            (r"exit code (\d+)", "Process exited with code {0}", "Check the failing step"),
         ]
 
         for pattern, cause_tpl, fix_tpl in patterns:

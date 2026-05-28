@@ -1,21 +1,21 @@
-# Mekong CLI — Codebase Summary
+# Mekong CLI v6.0 — Codebase Summary
 
-**Version:** 5.0.0 | **Status:** Production | **Last Updated:** 2026-03-23
+**Version:** 6.0.0 | **Status:** Phase 01-04 (Seed Layer COMPLETE) | **Last Updated:** 2026-04-25
 
-> AI-operated business platform. Open source. Universal LLM. 319 commands, 542 skills, 410 contracts.
+> AI-operated business platform. 4-phase Seed→Tree→Forest→Land architecture. Phase 01 (Seed) complete: 319 commands, 542 skills, Ollama-native Python stdlib agents.
 
 ---
 
 ## Executive Overview
 
-**Mekong CLI** is an orchestrated AI platform built on the Plan→Execute→Verify (PEV) engine. It enables automated business operations across 5 layers (Founder, Business, Product, Engineering, Ops) with 319+ commands and 542 skills.
+**Mekong CLI v6.0** restructures around a 4-phase growth architecture. Phase 01 (Seed) is production-ready with a local Python CLI + ChromaDB memory + Ollama integration. The platform enables autonomous agent orchestration with Plan-Execute-Verify (PEV) across 5 business layers (Founder, Business, Product, Engineering, Ops).
 
 **Key Stats:**
-- **4,002 files** | 5.8M tokens | 23M characters
-- **Python 3.9+** | TypeScript/Node.js 18+ | Cloudflare Workers + local LLM
-- **Monorepo structure:** Core SDK + 8 applications + 542 reusable skills
-- **Deployment:** 100% Cloudflare (Pages, Workers, D1, R2, KV) + M1 Max LLM (192.168.11.111:11434)
-- **License:** MIT | Open source with commercial licensing
+- **4,500+ files** | Phase 01-04 complete on main
+- **Python 3.9+** stdlib-first design (no requests/httpx) | TypeScript/Node.js 18+
+- **Monorepo:** Seed runtime + Tools + Apps + Integrations + Observability
+- **Deployment:** M1 Max local (Phase 01) → Telegram+Web (Phase 02) → Multi-tenant (Phase 03) → Temporal+CI/CD (Phase 04)
+- **License:** MIT | Open source infrastructure
 
 ---
 
@@ -58,11 +58,68 @@
 - **Database:** Cloudflare D1 (SQLite) + PostgreSQL (optional)
 - **Cache:** Cloudflare KV + Redis (optional)
 - **Storage:** Cloudflare R2 (S3-compatible)
-- **Messaging:** Stripe/Polar webhooks + email
+- **Messaging:** Polar.sh webhooks + email
 
 ---
 
 ## Directory Structure
+
+### Phase 01: Seed Layer (COMPLETE 2026-04-25)
+
+```
+seed/                                 # Local Python CLI runtime (stdlib-only)
+├── main.py                          # Entry: python3 seed/main.py "task"
+├── agents/
+│   ├── base.py                      # BaseAgent protocol + @timed decorator
+│   ├── ceo.py                       # Planning agent (LLM task decomposition)
+│   ├── developer.py                 # Code execution agent
+│   └── tester.py                    # Verification agent
+├── llm_client.py                    # Ollama urllib client (no SDK)
+├── memory.py                        # ChromaDB + SQLite hybrid store
+└── config.py                        # ENV-based configuration
+
+tests/seed/                           # Unit tests (69 tests, no Ollama needed)
+├── test_seed_config.py              # Config validation
+├── test_seed_llm_client.py          # LLM client + fallback
+├── test_seed_agents_base.py         # Base agent + decorators
+├── test_seed_memory.py              # Memory hybrid store
+├── test_seed_agents_ceo.py          # CEO agent planning
+├── test_seed_agents_dev_tester.py   # Developer + Tester agents
+├── test_seed_main_pipeline.py       # Main pipeline integration
+└── conftest.py                      # pytest fixtures + mocks
+
+tools/                                # Capability tools
+├── file_system.py                   # File operations
+└── browser.py                       # Browser automation
+
+apps/
+├── web/mission-control.html         # htmx Mission Control UI
+├── api/
+│   ├── server.py                    # FastAPI single-tenant (port 8765)
+│   └── gateway.py                   # Multi-tenant JWT gateway (port 8766)
+
+worker/
+└── main.py                          # Redis queue worker + Docker isolation
+
+integrations/
+└── telegram_bot.py                  # Telegram bot (set TELEGRAM_TOKEN)
+
+observability/
+└── agent_metrics.py                 # @timed decorator + Prometheus metrics
+
+feedback/
+└── signals_loop.py                  # Weekly LLM evals + analysis
+
+clipmart/
+└── marketplace_api.py               # Agent template marketplace
+
+.github/workflows/
+└── ai-native-ci.yml                 # 5-gate CI/CD pipeline (Gate 5: pytest)
+
+docker-compose.seed.yml              # Container stack
+Dockerfile.seed                       # Build image (copies seed/ tools/ worker/ apps/ integrations/ clipmart/ observability/ feedback/)
+requirements.seed.txt                # chromadb, fastapi, uvicorn, redis, pytest
+```
 
 ### Core Packages
 
@@ -76,6 +133,12 @@ packages/
 │   │   │   │   ├── executor.py
 │   │   │   │   ├── verifier.py
 │   │   │   │   └── orchestrator.py
+│   │   │   ├── telemetry/        # Layer 2: OpenTelemetry SDK
+│   │   │   │   ├── observe.py    # @observe_agent decorator + metrics
+│   │   │   │   └── otel_setup.py
+│   │   │   ├── signals/          # Layer 2: Signals loop (SQLite evals)
+│   │   │   │   ├── evals.py
+│   │   │   │   └── emit.py
 │   │   │   ├── llm_client.py      # Router (3 env vars)
 │   │   │   ├── llm_providers.yaml
 │   │   │   ├── skill_loader.py
@@ -87,8 +150,29 @@ packages/
 │   │   │   │   ├── tasks.py
 │   │   │   │   └── ... (10+ route groups)
 │   │   ├── agents/
+│   │   ├── cli/
+│   │   │   ├── commands/
+│   │   │   │   ├── metrics.py     # Layer 2: mekong metrics
+│   │   │   │   ├── eval_agent.py  # Layer 2: mekong eval-agent
+│   │   │   │   └── ... (sdlc commands in phase-04)
+│   │   │   └── sdlc/              # Layer 2: SDLC scaffold (phase-04)
+│   │   │       ├── spec_command.py
+│   │   │       ├── design_command.py
+│   │   │       ├── code_command.py
+│   │   │       └── deploy_command.py
 │   │   └── tests/
 │   └── pyproject.toml
+├── agent-core/                    # Phase 1 (Seed): Agent kernel
+│   ├── src/agent_core/
+│   │   ├── base_agent.py          # Think→Act→Observe loop
+│   │   ├── llm_client.py          # LLMClient (routes to mekongd:8765)
+│   │   ├── memory.py              # SeedMemory (SQLite + ChromaDB)
+│   │   ├── tools/                 # Sandboxed tools (browser, file_system, execute)
+│   │   ├── agents/                # CEO, Developer, ToolAgent roles
+│   │   ├── experiments.py         # A/B bucket (SHA-256 deterministic variant assignment)
+│   │   ├── evals.py               # Offline-eval harness (regression gate)
+│   │   └── cli.py                 # 11 commands: run/orchestrate/report/signal/history/prune/status/forest-status/eval/experiment/doctor
+│   └── tests/                     # 196/196 tests pass, 1 skipped
 ├── agents/
 │   └── hubs/                      # Department-scoped command catalogs (17 total)
 │       ├── cto-hub.md             # Chief Technology Officer commands
@@ -188,6 +272,14 @@ export LLM_MODEL=anthropic/claude-sonnet-4
 - `mekong-qwen` — DashScope Qwen 3.5
 - `mekong-cto` — Daemon mode
 
+### Agent Workforce Layer (agent-core)
+
+`packages/agent-core/` provides the **Phase 1 (Seed) agent kernel** — primitives for building autonomous workforce systems. It pairs with `mekongd` (Phase 0 cost-saving LLM proxy) to enable distributed agent execution via LLMClient routing to `http://127.0.0.1:8765` with Prometheus metrics at `GET /metrics`. Includes BaseAgent (think→act→observe), SeedMemory (SQLite + optional ChromaDB), pre-built CEO/Developer/ToolAgent roles with sandboxed tools (browser, file_system, execute), and A/B experiment bucketing (SHA-256 deterministic variant assignment via Statsig-style 3-step gate: offline eval ✓ / online signals ✓ / exposure ✓). Operator-facing CLI covers 11 commands with `--json` parity on non-interactive subcommands (forest-status/eval/history/report/status/experiment/doctor); `doctor` gives holistic triage (env + memory + connectivity + package). Seed phase completes Phase 2 (Forest multi-tenant) on demand.
+
+#### Forest Layer (Multi-Tenant Runtime)
+
+`packages/agent-forest/` — **Phase 2 (Forest)** multi-tenant agent orchestration platform. FastAPI gateway (JWT HS256 auth, rate limiting), Redis-backed task queue, async worker pool, per-user sandbox (subprocess-based). 142/142 tests pass. Routes task submission → queued for async execution → result callback via webhook. Pillar 4 security tier-1 active: `prompt_guard` (24 regex patterns + sanitize_input) rejects injection/dangerous-code on POST /task, with Prometheus counter `agent_forest_prompt_guard_rejections_total{reason}` + `AgentForestPromptGuardSurge` alert. Foundation for Phase 3 (Postgres user persistence) and Phase 4 (multi-cloud deployment).
+
 ---
 
 ## API Gateway
@@ -200,8 +292,9 @@ export LLM_MODEL=anthropic/claude-sonnet-4
 | `POST /v1/tasks` | Execute command |
 | `POST /v1/agents/spawn` | Spawn agent |
 | `POST /v1/chat/completions` | Chat API |
-| `POST /payment/webhook` | NOWPayments webhook |
+| `POST /webhook/polar` | Polar.sh subscription/order events |
 | `GET /v1/reports` | Analytics |
+| `GET /metrics` | Prometheus metrics (mekongd observability) |
 
 **Middleware:**
 - `authMiddleware` — API key validation
@@ -253,10 +346,9 @@ CREATE TABLE tasks (
 
 | Tier | Price/mo | Credits | Daily Limit |
 |------|----------|---------|-------------|
-| Free | $0 | 10 | 3/day |
-| Starter | $79 | 150 | 15/day |
-| Pro | $249 | 750 | 50/day |
-| Enterprise | $599 | Unlimited* | Unlimited |
+| Starter | $49 | 200 | All departments |
+| Growth | $149 | 1,000 | + priority execution |
+| Pro | $499 | 5,000 | + dedicated support |
 
 **Command Costs:**
 ```
@@ -351,7 +443,10 @@ curl -X POST https://api.mekongmind.com/v1/tasks \
 git clone https://github.com/longtho638-jpg/mekong-cli.git
 cd mekong-cli
 pip install -e ".[dev]"
-pytest tests/
+
+# Run seed layer tests (69 tests, no Ollama needed)
+make test-seed    # Recommended
+# OR: pytest tests/seed/ -v
 ```
 
 ---
@@ -373,7 +468,7 @@ pytest tests/
 | Template | Agents | Use Case | Budget |
 |----------|--------|----------|--------|
 | **mekong-saas-startup** | 22 | Funded SaaS founders building full org | Scalable |
-| **mekong-dev-shop** | 8 | Dev agencies and engineering teams | 2,100 MCU/mo |
+| **mekong-dev-shop** | 8 | Solo developers running a full agency | 2,100 MCU/mo |
 | **mekong-solo-founder** | 5 | Solopreneurs shipping fast | 1,550 MCU/mo |
 
 **Features per template:**

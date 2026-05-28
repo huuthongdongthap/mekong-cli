@@ -257,7 +257,9 @@ class LearningJournal:
 
         stats.total_duration_ms += entry.duration_ms
         stats.avg_duration_ms = stats.total_duration_ms / stats.total_missions
-        stats.success_rate = (stats.successful / stats.total_missions * 100) if stats.total_missions > 0 else 0
+        stats.success_rate = (
+            (stats.successful / stats.total_missions * 100) if stats.total_missions > 0 else 0
+        )
 
     def _archive_old_entries(self) -> None:
         """Archive entries older than retention period."""
@@ -313,11 +315,7 @@ class LearningJournal:
         cutoff = datetime.now() - timedelta(days=days)
         cutoff_str = cutoff.strftime("%Y-%m-%d")
 
-        stats = [
-            s.to_dict()
-            for date, s in self._daily_stats.items()
-            if date >= cutoff_str
-        ]
+        stats = [s.to_dict() for date, s in self._daily_stats.items() if date >= cutoff_str]
         return sorted(stats, key=lambda s: s["date"], reverse=True)
 
     def get_summary(self) -> dict[str, Any]:
@@ -344,7 +342,9 @@ class LearningJournal:
             "total_duration_ms": total_duration,
         }
 
-    def add_insight(self, insight_type: str, description: str, data: dict[str, Any] | None = None) -> None:
+    def add_insight(
+        self, insight_type: str, description: str, data: dict[str, Any] | None = None
+    ) -> None:
         """
         Add a learning insight.
 
@@ -353,12 +353,14 @@ class LearningJournal:
             description: Insight description
             data: Optional structured data
         """
-        self._insights.append({
-            "timestamp": datetime.now().isoformat(),
-            "type": insight_type,
-            "description": description,
-            "data": data or {},
-        })
+        self._insights.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "type": insight_type,
+                "description": description,
+                "data": data or {},
+            }
+        )
         self._save()
 
     def get_insights(self, limit: int = 20) -> list[dict]:

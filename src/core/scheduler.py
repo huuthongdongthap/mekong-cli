@@ -105,10 +105,7 @@ class Scheduler:
     def get_due_jobs(self) -> list[ScheduledJob]:
         """Return jobs that are due to run now."""
         now = time.time()
-        return [
-            j for j in self._jobs.values()
-            if j.enabled and j.next_run <= now
-        ]
+        return [j for j in self._jobs.values() if j.enabled and j.next_run <= now]
 
     def mark_completed(self, job: ScheduledJob) -> None:
         """Mark a job as completed and schedule next run."""
@@ -144,12 +141,15 @@ class Scheduler:
         bus = get_event_bus()
 
         for job in due:
-            bus.emit(EventType.JOB_STARTED, {
-                "job_id": job.id,
-                "job_name": job.name,
-                "goal": job.goal,
-                "source": "scheduler",
-            })
+            bus.emit(
+                EventType.JOB_STARTED,
+                {
+                    "job_id": job.id,
+                    "job_name": job.name,
+                    "goal": job.goal,
+                    "source": "scheduler",
+                },
+            )
 
             result: dict[str, Any] = {"job_id": job.id, "status": "skipped"}
             if self._run_callback:
@@ -159,11 +159,14 @@ class Scheduler:
                 except Exception as e:
                     result = {"job_id": job.id, "status": "error", "error": str(e)}
 
-            bus.emit(EventType.JOB_COMPLETED, {
-                "job_id": job.id,
-                "job_name": job.name,
-                "result": result,
-            })
+            bus.emit(
+                EventType.JOB_COMPLETED,
+                {
+                    "job_id": job.id,
+                    "job_name": job.name,
+                    "result": result,
+                },
+            )
 
             self.mark_completed(job)
             results.append(result)

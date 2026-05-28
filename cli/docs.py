@@ -13,6 +13,7 @@ import sys
 def _get_agent() -> object:
     """Lazy-import DocsAgent to avoid heavy import chain."""
     from src.agents.docs_agent import DocsAgent
+
     return DocsAgent()
 
 

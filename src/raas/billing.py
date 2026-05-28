@@ -3,6 +3,7 @@
 Verifies webhook signatures, enforces idempotency, and provisions
 credits to tenant accounts based on Polar product purchases.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -67,18 +68,14 @@ class PolarWebhookHandler:
         """Create processed_events table if it does not exist."""
         try:
             with self._connect() as conn:
-                conn.execute(
-                    """
+                conn.execute("""
                     CREATE TABLE IF NOT EXISTS processed_events (
                         event_id     TEXT PRIMARY KEY,
                         processed_at TEXT NOT NULL
                     )
-                    """
-                )
+                    """)
         except sqlite3.Error as exc:
-            raise RuntimeError(
-                f"PolarWebhookHandler: failed to initialize DB: {exc}"
-            ) from exc
+            raise RuntimeError(f"PolarWebhookHandler: failed to initialize DB: {exc}") from exc
 
     @staticmethod
     def _now_iso() -> str:
@@ -113,9 +110,7 @@ class PolarWebhookHandler:
     # Public API
     # ------------------------------------------------------------------
 
-    def verify_signature(
-        self, payload: bytes, signature: str, secret: str
-    ) -> bool:
+    def verify_signature(self, payload: bytes, signature: str, secret: str) -> bool:
         """Verify a Polar webhook HMAC-SHA256 signature.
 
         Args:
@@ -126,9 +121,7 @@ class PolarWebhookHandler:
         Returns:
             True if the signature is valid, False otherwise.
         """
-        expected = hmac.new(
-            secret.encode(), payload, hashlib.sha256
-        ).hexdigest()
+        expected = hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
         # Polar sends signature as "sha256=<hex>"; strip prefix if present.
         sig = signature.removeprefix("sha256=")
         return hmac.compare_digest(expected, sig)
@@ -149,8 +142,7 @@ class PolarWebhookHandler:
         amount = POLAR_PRODUCT_MAP.get(product_id)
         if amount is None:
             raise ValueError(
-                f"Unknown product_id '{product_id}'. "
-                f"Known products: {list(POLAR_PRODUCT_MAP)}"
+                f"Unknown product_id '{product_id}'. " f"Known products: {list(POLAR_PRODUCT_MAP)}"
             )
         reason = f"Polar purchase: {product_id}"
         return self.credit_store.add(tenant_id, amount, reason)
@@ -187,10 +179,7 @@ class PolarWebhookHandler:
                     or data.get("metadata", {}).get("tenant_id")
                     or data.get("customer_id", "")
                 )
-                product_id = (
-                    data.get("product", {}).get("id")
-                    or data.get("product_id", "")
-                )
+                product_id = data.get("product", {}).get("id") or data.get("product_id", "")
                 if not tenant_id or not product_id:
                     result["status"] = "error"
                     result["reason"] = "missing tenant_id or product_id"
@@ -229,6 +218,7 @@ def _get_handler() -> PolarWebhookHandler:
 # ---------------------------------------------------------------------------
 # FastAPI route
 # ---------------------------------------------------------------------------
+
 
 @billing_router.post("/billing/webhook")
 async def polar_webhook(request: Request) -> dict:

@@ -113,6 +113,7 @@ class RecipeOrchestrator:
         self._reflection: Optional[Any] = None
         try:
             from .reflection import ReflectionEngine
+
             self._reflection = ReflectionEngine(llm_client=llm_client)
         except Exception:
             pass
@@ -121,6 +122,7 @@ class RecipeOrchestrator:
         self._world_model: Optional[Any] = None
         try:
             from .world_model import WorldModel
+
             self._world_model = WorldModel(llm_client=llm_client)
         except Exception:
             pass
@@ -129,6 +131,7 @@ class RecipeOrchestrator:
         self._tool_registry: Optional[Any] = None
         try:
             from .tool_registry import ToolRegistry
+
             self._tool_registry = ToolRegistry()
         except Exception:
             pass
@@ -137,6 +140,7 @@ class RecipeOrchestrator:
         self._collaboration: Optional[Any] = None
         try:
             from .collaboration import CollaborationProtocol
+
             self._collaboration = CollaborationProtocol(llm_client=llm_client)
         except Exception:
             pass
@@ -145,6 +149,7 @@ class RecipeOrchestrator:
         self._code_evolution: Optional[Any] = None
         try:
             from .code_evolution import CodeEvolutionEngine
+
             self._code_evolution = CodeEvolutionEngine(llm_client=llm_client)
         except Exception:
             pass
@@ -153,6 +158,7 @@ class RecipeOrchestrator:
         self._vector_memory: Optional[Any] = None
         try:
             from .vector_memory_store import VectorMemoryStore
+
             self._vector_memory = VectorMemoryStore()
         except Exception:
             pass
@@ -160,6 +166,7 @@ class RecipeOrchestrator:
         # Swarm dispatcher (optional)
         if use_swarm:
             from .swarm import SwarmDispatcher, SwarmRegistry
+
             self.dispatcher: Optional[Any] = SwarmDispatcher(SwarmRegistry())
         else:
             self.dispatcher = None
@@ -251,9 +258,12 @@ class RecipeOrchestrator:
         if self._vector_memory:
             try:
                 from .vector_memory_store import VectorMemoryStore
+
                 vec = VectorMemoryStore.text_to_hash_vector(goal)
                 results = self._vector_memory.search(
-                    "goal_history", vec, top_k=1,
+                    "goal_history",
+                    vec,
+                    top_k=1,
                 )
                 if results and results[0].get("score", 0) > 0.85:
                     prev = results[0].get("payload", {}).get("goal", "")
@@ -270,9 +280,7 @@ class RecipeOrchestrator:
                 roles = self._collaboration.assign_roles(goal)
                 if roles:
                     assigned = [f"{r['agent']}: {r['role']}" for r in roles[:2]]
-                    self.console.print(
-                        f"[dim]🤝 Agents assigned: {', '.join(assigned)}[/dim]"
-                    )
+                    self.console.print(f"[dim]🤝 Agents assigned: {', '.join(assigned)}[/dim]")
             except Exception:
                 pass
 
@@ -288,12 +296,12 @@ class RecipeOrchestrator:
 
                 try:
                     from pathlib import Path as _Path
+
                     recipe = RecipeParser().parse(_Path(route.recipe_path))
-                    self.console.print(
-                        f"[green]NLU:[/green] Matched recipe '{route.recipe_name}'"
-                    )
+                    self.console.print(f"[green]NLU:[/green] Matched recipe '{route.recipe_name}'")
                     result = self.run_from_recipe(
-                        recipe, progress_callback=progress_callback,
+                        recipe,
+                        progress_callback=progress_callback,
                     )
                     self.telemetry.finish_trace()
                     duration_ms = (time.time() - goal_start_time) * 1000
@@ -308,7 +316,11 @@ class RecipeOrchestrator:
 
                     # AGI v2: Post-execution reflection + world diff
                     self._post_execution_agi(
-                        goal, result.status.value, duration_ms, world_before, result.errors,
+                        goal,
+                        result.status.value,
+                        duration_ms,
+                        world_before,
+                        result.errors,
                     )
                     return result
                 except Exception:
@@ -354,13 +366,19 @@ class RecipeOrchestrator:
 
         # AGI v2: Post-execution reflection + world diff
         self._post_execution_agi(
-            goal, result.status.value, duration_ms, world_before, result.errors,
+            goal,
+            result.status.value,
+            duration_ms,
+            world_before,
+            result.errors,
         )
 
         return result
 
     def run_from_recipe(
-        self, recipe: Recipe, progress_callback: Optional[Callable[..., None]] = None,
+        self,
+        recipe: Recipe,
+        progress_callback: Optional[Callable[..., None]] = None,
     ) -> OrchestrationResult:
         """
         Execute existing recipe with verification.
@@ -386,14 +404,15 @@ class RecipeOrchestrator:
         wf_state.transition(WorkflowStatus.RUNNING)
 
         # Record workflow start event
-        self.history.append(ExecutionEvent.create(
-            EventKind.WORKFLOW_STARTED, workflow_id,
-            data={"recipe": recipe.name, "steps": len(recipe.steps)},
-        ))
-
-        self.console.print(
-            "\n[bold yellow]⚙️  PHASE 2: EXECUTION & VERIFICATION[/bold yellow]"
+        self.history.append(
+            ExecutionEvent.create(
+                EventKind.WORKFLOW_STARTED,
+                workflow_id,
+                data={"recipe": recipe.name, "steps": len(recipe.steps)},
+            )
         )
+
+        self.console.print("\n[bold yellow]⚙️  PHASE 2: EXECUTION & VERIFICATION[/bold yellow]")
 
         # Create executor
         executor = RecipeExecutor(recipe)
@@ -412,7 +431,10 @@ class RecipeOrchestrator:
 
             def _dag_executor(step: RecipeStep) -> StepResult:
                 return self._execute_and_verify_step(
-                    executor, step, workflow_id, wf_state,
+                    executor,
+                    step,
+                    workflow_id,
+                    wf_state,
                 )
 
             def _on_dag_complete(order: int, dag_result: Any) -> None:
@@ -443,16 +465,22 @@ class RecipeOrchestrator:
             if result.failed_steps == 0 and not dag.cancelled_steps:
                 result.status = OrchestrationStatus.SUCCESS
                 wf_state.transition(WorkflowStatus.COMPLETED)
-                self.history.append(ExecutionEvent.create(
-                    EventKind.WORKFLOW_COMPLETED, workflow_id,
-                    data={"success_rate": result.success_rate},
-                ))
+                self.history.append(
+                    ExecutionEvent.create(
+                        EventKind.WORKFLOW_COMPLETED,
+                        workflow_id,
+                        data={"success_rate": result.success_rate},
+                    )
+                )
             else:
                 wf_state.transition(WorkflowStatus.FAILED)
-                self.history.append(ExecutionEvent.create(
-                    EventKind.WORKFLOW_FAILED, workflow_id,
-                    data={"errors": result.errors[:5]},
-                ))
+                self.history.append(
+                    ExecutionEvent.create(
+                        EventKind.WORKFLOW_FAILED,
+                        workflow_id,
+                        data={"errors": result.errors[:5]},
+                    )
+                )
 
             self.history.persist(workflow_id)
             self._display_report(result)
@@ -461,31 +489,46 @@ class RecipeOrchestrator:
         # Sequential path: execute each step in order
         for step in recipe.steps:
             # Record step scheduled event
-            self.history.append(ExecutionEvent.create(
-                EventKind.STEP_SCHEDULED, workflow_id, step.order,
-            ))
+            self.history.append(
+                ExecutionEvent.create(
+                    EventKind.STEP_SCHEDULED,
+                    workflow_id,
+                    step.order,
+                )
+            )
             wf_state.step_transition(step.order, StepStatus.STARTED)
 
             step_result = self._execute_and_verify_step(
-                executor, step, workflow_id, wf_state,
+                executor,
+                step,
+                workflow_id,
+                wf_state,
             )
             result.step_results.append(step_result)
 
             if step_result.verification.passed:
                 result.completed_steps += 1
                 wf_state.step_transition(step.order, StepStatus.COMPLETED)
-                self.history.append(ExecutionEvent.create(
-                    EventKind.STEP_COMPLETED, workflow_id, step.order,
-                ))
+                self.history.append(
+                    ExecutionEvent.create(
+                        EventKind.STEP_COMPLETED,
+                        workflow_id,
+                        step.order,
+                    )
+                )
                 self.console.print(f"[green]✓[/green] Step {step.order} passed")
             else:
                 result.failed_steps += 1
                 result.status = OrchestrationStatus.FAILED
                 wf_state.step_transition(step.order, StepStatus.FAILED)
-                self.history.append(ExecutionEvent.create(
-                    EventKind.STEP_FAILED, workflow_id, step.order,
-                    data={"errors": step_result.verification.errors[:3]},
-                ))
+                self.history.append(
+                    ExecutionEvent.create(
+                        EventKind.STEP_FAILED,
+                        workflow_id,
+                        step.order,
+                        data={"errors": step_result.verification.errors[:3]},
+                    )
+                )
                 self.console.print(f"[red]✗[/red] Step {step.order} failed")
 
                 # Collect errors
@@ -503,13 +546,21 @@ class RecipeOrchestrator:
             # Handle failure after callback so the listener sees the step
             if not step_result.verification.passed:
                 if self.enable_rollback:
-                    self.history.append(ExecutionEvent.create(
-                        EventKind.ROLLBACK_STARTED, workflow_id, step.order,
-                    ))
+                    self.history.append(
+                        ExecutionEvent.create(
+                            EventKind.ROLLBACK_STARTED,
+                            workflow_id,
+                            step.order,
+                        )
+                    )
                     self._handle_failure(result, step)
-                    self.history.append(ExecutionEvent.create(
-                        EventKind.ROLLBACK_COMPLETED, workflow_id, step.order,
-                    ))
+                    self.history.append(
+                        ExecutionEvent.create(
+                            EventKind.ROLLBACK_COMPLETED,
+                            workflow_id,
+                            step.order,
+                        )
+                    )
                     break
                 else:
                     result.status = OrchestrationStatus.PARTIAL
@@ -517,16 +568,22 @@ class RecipeOrchestrator:
         # Finalize workflow state
         if result.status == OrchestrationStatus.SUCCESS:
             wf_state.transition(WorkflowStatus.COMPLETED)
-            self.history.append(ExecutionEvent.create(
-                EventKind.WORKFLOW_COMPLETED, workflow_id,
-                data={"success_rate": result.success_rate},
-            ))
+            self.history.append(
+                ExecutionEvent.create(
+                    EventKind.WORKFLOW_COMPLETED,
+                    workflow_id,
+                    data={"success_rate": result.success_rate},
+                )
+            )
         elif result.status == OrchestrationStatus.FAILED:
             wf_state.transition(WorkflowStatus.FAILED)
-            self.history.append(ExecutionEvent.create(
-                EventKind.WORKFLOW_FAILED, workflow_id,
-                data={"errors": result.errors[:5]},
-            ))
+            self.history.append(
+                ExecutionEvent.create(
+                    EventKind.WORKFLOW_FAILED,
+                    workflow_id,
+                    data={"errors": result.errors[:5]},
+                )
+            )
 
         # Persist execution history
         self.history.persist(workflow_id)
@@ -575,14 +632,16 @@ class RecipeOrchestrator:
         ):
             command = step.description.strip()
             stderr = execution_result.stderr or ""
-            self.console.print(
-                "[yellow]🔧 Attempting AI self-correction...[/yellow]"
-            )
+            self.console.print("[yellow]🔧 Attempting AI self-correction...[/yellow]")
             if workflow_id:
-                self.history.append(ExecutionEvent.create(
-                    EventKind.SELF_HEAL_ATTEMPTED, workflow_id, step.order,
-                    data={"error": stderr[:200]},
-                ))
+                self.history.append(
+                    ExecutionEvent.create(
+                        EventKind.SELF_HEAL_ATTEMPTED,
+                        workflow_id,
+                        step.order,
+                        data={"error": stderr[:200]},
+                    )
+                )
 
             try:
                 self.telemetry.record_llm_call()
@@ -608,14 +667,15 @@ class RecipeOrchestrator:
                     execution_result = executor.execute_step(healed_step)
                     if execution_result.exit_code == 0:
                         self_healed = True
-                        self.console.print(
-                            "[green]✓ Self-healing succeeded[/green]"
-                        )
+                        self.console.print("[green]✓ Self-healing succeeded[/green]")
                         if workflow_id:
-                            self.history.append(ExecutionEvent.create(
-                                EventKind.SELF_HEAL_SUCCEEDED,
-                                workflow_id, step.order,
-                            ))
+                            self.history.append(
+                                ExecutionEvent.create(
+                                    EventKind.SELF_HEAL_SUCCEEDED,
+                                    workflow_id,
+                                    step.order,
+                                )
+                            )
                     else:
                         self.telemetry.record_error(
                             f"Self-heal retry also failed for step {step.order}"
@@ -647,9 +707,7 @@ class RecipeOrchestrator:
             self_healed=self_healed,
         )
 
-    def _handle_failure(
-        self, result: OrchestrationResult, failed_step: RecipeStep
-    ) -> None:
+    def _handle_failure(self, result: OrchestrationResult, failed_step: RecipeStep) -> None:
         """
         Handle step failure with rollback.
 
@@ -697,9 +755,7 @@ class RecipeOrchestrator:
                     timeout=30,
                 )
                 if proc.returncode == 0:
-                    self.console.print(
-                        f"  [green]✓ Step {step.order} rolled back[/green]"
-                    )
+                    self.console.print(f"  [green]✓ Step {step.order} rolled back[/green]")
                 else:
                     msg = f"Step {step.order} rollback failed: {proc.stderr.strip()}"
                     rollback_errors.append(msg)
@@ -948,6 +1004,7 @@ class RollbackHandler:
         self.enable_rollback = enable_rollback
         try:
             from .command_sanitizer import CommandSanitizer
+
             self._sanitizer = CommandSanitizer(strict_mode=True)
         except Exception:
             self._sanitizer = None

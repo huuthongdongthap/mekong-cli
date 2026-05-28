@@ -58,9 +58,10 @@ class CreditStore:
     # ------------------------------------------------------------------
 
     def _connect(self) -> sqlite3.Connection:
-        """Return a configured SQLite connection."""
+        """Return a configured SQLite connection with WAL mode and busy timeout."""
         conn = sqlite3.connect(str(self.db_path), timeout=10)
         conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=5000")
         conn.row_factory = sqlite3.Row
         return conn
 
@@ -68,8 +69,7 @@ class CreditStore:
         """Create tables if they do not already exist."""
         try:
             with self._connect() as conn:
-                conn.executescript(
-                    """
+                conn.executescript("""
                     CREATE TABLE IF NOT EXISTS credit_accounts (
                         tenant_id  TEXT PRIMARY KEY,
                         balance    INTEGER NOT NULL DEFAULT 0,
@@ -84,8 +84,7 @@ class CreditStore:
                         reason    TEXT NOT NULL,
                         timestamp TEXT NOT NULL
                     );
-                    """
-                )
+                    """)
         except sqlite3.Error as exc:
             raise RuntimeError(f"CreditStore: failed to initialize DB: {exc}") from exc
 
@@ -262,9 +261,7 @@ class CreditStore:
         except sqlite3.Error as exc:
             raise RuntimeError(f"CreditStore.add failed: {exc}") from exc
 
-    def get_history(
-        self, tenant_id: str, limit: int = 50
-    ) -> list[CreditTransaction]:
+    def get_history(self, tenant_id: str, limit: int = 50) -> list[CreditTransaction]:
         """Return recent transactions for a tenant, newest first.
 
         Args:

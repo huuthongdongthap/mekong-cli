@@ -165,39 +165,48 @@ def get_investor_persona(investor_type: InvestorType) -> InvestorPersona:
 # ── Questions ────────────────────────────────────────────────────────
 
 STANDARD_QUESTIONS: list[PitchQuestion] = [
-    PitchQuestion(1, "What does your company do? (30 seconds)",
-                  "clarity, no jargon"),
-    PitchQuestion(2, "What's your traction?",
-                  "real numbers, growth rate"),
-    PitchQuestion(3, "Why is now the right time for this?",
-                  "market timing insight"),
-    PitchQuestion(4, "Why are you the right team?",
-                  "unfair advantage, domain expertise"),
-    PitchQuestion(5, "What's your revenue model?",
-                  "CAC, LTV, payback period"),
-    PitchQuestion(6, "Who are your competitors? Why will you win?",
-                  "honest competitive analysis"),
-    PitchQuestion(7, "What are you most worried about?",
-                  "self-awareness, intellectual honesty"),
-    PitchQuestion(8, "What do you need beyond money?",
-                  "specific asks, not just mentorship"),
-    PitchQuestion(9, "What's your biggest assumption that could be wrong?",
-                  "risk awareness"),
-    PitchQuestion(10, "If you don't raise this round, what happens?",
-                  "bootstrappability, burn discipline"),
+    PitchQuestion(1, "What does your company do? (30 seconds)", "clarity, no jargon"),
+    PitchQuestion(2, "What's your traction?", "real numbers, growth rate"),
+    PitchQuestion(3, "Why is now the right time for this?", "market timing insight"),
+    PitchQuestion(4, "Why are you the right team?", "unfair advantage, domain expertise"),
+    PitchQuestion(5, "What's your revenue model?", "CAC, LTV, payback period"),
+    PitchQuestion(6, "Who are your competitors? Why will you win?", "honest competitive analysis"),
+    PitchQuestion(7, "What are you most worried about?", "self-awareness, intellectual honesty"),
+    PitchQuestion(8, "What do you need beyond money?", "specific asks, not just mentorship"),
+    PitchQuestion(9, "What's your biggest assumption that could be wrong?", "risk awareness"),
+    PitchQuestion(
+        10, "If you don't raise this round, what happens?", "bootstrappability, burn discipline"
+    ),
 ]
 
 CURVEBALL_QUESTIONS: list[PitchQuestion] = [
-    PitchQuestion(11, "Your competitor just raised $50M. How do you win?",
-                  "strategic thinking under pressure", "curveball"),
-    PitchQuestion(12, "Why wouldn't I just build this myself in 6 months?",
-                  "moat articulation", "curveball"),
-    PitchQuestion(13, "You're a solo founder. That's a risk. Convince me.",
-                  "self-awareness + strength framing", "curveball"),
-    PitchQuestion(14, "What have you been wrong about in the last 6 months?",
-                  "intellectual honesty, learning ability", "curveball"),
-    PitchQuestion(15, "Quote your best customer. What do they say about you?",
-                  "customer intimacy", "curveball"),
+    PitchQuestion(
+        11,
+        "Your competitor just raised $50M. How do you win?",
+        "strategic thinking under pressure",
+        "curveball",
+    ),
+    PitchQuestion(
+        12, "Why wouldn't I just build this myself in 6 months?", "moat articulation", "curveball"
+    ),
+    PitchQuestion(
+        13,
+        "You're a solo founder. That's a risk. Convince me.",
+        "self-awareness + strength framing",
+        "curveball",
+    ),
+    PitchQuestion(
+        14,
+        "What have you been wrong about in the last 6 months?",
+        "intellectual honesty, learning ability",
+        "curveball",
+    ),
+    PitchQuestion(
+        15,
+        "Quote your best customer. What do they say about you?",
+        "customer intimacy",
+        "curveball",
+    ),
 ]
 
 
@@ -207,7 +216,7 @@ def get_session_questions(
     """Get questions for a pitch session."""
     questions = list(STANDARD_QUESTIONS)
     # Add subset of curveballs
-    curveballs = CURVEBALL_QUESTIONS[:min(include_curveballs, len(CURVEBALL_QUESTIONS))]
+    curveballs = CURVEBALL_QUESTIONS[: min(include_curveballs, len(CURVEBALL_QUESTIONS))]
     questions.extend(curveballs)
     return questions
 
@@ -247,13 +256,15 @@ def evaluate_pitch(
             score = max(1, score - 2)
 
         total_score += score
-        answer_scores.append(AnswerFeedback(
-            question=q.question,
-            answer=answer[:100],
-            problem="Too vague" if score < 5 else "Could be sharper",
-            suggested_better=f"Add specific numbers for: {q.look_for}",
-            score=score,
-        ))
+        answer_scores.append(
+            AnswerFeedback(
+                question=q.question,
+                answer=answer[:100],
+                problem="Too vague" if score < 5 else "Could be sharper",
+                suggested_better=f"Add specific numbers for: {q.look_for}",
+                score=score,
+            )
+        )
 
     avg_score = total_score // max(1, len(answer_scores))
 
@@ -270,20 +281,17 @@ def evaluate_pitch(
     if deck_slides:
         for slide_name, content in deck_slides.items():
             s_score = min(10, max(1, len(content) // 30 + 3))
-            slide_fb.append(SlideFeedback(
-                slide=slide_name,
-                feedback="Content length ok" if s_score >= 5 else "Needs more detail",
-                score=s_score,
-            ))
+            slide_fb.append(
+                SlideFeedback(
+                    slide=slide_name,
+                    feedback="Content length ok" if s_score >= 5 else "Needs more detail",
+                    score=s_score,
+                )
+            )
 
     # Build feedback
-    what_worked = [
-        fb.question for fb in answer_scores if fb.score >= 7
-    ][:3]
-    fixable = [
-        f"Q: {fb.question} — {fb.problem}"
-        for fb in answer_scores if fb.score < 5
-    ]
+    what_worked = [fb.question for fb in answer_scores if fb.score >= 7][:3]
+    fixable = [f"Q: {fb.question} — {fb.problem}" for fb in answer_scores if fb.score < 5]
 
     return PitchFeedback(
         round_number=round_number,
@@ -291,7 +299,9 @@ def evaluate_pitch(
         result=result,
         overall_score=avg_score,
         what_worked=what_worked if what_worked else ["Showed up and pitched"],
-        fatal_issue="No fatal issues" if result != "PASS" else fixable[0] if fixable else "Overall weak",
+        fatal_issue=(
+            "No fatal issues" if result != "PASS" else fixable[0] if fixable else "Overall weak"
+        ),
         fixable_issues=fixable[:3],
         slide_feedback=slide_fb,
         answer_feedback=answer_scores,

@@ -5,6 +5,7 @@ Calculates engagement score (0-100) based on:
 - Frequency: active days in period (35%)
 - Breadth: unique feature types used (25%)
 """
+
 from __future__ import annotations
 
 import logging
@@ -20,8 +21,13 @@ logger = logging.getLogger(__name__)
 _DB_PATH = Path.home() / ".mekong" / "raas" / "tenants.db"
 
 KNOWN_EVENT_TYPES = [
-    "mission_run", "command_used", "login", "api_call",
-    "workspace_switch", "config_change", "export_data",
+    "mission_run",
+    "command_used",
+    "login",
+    "api_call",
+    "workspace_switch",
+    "config_change",
+    "export_data",
 ]
 
 
@@ -83,10 +89,15 @@ class EngagementTracker:
         total = max(0, min(100, total))
 
         return EngagementScore(
-            user_id=user_id, total_score=total,
-            recency_score=recency, frequency_score=frequency, breadth_score=breadth,
-            active_days=active_days, total_events=total_events,
-            unique_features=unique_features, days_since_last=days_since,
+            user_id=user_id,
+            total_score=total,
+            recency_score=recency,
+            frequency_score=frequency,
+            breadth_score=breadth,
+            active_days=active_days,
+            total_events=total_events,
+            unique_features=unique_features,
+            days_since_last=days_since,
             level=self._classify_level(total),
         )
 

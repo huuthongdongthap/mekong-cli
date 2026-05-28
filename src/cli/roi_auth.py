@@ -41,6 +41,7 @@ def validate_license(
         # Show license details if verbose
         if verbose:
             from src.lib.raas_gate import LicenseService
+
             service = LicenseService.getInstance()
             validation = service.validateSync(license_key)
 
@@ -48,15 +49,14 @@ def validate_license(
             table.add_column("Property", style="dim")
             table.add_column("Value", style="green")
 
-            tier_display = {
-                'free': '🔓 FREE',
-                'pro': '💎 PRO',
-                'enterprise': '🏢 ENTERPRISE'
-            }
+            tier_display = {"free": "🔓 FREE", "pro": "💎 PRO", "enterprise": "🏢 ENTERPRISE"}
 
             table.add_row("Tier", tier_display.get(validation.tier, validation.tier.upper()))
             table.add_row("Features", f"{len(validation.features)} enabled")
-            table.add_row("Valid Until", "Never" if not hasattr(validation, 'expires_at') else str(validation.expires_at))
+            table.add_row(
+                "Valid Until",
+                "Never" if not hasattr(validation, "expires_at") else str(validation.expires_at),
+            )
 
             console.print(table)
 
@@ -76,7 +76,9 @@ def validate_license(
 
 @app.command("status")
 def license_status(
-    license_key: Optional[str] = typer.Option(None, "--key", "-k", help="License key (defaults to env var)"),
+    license_key: Optional[str] = typer.Option(
+        None, "--key", "-k", help="License key (defaults to env var)"
+    ),
 ) -> None:
     """
     📊 Show current license status (masked).
@@ -101,6 +103,7 @@ def license_status(
         masked = f"{license_key[:8]}...{license_key[-4:]}" if len(license_key) > 12 else "***"
     else:
         import os
+
         env_key = os.getenv("RAAS_LICENSE_KEY", "")
         masked = f"{env_key[:8]}...{env_key[-4:]}" if env_key and len(env_key) > 12 else "(not set)"
 
@@ -130,11 +133,13 @@ def generate_license(
         mekong roi auth generate -t enterprise -e company@example.com -q 3
     """
 
-    console.print(f"[bold cyan]🔑 Generating {quantity} {tier.upper()} license key(s)...[/bold cyan]\n")
+    console.print(
+        f"[bold cyan]🔑 Generating {quantity} {tier.upper()} license key(s)...[/bold cyan]\n"
+    )
 
     # Validate tier
     tier_lower = tier.lower()
-    if tier_lower not in ('free', 'pro', 'enterprise'):
+    if tier_lower not in ("free", "pro", "enterprise"):
         console.print("[red]Error:[/red] Invalid tier. Must be 'free', 'pro', or 'enterprise'.")
         raise typer.Exit(1)
 
@@ -166,6 +171,7 @@ def _generate_key(tier: str, email: str) -> str:
     payload = f"{tier}_{timestamp}_{email_hash}_{random_part}"
 
     import os
+
     secret = os.getenv("RAAS_KEY_SECRET", "mekong-cli-default-secret-change-in-prod")
     hmac_sig = hashlib.sha256(f"{payload}{secret}".encode()).hexdigest()[:8]
 

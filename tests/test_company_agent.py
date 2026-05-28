@@ -22,7 +22,7 @@ def _setup_agents_dir(tmpdir: str, roles=None) -> Path:
     base = Path(tmpdir)
     agents_dir = base / ".mekong" / "agents"
     agents_dir.mkdir(parents=True)
-    for role in (roles or AGENT_ROLES):
+    for role in roles or AGENT_ROLES:
         (agents_dir / f"{role}.md").write_text(
             f"You are the {role} of TestCorp.\nLanguage: vi\nFocus: testing."
         )
@@ -58,11 +58,14 @@ class TestListAgents:
     def test_task_count_from_memory(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             base = _setup_agents_dir(tmpdir)
-            _setup_memory(base, [
-                {"agent": "cto", "status": "success", "mcu": 3},
-                {"agent": "cto", "status": "success", "mcu": 5},
-                {"agent": "cmo", "status": "success", "mcu": 1},
-            ])
+            _setup_memory(
+                base,
+                [
+                    {"agent": "cto", "status": "success", "mcu": 3},
+                    {"agent": "cto", "status": "success", "mcu": 5},
+                    {"agent": "cmo", "status": "success", "mcu": 1},
+                ],
+            )
             agents = list_agents(base_dir=tmpdir)
             cto = next(a for a in agents if a["role"] == "cto")
             assert cto["tasks"] == 2
@@ -84,11 +87,14 @@ class TestGetAgentStatus:
     def test_stats_calculation(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             base = _setup_agents_dir(tmpdir)
-            _setup_memory(base, [
-                {"agent": "cto", "status": "success", "mcu": 3},
-                {"agent": "cto", "status": "success", "mcu": 5},
-                {"agent": "cto", "status": "failed", "mcu": 1},
-            ])
+            _setup_memory(
+                base,
+                [
+                    {"agent": "cto", "status": "success", "mcu": 3},
+                    {"agent": "cto", "status": "success", "mcu": 5},
+                    {"agent": "cto", "status": "failed", "mcu": 1},
+                ],
+            )
             status = get_agent_status("cto", base_dir=tmpdir)
             assert status["stats"]["total_tasks"] == 3
             assert status["stats"]["success_rate"] == pytest.approx(66.7, abs=0.1)

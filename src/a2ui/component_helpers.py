@@ -8,26 +8,50 @@ from typing import Any
 
 from rich.console import RenderableType
 
-
 # ---------------------------------------------------------------------------
 # Icon / emoji mapping
 # ---------------------------------------------------------------------------
 
 ICON_MAP: dict[str, str] = {
-    "home": "🏠", "search": "🔍", "settings": "⚙️", "user": "👤",
-    "check": "✅", "error": "❌", "warning": "⚠️", "info": "i",
-    "star": "⭐", "heart": "❤️", "arrow_right": "→", "arrow_left": "←",
-    "plus": "+", "minus": "-", "edit": "✏️", "delete": "🗑️",
-    "download": "⬇️", "upload": "⬆️", "refresh": "🔄", "link": "🔗",
-    "lock": "🔒", "unlock": "🔓", "mail": "📧", "phone": "📞",
-    "calendar": "📅", "clock": "🕐", "folder": "📁", "file": "📄",
-    "chart": "📊", "money": "💰", "cart": "🛒", "bell": "🔔",
+    "home": "🏠",
+    "search": "🔍",
+    "settings": "⚙️",
+    "user": "👤",
+    "check": "✅",
+    "error": "❌",
+    "warning": "⚠️",
+    "info": "i",
+    "star": "⭐",
+    "heart": "❤️",
+    "arrow_right": "→",
+    "arrow_left": "←",
+    "plus": "+",
+    "minus": "-",
+    "edit": "✏️",
+    "delete": "🗑️",
+    "download": "⬇️",
+    "upload": "⬆️",
+    "refresh": "🔄",
+    "link": "🔗",
+    "lock": "🔒",
+    "unlock": "🔓",
+    "mail": "📧",
+    "phone": "📞",
+    "calendar": "📅",
+    "clock": "🕐",
+    "folder": "📁",
+    "file": "📄",
+    "chart": "📊",
+    "money": "💰",
+    "cart": "🛒",
+    "bell": "🔔",
 }
 
 
 # ---------------------------------------------------------------------------
 # Data binding resolver
 # ---------------------------------------------------------------------------
+
 
 def _resolve_binding(value: Any, data_context: dict[str, Any]) -> Any:
     """Resolve data bindings of the form '$data.key.subkey' from context.
@@ -41,7 +65,7 @@ def _resolve_binding(value: Any, data_context: dict[str, Any]) -> Any:
     """
     if not isinstance(value, str) or not value.startswith("$data."):
         return value
-    path = value[len("$data."):]
+    path = value[len("$data.") :]
     node: Any = data_context
     for part in path.split("."):
         if not isinstance(node, dict):
@@ -53,6 +77,7 @@ def _resolve_binding(value: Any, data_context: dict[str, Any]) -> Any:
 # ---------------------------------------------------------------------------
 # Layout group helper
 # ---------------------------------------------------------------------------
+
 
 class _Group:
     """Minimal Rich renderable that stacks items vertically.

@@ -21,7 +21,6 @@ from src.auth.rate_limiter import (
 )
 from src.models.user import User
 
-
 # Map endpoint paths to rate limit presets
 AUTH_RATE_LIMITS = {
     "/auth/login": RateLimitPreset.AUTH_LOGIN,
@@ -61,7 +60,9 @@ class SessionMiddleware(BaseHTTPMiddleware):
             Tuple of (user, token_payload) if valid, None otherwise
         """
         # Decode and validate token
-        is_valid, payload, error = self._session_manager.decode_token(token)  # noqa: F841 (error unused)
+        is_valid, payload, error = self._session_manager.decode_token(
+            token
+        )  # noqa: F841 (error unused)
         if not is_valid:
             return None
 
@@ -72,6 +73,7 @@ class SessionMiddleware(BaseHTTPMiddleware):
 
         try:
             from uuid import UUID
+
             user = await self._user_repo.find_by_id(UUID(user_id))
             if not user:
                 return None
@@ -265,7 +267,9 @@ class OptionalAuthMiddleware(BaseHTTPMiddleware):
 
     async def _authenticate_user(self, token: str) -> Optional[tuple[User, dict]]:
         """Authenticate user from JWT token."""
-        is_valid, payload, error = self._session_manager.decode_token(token)  # noqa: F841 (error unused)
+        is_valid, payload, error = self._session_manager.decode_token(
+            token
+        )  # noqa: F841 (error unused)
         if not is_valid:
             return None
 
@@ -275,6 +279,7 @@ class OptionalAuthMiddleware(BaseHTTPMiddleware):
 
         try:
             from uuid import UUID
+
             user = await self._user_repo.find_by_id(UUID(user_id))
             if not user:
                 return None

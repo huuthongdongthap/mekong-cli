@@ -24,6 +24,7 @@ LAYERS_PATH = FACTORY_DIR / "layers.yaml"
 
 try:
     import jsonschema
+
     HAS_JSONSCHEMA = True
 except ImportError:
     HAS_JSONSCHEMA = False

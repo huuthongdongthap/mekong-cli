@@ -21,6 +21,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 class SecureStorageError(Exception):
     """Base exception for secure storage operations."""
+
     pass
 
 
@@ -62,12 +63,7 @@ class MacOSKeychainBackend(SecureStorageBackend):
     def _run_security(self, args: list) -> Tuple[int, str, str]:
         """Run security CLI command."""
         try:
-            result = subprocess.run(
-                ["security"] + args,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            result = subprocess.run(["security"] + args, capture_output=True, text=True, timeout=10)
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             raise SecureStorageError("Keychain operation timed out")
@@ -77,13 +73,19 @@ class MacOSKeychainBackend(SecureStorageBackend):
     def store_credential(self, key: str, value: str) -> None:
         """Store license key in macOS Keychain."""
         # security add-generic-password -s <service> -a <account> -w <value>
-        returncode, stdout, stderr = self._run_security([  # noqa: F841 (stdout unused, stderr used in error)
-            "add-generic-password",
-            "-s", self.SERVICE_NAME,
-            "-a", self.account,
-            "-l", key,
-            "-w", value
-        ])
+        returncode, stdout, stderr = self._run_security(
+            [  # noqa: F841 (stdout unused, stderr used in error)
+                "add-generic-password",
+                "-s",
+                self.SERVICE_NAME,
+                "-a",
+                self.account,
+                "-l",
+                key,
+                "-w",
+                value,
+            ]
+        )
 
         if returncode != 0:
             raise SecureStorageError(f"Failed to store credential: {stderr.strip()}")
@@ -91,13 +93,9 @@ class MacOSKeychainBackend(SecureStorageBackend):
     def get_credential(self, key: str) -> Optional[str]:
         """Retrieve license key from macOS Keychain."""
         # security find-generic-password -s <service> -a <account> -l <key> -w
-        returncode, stdout, stderr = self._run_security([
-            "find-generic-password",
-            "-s", self.SERVICE_NAME,
-            "-a", self.account,
-            "-l", key,
-            "-w"
-        ])
+        returncode, stdout, stderr = self._run_security(
+            ["find-generic-password", "-s", self.SERVICE_NAME, "-a", self.account, "-l", key, "-w"]
+        )
 
         if returncode == 44:  # errSecItemNotFound
             return None
@@ -109,12 +107,17 @@ class MacOSKeychainBackend(SecureStorageBackend):
     def delete_credential(self, key: str) -> bool:
         """Delete license key from macOS Keychain."""
         # security delete-generic-password -s <service> -a <account> -l <key>
-        returncode, stdout, stderr = self._run_security([  # noqa: F841 (stdout unused)
-            "delete-generic-password",
-            "-s", self.SERVICE_NAME,
-            "-a", self.account,
-            "-l", key
-        ])
+        returncode, stdout, stderr = self._run_security(
+            [  # noqa: F841 (stdout unused)
+                "delete-generic-password",
+                "-s",
+                self.SERVICE_NAME,
+                "-a",
+                self.account,
+                "-l",
+                key,
+            ]
+        )
 
         if returncode == 44:  # errSecItemNotFound
             return False
@@ -132,6 +135,7 @@ def _sanitize_credential_name(value: str) -> str:
     This prevents injection via credential key names or account identifiers.
     """
     import re
+
     sanitized = re.sub(r"[^A-Za-z0-9._-]", "", value)
     if not sanitized:
         raise ValueError(f"Credential name '{value}' is empty after sanitization")
@@ -160,7 +164,7 @@ class WindowsVaultBackend(SecureStorageBackend):
                 capture_output=True,
                 text=True,
                 timeout=10,
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NO_WINDOW,
             )
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
@@ -179,7 +183,9 @@ class WindowsVaultBackend(SecureStorageBackend):
         generic = f"{self.SERVICE_NAME}:{safe_key}:{safe_account}"
         result = subprocess.run(
             ["cmdkey", f"/generic:{generic}", f"/user:{safe_account}", f"/pass:{value}"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         returncode, stderr = result.returncode, result.stderr
 
@@ -278,6 +284,7 @@ class LinuxEncryptedBackend(SecureStorageBackend):
     def _encrypt_data(self, data: str, key: bytes) -> bytes:
         """Encrypt data using AES-256-GCM."""
         import os
+
         nonce = os.urandom(12)  # 96-bit nonce for GCM
         aesgcm = AESGCM(key)
         ciphertext = aesgcm.encrypt(nonce, data.encode(), None)

@@ -513,9 +513,9 @@ class AdvancedABTestEngine:
             "total_sample_size": total_sample_size,
             "total_revenue": total_revenue,
             "test_duration_days": test_duration / (24 * 3600),
-            "conversion_rate": total_conversions / total_sample_size
-            if total_sample_size > 0
-            else 0,
+            "conversion_rate": (
+                total_conversions / total_sample_size if total_sample_size > 0 else 0
+            ),
             "revenue_per_user": total_revenue / total_sample_size if total_sample_size > 0 else 0.0,
             "winner": winner_variants[0] if winner_variants else None,
             "statistical_significance": test.statistical_significance,
@@ -544,9 +544,9 @@ class AdvancedABTestEngine:
             "sample_size": test.sample_size,
             "conversions": test.conversions,
             "revenue": test.revenue,
-            "conversion_rate": sum(test.conversions.values()) / test.sample_size
-            if test.sample_size > 0
-            else 0,
+            "conversion_rate": (
+                sum(test.conversions.values()) / test.sample_size if test.sample_size > 0 else 0
+            ),
             "duration_days": (time.time() - test.start_time) / (24 * 3600),
             "statistical_significance": test.statistical_significance,
             "effect_size": test.effect_size,
@@ -558,9 +558,9 @@ class AdvancedABTestEngine:
             },
             "p_value": test.p_value,
             "bayes_factor": test.bayes_factor,
-            "traffic_allocation_performance": self.traffic_allocator.get_performance(test_id)
-            if self.traffic_allocator
-            else None,
+            "traffic_allocation_performance": (
+                self.traffic_allocator.get_performance(test_id) if self.traffic_allocator else None
+            ),
             "early_stopped": test.end_time is not None
             and (test.end_time - test.start_time) < 7 * 24 * 3600,
         }
@@ -582,9 +582,9 @@ class AdvancedABTestEngine:
             "total_active_tests": len(self.active_tests),
             "total_sample_size": sum(test.sample_size for test in self.active_tests.values()),
             "tests": active_summary,
-            "performance_metrics": self.traffic_allocator.get_overall_performance()
-            if self.traffic_allocator
-            else None,
+            "performance_metrics": (
+                self.traffic_allocator.get_overall_performance() if self.traffic_allocator else None
+            ),
         }
 
 
@@ -672,9 +672,9 @@ class TrafficAllocator:
             all_performances.append(avg_performance)
 
         return {
-            "avg_performance": sum(all_performances) / len(all_performances)
-            if all_performances
-            else 0.0,
+            "avg_performance": (
+                sum(all_performances) / len(all_performances) if all_performances else 0.0
+            ),
             "test_count": len(self.allocations),
             "performance_variance": np.var(all_performances) if len(all_performances) > 1 else 0.0,
         }

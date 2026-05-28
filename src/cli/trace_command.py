@@ -37,9 +37,7 @@ def register_trace_command(app: typer.Typer) -> None:
 
         sid = session_id or os.getenv("MEKONG_SESSION_ID", "")
         if not sid:
-            console.print(
-                "[yellow]Chua co session ID. Dung --session <id> hoac --demo.[/yellow]"
-            )
+            console.print("[yellow]Chua co session ID. Dung --session <id> hoac --demo.[/yellow]")
             raise typer.Exit(0)
 
         tracker = LineageTracker(session_id=sid)
@@ -87,24 +85,12 @@ def _show_demo_tree() -> None:
     root = Tree("[bold cyan]Demo Session: abc-123[/bold cyan]")
 
     founder_node = root.add("[green]founder[/green]/[bold]okr[/bold] [dim](a1b2)[/dim]")
-    biz_node = founder_node.add(
-        "[green]business[/green]/[bold]sales[/bold] [dim](c3d4)[/dim]"
-    )
-    prod_node = biz_node.add(
-        "[green]product[/green]/[bold]roadmap[/bold] [dim](e5f6)[/dim]"
-    )
-    eng_node = prod_node.add(
-        "[green]engineering[/green]/[bold]cook[/bold] [dim](g7h8)[/dim]"
-    )
-    eng_node.add(
-        "[green]ops[/green]/[bold]deploy[/bold] [dim](i9j0)[/dim]"
-    )
-    founder_node.add(
-        "[green]business[/green]/[bold]marketing[/bold] [dim](k1l2)[/dim]"
-    )
+    biz_node = founder_node.add("[green]business[/green]/[bold]sales[/bold] [dim](c3d4)[/dim]")
+    prod_node = biz_node.add("[green]product[/green]/[bold]roadmap[/bold] [dim](e5f6)[/dim]")
+    eng_node = prod_node.add("[green]engineering[/green]/[bold]cook[/bold] [dim](g7h8)[/dim]")
+    eng_node.add("[green]ops[/green]/[bold]deploy[/bold] [dim](i9j0)[/dim]")
+    founder_node.add("[green]business[/green]/[bold]marketing[/bold] [dim](k1l2)[/dim]")
 
     console.print("\n[bold]Demo Lineage Tree — Founder → Business → Product → Eng → Ops[/bold]")
     console.print(root)
-    console.print(
-        "\n[dim]Dung `mekong trace --session <id>` de xem session thuc te.[/dim]"
-    )
+    console.print("\n[dim]Dung `mekong trace --session <id>` de xem session thuc te.[/dim]")

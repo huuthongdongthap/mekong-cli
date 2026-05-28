@@ -51,9 +51,7 @@ class FunnelSnapshot:
 
     stages: Dict[FunnelStage, int] = field(default_factory=dict)
 
-    def conversion_rate(
-        self, from_stage: FunnelStage, to_stage: FunnelStage
-    ) -> float:
+    def conversion_rate(self, from_stage: FunnelStage, to_stage: FunnelStage) -> float:
         """Calculate conversion rate between two stages.
 
         Args:
@@ -79,9 +77,7 @@ class FunnelTracker:
 
     def __init__(self) -> None:
         """Initialize with zero counts for all stages."""
-        self._counts: Dict[FunnelStage, int] = {
-            stage: 0 for stage in FunnelStage
-        }
+        self._counts: Dict[FunnelStage, int] = {stage: 0 for stage in FunnelStage}
 
     def record(self, stage: FunnelStage, count: int = 1) -> None:
         """Record events at a funnel stage.
@@ -100,9 +96,7 @@ class FunnelTracker:
         """
         return FunnelSnapshot(stages=dict(self._counts))
 
-    def conversion_rate(
-        self, from_stage: FunnelStage, to_stage: FunnelStage
-    ) -> float:
+    def conversion_rate(self, from_stage: FunnelStage, to_stage: FunnelStage) -> float:
         """Calculate conversion rate between two stages.
 
         Args:
@@ -114,9 +108,7 @@ class FunnelTracker:
         """
         return self.snapshot().conversion_rate(from_stage, to_stage)
 
-    def target_rate(
-        self, from_stage: FunnelStage, to_stage: FunnelStage
-    ) -> Optional[float]:
+    def target_rate(self, from_stage: FunnelStage, to_stage: FunnelStage) -> Optional[float]:
         """Get target conversion rate for a stage transition.
 
         Args:

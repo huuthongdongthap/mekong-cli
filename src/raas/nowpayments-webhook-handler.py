@@ -6,6 +6,7 @@ Mirrors polar_webhook_handler.py pattern for consistency.
 Env vars:
     NOWPAYMENTS_IPN_SECRET — IPN secret for HMAC verification
 """
+
 from __future__ import annotations
 
 import hashlib

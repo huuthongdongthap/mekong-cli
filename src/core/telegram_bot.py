@@ -87,6 +87,7 @@ def _load_inbox() -> list:
         return list(result)
     except (json.JSONDecodeError, OSError) as e:
         import logging
+
         logging.error(f"Failed to load inbox: {e}")
         return []
 
@@ -211,6 +212,7 @@ class MekongBot:
                 await self._application.shutdown()
             except Exception as e:
                 import logging
+
                 logging.error(f"Failed to stop application: {e}")
 
     def is_running(self) -> bool:
@@ -422,6 +424,7 @@ class MekongBot:
             )
         except Exception as e:
             import logging
+
             logging.error(f"Sessions handler error: {e}")
             await update.message.reply_text("No CC CLI sessions active.")
 
@@ -475,9 +478,7 @@ class MekongBot:
                 last_str = ""
                 if last:
                     icon = "✅" if last.get("success") else "❌"
-                    last_str = (
-                        f"\n\n📌 *Last:* {icon} {last.get('title', 'Unknown')}"
-                    )
+                    last_str = f"\n\n📌 *Last:* {icon} {last.get('title', 'Unknown')}"
                 await update.message.reply_text(
                     f"♾️ *AGI Loop Status*\n\n"
                     f"{running_icon} Running: {'Yes' if s['running'] else 'No'}\n"
@@ -509,7 +510,8 @@ class MekongBot:
                         f"{icon} `{d.get('id', '?')}` — {d.get('title', '?')}",
                     )
                 await update.message.reply_text(
-                    "\n".join(lines), parse_mode="Markdown",
+                    "\n".join(lines),
+                    parse_mode="Markdown",
                 )
             except Exception as e:
                 await update.message.reply_text(f"❌ AGI history error: {e}")
@@ -577,6 +579,7 @@ class MekongBot:
             cc_info = f"\n🤖 CC CLI: {active} active / {total} total"
         except Exception as e:
             import logging
+
             logging.debug(f"CC spawner not available: {e}")
 
         text = (
@@ -638,13 +641,18 @@ class MekongBot:
     async def heartbeat_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /heartbeat — show next scheduled tasks."""
         from src.daemon.heartbeat_scheduler import HeartbeatScheduler
+
         scheduler = HeartbeatScheduler()
         lines = ["📋 *HEARTBEAT Schedule*\n"]
         for ws_name, hb_path in scheduler.discover_heartbeats():
             tasks = scheduler.parse_heartbeat(ws_name, hb_path)
             lines.append(f"*{ws_name}*: {len(tasks)} tasks")
             for t in tasks[:5]:
-                interval = f"{t.interval_minutes}m" if t.interval_minutes < 1440 else f"{t.interval_minutes // 1440}d"
+                interval = (
+                    f"{t.interval_minutes}m"
+                    if t.interval_minutes < 1440
+                    else f"{t.interval_minutes // 1440}d"
+                )
                 lines.append(f"  [{interval}] {t.description}")
         await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
@@ -656,16 +664,20 @@ class MekongBot:
             return
         lines = alert_file.read_text().strip().split("\n")
         recent = lines[-10:] if len(lines) > 10 else lines
-        await update.message.reply_text("🚨 *Recent Alerts*\n\n" + "\n".join(recent), parse_mode="Markdown")
+        await update.message.reply_text(
+            "🚨 *Recent Alerts*\n\n" + "\n".join(recent), parse_mode="Markdown"
+        )
 
     async def health_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /health — show platform health via PM2."""
         import subprocess
+
         result = subprocess.run(["pm2", "jlist"], capture_output=True, text=True)
         if result.returncode != 0:
             await update.message.reply_text("⚠️ PM2 not running")
             return
         import json
+
         try:
             procs = json.loads(result.stdout)
             lines = ["🏥 *Platform Health*\n"]

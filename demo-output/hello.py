@@ -1,5 +1,4 @@
 # Mekong CLI v6.0 CTO Worker Demo
-import platform
 import datetime
 import sys
 import socket

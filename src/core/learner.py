@@ -51,12 +51,14 @@ class PatternAnalyzer:
 
         for goal, streak in goal_streaks.items():
             if streak >= self.FAILURE_THRESHOLD:
-                patterns.append(Pattern(
-                    pattern_type="repeated_failure",
-                    description=f"Goal '{goal}' failed {streak} consecutive times",
-                    confidence=min(streak / 10, 1.0),
-                    data={"goal": goal, "streak": streak},
-                ))
+                patterns.append(
+                    Pattern(
+                        pattern_type="repeated_failure",
+                        description=f"Goal '{goal}' failed {streak} consecutive times",
+                        confidence=min(streak / 10, 1.0),
+                        data={"goal": goal, "streak": streak},
+                    )
+                )
         return patterns
 
     def get_recipe_effectiveness(self) -> dict[str, float]:
@@ -93,12 +95,14 @@ class PatternAnalyzer:
             if len(results) >= 3:
                 rate = sum(results) / len(results)
                 if rate > 0.7:
-                    patterns.append(Pattern(
-                        pattern_type="time_correlation",
-                        description=f"Higher success rate ({rate:.0%}) during {slot}",
-                        confidence=min(len(results) / 20, 1.0),
-                        data={"slot": slot, "rate": rate, "count": len(results)},
-                    ))
+                    patterns.append(
+                        Pattern(
+                            pattern_type="time_correlation",
+                            description=f"Higher success rate ({rate:.0%}) during {slot}",
+                            confidence=min(len(results) / 20, 1.0),
+                            data={"slot": slot, "rate": rate, "count": len(results)},
+                        )
+                    )
         return patterns
 
     def on_memory_recorded(self, event: Event) -> None:
@@ -107,11 +111,14 @@ class PatternAnalyzer:
         if failures:
             bus = get_event_bus()
             for pattern in failures:
-                bus.emit(EventType.PATTERN_DETECTED, {
-                    "pattern_type": pattern.pattern_type,
-                    "description": pattern.description,
-                    "confidence": pattern.confidence,
-                })
+                bus.emit(
+                    EventType.PATTERN_DETECTED,
+                    {
+                        "pattern_type": pattern.pattern_type,
+                        "description": pattern.description,
+                        "confidence": pattern.confidence,
+                    },
+                )
 
 
 __all__ = [

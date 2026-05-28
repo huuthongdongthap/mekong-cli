@@ -192,6 +192,7 @@ class EncryptedPayload(BaseModel):
     def from_bytes(cls, nonce: bytes, ciphertext: bytes) -> "EncryptedPayload":
         """Create from raw bytes."""
         import base64
+
         return cls(
             nonce=base64.b64encode(nonce).decode("ascii"),
             ciphertext=base64.b64encode(ciphertext).decode("ascii"),
@@ -200,6 +201,7 @@ class EncryptedPayload(BaseModel):
     def to_bytes(self) -> tuple[bytes, bytes]:
         """Convert back to raw bytes."""
         import base64
+
         return (
             base64.b64decode(self.nonce),
             base64.b64decode(self.ciphertext),

@@ -25,9 +25,7 @@ def launch_dashboard(
     no_browser: bool = typer.Option(
         False, "--no-browser", "-n", help="Don't open browser automatically"
     ),
-    host: str = typer.Option(
-        "127.0.0.1", "--host", "-h", help="Bind host (default: 127.0.0.1)"
-    ),
+    host: str = typer.Option("127.0.0.1", "--host", "-h", help="Bind host (default: 127.0.0.1)"),
 ) -> None:
     """
     🚀 Launch analytics dashboard server.
@@ -86,34 +84,22 @@ def dashboard_status() -> None:
         table.add_column("Status")
         table.add_column("Details")
 
-        table.add_row(
-            "Database", "✅", "Connected"
-        )
-        table.add_row(
-            "Cache", "✅", f"{len(service._cache)} entries"
-        )
-        table.add_row(
-            "API Usage Data", "✅",
-            f"{len(metrics.api_calls)} data points"
-        )
-        table.add_row(
-            "License Data", "✅",
-            f"{metrics.active_licenses.get('total', 0)} active"
-        )
+        table.add_row("Database", "✅", "Connected")
+        table.add_row("Cache", "✅", f"{len(service._cache)} entries")
+        table.add_row("API Usage Data", "✅", f"{len(metrics.api_calls)} data points")
+        table.add_row("License Data", "✅", f"{metrics.active_licenses.get('total', 0)} active")
 
         # Rate limit metrics (Phase 6)
-        table.add_row(
-            "Rate Limit Events", "✅",
-            f"{len(metrics.rate_limit_events)} events"
-        )
+        table.add_row("Rate Limit Events", "✅", f"{len(metrics.rate_limit_events)} events")
 
         # License health (Phase 7)
         health = metrics.license_health
         if health:
             table.add_row(
-                "License Health", "✅",
+                "License Health",
+                "✅",
                 f"{health.get('active_count', 0)} active, "
-                f"{health.get('expiring_soon_count', 0)} expiring"
+                f"{health.get('expiring_soon_count', 0)} expiring",
             )
 
         console.print(table)
@@ -126,29 +112,13 @@ def dashboard_status() -> None:
 
 @app.command("export")
 def export_dashboard_data(
-    format: str = typer.Option(
-        "csv", "--format", "-f",
-        help="Export format: csv or json"
-    ),
-    output: str = typer.Option(
-        ..., "--output", "-o",
-        help="Output file path"
-    ),
-    start_date: Optional[str] = typer.Option(
-        None, "--start", "-s",
-        help="Start date (YYYY-MM-DD)"
-    ),
-    end_date: Optional[str] = typer.Option(
-        None, "--end", "-e",
-        help="End date (YYYY-MM-DD)"
-    ),
-    license_key: Optional[str] = typer.Option(
-        None, "--key", "-k",
-        help="Filter by license key"
-    ),
+    format: str = typer.Option("csv", "--format", "-f", help="Export format: csv or json"),
+    output: str = typer.Option(..., "--output", "-o", help="Output file path"),
+    start_date: Optional[str] = typer.Option(None, "--start", "-s", help="Start date (YYYY-MM-DD)"),
+    end_date: Optional[str] = typer.Option(None, "--end", "-e", help="End date (YYYY-MM-DD)"),
+    license_key: Optional[str] = typer.Option(None, "--key", "-k", help="Filter by license key"),
     days: int = typer.Option(
-        30, "--days", "-d",
-        help="Number of days (if start/end not specified)"
+        30, "--days", "-d", help="Number of days (if start/end not specified)"
     ),
 ) -> None:
     """
@@ -176,9 +146,7 @@ def export_dashboard_data(
         end = datetime.now().strftime("%Y-%m-%d")
         start = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
-    console.print(
-        f"[dim]Exporting data from {start} to {end}...[/dim]"
-    )
+    console.print(f"[dim]Exporting data from {start} to {end}...[/dim]")
 
     try:
         from src.analytics.dashboard_service import DashboardService
@@ -187,28 +155,21 @@ def export_dashboard_data(
         date_range = (start, end)
 
         if format == "csv":
-            data = asyncio.run(
-                service.export_to_csv(date_range, license_key)
-            )
+            data = asyncio.run(service.export_to_csv(date_range, license_key))
         else:
-            data = asyncio.run(
-                service.export_to_json(date_range, license_key)
-            )
+            data = asyncio.run(service.export_to_json(date_range, license_key))
 
         # Write to file
         with open(output, "w") as f:
             f.write(data)
 
-        console.print(
-            f"[green]✓ Exported to {output}[/green]"
-        )
+        console.print(f"[green]✓ Exported to {output}[/green]")
 
         # Show file size
         import os
+
         file_size = os.path.getsize(output)
-        console.print(
-            f"[dim]File size: {file_size:,} bytes[/dim]"
-        )
+        console.print(f"[dim]File size: {file_size:,} bytes[/dim]")
 
     except Exception as e:
         console.print(f"[red]Export failed:[/red] {e}")
@@ -263,9 +224,7 @@ def dashboard_summary() -> None:
             for tier, data in metrics.tier_distribution["by_tier"].items():
                 if isinstance(data, dict):
                     tier_table.add_row(
-                        tier.upper(),
-                        str(data.get("count", 0)),
-                        str(data.get("active", 0))
+                        tier.upper(), str(data.get("count", 0)), str(data.get("active", 0))
                     )
 
             console.print(tier_table)
@@ -279,21 +238,14 @@ def dashboard_summary() -> None:
             health_table.add_column("Status")
             health_table.add_column("Count")
 
+            health_table.add_row("Active", f"[green]{health.get('active_count', 0)}[/green]")
             health_table.add_row(
-                "Active", f"[green]{health.get('active_count', 0)}[/green]"
+                "Expiring Soon", f"[orange]{health.get('expiring_soon_count', 0)}[/orange]"
             )
             health_table.add_row(
-                "Expiring Soon",
-                f"[orange]{health.get('expiring_soon_count', 0)}[/orange]"
+                "Suspended", f"[yellow]{health.get('suspended_count', 0)}[/yellow]"
             )
-            health_table.add_row(
-                "Suspended",
-                f"[yellow]{health.get('suspended_count', 0)}[/yellow]"
-            )
-            health_table.add_row(
-                "Revoked",
-                f"[red]{health.get('revoked_count', 0)}[/red]"
-            )
+            health_table.add_row("Revoked", f"[red]{health.get('revoked_count', 0)}[/red]")
 
             console.print(health_table)
 

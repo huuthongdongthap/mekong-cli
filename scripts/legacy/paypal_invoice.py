@@ -51,11 +51,7 @@ def get_paypal_token():
         print(f"{RED}❌ Missing PayPal credentials{RESET}")
         return None
 
-    base_url = (
-        "https://api-m.paypal.com"
-        if mode == "live"
-        else "https://api-m.sandbox.paypal.com"
-    )
+    base_url = "https://api-m.paypal.com" if mode == "live" else "https://api-m.sandbox.paypal.com"
 
     auth = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
 

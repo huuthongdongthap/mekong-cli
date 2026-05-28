@@ -122,8 +122,7 @@ def _result_to_record(record: TaskRecord, result: Any) -> TaskRecord:
         # Fallback: store step summaries as minimal result_data
         record.result_data = {
             "steps": [
-                {"order": s.order, "title": s.title, "summary": s.summary}
-                for s in record.steps
+                {"order": s.order, "title": s.title, "summary": s.summary} for s in record.steps
             ]
         }
 

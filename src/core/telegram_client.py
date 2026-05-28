@@ -89,7 +89,7 @@ class TelegramClient:
             except requests.RequestException:
                 if attempt == self.config.max_retries - 1:
                     raise
-                time.sleep(2 ** attempt)  # Exponential backoff
+                time.sleep(2**attempt)  # Exponential backoff
 
         return None
 

@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class RefreshStatus(Enum):
     """Token refresh status."""
+
     SUCCESS = "success"
     FAILED = "failed"
     RETRYING = "retrying"
@@ -92,8 +93,14 @@ class TokenCache:
             access_token=data["access_token"],
             refresh_token=data.get("refresh_token"),
             expires_at=datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00")),
-            created_at=datetime.fromisoformat(data.get("created_at", datetime.now(timezone.utc).isoformat())),
-            last_refresh=datetime.fromisoformat(data["last_refresh"].replace("Z", "+00:00")) if data.get("last_refresh") else None,
+            created_at=datetime.fromisoformat(
+                data.get("created_at", datetime.now(timezone.utc).isoformat())
+            ),
+            last_refresh=(
+                datetime.fromisoformat(data["last_refresh"].replace("Z", "+00:00"))
+                if data.get("last_refresh")
+                else None
+            ),
             refresh_attempts=data.get("refresh_attempts", 0),
         )
 
@@ -137,6 +144,7 @@ class JwtRefreshClient:
             # Try loading from secure storage
             try:
                 from src.auth.secure_storage import get_secure_storage
+
                 storage = get_secure_storage()
                 self._api_key = storage.get_license()
             except Exception as e:
@@ -183,8 +191,7 @@ class JwtRefreshClient:
 
         if not key:
             return RefreshResult(
-                status=RefreshStatus.FAILED,
-                error="No API key or license key provided"
+                status=RefreshStatus.FAILED, error="No API key or license key provided"
             )
 
         payload = {
@@ -196,9 +203,7 @@ class JwtRefreshClient:
 
         try:
             response = self.gateway.post(
-                self.ACTIVATE_ENDPOINT,
-                json=payload,
-                headers=self._get_auth_headers()
+                self.ACTIVATE_ENDPOINT, json=payload, headers=self._get_auth_headers()
             )
 
             if response.status_code == 200:
@@ -206,16 +211,12 @@ class JwtRefreshClient:
                 return self._cache_tokens(data)
             else:
                 return RefreshResult(
-                    status=RefreshStatus.FAILED,
-                    error=f"Activation failed: {response.status_code}"
+                    status=RefreshStatus.FAILED, error=f"Activation failed: {response.status_code}"
                 )
 
         except Exception as e:
             self._logger.error(f"Activation error: {e}")
-            return RefreshResult(
-                status=RefreshStatus.FAILED,
-                error=str(e)
-            )
+            return RefreshResult(status=RefreshStatus.FAILED, error=str(e))
 
     def refresh(self, force: bool = False) -> RefreshResult:
         """
@@ -256,9 +257,7 @@ class JwtRefreshClient:
                 }
 
                 response = self.gateway.post(
-                    self.REFRESH_ENDPOINT,
-                    json=payload,
-                    headers=self._get_auth_headers()
+                    self.REFRESH_ENDPOINT, json=payload, headers=self._get_auth_headers()
                 )
 
                 if response.status_code == 200:
@@ -312,16 +311,15 @@ class JwtRefreshClient:
         expires_in = data.get("expires_in", 3600)  # Default 1 hour
 
         if not access_token:
-            return RefreshResult(
-                status=RefreshStatus.FAILED,
-                error="No access token in response"
-            )
+            return RefreshResult(status=RefreshStatus.FAILED, error="No access token in response")
 
         expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
 
         self._token_cache = TokenCache(
             access_token=access_token,
-            refresh_token=refresh_token or self._token_cache.refresh_token if self._token_cache else None,
+            refresh_token=(
+                refresh_token or self._token_cache.refresh_token if self._token_cache else None
+            ),
             expires_at=expires_at,
             last_refresh=datetime.now(timezone.utc),
         )
@@ -362,9 +360,7 @@ class JwtRefreshClient:
 
         try:
             response = self.gateway.post(
-                self.VERIFY_ENDPOINT,
-                json={},
-                headers=self._get_auth_headers()
+                self.VERIFY_ENDPOINT, json={}, headers=self._get_auth_headers()
             )
             return response.status_code == 200
         except Exception as e:
@@ -383,6 +379,7 @@ class JwtRefreshClient:
         """Get CLI version."""
         try:
             from importlib.metadata import version
+
             return version("mekong-cli")
         except Exception as e:
             logger.debug("JWT refresh error getting CLI version: %s", e)

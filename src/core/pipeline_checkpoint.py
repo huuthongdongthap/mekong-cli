@@ -137,7 +137,8 @@ class PipelineCheckpoint:
 
             logger.debug(
                 "Loaded checkpoint for %s: %d stages",
-                self.pipeline_id, len(self._stages),
+                self.pipeline_id,
+                len(self._stages),
             )
         except (json.JSONDecodeError, KeyError) as e:
             logger.warning("Failed to load checkpoint for %s: %s", self.pipeline_id, e)
@@ -149,15 +150,18 @@ class PipelineCheckpoint:
             self._metadata.updated_at = time.time()
             meta_path = self._dir / "checkpoint.json"
             meta_path.write_text(
-                json.dumps({
-                    "pipeline_id": self._metadata.pipeline_id,
-                    "total_stages": self._metadata.total_stages,
-                    "created_at": self._metadata.created_at,
-                    "updated_at": self._metadata.updated_at,
-                    "completed_stages": self._metadata.completed_stages,
-                    "failed_stages": self._metadata.failed_stages,
-                    "status": self._metadata.status,
-                }, indent=2),
+                json.dumps(
+                    {
+                        "pipeline_id": self._metadata.pipeline_id,
+                        "total_stages": self._metadata.total_stages,
+                        "created_at": self._metadata.created_at,
+                        "updated_at": self._metadata.updated_at,
+                        "completed_stages": self._metadata.completed_stages,
+                        "failed_stages": self._metadata.failed_stages,
+                        "status": self._metadata.status,
+                    },
+                    indent=2,
+                ),
                 encoding="utf-8",
             )
 
@@ -185,7 +189,8 @@ class PipelineCheckpoint:
             status=status,
             result=result,
             error=error,
-            started_at=self._stages.get(stage_index, StageCheckpoint(stage_index, "")).started_at or time.time(),
+            started_at=self._stages.get(stage_index, StageCheckpoint(stage_index, "")).started_at
+            or time.time(),
             completed_at=time.time(),
             attempt_count=attempt_count,
         )

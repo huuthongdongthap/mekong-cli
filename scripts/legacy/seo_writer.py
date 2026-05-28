@@ -281,16 +281,12 @@ def show_schedule():
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="SEO Writer - AI Blog Content Generator"
-    )
+    parser = argparse.ArgumentParser(description="SEO Writer - AI Blog Content Generator")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Generate Command
     gen_parser = subparsers.add_parser("generate", help="Generate a blog post")
-    gen_parser.add_argument(
-        "topic", nargs="?", help="Topic (optional, random if not specified)"
-    )
+    gen_parser.add_argument("topic", nargs="?", help="Topic (optional, random if not specified)")
 
     # Ideas Command
     subparsers.add_parser("ideas", help="Show topic ideas")

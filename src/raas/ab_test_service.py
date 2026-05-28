@@ -10,6 +10,7 @@ Usage:
     service.record_exposure("user_123", "welcome_email", variant)
     service.record_conversion("user_123", "welcome_email")
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -553,9 +554,7 @@ class ABTestService:
                 # Calculate relative improvement
                 relative_improvement = 0.0
                 if variant_a_rate > 0:
-                    relative_improvement = (
-                        (variant_b_rate - variant_a_rate) / variant_a_rate * 100
-                    )
+                    relative_improvement = (variant_b_rate - variant_a_rate) / variant_a_rate * 100
 
                 return ExperimentResults(
                     experiment_name=experiment_name,

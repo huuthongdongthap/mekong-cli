@@ -128,7 +128,9 @@ class WorkflowState:
         """
         valid_targets = _WORKFLOW_TRANSITIONS.get(self.status, set())
         if new_status not in valid_targets:
-            msg = f"Workflow {self.workflow_id}: {self.status.value} → {new_status.value} not allowed"
+            msg = (
+                f"Workflow {self.workflow_id}: {self.status.value} → {new_status.value} not allowed"
+            )
             raise InvalidTransitionError(
                 msg,
             )
@@ -160,17 +162,11 @@ class WorkflowState:
 
     def get_completed_steps(self) -> list[int]:
         """Return order numbers of all completed steps."""
-        return [
-            order for order, step in self.steps.items()
-            if step.status == StepStatus.COMPLETED
-        ]
+        return [order for order, step in self.steps.items() if step.status == StepStatus.COMPLETED]
 
     def get_failed_steps(self) -> list[int]:
         """Return order numbers of all failed steps."""
-        return [
-            order for order, step in self.steps.items()
-            if step.status == StepStatus.FAILED
-        ]
+        return [order for order, step in self.steps.items() if step.status == StepStatus.FAILED]
 
     @property
     def is_terminal(self) -> bool:

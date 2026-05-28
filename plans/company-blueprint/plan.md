@@ -1,172 +1,136 @@
-# BookScout — Company Execution Blueprint
+# Mekong Sexology Hub — Project Blueprint
 
-> **AI Book Discovery Engine** — Visual multi-source search, trust-scored rankings, web dashboard output.
-> Stage: **Zero → PSF** | Model: **SaaS B2C + Freemium + Affiliate**
-
----
-
-## 🏗 Architecture Overview
-
-```
-┌──────────────────────────────────────────────┐
-│              USER (Web Dashboard)             │
-│  Search → Visual Crawl Animation → Results    │
-└──────────────┬───────────────────────────────┘
-               │
-┌──────────────▼───────────────────────────────┐
-│           BookScout API (FastAPI)             │
-│  /search → CrawlOrchestrator → RankEngine    │
-└──────────────┬───────────────────────────────┘
-               │
-┌──────────────▼───────────────────────────────┐
-│         Parallel Crawl Agents                │
-│  ┌─────────┐ ┌─────────┐ ┌──────────┐       │
-│  │Goodreads│ │  NYT    │ │  Kirkus  │ ...   │
-│  │ Reviews │ │Bestsell.│ │ Reviews  │       │
-│  └─────────┘ └─────────┘ └──────────┘       │
-└──────────────┬───────────────────────────────┘
-               │
-┌──────────────▼───────────────────────────────┐
-│     Trust Score Engine + AI Summarizer        │
-│  Weighted aggregation → Ranked output         │
-└──────────────────────────────────────────────┘
-```
+Mekong Sexology Hub is a free, self-use, open-source educational platform designed to provide highly credible, scientifically-validated sexology and marital harmony resources. It converts commercial curriculum points into structured, evidence-informed modules backed by international standards (UNESCO, WHO, Gottman Method).
 
 ---
 
-## Department Execution Map
+## 25-Step Educational Project Architecture
 
-| Layer | Key Actions | Agent/Owner | Timeline |
-|-------|-------------|-------------|----------|
-| **Founder** | Vision, fundraising, community strategy, BookTok partnerships | CEO | Ongoing |
-| **Product** | MVP search UX, visual crawl animation, trust score UI | Product/CTO | Month 1-2 |
-| **Engineering** | Crawl engine (5 sources), API, web dashboard, real-time WebSocket | CTO/Dev | Month 1-3 |
-| **Business** | Affiliate setup (Amazon, Bookshop.org), Pro tier pricing, B2B API pricing | Revenue Lead | Month 2-4 |
-| **Marketing** | SEO (book recommendation keywords), Reddit/BookTok launch, content calendar | Growth Lead | Month 2-6 |
-| **Ops** | Monitoring (crawl health, uptime), rate-limit compliance, GDPR setup | DevOps/CTO | Month 1-2 |
+### Phase 1: Foundation (Steps 1-5)
 
----
+#### 1. Master Framework
+- **Business Layer:** Free personal utility model. Zero commercial monetization. Focuses entirely on curation quality and self-study value.
+- **Agentic Layer:** Standardized local LLM agents for curating materials, checking sources, and translating medical jargon into accessible relationship concepts.
+- **Governance Layer:** 100% user privacy. Self-hosted, offline-first. Ethical boundaries matching UNESCO's Comprehensive Sexuality Education (CSE).
 
-## Phase 1: MVP Build (Month 1-2)
+#### 2. Refactor to 2026 Frame
+- Transition the product from a commercial landing page to a beautiful, local-first interactive Knowledge Hub.
+- Incorporate interactive, responsive web tools (e.g. Kegel trackers, emotional journal) built on Vanilla HTML/CSS/JS.
 
-### Core Product — Visual Book Search Engine
+#### 3. Agentic OS Design
+- **Curator Agent:** Crawls and links academic articles (Gottman, PubMed, Siecus) to appropriate sections.
+- **Privacy Guard Agent:** Audits javascript dependencies and storage mechanisms (e.g., localStorage) to ensure zero data leaves the user's browser.
+- **Mentor Agent:** Provides friendly, science-based guidance inside the interactive learning dashboard.
 
-**What makes BookScout unique:**
-1. **Visual Crawl Progress** — Users see real-time animated search across 5+ sources
-2. **Trust Score™** — Weighted aggregation: critic reviews (40%) + user ratings (35%) + awards (15%) + recency (10%)
-3. **Source Transparency** — Every rating shown with its source, not hidden behind an algorithm
+#### 4. Compliance & Privacy Score (IPO/Scale Readiness counterpart)
+- 100% compliance with HIPAA/GDPR standards on sexual health data by implementing an offline-first strategy: **Zero databases, zero server storage, zero external telemetry**.
 
-### Technical MVP Scope
-
-| Component | Technology | Priority |
-|-----------|-----------|----------|
-| Web Dashboard | Next.js + Framer Motion | P0 |
-| Search API | FastAPI + Celery | P0 |
-| Crawl Engine | Playwright + BeautifulSoup | P0 |
-| Visual WebSocket | FastAPI WebSocket + SSE | P0 |
-| Database | PostgreSQL + Redis cache | P0 |
-| AI Summarizer | Gemini API | P1 |
-| Chrome Extension | Manifest V3 | P2 |
-
-### Source Integration Priority
-
-| Source | Data Available | API? | Priority |
-|--------|---------------|------|----------|
-| Goodreads | Ratings, reviews, shelves | Unofficial | P0 |
-| NYT Books | Bestseller lists, reviews | Official API | P0 |
-| Kirkus Reviews | Professional reviews | Scrape | P0 |
-| LibraryThing | Community ratings | API | P1 |
-| BookRiot | Curated lists | Scrape | P1 |
-| Tiki.vn | VN market ratings | Scrape | P2 |
-| Fahasa | VN market availability | Scrape | P2 |
+#### 5. Gap Report & 3-Month Roadmap
+- **Gaps identified:** Need high-quality peer-reviewed Vietnamese translations of Gottman tools and Kegel guides.
+- **Roadmap:**
+  - **Month 1:** Deploy the static curriculum and source database.
+  - **Month 2:** Add interactive Kegel breathing coach and relationship checkup quiz.
+  - **Month 3:** Pack into a standalone desktop utility or private browser application.
 
 ---
 
-## Phase 2: Growth (Month 3-6)
+### Phase 2: Knowledge Architecture (Steps 6-7)
 
-### Revenue Activation
-- Launch **Pro tier** ($9.99/mo): unlimited searches, API access, export to CSV/Notion
-- Activate **affiliate links**: Amazon Associates (4-8%), Bookshop.org (10%)
-- **B2B API** beta: libraries, EdTech platforms
+#### 6. Operating Model & Economics (No-Fee counterpart)
+- **Revenue:** $0.00 (Pure Educational Gift).
+- **Cost structure:** $0/month. Hosted via local file loading, GitHub Pages, or Vercel free tier.
+- **Moat:** Deepest scientific rigor. Zero commercial bias or up-selling.
 
-### Marketing Engine
-- **SEO**: Target 500+ long-tail keywords ("best books 2026", "top rated mystery novels")
-- **BookTok Campaign**: 20 influencer partnerships, 30-day free Pro trials
-- **Reddit Organic**: Weekly curated lists on r/books, r/booksuggestions, r/suggestmeabook
-- **Email Digest**: Weekly "Top Rated New Releases" powered by crawl data
-
-### Metrics Targets (Month 6)
-| Metric | Target |
-|--------|--------|
-| MAU | 10,000 |
-| MRR | $5,000 |
-| Free→Pro Conversion | 5% |
-| Weekly Active Searches | 25,000 |
-| Sources Integrated | 10 |
+#### 7. Learner Psychology & Personas
+- **The Self-Improvement Learner:** Focuses on physiological performance, Kegel exercises, and stress management.
+- **The Harmonious Couple:** Focuses on connection, Love Maps, and resolving perpetual conflicts (Gottman).
 
 ---
 
-## Phase 3: Scale (Month 7-12)
+### Phase 3: Content Curation (Steps 8-12)
 
-- **International**: Vietnam (Tiki, Fahasa), SEA markets
-- **Publisher Partnerships**: Premium placement, early access to ARCs
-- **API Marketplace**: Self-serve B2B API with usage-based pricing
-- **Chrome Extension**: Instant ratings overlay on any book page
-- **Mobile App**: React Native, push notifications for new releases
+#### 8. Positioning
+- "The ultimate, scientifically rigorous, and strictly private sexology companion for Vietnamese couples."
+- **Positioning:** Science, Privacy, Love.
 
-### Target: $80K MRR by Month 12
+#### 9. Content Pillars
+- **Physiology:** Scientific sexual anatomy, responses, Kegel exercises, and nutrition.
+- **Psychology:** Gottman method, Sound Relationship House, emotional bids, and active communication.
+- **Harmony:** Mutual desire, sexual energy transformation, and long-term marital health.
 
----
+#### 10. Digital Learning Narrative
+- A modern, distraction-free Single Page Application (SPA). Elegant typography, dark mode, high-quality SVGs.
+- A logical progression from basic science to complex emotional connection.
 
-## Governance & Compliance
+#### 11. Distribution & Community
+- Organic peer sharing. Open-source code available on GitHub. Easy self-hosting for maximum safety.
 
-| Area | Status | Action |
-|------|--------|--------|
-| GDPR/PDPA | Planned | No personal reading data stored/sold |
-| Terms of Service | Draft | Fair use crawling, attribution policy |
-| Rate Limiting | Built-in | Respect robots.txt, max 1 req/sec/source |
-| Copyright | Compliant | Metadata only, no full review reproduction |
-| Financial Audit | Q4 | QuickBooks setup, P&L tracking |
-
----
-
-## Risk Matrix
-
-| Risk | Probability | Impact | Mitigation |
-|------|------------|--------|------------|
-| Source blocks crawling | High | High | API partnerships, proxy rotation, caching |
-| Copyright claims | Medium | High | Metadata-only policy, legal review |
-| Low paid conversion | Medium | Medium | Enhanced Pro features, A/B test pricing |
-| Competitor enters | Low | Medium | Speed advantage, trust brand, community |
-| AI summarization quality | Medium | Low | Human review layer, user feedback loop |
+#### 12. Case Studies & Success Stories
+- Real couples using Gottman Method and Kegel exercises to rebuild intimacy and resolve sexual mismatches.
 
 ---
 
-## Follow-up Execution Chain
+### Phase 4: Interactive Tools (Steps 13-15)
 
-```
-PHASE 1: INTELLIGENCE ✅ (This document)
-  → SWOT analysis completed
-  → 5-factor assessment done
-  → Technical stack defined
+#### 13. Relationship Checkups
+- Interactive client-side quizzes that assess the couple's "Love Map" health and provide localized tips based on Gottman principles.
 
-PHASE 2: STRATEGY → Next conversation
-  → Implementation plan for MVP
-  → Visual search UX design
-  → GTM strategy finalization
+#### 14. Physiology & Exercise Guide
+- Visual guide for Kegels and breathing, complete with a beautiful, synchronized canvas-based timer to guide inhalation and contraction intervals.
 
-PHASE 3: BUILD → /build command
-  → Build MVP crawler + dashboard end-to-end
-  → Full test suite
-  → Deploy to Cloudflare
+#### 15. Feedback Loops
+- Ability to export learning progress as a simple, encrypted JSON file to share securely with a partner via messaging apps.
 
-PHASE 4: REVENUE → /money command
-  → Launch affiliate tracking
-  → Sales pipeline for B2B API
-  → Pricing experiments
+---
 
-PHASE 5: SCALE → /studio command
-  → International expansion
-  → Publisher partnerships
-  → Series A preparation
-```
+### Phase 5: Operations & Security (Steps 16-21)
+
+#### 16. Learner Analytics
+- Self-hosted metrics showing modules read, quiz scores, and streak days. Stored completely in-browser.
+
+#### 17. Funding Strategy
+- Self-funded. Zero external dependencies or advertising.
+
+#### 18. Risk Mitigation
+- **Risk:** Partner disagreement over sexual frequency/desire.
+- **Mitigation:** Comprehensive module on "Desire Mismatch" utilizing Gottman's "perpetual problems" conflict resolution tools.
+
+#### 19. Individual Development Org
+- Run completely by the user. Adaptable modular code, allowing extensions for more subjects.
+
+#### 20. Comparable Projects
+- UNESCO Comprehensive Sexuality Education guidelines.
+- Siecus Educational Standards.
+- Kinsey Institute research portal.
+
+#### 21. Material Library
+- Access to 10+ selected public-domain books and reference papers compiled directly inside the app assets.
+
+---
+
+### Phase 6: Continuous Alignment (Steps 22-25)
+
+#### 22. Quarterly OKRs
+- Q1: Launch core static app with the 13 verified modules.
+- Q2: Add interactive breathing coaches and offline questionnaires.
+
+#### 23. Mutual Agreement Governance
+- A "Couple Agreement Contract" template included in the final module to help partners write down their communication norms and boundaries.
+
+#### 24. Social Impact
+- Promoting a healthy, mature, and shame-free approach to sex and intimacy in the Vietnamese community.
+
+#### 25. Security Auditing
+- Quarterly dependency checks to ensure zero data leakage or tracking codes are introduced.
+
+---
+
+## Action Plan by Layer
+
+| Layer | Key Actions | Role/Agent |
+|-------|-------------|-------------|
+| **Founder** | Set educational tone, select reference materials, ensure privacy. | User (Self) |
+| **Business** | Maintain zero-cost hosting (GitHub/Local-only). | Curator Agent |
+| **Product** | Design clean dark-mode UI with beautiful timers & sliders. | UI Designer Agent |
+| **Engineering** | Code the offline-first web client with interactive tools. | Fullstack Agent |
+| **Ops** | Security audits, local testing, source checking. | Privacy Guard Agent |

@@ -1,8 +1,10 @@
 # 🌌 Mekong CLI for Antigravity
 
-> **Use the full power of Mekong CLI's 240+ commands on Antigravity AI — zero config required.**
+> **Use the full power of Mekong CLI's 505 commands on Antigravity AI — zero config required.**
 
-Antigravity is a powerful AI coding assistant by Google DeepMind. This guide helps Antigravity users leverage Mekong CLI's 5-layer business platform directly from their IDE.
+Antigravity is a powerful AI coding assistant by Google DeepMind. This guide helps Antigravity users leverage Mekong CLI's 6-layer business platform directly from their IDE.
+
+> 🔧 **Deep Config Status**: 504 TOML commands synced | 49 workflows | 6 subagents | 6 crews | 5 skill categories
 
 ## Quick Start
 
@@ -99,10 +101,24 @@ Mekong CLI embeds the Binh Pháp (Art of War) strategic framework throughout its
 
 ## 📊 Stats
 
-- **21 workflow files** adapted for Antigravity
-- **2,189 lines** of workflow instructions
-- **240+ sub-commands** covered across 5 layers
-- **0 files modified** in original codebase
+- **504 TOML command files** in `.gemini/commands/` (synced from `.claude/commands/`)
+- **22 workflow files** in `.agents/workflows/` (core layer workflows)
+- **27 workflow files** in `.agent/workflows/` (extended workflows)
+- **6 subagents** in `.agent/subagents/primary/`
+- **6 crews** in `.agent/crews/crews.yaml`
+- **5 skill categories** in `.agent/skills/`
+- **505 sub-commands** covered across 6 layers
+- **0 files modified** in original `.claude/commands/` codebase
+
+### Sync Commands
+
+```bash
+# Regenerate all TOML commands from Claude source
+python3 tools/sync_antigravity.py
+
+# Force-update (overwrite existing)
+python3 tools/sync_antigravity.py --force
+```
 
 ## 🤝 Contributing
 

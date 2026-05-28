@@ -146,10 +146,14 @@ class TestWebhookEndpoint:
             "/webhooks/polar",
             json={
                 "type": "subscription.created",
-                "data": {"object": {
-                    "id": "sub_upd", "customer_id": "c1",
-                    "customer_email": "u@e.com", "product_id": "prod_starter",
-                }},
+                "data": {
+                    "object": {
+                        "id": "sub_upd",
+                        "customer_id": "c1",
+                        "customer_email": "u@e.com",
+                        "product_id": "prod_starter",
+                    }
+                },
             },
             headers={"X-Polar-Signature": ""},
         )
@@ -170,10 +174,14 @@ class TestWebhookEndpoint:
             "/webhooks/polar",
             json={
                 "type": "subscription.created",
-                "data": {"object": {
-                    "id": "sub_can", "customer_id": "c2",
-                    "customer_email": "c@e.com", "product_id": "prod_starter",
-                }},
+                "data": {
+                    "object": {
+                        "id": "sub_can",
+                        "customer_id": "c2",
+                        "customer_email": "c@e.com",
+                        "product_id": "prod_starter",
+                    }
+                },
             },
             headers={"X-Polar-Signature": ""},
         )

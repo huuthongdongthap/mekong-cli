@@ -26,8 +26,8 @@ class ConstraintViolation:
 class ResourceLimit:
     """Limit concurrent and total step counts."""
 
-    max_concurrent_steps: int = 0    # 0 = unlimited
-    max_total_steps: int = 0         # 0 = unlimited
+    max_concurrent_steps: int = 0  # 0 = unlimited
+    max_total_steps: int = 0  # 0 = unlimited
 
 
 @dataclass
@@ -42,8 +42,8 @@ class TimeBound:
 class OrderingConstraint:
     """Require step matching `before_step` title pattern to precede `after_step`."""
 
-    before_step: str   # substring match against step title
-    after_step: str    # substring match against step title
+    before_step: str  # substring match against step title
+    after_step: str  # substring match against step title
 
 
 @dataclass
@@ -73,7 +73,9 @@ class ConstraintEngine:
     """
 
     def validate(
-        self, recipe: "Recipe", constraints: PlanConstraints,
+        self,
+        recipe: "Recipe",
+        constraints: PlanConstraints,
     ) -> List[ConstraintViolation]:
         """Check all constraints and return every violation found.
 
@@ -111,7 +113,9 @@ class ConstraintEngine:
     # ------------------------------------------------------------------
 
     def _check_resource_limits(
-        self, recipe: "Recipe", limit: ResourceLimit,
+        self,
+        recipe: "Recipe",
+        limit: ResourceLimit,
     ) -> List[ConstraintViolation]:
         """Enforce max_total_steps and max_concurrent_steps."""
         violations: List[ConstraintViolation] = []
@@ -120,44 +124,43 @@ class ConstraintEngine:
         if limit.max_total_steps > 0:
             total = len(recipe.steps)
             if total > limit.max_total_steps:
-                violations.append(ConstraintViolation(
-                    step_order=0,
-                    constraint_name="ResourceLimit.max_total_steps",
-                    message=(
-                        f"Plan has {total} steps, exceeds limit of "
-                        f"{limit.max_total_steps}"
-                    ),
-                ))
+                violations.append(
+                    ConstraintViolation(
+                        step_order=0,
+                        constraint_name="ResourceLimit.max_total_steps",
+                        message=(
+                            f"Plan has {total} steps, exceeds limit of " f"{limit.max_total_steps}"
+                        ),
+                    )
+                )
 
         # Concurrent steps = DAG width (steps sharing no dependency path)
         if limit.max_concurrent_steps > 0:
             width = self._dag_width(recipe)
             if width > limit.max_concurrent_steps:
-                violations.append(ConstraintViolation(
-                    step_order=0,
-                    constraint_name="ResourceLimit.max_concurrent_steps",
-                    message=(
-                        f"Plan has up to {width} concurrent steps, exceeds "
-                        f"limit of {limit.max_concurrent_steps}"
-                    ),
-                ))
+                violations.append(
+                    ConstraintViolation(
+                        step_order=0,
+                        constraint_name="ResourceLimit.max_concurrent_steps",
+                        message=(
+                            f"Plan has up to {width} concurrent steps, exceeds "
+                            f"limit of {limit.max_concurrent_steps}"
+                        ),
+                    )
+                )
 
         return violations
 
     def _check_ordering(
-        self, recipe: "Recipe", ordering: OrderingConstraint,
+        self,
+        recipe: "Recipe",
+        ordering: OrderingConstraint,
     ) -> List[ConstraintViolation]:
         """Verify that before_step always precedes after_step in the dependency graph."""
         violations: List[ConstraintViolation] = []
 
-        before_steps = [
-            s for s in recipe.steps
-            if ordering.before_step.lower() in s.title.lower()
-        ]
-        after_steps = [
-            s for s in recipe.steps
-            if ordering.after_step.lower() in s.title.lower()
-        ]
+        before_steps = [s for s in recipe.steps if ordering.before_step.lower() in s.title.lower()]
+        after_steps = [s for s in recipe.steps if ordering.after_step.lower() in s.title.lower()]
 
         if not before_steps or not after_steps:
             # Constraint references steps not present — skip silently
@@ -169,33 +172,34 @@ class ConstraintEngine:
         for a_step in after_steps:
             # At least one before_step must be an ancestor of a_step
             has_ancestor = any(
-                b_step.order in reachable.get(a_step.order, set())
-                for b_step in before_steps
+                b_step.order in reachable.get(a_step.order, set()) for b_step in before_steps
             )
             if not has_ancestor:
-                violations.append(ConstraintViolation(
-                    step_order=a_step.order,
-                    constraint_name="OrderingConstraint",
-                    message=(
-                        f"Step {a_step.order} ('{a_step.title}') must depend on "
-                        f"a step matching '{ordering.before_step}'"
-                    ),
-                ))
+                violations.append(
+                    ConstraintViolation(
+                        step_order=a_step.order,
+                        constraint_name="OrderingConstraint",
+                        message=(
+                            f"Step {a_step.order} ('{a_step.title}') must depend on "
+                            f"a step matching '{ordering.before_step}'"
+                        ),
+                    )
+                )
 
         return violations
 
     def _check_mutual_exclusion(
-        self, recipe: "Recipe", exclusion: MutualExclusion,
+        self,
+        recipe: "Recipe",
+        exclusion: MutualExclusion,
     ) -> List[ConstraintViolation]:
         """Verify that mutually exclusive steps are not in the same parallel batch."""
         violations: List[ConstraintViolation] = []
 
         matched = [
-            s for s in recipe.steps
-            if any(
-                pattern.lower() in s.title.lower()
-                for pattern in exclusion.step_titles
-            )
+            s
+            for s in recipe.steps
+            if any(pattern.lower() in s.title.lower() for pattern in exclusion.step_titles)
         ]
 
         if len(matched) < 2:
@@ -205,24 +209,28 @@ class ConstraintEngine:
         reachable = self._build_reachability(recipe)
 
         for i, s1 in enumerate(matched):
-            for s2 in matched[i + 1:]:
+            for s2 in matched[i + 1 :]:
                 s1_reaches_s2 = s1.order in reachable.get(s2.order, set())
                 s2_reaches_s1 = s2.order in reachable.get(s1.order, set())
                 if not s1_reaches_s2 and not s2_reaches_s1:
-                    violations.append(ConstraintViolation(
-                        step_order=s1.order,
-                        constraint_name="MutualExclusion",
-                        message=(
-                            f"Steps {s1.order} ('{s1.title}') and "
-                            f"{s2.order} ('{s2.title}') may run concurrently "
-                            f"but are mutually exclusive"
-                        ),
-                    ))
+                    violations.append(
+                        ConstraintViolation(
+                            step_order=s1.order,
+                            constraint_name="MutualExclusion",
+                            message=(
+                                f"Steps {s1.order} ('{s1.title}') and "
+                                f"{s2.order} ('{s2.title}') may run concurrently "
+                                f"but are mutually exclusive"
+                            ),
+                        )
+                    )
 
         return violations
 
     def _check_time_bound(
-        self, recipe: "Recipe", bound: TimeBound,
+        self,
+        recipe: "Recipe",
+        bound: TimeBound,
     ) -> List[ConstraintViolation]:
         """Validate TimeBound fields are sane (positive values).
 
@@ -232,18 +240,22 @@ class ConstraintEngine:
         violations: List[ConstraintViolation] = []
 
         if bound.max_step_duration_s is not None and bound.max_step_duration_s <= 0:
-            violations.append(ConstraintViolation(
-                step_order=0,
-                constraint_name="TimeBound.max_step_duration_s",
-                message="max_step_duration_s must be positive",
-            ))
+            violations.append(
+                ConstraintViolation(
+                    step_order=0,
+                    constraint_name="TimeBound.max_step_duration_s",
+                    message="max_step_duration_s must be positive",
+                )
+            )
 
         if bound.max_total_duration_s is not None and bound.max_total_duration_s <= 0:
-            violations.append(ConstraintViolation(
-                step_order=0,
-                constraint_name="TimeBound.max_total_duration_s",
-                message="max_total_duration_s must be positive",
-            ))
+            violations.append(
+                ConstraintViolation(
+                    step_order=0,
+                    constraint_name="TimeBound.max_total_duration_s",
+                    message="max_total_duration_s must be positive",
+                )
+            )
 
         return violations
 
@@ -291,10 +303,7 @@ class ConstraintEngine:
 
         # Assign levels via BFS
         order_to_deps = {
-            s.order: set(
-                s.params.get("dependencies", []) or s.dependencies
-            )
-            for s in recipe.steps
+            s.order: set(s.params.get("dependencies", []) or s.dependencies) for s in recipe.steps
         }
 
         levels: dict = {}
@@ -308,6 +317,7 @@ class ConstraintEngine:
 
         # Count how many steps share the same level
         from collections import Counter
+
         level_counts = Counter(levels.values())
         return max(level_counts.values()) if level_counts else 0
 

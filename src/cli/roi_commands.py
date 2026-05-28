@@ -79,6 +79,7 @@ def _check_auto_update_async() -> None:
     try:
         # Run in background to avoid blocking CLI
         import threading
+
         thread = threading.Thread(target=_check_auto_update_impl, daemon=True)
         thread.start()
     except Exception:
@@ -119,6 +120,7 @@ def _get_current_version() -> Optional[str]:
     """Get current CLI version."""
     try:
         import importlib.metadata
+
         return importlib.metadata.version("mekong-cli")
     except Exception:
         return None
@@ -142,23 +144,23 @@ def full_status(
     # Resolve license key
     if not license_key:
         import os
+
         license_key = os.getenv("RAAS_LICENSE_KEY", "")
 
     if not license_key:
-        console.print("[yellow]No license key provided. Set RAAS_LICENSE_KEY or use --key.[/yellow]\n")
+        console.print(
+            "[yellow]No license key provided. Set RAAS_LICENSE_KEY or use --key.[/yellow]\n"
+        )
 
     # 1. Auth Status
     console.print("[bold]🔐 License Status[/bold]")
     try:
         from src.lib.raas_gate import LicenseService
+
         service = LicenseService.getInstance()
         validation = service.validateSync(license_key)
 
-        tier_display = {
-            'free': '🔓 FREE',
-            'pro': '💎 PRO',
-            'enterprise': '🏢 ENTERPRISE'
-        }
+        tier_display = {"free": "🔓 FREE", "pro": "💎 PRO", "enterprise": "🏢 ENTERPRISE"}
 
         status_table = Table(show_header=True, header_style="bold cyan")
         status_table.add_column("Property", style="dim")
@@ -175,7 +177,8 @@ def full_status(
     # 2. Usage Status
     console.print("\n[bold]📊 Usage Status[/bold]")
     try:
-        from src. raas.quota_cache import get_quota_cache
+        from src.raas.quota_cache import get_quota_cache
+
         quota_cache = get_quota_cache()
         quota_status = asyncio.run(quota_cache.get_quota_status(license_key or "anonymous"))
 
@@ -185,9 +188,9 @@ def full_status(
         usage_table.add_column("Limit", justify="right")
         usage_table.add_column("%", justify="right")
 
-        for quota_type in ['daily', 'monthly']:
-            used = quota_status.get(f'{quota_type}_used', 0)
-            limit = quota_status.get(f'{quota_type}_limit', 0)
+        for quota_type in ["daily", "monthly"]:
+            used = quota_status.get(f"{quota_type}_used", 0)
+            limit = quota_status.get(f"{quota_type}_limit", 0)
             pct = (used / limit * 100) if limit > 0 else 0
 
             pct_style = "green" if pct < 80 else "yellow" if pct < 95 else "red"
@@ -214,11 +217,13 @@ def full_status(
 
         if license_info:
             engine = get_engine()
-            result = asyncio.run(engine.calculate_period_charges(
-                license_key=license_key,
-                period_start=datetime.now().replace(day=1),
-                period_end=datetime.now(),
-            ))
+            result = asyncio.run(
+                engine.calculate_period_charges(
+                    license_key=license_key,
+                    period_start=datetime.now().replace(day=1),
+                    period_end=datetime.now(),
+                )
+            )
 
             billing_table = Table(show_header=True, header_style="bold green")
             billing_table.add_column("Metric", style="dim")
@@ -293,7 +298,9 @@ def check_auto_update() -> None:
             # Show release notes
             if data.get("body"):
                 console.print("\n[bold]Release Notes:[/bold]")
-                console.print(data["body"][:500] + "..." if len(data.get("body", "")) > 500 else data["body"])
+                console.print(
+                    data["body"][:500] + "..." if len(data.get("body", "")) > 500 else data["body"]
+                )
         else:
             console.print("[bold green]✓ You're on the latest version![/bold green]\n")
 
@@ -349,6 +356,7 @@ def quick_start() -> None:
 # =============================================================================
 # Main Entry Point
 # =============================================================================
+
 
 def main() -> None:
     """Main entry point for ROI CLI."""

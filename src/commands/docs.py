@@ -15,7 +15,9 @@ console = Console()
 
 @app.command()
 def generate(
-    format_type: str = typer.Option("html", "--format", "-f", help="Output format: html, pdf, epub, md"),
+    format_type: str = typer.Option(
+        "html", "--format", "-f", help="Output format: html, pdf, epub, md"
+    ),
     source: str = typer.Option("./", "--source", "-s", help="Source directory containing docs"),
     output: str = typer.Option("./docs/_build", "--output", "-o", help="Output directory"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
@@ -36,7 +38,9 @@ def generate(
             result = subprocess.run(cmd, check=True, capture_output=not verbose, text=True)
 
             if result.returncode == 0:
-                console.print(f"[green]✅ {format_type.upper()} documentation generated at {output}[/green]")
+                console.print(
+                    f"[green]✅ {format_type.upper()} documentation generated at {output}[/green]"
+                )
             else:
                 console.print("[red]❌ Documentation generation failed[/red]")
                 if result.stderr:
@@ -56,7 +60,7 @@ def generate(
 
 def generate_simple_docs(format_type: str, source: str, output: str):
     """Generate simple documentation for different formats"""
-# source_path = Path(source)  # Removed unused variable
+    # source_path = Path(source)  # Removed unused variable
     output_path = Path(output)
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -112,7 +116,9 @@ def generate_simple_docs(format_type: str, source: str, output: str):
         with open(output_path / "index.html", "w") as f:
             f.write(html_content)
 
-        console.print(f"[green]✅ Simple HTML documentation generated at {output_path / 'index.html'}[/green]")
+        console.print(
+            f"[green]✅ Simple HTML documentation generated at {output_path / 'index.html'}[/green]"
+        )
 
     elif format_type == "md":
         # Create README-style documentation
@@ -121,10 +127,14 @@ def generate_simple_docs(format_type: str, source: str, output: str):
         with open(output_path / "README.md", "w") as f:
             f.write(md_content)
 
-        console.print(f"[green]✅ Markdown documentation generated at {output_path / 'README.md'}[/green]")
+        console.print(
+            f"[green]✅ Markdown documentation generated at {output_path / 'README.md'}[/green]"
+        )
 
     else:
-        console.print(f"[yellow]⚠️  Format {format_type} not supported in simple mode. Use Sphinx for advanced formats.[/yellow]")
+        console.print(
+            f"[yellow]⚠️  Format {format_type} not supported in simple mode. Use Sphinx for advanced formats.[/yellow]"
+        )
 
 
 @app.command()
@@ -169,7 +179,9 @@ def serve(
 
     except ImportError:
         console.print("[red]❌ Failed to start documentation server[/red]")
-        console.print("[dim]Try installing a simple HTTP server: python -m http.server {port}[/dim]")
+        console.print(
+            "[dim]Try installing a simple HTTP server: python -m http.server {port}[/dim]"
+        )
 
 
 @app.command()
@@ -196,15 +208,16 @@ def check_links():
     total_links = 0
 
     for doc_file in all_docs:
-        with open(doc_file, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(doc_file, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
         # Find potential links in the document
         import re
+
         link_patterns = [
-            r'\[.*?\]\((.*?)\)',  # Markdown links: [text](link)
-            r'href="(.*?)"',      # HTML href attributes
-            r'src="(.*?)"',       # HTML src attributes
+            r"\[.*?\]\((.*?)\)",  # Markdown links: [text](link)
+            r'href="(.*?)"',  # HTML href attributes
+            r'src="(.*?)"',  # HTML src attributes
         ]
 
         for pattern in link_patterns:
@@ -212,7 +225,7 @@ def check_links():
             for match in matches:
                 total_links += 1
                 # Skip absolute URLs
-                if match.startswith(('http://', 'https://', '#')):
+                if match.startswith(("http://", "https://", "#")):
                     continue
 
                 # Check if local file exists
@@ -221,7 +234,9 @@ def check_links():
                     broken_links.append((doc_file.name, match))
 
     if broken_links:
-        console.print(f"[red]❌ Found {len(broken_links)} broken links out of {total_links} total links[/red]")
+        console.print(
+            f"[red]❌ Found {len(broken_links)} broken links out of {total_links} total links[/red]"
+        )
 
         table = Table(title="Broken Links")
         table.add_column("Document", style="cyan")
@@ -271,7 +286,11 @@ def validate():
     # Check for tutorials
     tutorial_docs = list(Path(".").glob("**/tutorial*.md")) + list(Path(".").glob("**/guide*.md"))
     tutorial_status = "✅" if tutorial_docs else "⚠️ "
-    tutorial_msg = f"Found {len(tutorial_docs)} tutorials/guides" if tutorial_docs else "No tutorials/guides found"
+    tutorial_msg = (
+        f"Found {len(tutorial_docs)} tutorials/guides"
+        if tutorial_docs
+        else "No tutorials/guides found"
+    )
     validation_results.append(("Tutorials/Guides", tutorial_status, tutorial_msg))
 
     table = Table(title="Documentation Validation")
@@ -287,8 +306,12 @@ def validate():
 
 @app.command()
 def publish(
-    platform: str = typer.Argument(..., help="Platform to publish to: github-pages, netlify, custom"),
-    source: str = typer.Option("./docs/_build/html", "--source", "-s", help="Source directory to publish"),
+    platform: str = typer.Argument(
+        ..., help="Platform to publish to: github-pages, netlify, custom"
+    ),
+    source: str = typer.Option(
+        "./docs/_build/html", "--source", "-s", help="Source directory to publish"
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
 ):
     """Publish documentation to various platforms"""
@@ -319,18 +342,17 @@ def publish_to_github_pages(source: str, verbose: bool):
 
         # If gh-pages doesn't exist, create it
         result = subprocess.run(
-            ["git", "show-ref", "--verify", "--quiet", "refs/heads/gh-pages"],
-            capture_output=True
+            ["git", "show-ref", "--verify", "--quiet", "refs/heads/gh-pages"], capture_output=True
         )
         if result.returncode != 0:
             # Create orphaned gh-pages branch
             subprocess.run(
-                ["git", "checkout", "--orphan", "gh-pages"],
-                check=True, capture_output=not verbose
+                ["git", "checkout", "--orphan", "gh-pages"], check=True, capture_output=not verbose
             )
 
         # Clear existing content
         import shutil
+
         for item in Path(".").iterdir():
             if item.name != ".git":
                 if item.is_dir():
@@ -347,16 +369,19 @@ def publish_to_github_pages(source: str, verbose: bool):
                     dest_path = Path(".") / item.relative_to(source_path)
                     dest_path.parent.mkdir(parents=True, exist_ok=True)
                     import shutil
+
                     shutil.copy2(item, dest_path)
 
         # Add and commit
         subprocess.run(["git", "add", "."], check=True, capture_output=not verbose)
-        subprocess.run(["git", "commit", "-m", "Update documentation"],
-                       check=True, capture_output=not verbose)
+        subprocess.run(
+            ["git", "commit", "-m", "Update documentation"], check=True, capture_output=not verbose
+        )
 
         # Push to GitHub Pages
-        subprocess.run(["git", "push", "origin", "gh-pages"],
-                       check=True, capture_output=not verbose)
+        subprocess.run(
+            ["git", "push", "origin", "gh-pages"], check=True, capture_output=not verbose
+        )
 
         console.print("[green]✅ Documentation published to GitHub Pages![/green]")
         console.print("[dim]Visit: https://<username>.github.io/<repository>[/dim]")
@@ -378,11 +403,12 @@ def publish_to_netlify(source: str, verbose: bool):
     try:
         # Check if netlify CLI is available
         result = subprocess.run(
-            ["netlify", "--version"],
-            capture_output=True, text=True, check=False
+            ["netlify", "--version"], capture_output=True, text=True, check=False
         )
         if result.returncode != 0:
-            console.print("[red]❌ Netlify CLI not found. Install with: npm install -g netlify-cli[/red]")
+            console.print(
+                "[red]❌ Netlify CLI not found. Install with: npm install -g netlify-cli[/red]"
+            )
             return
 
         # Deploy using netlify
@@ -411,7 +437,9 @@ def publish_to_custom(source: str, verbose: bool):
 
     if not Path(custom_publish_script).exists():
         console.print(f"[red]❌ Custom publish script not found: {custom_publish_script}[/red]")
-        console.print("[dim]Set CUSTOM_DOCS_PUBLISH_SCRIPT env var or create ./publish-docs.sh[/dim]")
+        console.print(
+            "[dim]Set CUSTOM_DOCS_PUBLISH_SCRIPT env var or create ./publish-docs.sh[/dim]"
+        )
         return
 
     try:

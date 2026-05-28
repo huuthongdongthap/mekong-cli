@@ -103,9 +103,7 @@ def get_billing_status(
     )
 
 
-def _calc_avg_daily(
-    base: Path, mcu_gate: MCUGate | None, tenant_id: str
-) -> float:
+def _calc_avg_daily(base: Path, mcu_gate: MCUGate | None, tenant_id: str) -> float:
     """Calculate average daily MCU usage from ledger."""
     entries = get_history(base_dir=base, mcu_gate=mcu_gate, tenant_id=tenant_id, limit=50)
     if not entries:
@@ -203,14 +201,16 @@ def get_tenants(
         tenant_id = r["tenant_id"]
         tier = _guess_tier(r["lifetime_used"])
         mrr = TIER_PRICE.get(tier, 0)
-        tenants.append({
-            "tenant_id": tenant_id,
-            "tier": tier,
-            "mrr": mrr,
-            "balance": r["balance"],
-            "locked": r["locked"],
-            "lifetime_used": r["lifetime_used"],
-        })
+        tenants.append(
+            {
+                "tenant_id": tenant_id,
+                "tier": tier,
+                "mrr": mrr,
+                "balance": r["balance"],
+                "locked": r["locked"],
+                "lifetime_used": r["lifetime_used"],
+            }
+        )
 
     if sort_by == "mrr":
         tenants.sort(key=lambda t: t["mrr"], reverse=True)

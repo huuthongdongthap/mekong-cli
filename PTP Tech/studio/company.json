@@ -1,0 +1,90 @@
+{
+  "name": "PTP Tech — Solar & Smart Home",
+  "version": "1.0.0",
+  "created": "2026-05-20",
+  "type": "ecommerce_services",
+  "status": "bootstrapping",
+  "company": {
+    "legal_name": "CÔNG TY TNHH CÔNG NGHỆ DỊCH VỤ PTP",
+    "short_name": "PTP Tech",
+    "founded": "2024",
+    "location": "Sa Đéc, Đồng Tháp",
+    "address": "Gần số 10, Khóm Tân Thành, TP. Sa Đéc, Đồng Tháp",
+    "phone": "093 280 9179",
+    "email": "ptptech.vn@gmail.com",
+    "facebook": "https://www.facebook.com/ptptechsolar/",
+    "zalo": "https://zalo.me/1746288598889950111",
+    "website": "https://ptptech.vn/"
+  },
+  "business_model": {
+    "type": "E-commerce + Services",
+    "current_platform": "KiotViet (kiotvietweb.vn)",
+    "goal": "Build custom website — independent platform, better UX, lower fees",
+    "revenue_streams": [
+      "Solar equipment sales (B2C + B2B)",
+      "Smart home products (Hunonic)",
+      "Installation services",
+      "Maintenance & warranty",
+      "Consulting & system design"
+    ]
+  },
+  "product_categories": [
+    {
+      "id": "solar-lights",
+      "name": "Đèn Năng Lượng Mặt Trời",
+      "subcategories": ["Đèn pha Kungfu Solar", "Đèn chống chói", "Đèn đường NLMT"],
+      "price_range": "580K - 1.2tr",
+      "bestseller": "Đèn pha NLMT KUNGFU SOLAR KF-83100 (100W)"
+    },
+    {
+      "id": "solar-systems",
+      "name": "Điện Năng Lượng Mặt Trời",
+      "subcategories": ["Tấm pin NLMT", "Inverter hòa lưới", "Pin lưu trữ", "Phụ kiện"],
+      "brands": ["Deye", "Growatt", "Luxpower", "ECOPower", "HinaESS", "SVE", "LVTOPSUN", "SAVISOLAR"],
+      "price_range": "25K - 162tr"
+    },
+    {
+      "id": "smart-home",
+      "name": "Nhà Thông Minh Hunonic",
+      "subcategories": ["Công tắc cảm ứng BLE/WiFi", "Cảm biến", "Khóa cửa vân tay", "Động cơ cổng", "IR Smart"],
+      "price_range": "195K - 1.7tr"
+    },
+    {
+      "id": "accessories",
+      "name": "Phụ Kiện & Vật Tư",
+      "subcategories": ["MC4 connectors", "Thanh rail nhôm", "Tủ điện", "Ốc siết cáp", "Bát chữ Z"],
+      "price_range": "5K - 441K"
+    }
+  ],
+  "services": [
+    {
+      "id": "installation",
+      "name": "Lắp Đặt Trọn Gói",
+      "description": "Lắp đặt hệ thống NLMT trọn gói — khảo sát, thiết kế, thi công, nghiệm thu",
+      "types": ["NLMT áp mái", "NLMT độc lập", "NLMT hòa lưới"]
+    },
+    {
+      "id": "consulting",
+      "name": "Tư Vấn & Thiết Kế",
+      "description": "Tư vấn giải pháp NLMT phù hợp — tính toán công suất, ROI, thiết kế hệ thống"
+    },
+    {
+      "id": "maintenance",
+      "name": "Bảo Trì & Bảo Hành",
+      "description": "Bảo hành chính hãng, bảo trì định kỳ, sửa chữa tại nhà"
+    }
+  ],
+  "target_metrics": {
+    "monthly_revenue_target": "500tr",
+    "avg_order_value": "5tr",
+    "orders_per_month": 100,
+    "installation_projects_per_month": 10
+  },
+  "stack": {
+    "frontend": "Next.js + Cloudflare Pages",
+    "backend": "Cloudflare Workers (Hono.js)",
+    "database": "D1 (SQLite) + KV",
+    "payment": "payOS (Vietnam gateway)",
+    "deployment": "Cloudflare (zero cost infrastructure)"
+  }
+}

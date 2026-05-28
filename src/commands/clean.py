@@ -129,7 +129,9 @@ def logs() -> None:
 
 
 @app.command()
-def all(dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Show what would be cleaned")) -> None:
+def all(
+    dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Show what would be cleaned")
+) -> None:
     """Clean everything (cache, build, temp, logs)"""
     console.print(
         Panel(

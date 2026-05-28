@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from mem0 import Memory as Mem0Memory
+
     MEM0_AVAILABLE = True
 except ImportError:
     MEM0_AVAILABLE = False

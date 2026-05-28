@@ -175,6 +175,7 @@ class TestEncryptedPayload:
         """Test converting back to bytes."""
         # Use actual encrypted data for realistic test
         from src.raas.payload_encryptor import PayloadEncryptor
+
         encryptor = PayloadEncryptor()
         payload = {"test": "data"}
 

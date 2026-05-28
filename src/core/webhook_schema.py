@@ -114,9 +114,7 @@ class MissionStepFailedPayload(BaseWebhookPayload):
     retry_count: int = Field(default=0, description="Number of retries attempted")
     max_retries: int = Field(default=3, description="Maximum retries allowed")
     can_retry: bool = Field(default=True, description="Whether retry is possible")
-    retry_after_seconds: int = Field(
-        default=0, description="Seconds to wait before retry"
-    )
+    retry_after_seconds: int = Field(default=0, description="Seconds to wait before retry")
 
 
 # =============================================================================
@@ -143,9 +141,7 @@ class MissionCompletedPayload(BaseWebhookPayload):
         description="List of files created during execution",
     )
     total_steps: int = Field(default=0, description="Total steps executed")
-    total_duration_seconds: float = Field(
-        default=0.0, description="Total mission duration"
-    )
+    total_duration_seconds: float = Field(default=0.0, description="Total mission duration")
     metrics: dict[str, Any] = Field(
         default_factory=dict,
         description="Performance metrics (success_rate, retry_count, etc.)",
@@ -168,9 +164,7 @@ class MissionFailedPayload(BaseWebhookPayload):
     failed_at_step: int = Field(default=0, description="Step number where failure occurred")
     total_steps_completed: int = Field(default=0, description="Steps completed before failure")
     retry_attempts: int = Field(default=0, description="Total retry attempts")
-    refund_eligible: bool = Field(
-        default=True, description="Whether credits should be refunded"
-    )
+    refund_eligible: bool = Field(default=True, description="Whether credits should be refunded")
     credits_to_refund: int = Field(default=0, description="Credits to refund")
 
 
@@ -190,9 +184,7 @@ class CreditsLowPayload(BaseWebhookPayload):
     current_balance: int = Field(..., description="Current credit balance")
     threshold: int = Field(default=10, description="Low balance threshold")
     currency: str = Field(default="credits", description="Currency type")
-    top_up_url: str = Field(
-        default="", description="URL to top up credits"
-    )
+    top_up_url: str = Field(default="", description="URL to top up credits")
 
 
 # =============================================================================

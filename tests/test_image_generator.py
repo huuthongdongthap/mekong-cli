@@ -94,9 +94,7 @@ class TestGenerate:
     def test_generate_multiple_images(self, mock_requests):
         """Test generating multiple images."""
         submit_resp = MagicMock()
-        submit_resp.json.return_value = {
-            "output": {"task_id": "task-multi"}
-        }
+        submit_resp.json.return_value = {"output": {"task_id": "task-multi"}}
         submit_resp.raise_for_status = MagicMock()
 
         poll_resp = MagicMock()
@@ -128,9 +126,7 @@ class TestGenerate:
     def test_generate_task_failed(self, mock_requests):
         """Test handling of FAILED task."""
         submit_resp = MagicMock()
-        submit_resp.json.return_value = {
-            "output": {"task_id": "task-fail"}
-        }
+        submit_resp.json.return_value = {"output": {"task_id": "task-fail"}}
         submit_resp.raise_for_status = MagicMock()
 
         poll_resp = MagicMock()
@@ -153,6 +149,7 @@ class TestGenerate:
     def test_generate_api_error(self, mock_requests):
         """Test handling of request exception."""
         import requests as real_requests
+
         mock_requests.post.side_effect = real_requests.RequestException("timeout")
         mock_requests.RequestException = real_requests.RequestException
 
@@ -166,9 +163,7 @@ class TestGenerateAndDownload:
     def test_download_success(self, mock_requests, tmp_path):
         """Test generate + download to disk."""
         submit_resp = MagicMock()
-        submit_resp.json.return_value = {
-            "output": {"task_id": "task-dl"}
-        }
+        submit_resp.json.return_value = {"output": {"task_id": "task-dl"}}
         submit_resp.raise_for_status = MagicMock()
 
         poll_resp = MagicMock()
@@ -207,9 +202,7 @@ class TestEdit:
     def test_edit_success(self, mock_requests):
         """Test image editing flow."""
         submit_resp = MagicMock()
-        submit_resp.json.return_value = {
-            "output": {"task_id": "task-edit"}
-        }
+        submit_resp.json.return_value = {"output": {"task_id": "task-edit"}}
         submit_resp.raise_for_status = MagicMock()
 
         poll_resp = MagicMock()
@@ -238,6 +231,7 @@ class TestGetImageGenerator:
     def test_singleton(self):
         """get_image_generator should return same instance."""
         import src.core.image_generator as mod
+
         mod._default_generator = None  # Reset
         g1 = get_image_generator()
         g2 = get_image_generator()

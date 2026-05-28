@@ -4,6 +4,7 @@ Unit Tests for ROI Dashboard
 Test suite for ROIDashboard class in src/analytics/roi_dashboard.py
 Tests ROI calculations, time savings, and cost analysis.
 """
+
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -105,7 +106,7 @@ class TestROIDashboard:
 
     def test_init_without_tracker(self):
         """Test initialization creates default tracker."""
-        with patch('src.analytics.roi_dashboard.get_tracker') as mock_get:
+        with patch("src.analytics.roi_dashboard.get_tracker") as mock_get:
             mock_tracker = MagicMock()
             mock_get.return_value = mock_tracker
             dashboard = ROIDashboard("test-key")
@@ -170,6 +171,7 @@ class TestROIDashboard:
     def test_export_json_structure(self, dashboard, mock_tracker):
         """Test JSON export has correct structure."""
         import json
+
         json_str = dashboard.export_json(days=30)
         data = json.loads(json_str)
 
@@ -183,6 +185,7 @@ class TestROIDashboard:
     def test_export_json_contains_metrics(self, dashboard, mock_tracker):
         """Test JSON export contains all metrics."""
         import json
+
         json_str = dashboard.export_json(days=30)
         data = json.loads(json_str)
         summary = data["summary"]
@@ -228,8 +231,16 @@ class TestTimeEstimates:
 
     def test_all_agents_have_estimates(self):
         """Test all tracked agents have time estimates."""
-        agents = ["planner", "researcher", "fullstack-developer", "tester",
-                  "code-reviewer", "debugger", "docs-manager", "project-manager"]
+        agents = [
+            "planner",
+            "researcher",
+            "fullstack-developer",
+            "tester",
+            "code-reviewer",
+            "debugger",
+            "docs-manager",
+            "project-manager",
+        ]
         for agent in agents:
             assert agent in TIME_ESTIMATES, f"{agent} missing from TIME_ESTIMATES"
             assert TIME_ESTIMATES[agent]["manual"] > TIME_ESTIMATES[agent]["cli"]
@@ -245,8 +256,16 @@ class TestAgentCosts:
 
     def test_all_agents_have_costs(self):
         """Test all tracked agents have cost estimates."""
-        agents = ["planner", "researcher", "fullstack-developer", "tester",
-                  "code-reviewer", "debugger", "docs-manager", "project-manager"]
+        agents = [
+            "planner",
+            "researcher",
+            "fullstack-developer",
+            "tester",
+            "code-reviewer",
+            "debugger",
+            "docs-manager",
+            "project-manager",
+        ]
         for agent in agents:
             assert agent in AGENT_COSTS, f"{agent} missing from AGENT_COSTS"
             assert AGENT_COSTS[agent] > 0
@@ -269,7 +288,7 @@ class TestGetDashboard:
 
     def test_get_dashboard_returns_instance(self):
         """Test get_dashboard returns ROIDashboard instance."""
-        with patch('src.analytics.roi_dashboard.get_tracker') as mock_get:
+        with patch("src.analytics.roi_dashboard.get_tracker") as mock_get:
             mock_tracker = MagicMock()
             mock_get.return_value = mock_tracker
             dashboard = get_dashboard("test-key")
@@ -389,6 +408,7 @@ class TestIntegration:
 
         # Export JSON
         import json
+
         json_str = dashboard.export_json(days=7)
         data = json.loads(json_str)
         assert data["summary"]["totalMinutesSaved"] == metrics.total_minutes_saved

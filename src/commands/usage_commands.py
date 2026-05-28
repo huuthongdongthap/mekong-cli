@@ -34,8 +34,7 @@ def usage_report(
     days: int = typer.Option(7, "--days", "-d", help="Number of days to report"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Export as JSON"),
     license_key: Optional[str] = typer.Option(
-        None, "--license", "-l",
-        help="License key (defaults to RAAS_LICENSE_KEY env var)"
+        None, "--license", "-l", help="License key (defaults to RAAS_LICENSE_KEY env var)"
     ),
 ) -> None:
     """
@@ -56,12 +55,14 @@ def usage_report(
     # Get license key
     current_license = license_key or os.getenv("RAAS_LICENSE_KEY")
     if not current_license:
-        console.print(Panel(
-            "[bold red]✗ No license key found[/bold red]\n\n"
-            "Set [green]RAAS_LICENSE_KEY[/green] environment variable or use [green]--license[/green] flag.",
-            title="License Required",
-            border_style="red",
-        ))
+        console.print(
+            Panel(
+                "[bold red]✗ No license key found[/bold red]\n\n"
+                "Set [green]RAAS_LICENSE_KEY[/green] environment variable or use [green]--license[/green] flag.",
+                title="License Required",
+                border_style="red",
+            )
+        )
         raise typer.Exit(code=1)
 
     try:
@@ -76,6 +77,7 @@ def usage_report(
         if json_output:
             # Export JSON
             import json
+
             output = {
                 "licenseKeyHash": current_license[:8] + "..." + current_license[-4:],
                 "generatedAt": datetime.utcnow().isoformat() + "Z",
@@ -87,11 +89,13 @@ def usage_report(
             console.print(json.dumps(output, indent=2))
         else:
             # ASCII table report
-            console.print(Panel(
-                f"[bold cyan]Usage Report: {current_license[:8]}...{current_license[-4:]}[/bold cyan]\n"
-                f"Period: Last {days} days | Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M')} UTC",
-                border_style="cyan",
-            ))
+            console.print(
+                Panel(
+                    f"[bold cyan]Usage Report: {current_license[:8]}...{current_license[-4:]}[/bold cyan]\n"
+                    f"Period: Last {days} days | Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M')} UTC",
+                    border_style="cyan",
+                )
+            )
 
             # Usage summary table
             table = Table(show_header=True, header_style="bold cyan")
@@ -119,7 +123,9 @@ def usage_report(
                 breakdown_table.add_column("Count", style="cyan", justify="right")
                 breakdown_table.add_column("Credits", style="yellow", justify="right")
 
-                for task_type, credits in sorted(summary.breakdown.items(), key=lambda x: x[1], reverse=True):
+                for task_type, credits in sorted(
+                    summary.breakdown.items(), key=lambda x: x[1], reverse=True
+                ):
                     count = credits  # Assuming 1 credit = 1 event for simplicity
                     breakdown_table.add_row(
                         task_type,
@@ -131,14 +137,21 @@ def usage_report(
 
             # Free tier status
             free_tier_limit = 10  # commands per day
-            console.print(Panel(
-                f"[bold]Free Tier Status:[/bold]\n"
-                f"Daily Limit: {free_tier_limit} commands\n"
-                f"Average: {summary.event_count / days:.1f} events/day\n"
-                f"[green]✓ Within limits[/green]" if summary.event_count / days < free_tier_limit
-                else "[red]⚠ Approaching limit[/red]",
-                border_style="green" if summary.event_count / days < free_tier_limit else "yellow",
-            ))
+            console.print(
+                Panel(
+                    (
+                        f"[bold]Free Tier Status:[/bold]\n"
+                        f"Daily Limit: {free_tier_limit} commands\n"
+                        f"Average: {summary.event_count / days:.1f} events/day\n"
+                        f"[green]✓ Within limits[/green]"
+                        if summary.event_count / days < free_tier_limit
+                        else "[red]⚠ Approaching limit[/red]"
+                    ),
+                    border_style=(
+                        "green" if summary.event_count / days < free_tier_limit else "yellow"
+                    ),
+                )
+            )
 
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {e}")
@@ -149,8 +162,7 @@ def usage_report(
 @app.command(name="check")
 def usage_check(
     license_key: Optional[str] = typer.Option(
-        None, "--license", "-l",
-        help="License key (defaults to RAAS_LICENSE_KEY env var)"
+        None, "--license", "-l", help="License key (defaults to RAAS_LICENSE_KEY env var)"
     ),
 ) -> None:
     """
@@ -187,14 +199,11 @@ def usage_check(
 @app.command(name="export")
 def usage_export(
     output: str = typer.Option(
-        "~/.mekong/raas/usage-export.json",
-        "--output", "-o",
-        help="Output file path"
+        "~/.mekong/raas/usage-export.json", "--output", "-o", help="Output file path"
     ),
     days: int = typer.Option(30, "--days", "-d", help="Number of days to export"),
     license_key: Optional[str] = typer.Option(
-        None, "--license", "-l",
-        help="License key (defaults to RAAS_LICENSE_KEY env var)"
+        None, "--license", "-l", help="License key (defaults to RAAS_LICENSE_KEY env var)"
     ),
 ) -> None:
     """
@@ -237,16 +246,18 @@ def usage_export(
             ],
         }
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(export_data, f, indent=2)
 
-        console.print(Panel(
-            f"[bold green]✓ Exported {len(events)} events[/bold green]\n\n"
-            f"Path: [cyan]{output_path}[/cyan]\n"
-            f"Size: {output_path.stat().st_size / 1024:.1f} KB",
-            title="Usage Export Complete",
-            border_style="green",
-        ))
+        console.print(
+            Panel(
+                f"[bold green]✓ Exported {len(events)} events[/bold green]\n\n"
+                f"Path: [cyan]{output_path}[/cyan]\n"
+                f"Size: {output_path.stat().st_size / 1024:.1f} KB",
+                title="Usage Export Complete",
+                border_style="green",
+            )
+        )
 
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {e}")

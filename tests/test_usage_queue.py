@@ -100,9 +100,7 @@ class TestParseLicenseKey:
 
     def test_valid_pro_key(self) -> None:
         """Test parsing valid pro license key."""
-        is_valid, parsed, error = parse_license_key(
-            "raas-pro-abc12345-aBcDeFgHiJkLmNoPqRsT"
-        )
+        is_valid, parsed, error = parse_license_key("raas-pro-abc12345-aBcDeFgHiJkLmNoPqRsT")
 
         assert is_valid is True
         assert parsed is not None
@@ -173,9 +171,7 @@ class TestParseLicenseKey:
 
     def test_key_with_dash_in_signature(self) -> None:
         """Test parsing key with dashes in signature."""
-        is_valid, parsed, error = parse_license_key(
-            "raas-pro-key123-signature-with-dashes"
-        )
+        is_valid, parsed, error = parse_license_key("raas-pro-key123-signature-with-dashes")
 
         assert is_valid is True
         assert parsed is not None
@@ -198,6 +194,7 @@ class TestGetQueue:
         """Test that init_queue starts the queue."""
         # Reset singleton
         import src.lib.usage_queue as usage_queue
+
         usage_queue._queue = None
 
         q = await init_queue()

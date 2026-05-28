@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 # Circuit Breaker
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CircuitBreaker:
     """
@@ -39,8 +40,8 @@ class CircuitBreaker:
     States: CLOSED (normal) → OPEN (failing) → HALF-OPEN (testing recovery)
     """
 
-    failure_threshold: int = 3          # failures before opening
-    recovery_timeout: float = 60.0      # seconds before trying again
+    failure_threshold: int = 3  # failures before opening
+    recovery_timeout: float = 60.0  # seconds before trying again
     _failures: int = field(default=0, init=False, repr=False)
     _opened_at: float = field(default=0.0, init=False, repr=False)
     _state: str = field(default="CLOSED", init=False, repr=False)
@@ -68,14 +69,13 @@ class CircuitBreaker:
         if self._failures >= self.failure_threshold:
             self._state = "OPEN"
             self._opened_at = time.time()
-            logger.warning(
-                f"[CircuitBreaker] Circuit OPENED after {self._failures} failures"
-            )
+            logger.warning(f"[CircuitBreaker] Circuit OPENED after {self._failures} failures")
 
 
 # ---------------------------------------------------------------------------
 # LLM Router
 # ---------------------------------------------------------------------------
+
 
 class LLMRouter:
     """
@@ -110,9 +110,7 @@ class LLMRouter:
     def route(self, task: Task) -> ModelConfig:
         """Select ModelConfig for task: capability map (local) or Bailian fallback."""
         if self._breaker.is_open:
-            logger.warning(
-                f"[LLMRouter] Circuit open, routing task {task.task_id} to fallback"
-            )
+            logger.warning(f"[LLMRouter] Circuit open, routing task {task.task_id} to fallback")
             return FALLBACK_MODEL
 
         local_config = get_model_for_capability(task.capability)

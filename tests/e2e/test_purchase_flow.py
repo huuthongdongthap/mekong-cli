@@ -22,8 +22,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Disable Redis for tests - MUST be set before any app imports
-os.environ['REDIS_URL'] = ''
-os.environ['REDIS_ENABLED'] = 'false'
+os.environ["REDIS_URL"] = ""
+os.environ["REDIS_ENABLED"] = "false"
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -39,11 +39,13 @@ except ImportError:
 @pytest.fixture(autouse=True)
 def disable_redis_for_tests():
     """Disable Redis for all tests in this module"""
-    os.environ['REDIS_URL'] = ''
-    with patch('redis.Redis', MagicMock()), \
-         patch('redis.from_url', MagicMock()), \
-         patch('redis.asyncio.Redis', MagicMock()), \
-         patch('redis.asyncio.from_url', MagicMock()):
+    os.environ["REDIS_URL"] = ""
+    with (
+        patch("redis.Redis", MagicMock()),
+        patch("redis.from_url", MagicMock()),
+        patch("redis.asyncio.Redis", MagicMock()),
+        patch("redis.asyncio.from_url", MagicMock()),
+    ):
         yield
 
 
@@ -106,7 +108,7 @@ def mock_db():
 @pytest.fixture
 def mock_email_service():
     """Mock EmailService"""
-    with patch('backend.services.email_service.EmailService') as mock:
+    with patch("backend.services.email_service.EmailService") as mock:
         instance = mock.return_value
         instance.send_purchase_email.return_value = True
         instance.mock_mode = True
@@ -116,21 +118,17 @@ def mock_email_service():
 @pytest.fixture
 def mock_license_generator():
     """Mock LicenseGenerator"""
-    with patch('core.licensing.logic.engine.LicenseGenerator') as mock:
+    with patch("core.licensing.logic.engine.LicenseGenerator") as mock:
         instance = mock.return_value
         instance.generate.return_value = "AGOS-PRO-ABCD1234-EF56"
-        instance.validate_format.return_value = {
-            'valid': True,
-            'format': 'agencyos',
-            'tier': 'pro'
-        }
+        instance.validate_format.return_value = {"valid": True, "format": "agencyos", "tier": "pro"}
         yield instance
 
 
 @pytest.fixture
 def mock_referral_system():
     """Mock ReferralSystem"""
-    with patch('core.growth.referral.ReferralSystem') as mock:
+    with patch("core.growth.referral.ReferralSystem") as mock:
         instance = mock.return_value
         mock_referral = MagicMock()
         mock_referral.id = "REF-ABC123"
@@ -150,7 +148,7 @@ class TestPurchaseFlowE2E:
         mock_db,
         mock_email_service,
         mock_license_generator,
-        mock_referral_system
+        mock_referral_system,
     ):
         """
         Test Case 1: Complete successful purchase flow
@@ -163,11 +161,20 @@ class TestPurchaseFlowE2E:
         5. Verify license via API
         """
         # Patch all dependencies including validation middleware
-        with patch('backend.services.payment_service.get_db', return_value=mock_db), \
-             patch('backend.services.payment_service.LicenseGenerator', return_value=mock_license_generator), \
-             patch('backend.services.email_service.get_email_service', return_value=mock_email_service), \
-             patch('backend.middleware.webhook_auth.verify_gumroad_webhook') as mock_verify, \
-             patch('backend.api.middleware.validation.ValidationMiddleware.dispatch') as mock_validation:
+        with (
+            patch("backend.services.payment_service.get_db", return_value=mock_db),
+            patch(
+                "backend.services.payment_service.LicenseGenerator",
+                return_value=mock_license_generator,
+            ),
+            patch(
+                "backend.services.email_service.get_email_service", return_value=mock_email_service
+            ),
+            patch("backend.middleware.webhook_auth.verify_gumroad_webhook") as mock_verify,
+            patch(
+                "backend.api.middleware.validation.ValidationMiddleware.dispatch"
+            ) as mock_validation,
+        ):
 
             # Mock webhook verification to pass through
             mock_verify.return_value = json.dumps(mock_gumroad_webhook_data).encode()
@@ -175,6 +182,7 @@ class TestPurchaseFlowE2E:
             # Bypass validation middleware for webhooks
             async def passthrough(request, call_next):
                 return await call_next(request)
+
             mock_validation.side_effect = passthrough
 
             # Step 1: Send webhook request
@@ -182,9 +190,9 @@ class TestPurchaseFlowE2E:
                 "/webhooks/gumroad/",
                 headers={
                     "X-Gumroad-Signature": "test_signature_12345",
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded",
                 },
-                data=mock_gumroad_webhook_data
+                data=mock_gumroad_webhook_data,
             )
 
             # Verify webhook processed successfully
@@ -212,10 +220,7 @@ class TestPurchaseFlowE2E:
                 pass
 
             # Step 5: Customer verifies license via API
-            verify_response = client.post(
-                "/api/license/verify",
-                json={"license_key": license_key}
-            )
+            verify_response = client.post("/api/license/verify", json={"license_key": license_key})
 
             assert verify_response.status_code == 200
             verify_data = verify_response.json()
@@ -228,7 +233,7 @@ class TestPurchaseFlowE2E:
         """
         Test Case 2: Webhook with invalid signature should be rejected
         """
-        with patch('backend.middleware.webhook_auth.verify_gumroad_webhook') as mock_verify:
+        with patch("backend.middleware.webhook_auth.verify_gumroad_webhook") as mock_verify:
             # Simulate signature verification failure
             mock_verify.side_effect = Exception("Invalid signature")
 
@@ -236,9 +241,9 @@ class TestPurchaseFlowE2E:
                 "/webhooks/gumroad/",
                 headers={
                     "X-Gumroad-Signature": "invalid_signature",
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded",
                 },
-                data={"product_name": "Test Product"}
+                data={"product_name": "Test Product"},
             )
 
             # Webhook should be rejected
@@ -253,16 +258,14 @@ class TestPurchaseFlowE2E:
             "starter": "AGOS-ST-12345678-ABCD",
             "pro": "AGOS-PRO-87654321-EFGH",
             "franchise": "AGOS-FR-11223344-IJKL",
-            "enterprise": "AGOS-EN-55667788-MNOP"
+            "enterprise": "AGOS-EN-55667788-MNOP",
         }
 
         for tier in tiers:
             mock_license_generator.generate.return_value = expected_licenses[tier]
 
             license_key = mock_license_generator.generate(
-                format="agencyos",
-                tier=tier,
-                email="customer@example.com"
+                format="agencyos", tier=tier, email="customer@example.com"
             )
 
             # Verify license key format
@@ -276,7 +279,7 @@ class TestPurchaseFlowE2E:
         result = mock_email_service.send_purchase_email(
             email="customer@example.com",
             license_key="AGOS-PRO-ABCD1234-EF56",
-            product_name="Agency OS Pro"
+            product_name="Agency OS Pro",
         )
 
         assert result is True
@@ -292,15 +295,12 @@ class TestPurchaseFlowE2E:
             r_email="partner@example.com",
             ref_name="Customer Name",
             ref_email="customer@example.com",
-            ref_company="Customer Corp"
+            ref_company="Customer Corp",
         )
 
         # Convert referral with deal value
         deal_value = 395.00  # $395 purchase
-        success = mock_referral_system.convert_referral(
-            ref_id=referral.id,
-            deal_value=deal_value
-        )
+        success = mock_referral_system.convert_referral(ref_id=referral.id, deal_value=deal_value)
 
         assert success is True
         assert referral.commission_amount == 39.50  # 10% commission
@@ -343,18 +343,19 @@ class TestPurchaseFlowE2E:
                 assert "description" in feature
 
     def test_webhook_duplicate_handling(
-        self,
-        client,
-        mock_gumroad_webhook_data,
-        mock_db,
-        mock_license_generator
+        self, client, mock_gumroad_webhook_data, mock_db, mock_license_generator
     ):
         """
         Test Case 9: Handle duplicate webhook deliveries (idempotency)
         """
-        with patch('backend.services.payment_service.get_db', return_value=mock_db), \
-             patch('backend.services.payment_service.LicenseGenerator', return_value=mock_license_generator), \
-             patch('backend.middleware.webhook_auth.verify_gumroad_webhook') as mock_verify:
+        with (
+            patch("backend.services.payment_service.get_db", return_value=mock_db),
+            patch(
+                "backend.services.payment_service.LicenseGenerator",
+                return_value=mock_license_generator,
+            ),
+            patch("backend.middleware.webhook_auth.verify_gumroad_webhook") as mock_verify,
+        ):
 
             mock_verify.return_value = json.dumps(mock_gumroad_webhook_data).encode()
 
@@ -363,18 +364,18 @@ class TestPurchaseFlowE2E:
                 "/webhooks/gumroad/",
                 headers={
                     "X-Gumroad-Signature": "test_signature",
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded",
                 },
-                data=mock_gumroad_webhook_data
+                data=mock_gumroad_webhook_data,
             )
 
             response2 = client.post(
                 "/webhooks/gumroad/",
                 headers={
                     "X-Gumroad-Signature": "test_signature",
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded",
                 },
-                data=mock_gumroad_webhook_data
+                data=mock_gumroad_webhook_data,
             )
 
             # Both should succeed (idempotent with upsert)
@@ -382,10 +383,7 @@ class TestPurchaseFlowE2E:
             assert response2.status_code == 200
 
     def test_purchase_flow_with_high_value(
-        self,
-        client,
-        mock_gumroad_webhook_data,
-        mock_referral_system
+        self, client, mock_gumroad_webhook_data, mock_referral_system
     ):
         """
         Test Case 10: Purchase flow with high-value transaction (commission capping)
@@ -400,15 +398,12 @@ class TestPurchaseFlowE2E:
             r_email="partner@example.com",
             ref_name="Customer",
             ref_email="customer@example.com",
-            ref_company="BigCorp"
+            ref_company="BigCorp",
         )
 
         # Convert with high deal value
         deal_value = 25000.00
-        success = mock_referral_system.convert_referral(
-            ref_id=referral.id,
-            deal_value=deal_value
-        )
+        success = mock_referral_system.convert_referral(ref_id=referral.id, deal_value=deal_value)
 
         # Commission should be capped (mock returns 39.50, but real system would cap at $2000)
         assert success is True
@@ -441,9 +436,7 @@ class TestPurchaseFlowIntegration:
 
         generator = LicenseGenerator()
         license_key = generator.generate(
-            format="agencyos",
-            tier="pro",
-            email="integration@test.com"
+            format="agencyos", tier="pro", email="integration@test.com"
         )
 
         # Verify license key format

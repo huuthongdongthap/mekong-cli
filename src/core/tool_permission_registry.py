@@ -22,18 +22,18 @@ logger = logging.getLogger(__name__)
 class ToolRisk(str, Enum):
     """Risk classification for tools."""
 
-    READ_ONLY = "read_only"      # No side effects (file read, search, grep)
-    WRITE = "write"              # Creates/modifies files
-    EXECUTE = "execute"          # Runs shell commands
+    READ_ONLY = "read_only"  # No side effects (file read, search, grep)
+    WRITE = "write"  # Creates/modifies files
+    EXECUTE = "execute"  # Runs shell commands
     DESTRUCTIVE = "destructive"  # Deletes, force-pushes, drops
 
 
 class PermissionMode(str, Enum):
     """Execution permission modes (inspired by claude-code)."""
 
-    DEFAULT = "default"          # Ask for write+ tools
-    PLAN = "plan"                # Read-only tools only, no execution
-    BYPASS = "bypass"            # Skip all permission checks (--dangerously-skip)
+    DEFAULT = "default"  # Ask for write+ tools
+    PLAN = "plan"  # Read-only tools only, no execution
+    BYPASS = "bypass"  # Skip all permission checks (--dangerously-skip)
     ACCEPT_EDITS = "accept_edits"  # Auto-approve file edits, ask for execute+
 
 
@@ -120,10 +120,7 @@ class ToolPermissionRegistry:
 
     def get_allowed_tools(self, agent_name: str = "*") -> list[str]:
         """List all tools available to an agent under current mode."""
-        return [
-            name for name in self._tools
-            if self.check_permission(name, agent_name)
-        ]
+        return [name for name in self._tools if self.check_permission(name, agent_name)]
 
     def get_tool_spec(self, tool_name: str) -> ToolSpec | None:
         """Get specification for a tool."""

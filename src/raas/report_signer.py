@@ -30,6 +30,7 @@ class SignatureResult:
         timestamp: Signing timestamp
         key_id: Key identifier used for signing
     """
+
     signature: str
     hash_value: str
     timestamp: str
@@ -46,6 +47,7 @@ class VerificationResult:
         timestamp: Verification timestamp
         error: Error message if verification failed
     """
+
     valid: bool
     hash_match: bool = True
     timestamp: str = ""
@@ -63,9 +65,7 @@ class ReportSigner:
     """
 
     def __init__(
-        self,
-        private_key_path: Optional[str] = None,
-        public_key_path: Optional[str] = None
+        self, private_key_path: Optional[str] = None, public_key_path: Optional[str] = None
     ) -> None:
         """Initialize signer with key paths.
 
@@ -86,7 +86,7 @@ class ReportSigner:
         self,
         key_size: int = 2048,
         private_key_path: str = "~/.mekong/keys/audit_signing.pem",
-        public_key_path: str = "~/.mekong/keys/audit_signing_pub.pem"
+        public_key_path: str = "~/.mekong/keys/audit_signing_pub.pem",
     ) -> Tuple[str, str]:
         """Generate new RSA key pair.
 
@@ -102,9 +102,7 @@ class ReportSigner:
 
         # Generate private key
         private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=key_size,
-            backend=default_backend()
+            public_exponent=65537, key_size=key_size, backend=default_backend()
         )
 
         # Derive public key
@@ -119,7 +117,7 @@ class ReportSigner:
         priv_pem = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.NoEncryption(),
         )
         with open(priv_path, "wb") as f:
             f.write(priv_pem)
@@ -128,7 +126,7 @@ class ReportSigner:
         # Write public key
         pub_pem = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         with open(pub_path, "wb") as f:
             f.write(pub_pem)
@@ -150,9 +148,7 @@ class ReportSigner:
             key_data = f.read()
 
         self._private_key = serialization.load_pem_private_key(
-            key_data,
-            password=None,
-            backend=default_backend()
+            key_data, password=None, backend=default_backend()
         )
 
         # Extract public key for key_id
@@ -169,10 +165,7 @@ class ReportSigner:
         with open(path, "rb") as f:
             key_data = f.read()
 
-        self._public_key = serialization.load_pem_public_key(
-            key_data,
-            backend=default_backend()
-        )
+        self._public_key = serialization.load_pem_public_key(key_data, backend=default_backend())
         self._key_id = self._compute_key_id(self._public_key)
 
     def load_certificate(self, cert_path: str) -> None:
@@ -189,11 +182,7 @@ class ReportSigner:
         self._public_key = cert.public_key()
         self._key_id = self._compute_key_id(self._public_key)
 
-    def sign_report(
-        self,
-        content: bytes,
-        include_timestamp: bool = True
-    ) -> SignatureResult:
+    def sign_report(self, content: bytes, include_timestamp: bool = True) -> SignatureResult:
         """Sign report content with RSA private key.
 
         Args:
@@ -213,11 +202,7 @@ class ReportSigner:
         hash_value = hashlib.sha256(content).hexdigest()
 
         # Sign the hash
-        signature_bytes = self._private_key.sign(
-            content,
-            padding.PKCS1v15(),
-            hashes.SHA256()
-        )
+        signature_bytes = self._private_key.sign(content, padding.PKCS1v15(), hashes.SHA256())
 
         timestamp = datetime.now(timezone.utc).isoformat() if include_timestamp else ""
 
@@ -225,14 +210,11 @@ class ReportSigner:
             signature=base64.b64encode(signature_bytes).decode("utf-8"),
             hash_value=hash_value,
             timestamp=timestamp,
-            key_id=self._key_id
+            key_id=self._key_id,
         )
 
     def verify_signature(
-        self,
-        content: bytes,
-        signature_b64: str,
-        expected_hash: Optional[str] = None
+        self, content: bytes, signature_b64: str, expected_hash: Optional[str] = None
     ) -> VerificationResult:
         """Verify report signature.
 
@@ -249,7 +231,7 @@ class ReportSigner:
                 valid=False,
                 hash_match=False,
                 timestamp=datetime.now(timezone.utc).isoformat(),
-                error="Public key not loaded"
+                error="Public key not loaded",
             )
 
         # Verify hash match if provided
@@ -264,17 +246,12 @@ class ReportSigner:
                 valid=False,
                 hash_match=hash_match,
                 timestamp=datetime.now(timezone.utc).isoformat(),
-                error=f"Invalid signature encoding: {e}"
+                error=f"Invalid signature encoding: {e}",
             )
 
         # Verify signature
         try:
-            self._public_key.verify(
-                signature_bytes,
-                content,
-                padding.PKCS1v15(),
-                hashes.SHA256()
-            )
+            self._public_key.verify(signature_bytes, content, padding.PKCS1v15(), hashes.SHA256())
             valid = True
             error = None
         except InvalidSignature:
@@ -288,13 +265,11 @@ class ReportSigner:
             valid=valid,
             hash_match=hash_match,
             timestamp=datetime.now(timezone.utc).isoformat(),
-            error=error
+            error=error,
         )
 
     def create_signature_file(
-        self,
-        report_path: str,
-        signature_output_path: str
+        self, report_path: str, signature_output_path: str
     ) -> SignatureResult:
         """Sign report and save signature to file.
 
@@ -330,9 +305,7 @@ class ReportSigner:
         return result
 
     def verify_signature_file(
-        self,
-        report_path: str,
-        signature_file_path: str
+        self, report_path: str, signature_file_path: str
     ) -> VerificationResult:
         """Verify report against signature file.
 
@@ -354,15 +327,11 @@ class ReportSigner:
             signature_data = json.load(f)
 
         return self.verify_signature(
-            content,
-            signature_data["signature"],
-            signature_data.get("hash_value")
+            content, signature_data["signature"], signature_data.get("hash_value")
         )
 
     def compute_hash_chain(
-        self,
-        events: List[Dict[str, Any]],
-        previous_hash: str = "0" * 64
+        self, events: List[Dict[str, Any]], previous_hash: str = "0" * 64
     ) -> str:
         """Compute hash chain for event sequence.
 
@@ -376,7 +345,7 @@ class ReportSigner:
         # Sort events by timestamp for deterministic ordering
         sorted_events = sorted(
             events,
-            key=lambda e: e.get("occurred_at", e.get("created_at", e.get("validated_at", "")))
+            key=lambda e: e.get("occurred_at", e.get("created_at", e.get("validated_at", ""))),
         )
 
         # Compute hash
@@ -401,7 +370,7 @@ class ReportSigner:
         """
         pub_pem = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         fingerprint = hashlib.sha256(pub_pem).hexdigest()
         return fingerprint[:16]
@@ -425,9 +394,7 @@ def get_signer() -> ReportSigner:
 
 
 def sign_file(
-    report_path: str,
-    signature_path: str,
-    private_key_path: Optional[str] = None
+    report_path: str, signature_path: str, private_key_path: Optional[str] = None
 ) -> SignatureResult:
     """Sign a report file.
 
@@ -446,9 +413,7 @@ def sign_file(
 
 
 def verify_file(
-    report_path: str,
-    signature_path: str,
-    public_key_path: Optional[str] = None
+    report_path: str, signature_path: str, public_key_path: Optional[str] = None
 ) -> VerificationResult:
     """Verify a report file signature.
 

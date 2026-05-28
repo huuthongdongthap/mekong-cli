@@ -13,7 +13,6 @@ from uuid import uuid4
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-
 # ============= License Key Payload =============
 
 
@@ -199,7 +198,9 @@ class GenerateLicenseResponse(BaseModel):
 
     success: bool = Field(..., description="Whether generation succeeded")
     license_key: Optional[str] = Field(None, description="Generated license key")
-    license_payload: Optional[LicenseKeyPayload] = Field(None, description="Decoded license payload")
+    license_payload: Optional[LicenseKeyPayload] = Field(
+        None, description="Decoded license payload"
+    )
     error: Optional[str] = Field(None, description="Error message if failed")
     download_url: Optional[str] = Field(None, description="URL to download license file")
 

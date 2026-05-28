@@ -107,11 +107,14 @@ class ProcessManager:
         process.state = ProcessState.STOPPING
         # Extend for subprocess.Popen: SIGTERM → wait(timeout) → SIGKILL
         process.state = ProcessState.IDLE
-        self._bus.emit(EventType.JOB_COMPLETED, {
-            "agent_id": agent_id,
-            "agent_type": process.agent_type,
-            "duration_ms": (time.time() - process.started_at) * 1000,
-        })
+        self._bus.emit(
+            EventType.JOB_COMPLETED,
+            {
+                "agent_id": agent_id,
+                "agent_type": process.agent_type,
+                "duration_ms": (time.time() - process.started_at) * 1000,
+            },
+        )
         del self._processes[agent_id]
         self._crash_callbacks.pop(agent_id, None)
         return True
@@ -134,9 +137,14 @@ class ProcessManager:
         if process is None:
             return
         process.state = ProcessState.CRASHED
-        self._bus.emit(EventType.HEALTH_WARNING, {
-            "agent_id": agent_id, "agent_type": process.agent_type, "reason": "crashed",
-        })
+        self._bus.emit(
+            EventType.HEALTH_WARNING,
+            {
+                "agent_id": agent_id,
+                "agent_type": process.agent_type,
+                "reason": "crashed",
+            },
+        )
         for cb in self._crash_callbacks.get(agent_id, []):
             try:
                 cb(agent_id)

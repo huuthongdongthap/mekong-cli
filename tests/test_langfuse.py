@@ -9,6 +9,7 @@ class TestLangfuseProvider:
         """LangfuseProvider gracefully handles missing SDK."""
         with patch("packages.observability.langfuse_provider._LANGFUSE_AVAILABLE", False):
             from packages.observability.langfuse_provider import LangfuseProvider
+
             provider = LangfuseProvider()
             # client should be None when SDK unavailable
             assert provider._client is None
@@ -16,6 +17,7 @@ class TestLangfuseProvider:
     def test_start_trace_returns_none_when_no_client(self):
         """start_trace() returns None when client not initialized."""
         from packages.observability.langfuse_provider import LangfuseProvider
+
         provider = LangfuseProvider()
         # No credentials in env — client is None
         result = provider.start_trace("test-trace", user_id="u1")
@@ -24,6 +26,7 @@ class TestLangfuseProvider:
     def test_start_span_returns_none_when_no_client(self):
         """start_span() returns None when client unavailable."""
         from packages.observability.langfuse_provider import LangfuseProvider
+
         provider = LangfuseProvider()
         result = provider.start_span(None, "test-span")
         assert result is None
@@ -31,6 +34,7 @@ class TestLangfuseProvider:
     def test_record_generation_returns_none_when_no_client(self):
         """record_generation() returns None when client unavailable."""
         from packages.observability.langfuse_provider import LangfuseProvider
+
         provider = LangfuseProvider()
         result = provider.record_generation(None, "claude", "input", "output")
         assert result is None
@@ -38,18 +42,21 @@ class TestLangfuseProvider:
     def test_end_trace_no_op_when_no_trace(self):
         """end_trace(None) doesn't raise."""
         from packages.observability.langfuse_provider import LangfuseProvider
+
         provider = LangfuseProvider()
         provider.end_trace(None, status="success")  # Should not raise
 
     def test_score_no_op_when_no_client(self):
         """score() is a no-op when client unavailable."""
         from packages.observability.langfuse_provider import LangfuseProvider
+
         provider = LangfuseProvider()
         provider.score(None, "quality", 0.9)  # Should not raise
 
     def test_mock_client_start_trace(self):
         """start_trace() delegates to Langfuse client when available."""
         from packages.observability.langfuse_provider import LangfuseProvider
+
         provider = LangfuseProvider()
         mock_client = MagicMock()
         mock_trace = MagicMock()
@@ -67,16 +74,19 @@ class TestObservabilityFacade:
     def setup_method(self):
         """Reset singleton before each test."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         ObservabilityFacade.reset()
 
     def teardown_method(self):
         """Reset singleton after each test."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         ObservabilityFacade.reset()
 
     def test_singleton_pattern(self):
         """instance() returns same object on repeated calls."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         f1 = ObservabilityFacade.instance()
         f2 = ObservabilityFacade.instance()
         assert f1 is f2
@@ -84,6 +94,7 @@ class TestObservabilityFacade:
     def test_reset_creates_new_instance(self):
         """reset() causes next instance() call to create a fresh object."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         f1 = ObservabilityFacade.instance()
         ObservabilityFacade.reset()
         f2 = ObservabilityFacade.instance()
@@ -92,6 +103,7 @@ class TestObservabilityFacade:
     def test_start_and_finish_trace(self):
         """Full trace lifecycle completes without raising."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         facade = ObservabilityFacade.instance()
         facade.start_trace("test goal", user_id="test-user")
         facade.record_step(1, "step one", 0.5, 0)
@@ -102,6 +114,7 @@ class TestObservabilityFacade:
     def test_record_step_with_self_heal(self):
         """record_step() accepts self_healed flag without raising."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         facade = ObservabilityFacade.instance()
         facade.start_trace("heal-test")
         facade.record_step(1, "healed step", 1.2, 0, self_healed=True, agent="tester")
@@ -110,14 +123,15 @@ class TestObservabilityFacade:
     def test_json_fallback_when_langfuse_down(self):
         """JSON telemetry collector still works when Langfuse client is None."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         facade = ObservabilityFacade.instance()
         # Ensure no Langfuse client
-        if hasattr(facade, '_langfuse') and facade._langfuse:
+        if hasattr(facade, "_langfuse") and facade._langfuse:
             facade._langfuse._client = None
         facade.start_trace("fallback test")
         facade.record_step(1, "fallback step", 1.0, 0)
         # JSON collector should have processed trace if available
-        if hasattr(facade, '_collector') and facade._collector is not None:
+        if hasattr(facade, "_collector") and facade._collector is not None:
             trace = facade._collector.get_trace()
             assert trace is not None
             assert trace.goal == "fallback test"
@@ -126,6 +140,7 @@ class TestObservabilityFacade:
     def test_multiple_llm_calls(self):
         """record_llm_call() can be called multiple times per trace."""
         from packages.observability.observability_facade import ObservabilityFacade
+
         facade = ObservabilityFacade.instance()
         facade.start_trace("multi-llm")
         facade.record_llm_call(model="claude", input_tokens=200, output_tokens=100, cost=0.01)

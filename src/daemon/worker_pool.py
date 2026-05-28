@@ -266,7 +266,9 @@ class WorkerPool:
 
         if self.workers:
             stats.avg_cpu = sum(w.cpu for w in self.workers.values()) / len(self.workers)
-            stats.avg_memory_mb = sum(w.memory_mb for w in self.workers.values()) / len(self.workers)
+            stats.avg_memory_mb = sum(w.memory_mb for w in self.workers.values()) / len(
+                self.workers
+            )
             stats.total_tasks_completed = sum(w.tasks_completed for w in self.workers.values())
             stats.total_tasks_failed = sum(w.tasks_failed for w in self.workers.values())
 

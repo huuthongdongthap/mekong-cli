@@ -23,7 +23,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
-
 # Free tier limits
 FREE_TIER_LIMITS = {
     "commands_per_day": 10,
@@ -35,6 +34,7 @@ FREE_TIER_LIMITS = {
 @dataclass
 class DailyUsage:
     """Daily usage summary."""
+
     date: str  # YYYY-MM-DD
     total_commands: int = 0
     total_agents: int = 0
@@ -46,6 +46,7 @@ class DailyUsage:
 @dataclass
 class UsageReport:
     """Multi-day usage report."""
+
     license_key_hash: str
     period_days: int
     total_commands: int
@@ -271,9 +272,13 @@ class UsageTracker:
     def get_free_tier_remaining(self, usage: DailyUsage) -> Dict[str, int]:
         """Get remaining free tier quota."""
         return {
-            "commands_remaining": max(0, FREE_TIER_LIMITS["commands_per_day"] - usage.total_commands),
+            "commands_remaining": max(
+                0, FREE_TIER_LIMITS["commands_per_day"] - usage.total_commands
+            ),
             "agents_remaining": max(0, FREE_TIER_LIMITS["agents_per_day"] - usage.total_agents),
-            "pipelines_remaining": max(0, FREE_TIER_LIMITS["pipelines_per_day"] - usage.total_pipelines),
+            "pipelines_remaining": max(
+                0, FREE_TIER_LIMITS["pipelines_per_day"] - usage.total_pipelines
+            ),
         }
 
     def get_usage_report(self, license_key: str, days: int = 7) -> UsageReport:

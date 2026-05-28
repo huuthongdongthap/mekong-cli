@@ -1,0 +1,68 @@
+{
+  "roadmap": [
+    {
+      "phase": "Phase 1: Website MVP",
+      "timeline": "Weeks 1-2",
+      "status": "in_progress",
+      "deliverables": [
+        "Landing page (danh mục, sản phẩm bán chạy, dịch vụ, thương hiệu)",
+        "Product catalog pages (4 categories)",
+        "Product detail pages",
+        "Shopping cart + checkout (payOS)",
+        "Customer account (đơn hàng, bảo hành)"
+      ],
+      "success_criteria": "Website chạy được, khách hàng đặt hàng online",
+      "budget": "0đ (self-built)"
+    },
+    {
+      "phase": "Phase 2: Features & Integration",
+      "timeline": "Weeks 3-4",
+      "status": "pending",
+      "deliverables": [
+        "Service pages (lắp đặt, tư vấn, bảo hành)",
+        "Yêu cầu báo giá online",
+        "Zalo OA integration",
+        "Facebook Pixel + Google Analytics",
+        "SEO optimization"
+      ],
+      "success_criteria": "Tích hợp đầy đủ channels, SEO top Google địa phương",
+      "budget": "2tr (ads + tools)"
+    },
+    {
+      "phase": "Phase 3: Migration & Launch",
+      "timeline": "Weeks 5-6",
+      "status": "pending",
+      "deliverables": [
+        "Migrate sản phẩm từ KiotViet sang website mới",
+        "Redirect URLs từ kiotvietweb.vn sang ptptech.vn",
+        "Testing & QA",
+        "Launch chính thức",
+        "Marketing campaign launch"
+      ],
+      "success_criteria": "Website chính thức thay thế KiotViet, đơn hàng online ổn định",
+      "budget": "5tr (marketing)"
+    },
+    {
+      "phase": "Phase 4: Growth",
+      "timeline": "Months 2-6",
+      "status": "pending",
+      "deliverables": [
+        "Đại lý vùng (online portal)",
+        "B2B pricing & wholesale",
+        "Loyalty program",
+        "Mobile app (optional)",
+        "Multi-language (English for export)"
+      ],
+      "success_criteria": "500tr+/tháng revenue, 2000+ customers",
+      "budget": "20tr (marketing + development)"
+    }
+  ],
+  "current_phase": 1,
+  "last_updated": "2026-05-20",
+  "key_milestones": [
+    { "date": "2026-06-01", "milestone": "Website MVP launch" },
+    { "date": "2026-06-15", "milestone": "Full features + integration" },
+    { "date": "2026-07-01", "milestone": "Migration from KiotViet" },
+    { "date": "2026-12-01", "milestone": "500tr/month revenue" }
+  ]
+}

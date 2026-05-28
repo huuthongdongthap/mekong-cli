@@ -82,9 +82,7 @@ def get_fallback_models(
     if data_sensitivity == "sensitive":
         api_candidates = [m for m in candidates if not m.startswith("ollama:")]
         if api_candidates:
-            logger.warning(
-                "Sensitive data: blocking API fallbacks %s", api_candidates
-            )
+            logger.warning("Sensitive data: blocking API fallbacks %s", api_candidates)
         candidates = [m for m in candidates if m.startswith("ollama:")]
 
     return candidates
@@ -124,7 +122,8 @@ async def execute_with_fallback(
 
                 adapter = OllamaAdapter()
                 async for token in adapter.generate(
-                    current_model, messages,
+                    current_model,
+                    messages,
                     temperature=current_config.temperature,
                     max_tokens=current_config.max_tokens,
                 ):
@@ -136,9 +135,7 @@ async def execute_with_fallback(
                 from src.core.api_adapter import APIAdapter
 
                 api_adapter = APIAdapter()
-                async for token in api_adapter.generate(
-                    current_config, messages, system_prompt
-                ):
+                async for token in api_adapter.generate(current_config, messages, system_prompt):
                     if on_token_cb:
                         await on_token_cb(token)
                     collected_output.append(token)
@@ -160,9 +157,7 @@ async def execute_with_fallback(
 
         except (ConnectionError, TimeoutError, OSError) as e:
             logger.warning("Model unavailable: %s — %s", current_model, e)
-            next_models = get_fallback_models(
-                current_model, attempted, data_sensitivity
-            )
+            next_models = get_fallback_models(current_model, attempted, data_sensitivity)
 
             if not next_models:
                 break

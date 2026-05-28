@@ -103,8 +103,11 @@ class AGIScoreEngine:
 
         # Total
         report.total_score = round(
-            report.module_score + report.wiring_score +
-            report.runtime_score + report.improvement_score, 1
+            report.module_score
+            + report.wiring_score
+            + report.runtime_score
+            + report.improvement_score,
+            1,
         )
 
         # Grade
@@ -148,6 +151,7 @@ class AGIScoreEngine:
         # Check orchestrator wiring
         try:
             from src.core.orchestrator import RecipeOrchestrator
+
             orch = RecipeOrchestrator(llm_client=None, strict_verification=False)
             checks = [
                 ("reflection", orch._reflection),
@@ -167,6 +171,7 @@ class AGIScoreEngine:
         # Check planner step types
         try:
             from src.core.planner import RecipePlanner
+
             planner = RecipePlanner(llm_client=None)
             if hasattr(planner, "_detect_step_type"):
                 score += 2.5
@@ -177,6 +182,7 @@ class AGIScoreEngine:
         # Check router intent tools
         try:
             from src.core.smart_router import _INTENT_TOOLS
+
             if _INTENT_TOOLS:
                 score += 2.5
                 wired.append("router_intent_tools")
@@ -187,6 +193,7 @@ class AGIScoreEngine:
         try:
             from src.core.executor import RecipeExecutor
             from src.core.parser import Recipe
+
             exe = RecipeExecutor(Recipe(name="", description="", steps=[]))
             if hasattr(exe, "_execute_tool_step") and hasattr(exe, "_execute_browse_step"):
                 score += 2.5
@@ -210,6 +217,7 @@ class AGIScoreEngine:
         score = 0.0
         try:
             from src.core.memory import MemoryStore
+
             store = MemoryStore()
             stats = store.stats()
             total = stats.get("total", 0)
@@ -241,6 +249,7 @@ class AGIScoreEngine:
         # Reflection available + has data = 5 pts
         try:
             from src.core.reflection import ReflectionEngine
+
             ReflectionEngine()  # validate importable
             score += 5.0  # Available
             report.details["reflection"] = "active"
@@ -250,6 +259,7 @@ class AGIScoreEngine:
         # Code Evolution available = 5 pts
         try:
             from src.core.code_evolution import CodeEvolutionEngine
+
             evo = CodeEvolutionEngine()
             stats = evo.get_stats()
             score += 5.0
@@ -260,6 +270,7 @@ class AGIScoreEngine:
         # Tiered telemetry available = 5 pts
         try:
             from src.core.telemetry import TieredTelemetryStore
+
             TieredTelemetryStore()  # validate importable
             score += 5.0
             report.details["telemetry"] = "tiered"

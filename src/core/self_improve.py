@@ -67,7 +67,8 @@ class SelfImprover:
         deprecated = self.deprecate_bad_recipes()
         for name in deprecated:
             entry = JournalEntry(
-                action="deprecated", target=name,
+                action="deprecated",
+                target=name,
                 reason="Success rate below threshold",
             )
             self._record(entry)
@@ -77,13 +78,15 @@ class SelfImprover:
         suggestions = self.suggest_new_recipes()
         for goal in suggestions:
             recipe = self.generator.from_successful_run(
-                next(e for e in self.memory.recent(100)
-                     if e.goal == goal and e.status == "success"),
+                next(
+                    e for e in self.memory.recent(100) if e.goal == goal and e.status == "success"
+                ),
             )
             if recipe.valid:
                 path = self.generator.save_recipe(recipe)
                 entry = JournalEntry(
-                    action="generated", target=recipe.name,
+                    action="generated",
+                    target=recipe.name,
                     reason=f"Auto-generated from successful goal: {goal}",
                     data={"path": path},
                 )
@@ -112,11 +115,14 @@ class SelfImprover:
                 # Mark as deprecated
                 deprecated.append(recipe_name)
                 if bus:
-                    bus.emit(EventType.RECIPE_DEPRECATED, {
-                        "name": recipe_name,
-                        "success_rate": success_rate,
-                        "total_runs": len(statuses),
-                    })
+                    bus.emit(
+                        EventType.RECIPE_DEPRECATED,
+                        {
+                            "name": recipe_name,
+                            "success_rate": success_rate,
+                            "total_runs": len(statuses),
+                        },
+                    )
 
         return deprecated
 
@@ -191,7 +197,7 @@ class SelfImprover:
         """Record a journal entry with FIFO eviction."""
         self._journal.append(entry)
         if len(self._journal) > self.MAX_JOURNAL:
-            self._journal = self._journal[-self.MAX_JOURNAL:]
+            self._journal = self._journal[-self.MAX_JOURNAL :]
         self._save_journal()
 
 

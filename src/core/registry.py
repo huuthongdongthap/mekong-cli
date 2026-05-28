@@ -51,7 +51,9 @@ class RecipeRegistry:
                 meta = recipe.metadata
 
                 # Prefer description from metadata, fallback to body description
-                description = meta.get("description", recipe.description) or "No description provided"
+                description = (
+                    meta.get("description", recipe.description) or "No description provided"
+                )
 
                 entry = RegistryIndex(
                     name=recipe.name,
@@ -107,7 +109,8 @@ class RecipeRegistry:
 
 
 def _scan_directory_for_agents(
-    directory: Path, package_prefix: str,
+    directory: Path,
+    package_prefix: str,
 ) -> dict[str, type[AgentBase]]:
     """Scan a directory for Python files containing AgentBase subclasses.
 

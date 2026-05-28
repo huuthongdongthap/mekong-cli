@@ -142,8 +142,12 @@ class TelemetryQueries:
 
         return {
             "total_sessions": total_sessions,
-            "avg_duration_seconds": round(total_duration_seconds / total_sessions, 2) if total_sessions else 0,
-            "avg_commands_per_session": round(total_commands / total_sessions, 2) if total_sessions else 0,
+            "avg_duration_seconds": (
+                round(total_duration_seconds / total_sessions, 2) if total_sessions else 0
+            ),
+            "avg_commands_per_session": (
+                round(total_commands / total_sessions, 2) if total_sessions else 0
+            ),
             "total_commands": total_commands,
         }
 

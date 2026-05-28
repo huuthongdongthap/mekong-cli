@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 class EventStatus(Enum):
     """Event status."""
+
     SUCCESS = "success"
     FAILURE = "failure"
     ERROR = "error"
@@ -66,7 +67,7 @@ class TelemetryEvent:
 
     # Machine info
     machine_fingerprint: Optional[str] = None
-    platform: str = field(default_factory=lambda: __import__('platform').system())
+    platform: str = field(default_factory=lambda: __import__("platform").system())
     cli_version: str = field(default_factory=lambda: "0.2.0")
 
     # Rate limit info
@@ -171,6 +172,7 @@ class TelemetryHooks:
         license_key_hash = None
         if api_key:
             import hashlib
+
             license_key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:16]
 
         # Create event
@@ -196,8 +198,10 @@ class TelemetryHooks:
         self._event_queue.append(event)
 
         # Flush if batch is full or interval elapsed
-        if (len(self._event_queue) >= self._config.BATCH_SIZE or
-                time.time() - self._last_flush > self._config.FLUSH_INTERVAL_SECONDS):
+        if (
+            len(self._event_queue) >= self._config.BATCH_SIZE
+            or time.time() - self._last_flush > self._config.FLUSH_INTERVAL_SECONDS
+        ):
             self.flush()
 
         return event.event_id
@@ -235,9 +239,7 @@ class TelemetryHooks:
             payload = event.to_dict()
 
             response = self.gateway.post(
-                self._config.TELEMETRY_ENDPOINT,
-                json=payload,
-                headers=headers
+                self._config.TELEMETRY_ENDPOINT, json=payload, headers=headers
             )
 
             if response.status_code == 200:
@@ -410,6 +412,7 @@ class TelemetryHooks:
         """Get CLI version."""
         try:
             from importlib.metadata import version
+
             return version("mekong-cli")
         except Exception as e:
             logger.debug("Failed to get CLI version from metadata: %s", e)
@@ -433,7 +436,7 @@ def emit_telemetry_event(
     command_name: Optional[str] = None,
     status: Optional[EventStatus] = None,
     duration_ms: Optional[float] = None,
-    **kwargs
+    **kwargs,
 ) -> Optional[str]:
     """Emit telemetry event."""
     return get_telemetry_hooks().emit_event(
@@ -441,7 +444,7 @@ def emit_telemetry_event(
         command_name=command_name,
         status=status,
         duration_ms=duration_ms,
-        **kwargs
+        **kwargs,
     )
 
 
@@ -451,7 +454,7 @@ def emit_command_event(
     start_time: Optional[float] = None,
     status: Optional[EventStatus] = None,
     exit_code: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ) -> Optional[str]:
     """Emit command event."""
     return get_telemetry_hooks().command_hook(
@@ -460,7 +463,7 @@ def emit_command_event(
         start_time=start_time,
         status=status,
         exit_code=exit_code,
-        **kwargs
+        **kwargs,
     )
 
 

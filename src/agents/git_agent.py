@@ -152,9 +152,7 @@ class GitAgent(AgentBase):
             )
 
         except subprocess.TimeoutExpired:
-            return Result(
-                task_id=task.id, success=False, output=None, error="Command timed out"
-            )
+            return Result(task_id=task.id, success=False, output=None, error="Command timed out")
         except Exception as e:
             return Result(task_id=task.id, success=False, output=None, error=str(e))
 
@@ -228,8 +226,10 @@ class GitAgent(AgentBase):
         results: list[Result] = []
         for task in tasks:
             results.append(self.execute(task))
-        return results[-1] if results else Result(
-            task_id="semantic_commit", success=False, output=None, error="No tasks"
+        return (
+            results[-1]
+            if results
+            else Result(task_id="semantic_commit", success=False, output=None, error="No tasks")
         )
 
     def _auto_commit_message(self) -> str:

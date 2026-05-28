@@ -119,9 +119,9 @@ def get_all_time_stats() -> dict:
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
-            total = conn.execute(
-                "SELECT COUNT(*) FROM ai_decisions WHERE resolved = 1"
-            ).fetchone()[0]
+            total = conn.execute("SELECT COUNT(*) FROM ai_decisions WHERE resolved = 1").fetchone()[
+                0
+            ]
 
             if total == 0:
                 return {"total_trades": 0, "win_rate": 0, "brier": None}

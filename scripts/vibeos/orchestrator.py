@@ -219,9 +219,9 @@ class VibeOSOrchestrator:
             success=result.decision == "GO",
             message=f"{emoji} Decision: {result.decision}",
             details=details,
-            next_action="Proceed with implementation"
-            if result.decision == "GO"
-            else "Reconsider approach",
+            next_action=(
+                "Proceed with implementation" if result.decision == "GO" else "Reconsider approach"
+            ),
         )
 
     async def _execute_ship(self, message: str) -> SimpleOutput:

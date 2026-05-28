@@ -35,6 +35,7 @@ def validate_api_key_for_mission(api_key: str, tenant_id: str) -> tuple[bool, Op
 
     try:
         from src.core.api_key_manager import validate_api_key as validate_key
+
         result = validate_key(api_key)
 
         if not result.valid:

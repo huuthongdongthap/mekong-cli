@@ -19,6 +19,7 @@ def _agi_hints(goal: str) -> None:
     """Print AGI v2 planning hints (NLU + tools + reflection). Silently degrades."""
     try:
         from src.core.nlu import IntentClassifier
+
         intent = IntentClassifier(llm_client=get_client()).classify(goal)
         console.print(
             f"[dim]📡 NLU: {intent.intent.value} ({intent.confidence:.0%})"
@@ -30,6 +31,7 @@ def _agi_hints(goal: str) -> None:
 
     try:
         from src.core.tool_registry import ToolRegistry
+
         suggested = ToolRegistry().suggest_tool(goal)
         if suggested:
             console.print(
@@ -40,6 +42,7 @@ def _agi_hints(goal: str) -> None:
 
     try:
         from src.core.reflection import ReflectionEngine
+
         hint = ReflectionEngine().get_strategy_suggestion(goal)
         if hint and "No prior data" not in hint:
             console.print(f"[dim]🪞 Strategy: {hint[:60]}[/dim]")
@@ -73,11 +76,13 @@ def register_workflow_commands(app: typer.Typer) -> None:
         planner = RecipePlanner(llm_client=llm if llm.is_available else None)
         recipe = planner.plan(goal, context)
 
-        console.print(Panel(
-            f"[bold]{recipe.name}[/bold]\n{recipe.description}",
-            title="📋 Generated Plan",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]{recipe.name}[/bold]\n{recipe.description}",
+                title="📋 Generated Plan",
+                border_style="cyan",
+            )
+        )
 
         plan_table = Table(title="Steps")
         plan_table.add_column("#", style="bold cyan", justify="right")
@@ -111,11 +116,13 @@ def register_workflow_commands(app: typer.Typer) -> None:
         context = PlanningContext(goal=question, complexity=TaskComplexity.SIMPLE)
         recipe = planner.plan(question, context)
 
-        console.print(Panel(
-            f"[bold]{recipe.name}[/bold]\n{recipe.description}",
-            title="💡 Answer",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]{recipe.name}[/bold]\n{recipe.description}",
+                title="💡 Answer",
+                border_style="cyan",
+            )
+        )
 
         plan_table = Table(title="Steps")
         plan_table.add_column("#", style="bold cyan", justify="right")
@@ -123,9 +130,7 @@ def register_workflow_commands(app: typer.Typer) -> None:
         plan_table.add_column("Description", style="dim")
         for step in recipe.steps:
             agent_hint = f" [{step.agent}]" if step.agent else ""
-            plan_table.add_row(
-                str(step.order), step.title + agent_hint, step.description[:80]
-            )
+            plan_table.add_row(str(step.order), step.title + agent_hint, step.description[:80])
         console.print(plan_table)
 
     @app.command(name="debug")
@@ -138,6 +143,7 @@ def register_workflow_commands(app: typer.Typer) -> None:
 
         try:
             from src.core.world_model import WorldModel
+
             prediction = WorldModel().predict_side_effects(goal)
             if prediction.risk_level == "high":
                 console.print(
@@ -148,6 +154,7 @@ def register_workflow_commands(app: typer.Typer) -> None:
 
         try:
             from src.core.reflection import ReflectionEngine
+
             hint = ReflectionEngine().get_strategy_suggestion(goal)
             if hint and "No prior data" not in hint:
                 console.print(f"[dim]🪞 Prior debug insight: {hint[:60]}[/dim]")
@@ -156,23 +163,24 @@ def register_workflow_commands(app: typer.Typer) -> None:
 
         if dry_run:
             from src.core.planner import RecipePlanner
+
             llm = get_client()
             planner = RecipePlanner(llm_client=llm if llm.is_available else None)
             recipe = planner.plan(goal)
-            console.print(Panel(
-                f"[bold]{recipe.name}[/bold]\n{recipe.description}",
-                title="🐛 Debug Plan",
-                border_style="yellow",
-            ))
+            console.print(
+                Panel(
+                    f"[bold]{recipe.name}[/bold]\n{recipe.description}",
+                    title="🐛 Debug Plan",
+                    border_style="yellow",
+                )
+            )
             plan_table = Table(title="Debug Steps")
             plan_table.add_column("#", style="bold cyan", justify="right")
             plan_table.add_column("Task", style="bold")
             plan_table.add_column("Description", style="dim")
             for step in recipe.steps:
                 agent_hint = f" [{step.agent}]" if step.agent else ""
-                plan_table.add_row(
-                    str(step.order), step.title + agent_hint, step.description[:80]
-                )
+                plan_table.add_row(str(step.order), step.title + agent_hint, step.description[:80])
             console.print(plan_table)
             console.print(
                 f'\n[dim]Run [bold cyan]mekong debug "{issue}" --execute[/bold cyan] to run[/dim]'

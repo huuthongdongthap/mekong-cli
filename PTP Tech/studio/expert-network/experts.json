@@ -1,0 +1,35 @@
+{
+  "experts": [],
+  "domains": [
+    {
+      "domain": "solar_engineering",
+      "skills": ["PV system design", "Inverter technology", "Battery storage", "Grid integration"],
+      "needed": true
+    },
+    {
+      "domain": "iot_hardware",
+      "skills": ["Sensor integration", "MQTT protocols", "Edge computing", "Time-series data"],
+      "needed": true
+    },
+    {
+      "domain": "ai_ml",
+      "skills": ["Energy forecasting", "Predictive maintenance", "Optimization algorithms", "Anomaly detection"],
+      "needed": true
+    },
+    {
+      "domain": "manufacturing",
+      "skills": ["Factory operations", "Energy management", "ESG compliance", "Lean manufacturing"],
+      "needed": true
+    },
+    {
+      "domain": "business",
+      "skills": ["B2B sales", "Partnership development", "Energy trading", "Carbon markets"],
+      "needed": true
+    }
+  ],
+  "matching_criteria": {
+    "availability": "10+ hours/week",
+    "experience": "5+ years in solar/energy/manufacturing",
+    "communication": "Vietnamese preferred, English OK"
+  }
+}

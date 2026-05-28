@@ -231,9 +231,7 @@ def save_post_ipo_strategy(output_dir: str, strategy: PostIPOStrategy) -> list[s
 
     if strategy.emergency_plan:
         emergency_path = base / "emergency-plan.json"
-        emergency_path.write_text(
-            json.dumps(asdict(strategy.emergency_plan), indent=2)
-        )
+        emergency_path.write_text(json.dumps(asdict(strategy.emergency_plan), indent=2))
         saved.append(str(emergency_path))
 
     strategy_path = base / "post-ipo-strategy.json"

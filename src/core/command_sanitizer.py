@@ -117,12 +117,10 @@ class CommandSanitizer:
 
         # Compile regex patterns
         self._dangerous_regex = [
-            (re.compile(pattern, re.IGNORECASE), name)
-            for pattern, name in self.DANGEROUS_PATTERNS
+            (re.compile(pattern, re.IGNORECASE), name) for pattern, name in self.DANGEROUS_PATTERNS
         ]
         self._suspicious_regex = [
-            (re.compile(pattern, re.IGNORECASE), name)
-            for pattern, name in self.SUSPICIOUS_PATTERNS
+            (re.compile(pattern, re.IGNORECASE), name) for pattern, name in self.SUSPICIOUS_PATTERNS
         ]
 
     def sanitize(self, command: str) -> SanitizationResult:

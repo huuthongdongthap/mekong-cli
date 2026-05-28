@@ -1,7 +1,7 @@
 """
 RAAS License Gate Validator - Gateway-Only Validation
 
-Validates license keys directly against RaaS Gateway at raas.agencyos.network.
+Validates license keys directly against RaaS Gateway at api.cashclaw.cc.
 No local license generation - fully delegated to gateway.
 
 Reference: docs/HIEN_PHAP_ROIAAS.md - ROIaaS Phase 1
@@ -73,7 +73,9 @@ class RaasGateValidator:
                     "tier": result.tenant.tier,
                     "tenant_id": result.tenant.tenant_id,
                     "features": result.tenant.features,
-                    "expires_at": result.tenant.expires_at.isoformat() if result.tenant.expires_at else None,
+                    "expires_at": (
+                        result.tenant.expires_at.isoformat() if result.tenant.expires_at else None
+                    ),
                 }
                 return True, None
             else:

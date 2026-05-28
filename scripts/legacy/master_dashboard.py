@@ -228,9 +228,7 @@ def dashboard_full():
 
     # Quick commands
     print(f"\n{DIM}{'─' * 60}{RESET}")
-    print(
-        f"{DIM}Quick: autopilot daily | outreach_cli.py stats | invoice_generator.py list{RESET}"
-    )
+    print(f"{DIM}Quick: autopilot daily | outreach_cli.py stats | invoice_generator.py list{RESET}")
 
 
 def main():

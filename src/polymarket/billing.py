@@ -46,6 +46,7 @@ PRODUCT_TIERS: dict[str, str] = {
 @dataclass
 class Subscription:
     """A customer subscription record."""
+
     subscription_id: str
     user_id: str
     email: str
@@ -64,10 +65,17 @@ class BillingDB:
         self.db_path = db_path
         self._ensure_tables()
 
+    def _connect(self) -> sqlite3.Connection:
+        """Open a WAL-mode connection with busy timeout."""
+        conn = sqlite3.connect(self.db_path, timeout=10)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=5000")
+        return conn
+
     def _ensure_tables(self) -> None:
         """Create billing tables if not exist."""
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS subscriptions (
                     subscription_id TEXT PRIMARY KEY,
@@ -111,24 +119,32 @@ class BillingDB:
             created_at=datetime.utcnow().isoformat(),
         )
 
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.execute(
                 """INSERT OR REPLACE INTO subscriptions
                    (subscription_id, user_id, email, tier, api_key, active, created_at)
                    VALUES (?, ?, ?, ?, ?, 1, ?)""",
-                (sub.subscription_id, sub.user_id, sub.email,
-                 sub.tier, sub.api_key, sub.created_at),
+                (
+                    sub.subscription_id,
+                    sub.user_id,
+                    sub.email,
+                    sub.tier,
+                    sub.api_key,
+                    sub.created_at,
+                ),
             )
 
         logger.info(
             "Provisioned subscription %s tier=%s email=%s",
-            subscription_id, tier, email,
+            subscription_id,
+            tier,
+            email,
         )
         return sub
 
     def update_tier(self, subscription_id: str, new_tier: str) -> bool:
         """Update subscription tier."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.execute(
                 "UPDATE subscriptions SET tier = ? WHERE subscription_id = ?",
                 (new_tier, subscription_id),
@@ -138,7 +154,7 @@ class BillingDB:
     def cancel_subscription(self, subscription_id: str, grace_days: int = 7) -> bool:
         """Cancel subscription with grace period."""
         grace_until = (datetime.utcnow() + timedelta(days=grace_days)).isoformat()
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.execute(
                 """UPDATE subscriptions
                    SET active = 0, grace_until = ?
@@ -149,7 +165,7 @@ class BillingDB:
 
     def get_by_api_key(self, api_key: str) -> Optional[Subscription]:
         """Look up subscription by API key."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             row = conn.execute(
                 "SELECT * FROM subscriptions WHERE api_key = ?",
@@ -173,7 +189,7 @@ class BillingDB:
 
     def get_by_subscription_id(self, subscription_id: str) -> Optional[Subscription]:
         """Look up subscription by Polar subscription ID."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             row = conn.execute(
                 "SELECT * FROM subscriptions WHERE subscription_id = ?",
@@ -197,7 +213,7 @@ class BillingDB:
 
     def log_event(self, event_type: str, subscription_id: str, payload: str) -> None:
         """Log a billing event for audit."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.execute(
                 """INSERT INTO billing_events (event_type, subscription_id, payload)
                    VALUES (?, ?, ?)""",
@@ -206,7 +222,7 @@ class BillingDB:
 
     def count_active(self) -> dict[str, int]:
         """Count active subscriptions by tier."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             rows = conn.execute(
                 "SELECT tier, COUNT(*) FROM subscriptions WHERE active = 1 GROUP BY tier"
             ).fetchall()
@@ -216,6 +232,7 @@ class BillingDB:
 # ---------------------------------------------------------------------------
 # Webhook signature verification
 # ---------------------------------------------------------------------------
+
 
 def verify_polar_signature(payload: bytes, signature: str) -> bool:
     """Verify Polar.sh webhook HMAC-SHA256 signature."""
@@ -236,6 +253,7 @@ def verify_polar_signature(payload: bytes, signature: str) -> bool:
 # ---------------------------------------------------------------------------
 # Webhook endpoint
 # ---------------------------------------------------------------------------
+
 
 @router.post("")
 async def handle_polar_webhook(request: Request) -> dict:

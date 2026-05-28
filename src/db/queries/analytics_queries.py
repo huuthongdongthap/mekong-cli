@@ -145,12 +145,12 @@ class AnalyticsQueries:
         """
         # Get MRR by tier (estimated based on tier pricing)
         tier_pricing = {
-            'free': 0,
-            'trial': 0,
-            'starter': 29,
-            'growth': 79,
-            'pro': 199,
-            'enterprise': 499,
+            "free": 0,
+            "trial": 0,
+            "starter": 29,
+            "growth": 79,
+            "pro": 199,
+            "enterprise": 499,
         }
 
         query = """
@@ -167,20 +167,20 @@ class AnalyticsQueries:
         by_tier = {}
 
         for row in results:
-            tier = row['tier']
+            tier = row["tier"]
             price = tier_pricing.get(tier, 0)
-            mrr = price * row['active_count']
+            mrr = price * row["active_count"]
             total_mrr += mrr
             by_tier[tier] = {
-                'count': row['count'],
-                'active': row['active_count'],
-                'mrr': mrr,
+                "count": row["count"],
+                "active": row["active_count"],
+                "mrr": mrr,
             }
 
         return {
-            'total_mrr': total_mrr,
-            'by_tier': by_tier,
-            'active_subscriptions': sum(r['active_count'] for r in results),
+            "total_mrr": total_mrr,
+            "by_tier": by_tier,
+            "active_subscriptions": sum(r["active_count"] for r in results),
         }
 
     async def get_license_tier_distribution(self) -> Dict[str, Any]:
@@ -206,17 +206,17 @@ class AnalyticsQueries:
         total = 0
 
         for row in results:
-            tier = row['tier']
-            status = row['status']
+            tier = row["tier"]
+            status = row["status"]
 
-            by_tier[tier] = by_tier.get(tier, 0) + row['count']
-            by_status[status] = by_status.get(status, 0) + row['count']
-            total += row['count']
+            by_tier[tier] = by_tier.get(tier, 0) + row["count"]
+            by_status[status] = by_status.get(status, 0) + row["count"]
+            total += row["count"]
 
         return {
-            'total': total,
-            'by_tier': by_tier,
-            'by_status': by_status,
+            "total": total,
+            "by_tier": by_tier,
+            "by_status": by_status,
         }
 
     async def get_license_health_summary(self) -> Dict[str, Any]:
@@ -240,8 +240,8 @@ class AnalyticsQueries:
         total = 0
 
         for row in results:
-            status = row['status']
-            count = int(row['count'])
+            status = row["status"]
+            count = int(row["count"])
             by_status[status.upper()] = count
             total += count
 
@@ -264,15 +264,15 @@ class AnalyticsQueries:
         expired = await self._db.fetch_one(expired_query)
 
         return {
-            'total': total,
-            'by_status': by_status,
-            'active_count': by_status.get('ACTIVE', 0),
-            'suspended_count': by_status.get('SUSPENDED', 0),
-            'revoked_count': by_status.get('REVOKED', 0),
-            'expired_count': by_status.get('EXPIRED', 0),
-            'invalid_count': by_status.get('INVALID', 0),
-            'expiring_soon_count': int(expiring_soon['count']) if expiring_soon else 0,
-            'expired_but_active_count': int(expired['count']) if expired else 0,
+            "total": total,
+            "by_status": by_status,
+            "active_count": by_status.get("ACTIVE", 0),
+            "suspended_count": by_status.get("SUSPENDED", 0),
+            "revoked_count": by_status.get("REVOKED", 0),
+            "expired_count": by_status.get("EXPIRED", 0),
+            "invalid_count": by_status.get("INVALID", 0),
+            "expiring_soon_count": int(expiring_soon["count"]) if expiring_soon else 0,
+            "expired_but_active_count": int(expired["count"]) if expired else 0,
         }
 
     async def get_expired_licenses_for_renewal(self, days: int = 7) -> List[Dict[str, Any]]:

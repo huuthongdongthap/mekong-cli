@@ -9,6 +9,7 @@ Test Categories:
 
 Total: ~80 tests
 """
+
 from __future__ import annotations
 
 import os
@@ -24,7 +25,6 @@ from src.lib.tier_config import (
     get_preset_config,
     get_tier_config,
 )
-
 
 # ============================================================================
 # TEST SECTION 1: TierConfig Tests (~15 tests)
@@ -642,18 +642,22 @@ class TestTierConfigRepository:
         return MockDatabaseConnection()
 
     @pytest.mark.asyncio
-    async def test_get_config_returns_config(self, mock_db_connection: MockDatabaseConnection) -> None:
+    async def test_get_config_returns_config(
+        self, mock_db_connection: MockDatabaseConnection
+    ) -> None:
         """Test get_config retrieves config from DB."""
         from src.db.tier_config_repository import TierConfigRepository
 
         # Setup mock data
-        mock_db_connection._db._data["tier_configs"].append({
-            "id": 1,
-            "tier": "pro",
-            "preset": "auth_login",
-            "rate_limit": 100,
-            "window_seconds": 60,
-        })
+        mock_db_connection._db._data["tier_configs"].append(
+            {
+                "id": 1,
+                "tier": "pro",
+                "preset": "auth_login",
+                "rate_limit": 100,
+                "window_seconds": 60,
+            }
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         config = await repo.get_config("pro", "auth_login")
@@ -692,13 +696,15 @@ class TestTierConfigRepository:
         from src.db.tier_config_repository import TierConfigRepository
 
         # Pre-populate
-        mock_db_connection._db._data["tier_configs"].append({
-            "id": 1,
-            "tier": "pro",
-            "preset": "api_default",
-            "rate_limit": 50,
-            "window_seconds": 60,
-        })
+        mock_db_connection._db._data["tier_configs"].append(
+            {
+                "id": 1,
+                "tier": "pro",
+                "preset": "api_default",
+                "rate_limit": 50,
+                "window_seconds": 60,
+            }
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         config = await repo.update_config("pro", "api_default", rate_limit=200)
@@ -712,11 +718,31 @@ class TestTierConfigRepository:
         from src.db.tier_config_repository import TierConfigRepository
 
         # Pre-populate with multiple configs
-        mock_db_connection._db._data["tier_configs"].extend([
-            {"id": 1, "tier": "free", "preset": "auth_login", "rate_limit": 5, "window_seconds": 60},
-            {"id": 2, "tier": "pro", "preset": "auth_login", "rate_limit": 30, "window_seconds": 60},
-            {"id": 3, "tier": "enterprise", "preset": "api_default", "rate_limit": 500, "window_seconds": 60},
-        ])
+        mock_db_connection._db._data["tier_configs"].extend(
+            [
+                {
+                    "id": 1,
+                    "tier": "free",
+                    "preset": "auth_login",
+                    "rate_limit": 5,
+                    "window_seconds": 60,
+                },
+                {
+                    "id": 2,
+                    "tier": "pro",
+                    "preset": "auth_login",
+                    "rate_limit": 30,
+                    "window_seconds": 60,
+                },
+                {
+                    "id": 3,
+                    "tier": "enterprise",
+                    "preset": "api_default",
+                    "rate_limit": 500,
+                    "window_seconds": 60,
+                },
+            ]
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         configs = await repo.get_all_configs()
@@ -731,13 +757,15 @@ class TestTierConfigRepository:
         """Test delete_config removes config."""
         from src.db.tier_config_repository import TierConfigRepository
 
-        mock_db_connection._db._data["tier_configs"].append({
-            "id": 1,
-            "tier": "free",
-            "preset": "auth_login",
-            "rate_limit": 5,
-            "window_seconds": 60,
-        })
+        mock_db_connection._db._data["tier_configs"].append(
+            {
+                "id": 1,
+                "tier": "free",
+                "preset": "auth_login",
+                "rate_limit": 5,
+                "window_seconds": 60,
+            }
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         deleted = await repo.delete_config("free", "auth_login")
@@ -749,15 +777,17 @@ class TestTierConfigRepository:
         """Test get_tenant_override retrieves override."""
         from src.db.tier_config_repository import TierConfigRepository
 
-        mock_db_connection._db._data["tenant_rate_limits"].append({
-            "id": 1,
-            "tenant_id": "tenant-123",
-            "tier": "pro",
-            "preset": "api_default",
-            "custom_limit": 1000,
-            "custom_window": 60,
-            "expires_at": None,
-        })
+        mock_db_connection._db._data["tenant_rate_limits"].append(
+            {
+                "id": 1,
+                "tenant_id": "tenant-123",
+                "tier": "pro",
+                "preset": "api_default",
+                "custom_limit": 1000,
+                "custom_window": 60,
+                "expires_at": None,
+            }
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         override = await repo.get_tenant_override("tenant-123", "api_default")
@@ -787,14 +817,34 @@ class TestTierConfigRepository:
         assert override.custom_limit == 50
 
     @pytest.mark.asyncio
-    async def test_get_all_tenant_overrides(self, mock_db_connection: MockDatabaseConnection) -> None:
+    async def test_get_all_tenant_overrides(
+        self, mock_db_connection: MockDatabaseConnection
+    ) -> None:
         """Test get_all_tenant_overrides returns all overrides."""
         from src.db.tier_config_repository import TierConfigRepository
 
-        mock_db_connection._db._data["tenant_rate_limits"].extend([
-            {"id": 1, "tenant_id": "tenant-1", "preset": "api_default", "custom_limit": 100, "custom_window": 60, "tier": "pro", "expires_at": None},
-            {"id": 2, "tenant_id": "tenant-2", "preset": "auth_login", "custom_limit": 50, "custom_window": 60, "tier": "free", "expires_at": None},
-        ])
+        mock_db_connection._db._data["tenant_rate_limits"].extend(
+            [
+                {
+                    "id": 1,
+                    "tenant_id": "tenant-1",
+                    "preset": "api_default",
+                    "custom_limit": 100,
+                    "custom_window": 60,
+                    "tier": "pro",
+                    "expires_at": None,
+                },
+                {
+                    "id": 2,
+                    "tenant_id": "tenant-2",
+                    "preset": "auth_login",
+                    "custom_limit": 50,
+                    "custom_window": 60,
+                    "tier": "free",
+                    "expires_at": None,
+                },
+            ]
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         overrides = await repo.get_all_tenant_overrides()
@@ -803,14 +853,34 @@ class TestTierConfigRepository:
 
     @pytest.mark.asyncio
     @pytest.mark.skip("Mock database does not support ON CONFLICT RETURNING SQL")
-    async def test_get_all_tenant_overrides_filtered(self, mock_db_connection: MockDatabaseConnection) -> None:
+    async def test_get_all_tenant_overrides_filtered(
+        self, mock_db_connection: MockDatabaseConnection
+    ) -> None:
         """Test get_all_tenant_overrides filters by tenant - skipped for mock DB."""
         from src.db.tier_config_repository import TierConfigRepository
 
-        mock_db_connection._db._data["tenant_rate_limits"].extend([
-            {"id": 1, "tenant_id": "tenant-1", "preset": "api_default", "custom_limit": 100, "custom_window": 60, "tier": "pro", "expires_at": None},
-            {"id": 2, "tenant_id": "tenant-2", "preset": "auth_login", "custom_limit": 50, "custom_window": 60, "tier": "free", "expires_at": None},
-        ])
+        mock_db_connection._db._data["tenant_rate_limits"].extend(
+            [
+                {
+                    "id": 1,
+                    "tenant_id": "tenant-1",
+                    "preset": "api_default",
+                    "custom_limit": 100,
+                    "custom_window": 60,
+                    "tier": "pro",
+                    "expires_at": None,
+                },
+                {
+                    "id": 2,
+                    "tenant_id": "tenant-2",
+                    "preset": "auth_login",
+                    "custom_limit": 50,
+                    "custom_window": 60,
+                    "tier": "free",
+                    "expires_at": None,
+                },
+            ]
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         overrides = await repo.get_all_tenant_overrides(tenant_id="tenant-1")
@@ -819,19 +889,23 @@ class TestTierConfigRepository:
         assert overrides[0].tenant_id == "tenant-1"
 
     @pytest.mark.asyncio
-    async def test_cleanup_expired_overrides(self, mock_db_connection: MockDatabaseConnection) -> None:
+    async def test_cleanup_expired_overrides(
+        self, mock_db_connection: MockDatabaseConnection
+    ) -> None:
         """Test cleanup_expired_overrides removes expired records."""
         from src.db.tier_config_repository import TierConfigRepository
 
         # Add some records (simplified - in real DB would check expires_at < NOW())
-        mock_db_connection._db._data["tenant_rate_limits"].append({
-            "id": 1,
-            "tenant_id": "tenant-1",
-            "preset": "api_default",
-            "custom_limit": 100,
-            "custom_window": 60,
-            "expires_at": "2025-01-01T00:00:00Z",  # Old - expired
-        })
+        mock_db_connection._db._data["tenant_rate_limits"].append(
+            {
+                "id": 1,
+                "tenant_id": "tenant-1",
+                "preset": "api_default",
+                "custom_limit": 100,
+                "custom_window": 60,
+                "expires_at": "2025-01-01T00:00:00Z",  # Old - expired
+            }
+        )
 
         repo = TierConfigRepository(db=mock_db_connection)
         deleted = await repo.cleanup_expired_overrides()
@@ -915,9 +989,7 @@ class TestTierRateLimitMiddleware:
         middleware = TierRateLimitMiddleware(app)
 
         # Token with dots (like JWT) will be extracted from Authorization
-        request = MockRequest(headers={
-            "Authorization": "Bearer raasjwt.pro.testtoken123"
-        })
+        request = MockRequest(headers={"Authorization": "Bearer raasjwt.pro.testtoken123"})
         license_key = middleware._extract_license_key(request)
 
         assert license_key == "raasjwt.pro.testtoken123"
@@ -1147,13 +1219,16 @@ class TestTierAdminCLI:
 
         runner = CliRunner()
 
-        result = runner.invoke(app, [
-            "override",
-            "tenant-123",
-            "api_default",
-            "1000",
-            "60",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "override",
+                "tenant-123",
+                "api_default",
+                "1000",
+                "60",
+            ],
+        )
 
         # Command connects to database which isn't available in test env
         # Just verify the command structure is correct
@@ -1179,11 +1254,14 @@ class TestTierAdminCLI:
 
         runner = CliRunner()
 
-        result = runner.invoke(app, [
-            "remove-override",
-            "tenant-123",
-            "invalid_preset",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "remove-override",
+                "tenant-123",
+                "invalid_preset",
+            ],
+        )
 
         # Should fail with invalid preset
         assert result.exit_code != 0
@@ -1309,7 +1387,7 @@ class TestEdgeCases:
         # Total should equal burst size (150)
         assert successes + failures == 200
         assert successes == 150  # Initial burst
-        assert failures == 50    # Exceeded burst
+        assert failures == 50  # Exceeded burst
 
     def test_middleware_empty_api_key_header(self) -> None:
         """Test middleware handles empty API key header."""
@@ -1353,7 +1431,9 @@ class TestCommandFilters:
 
         for path, expected_preset in paths:
             preset = middleware._get_preset_for_path(path)
-            assert preset == expected_preset, f"Path {path} should map to {expected_preset}, got {preset}"
+            assert (
+                preset == expected_preset
+            ), f"Path {path} should map to {expected_preset}, got {preset}"
 
 
 class TestBenchmark:

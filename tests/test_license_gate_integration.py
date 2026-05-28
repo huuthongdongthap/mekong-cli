@@ -15,7 +15,8 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone, timedelta
 
 import sys
-sys.path.insert(0, '/Users/macbookprom1/mekong-cli')
+
+sys.path.insert(0, "/Users/macbookprom1/mekong-cli")
 
 from src.lib.raas_gate import RaasLicenseGate
 from src.lib.quota_error_messages import (
@@ -71,14 +72,10 @@ class TestLicenseValidationFlow:
         assert format_valid is True
         assert format_error == ""
 
-    @patch.object(RaasLicenseGate, 'validate_remote')
+    @patch.object(RaasLicenseGate, "validate_remote")
     def test_valid_license_remote_validation(self, mock_validate_remote):
         """Valid license passes remote validation (mocked)."""
-        mock_validate_remote.return_value = (
-            True,
-            {"tier": "pro", "key_id": "pro-key-123"},
-            ""
-        )
+        mock_validate_remote.return_value = (True, {"tier": "pro", "key_id": "pro-key-123"}, "")
 
         gate = RaasLicenseGate(enable_remote=False)
         gate._license_key = "raas-pro-validkey-signature"
@@ -92,15 +89,11 @@ class TestLicenseValidationFlow:
         assert info is not None
         assert info["tier"] == "pro"
 
-    @patch('src.lib.license_generator.validate_license')
+    @patch("src.lib.license_generator.validate_license")
     def test_revoked_license_blocks_with_formatted_message(self, mock_validate):
         """Revoked license blocks with formatted error message."""
         # Format validation passes
-        mock_validate.return_value = (
-            True,
-            {"tier": "pro", "key_id": "pro-key-123"},
-            ""
-        )
+        mock_validate.return_value = (True, {"tier": "pro", "key_id": "pro-key-123"}, "")
 
         gate = RaasLicenseGate(enable_remote=False)
         gate._license_key = "raas-pro-validkey-signature"
@@ -117,26 +110,24 @@ class TestLicenseValidationFlow:
         assert "revoked" in error_msg.lower()
         assert "support" in error_msg.lower() or "contact" in error_msg.lower()
 
-    @patch('src.lib.license_generator.validate_license')
+    @patch("src.lib.license_generator.validate_license")
     def test_expired_license_blocks_with_formatted_message(self, mock_validate):
         """Expired license blocks with formatted error message."""
-        mock_validate.return_value = (
-            True,
-            {"tier": "pro", "key_id": "pro-key-123"},
-            ""
-        )
+        mock_validate.return_value = (True, {"tier": "pro", "key_id": "pro-key-123"}, "")
 
         gate = RaasLicenseGate(enable_remote=False)
         gate._license_key = "raas-pro-validkey-signature"
         gate._key_id = "pro-key-123"
         gate._license_tier = "pro"
         gate._license_status = "expired"
-        gate._license_expires_at = int((datetime.now(timezone.utc) - timedelta(days=30)).timestamp())
+        gate._license_expires_at = int(
+            (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
+        )
 
         # Test error message formatting
-        expiry_date = datetime.fromtimestamp(
-            gate._license_expires_at, tz=timezone.utc
-        ).strftime("%Y-%m-%d")
+        expiry_date = datetime.fromtimestamp(gate._license_expires_at, tz=timezone.utc).strftime(
+            "%Y-%m-%d"
+        )
         error_msg = format_license_expired(expiry_date)
 
         assert "expired" in error_msg.lower()
@@ -147,15 +138,15 @@ class TestLicenseValidationFlow:
 class TestRemoteValidationHandling:
     """Tests for remote API validation response handling."""
 
-    @patch('src.lib.license_generator.validate_license')
-    @patch('requests.post')
+    @patch("src.lib.license_generator.validate_license")
+    @patch("requests.post")
     def test_remote_401_returns_invalid_license(self, mock_post, mock_validate):
         """HTTP 401 from remote returns invalid license error."""
         mock_validate.return_value = (True, {"tier": "pro", "key_id": "key123"}, "")
 
         mock_response = MagicMock()
         mock_response.status_code = 401
-        mock_response.content = b''
+        mock_response.content = b""
         mock_post.return_value = mock_response
 
         gate = RaasLicenseGate(enable_remote=True)
@@ -166,8 +157,8 @@ class TestRemoteValidationHandling:
         assert is_valid is False
         assert "invalid" in error.lower() or "revoked" in error.lower()
 
-    @patch('src.lib.license_generator.validate_license')
-    @patch('requests.post')
+    @patch("src.lib.license_generator.validate_license")
+    @patch("requests.post")
     def test_remote_403_revoked_returns_revoked_error(self, mock_post, mock_validate):
         """HTTP 403 with reason=revoked returns revoked error."""
         mock_validate.return_value = (True, {"tier": "pro", "key_id": "key123"}, "")
@@ -185,8 +176,8 @@ class TestRemoteValidationHandling:
         assert is_valid is False
         assert "revoked" in error.lower()
 
-    @patch('src.lib.license_generator.validate_license')
-    @patch('requests.post')
+    @patch("src.lib.license_generator.validate_license")
+    @patch("requests.post")
     def test_remote_403_expired_returns_expired_error(self, mock_post, mock_validate):
         """HTTP 403 with reason=expired returns expired error."""
         mock_validate.return_value = (True, {"tier": "pro", "key_id": "key123"}, "")
@@ -204,15 +195,15 @@ class TestRemoteValidationHandling:
         assert is_valid is False
         assert "expired" in error.lower()
 
-    @patch('src.lib.license_generator.validate_license')
-    @patch('requests.post')
+    @patch("src.lib.license_generator.validate_license")
+    @patch("requests.post")
     def test_remote_429_returns_rate_limit_error(self, mock_post, mock_validate):
         """HTTP 429 returns rate limit error."""
         mock_validate.return_value = (True, {"tier": "pro", "key_id": "key123"}, "")
 
         mock_response = MagicMock()
         mock_response.status_code = 429
-        mock_response.content = b''
+        mock_response.content = b""
         mock_post.return_value = mock_response
 
         gate = RaasLicenseGate(enable_remote=True)
@@ -223,8 +214,8 @@ class TestRemoteValidationHandling:
         assert is_valid is False
         assert "rate limit" in error.lower()
 
-    @patch('src.lib.license_generator.validate_license')
-    @patch('requests.post')
+    @patch("src.lib.license_generator.validate_license")
+    @patch("requests.post")
     def test_remote_200_returns_success(self, mock_post, mock_validate):
         """HTTP 200 returns success with license data."""
         mock_validate.return_value = (True, {"tier": "pro", "key_id": "key123"}, "")
@@ -235,7 +226,7 @@ class TestRemoteValidationHandling:
             "tier": "pro",
             "key_id": "pro-key-456",
             "status": "active",
-            "expires_at": int((datetime.now(timezone.utc) + timedelta(days=365)).timestamp())
+            "expires_at": int((datetime.now(timezone.utc) + timedelta(days=365)).timestamp()),
         }
         mock_post.return_value = mock_response
 
@@ -249,8 +240,8 @@ class TestRemoteValidationHandling:
         assert info["tier"] == "pro"
         assert info["key_id"] == "pro-key-456"
 
-    @patch('src.lib.license_generator.validate_license')
-    @patch('requests.post')
+    @patch("src.lib.license_generator.validate_license")
+    @patch("requests.post")
     def test_network_error_falls_back_to_local(self, mock_post, mock_validate):
         """Network error falls back to local validation."""
         import requests
@@ -282,7 +273,7 @@ class TestExitCodesAndErrorMessages:
             daily_used=10,
             daily_limit=10,
             command="cook",
-            violation_type="quota_exceeded"
+            violation_type="quota_exceeded",
         )
 
         error_msg = format_quota_error(ctx)
@@ -324,7 +315,7 @@ class TestExitCodesAndErrorMessages:
 class TestTierLimitsAndQuotaEnforcement:
     """Tests for tier-based quota enforcement."""
 
-    @patch('src.lib.license_generator.validate_license')
+    @patch("src.lib.license_generator.validate_license")
     def test_different_tiers_have_different_limits(self, mock_validate):
         """Different tiers have different quota limits."""
         from src.raas.credit_rate_limiter import TIER_LIMITS
@@ -332,7 +323,7 @@ class TestTierLimitsAndQuotaEnforcement:
         # Check that free tier has lower limits than pro
         assert TIER_LIMITS["free"]["daily"] < TIER_LIMITS.get("pro", {}).get("daily", 500)
 
-    @patch('src.lib.license_generator.validate_license')
+    @patch("src.lib.license_generator.validate_license")
     def test_enterprise_tier_has_unlimited_quota(self, mock_validate):
         """Enterprise tier has unlimited quota (daily=-1 or 0 for unlimited)."""
         from src.raas.credit_rate_limiter import TIER_LIMITS

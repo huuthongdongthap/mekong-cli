@@ -104,9 +104,9 @@ class TestContentVirality:
         # Simple keyword matching
         found_keywords = [kw for kw in expected_keywords if kw in content]
 
-        assert len(found_keywords) >= 2, (
-            f"Found only {found_keywords}, expected at least 2 from {expected_keywords}"
-        )
+        assert (
+            len(found_keywords) >= 2
+        ), f"Found only {found_keywords}, expected at least 2 from {expected_keywords}"
 
 
 if __name__ == "__main__":

@@ -71,8 +71,7 @@ def build_roadshow_deck(
             content = f"{company_name} | {template}"
         elif num == 9:
             content = (
-                f"ARR: ${arr:.1f}M | Growth: {growth_pct:.0f}% YoY | "
-                f"Customers: {customers}"
+                f"ARR: ${arr:.1f}M | Growth: {growth_pct:.0f}% YoY | " f"Customers: {customers}"
             )
         elif num == 12:
             content = f"Moat: {moat}. {template}"
@@ -132,8 +131,10 @@ def analyze_order_book(
 
 def get_allocation_strategy() -> list[AllocationRule]:
     """Return IPO share allocation rules."""
-    return [AllocationRule(category=cat, target_pct=pct, description=desc)
-            for cat, pct, desc in ALLOCATION_RULES]
+    return [
+        AllocationRule(category=cat, target_pct=pct, description=desc)
+        for cat, pct, desc in ALLOCATION_RULES
+    ]
 
 
 def build_roadshow_package(

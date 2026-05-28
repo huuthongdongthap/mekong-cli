@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 
 try:
     import httpx
+
     HTTPX_AVAILABLE = True
 except ImportError:
     HTTPX_AVAILABLE = False
@@ -50,6 +51,7 @@ def generate_pkce_challenge(verifier: str) -> str:
     sha256_hash = hashlib.sha256(verifier.encode()).digest()
     # Base64URL encode
     import base64
+
     return base64.urlsafe_b64encode(sha256_hash).rstrip(b"=").decode()
 
 
@@ -71,6 +73,7 @@ class OAuth2Client:
     async def close(self):
         """Close the HTTP client if it was created."""
         import inspect
+
         if self._client is not None:
             result = self._client.aclose()
             if inspect.isawaitable(result):
@@ -304,6 +307,7 @@ class OAuth2Client:
 
 
 # Convenience functions for simple usage
+
 
 async def get_google_oauth_url() -> str:
     """Get Google OAuth2 URL."""

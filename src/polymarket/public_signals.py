@@ -102,6 +102,7 @@ async def public_calibration(request: Request) -> dict:
 # Data helpers
 # ---------------------------------------------------------------------------
 
+
 def _get_latest_signal() -> Optional[dict]:
     """Get the latest prediction signal from the database."""
     if not Path(DB_PATH).exists():
@@ -110,14 +111,12 @@ def _get_latest_signal() -> Optional[dict]:
     try:
         with sqlite3.connect(DB_PATH) as conn:
             conn.row_factory = sqlite3.Row
-            row = conn.execute(
-                """SELECT market_id, question, predicted_probability,
+            row = conn.execute("""SELECT market_id, question, predicted_probability,
                           market_price, edge, direction, confidence,
                           model_used, timestamp
                    FROM ai_decisions
                    ORDER BY timestamp DESC
-                   LIMIT 1"""
-            ).fetchone()
+                   LIMIT 1""").fetchone()
 
         if row is None:
             return None
@@ -145,9 +144,9 @@ def _get_performance_summary() -> dict:
     try:
         with sqlite3.connect(DB_PATH) as conn:
             # Total stats
-            total = conn.execute(
-                "SELECT COUNT(*) FROM ai_decisions WHERE resolved = 1"
-            ).fetchone()[0]
+            total = conn.execute("SELECT COUNT(*) FROM ai_decisions WHERE resolved = 1").fetchone()[
+                0
+            ]
 
             if total == 0:
                 return _empty_performance()
@@ -164,16 +163,14 @@ def _get_performance_summary() -> dict:
             brier = sum((p - a) ** 2 for p, a in rows) / len(rows) if rows else 1.0
 
             # Weekly breakdown
-            weekly = conn.execute(
-                """SELECT strftime('%Y-W%W', timestamp) as week,
+            weekly = conn.execute("""SELECT strftime('%Y-W%W', timestamp) as week,
                           COUNT(*) as trades,
                           SUM(CASE WHEN pnl > 0 THEN 1 ELSE 0 END) as wins
                    FROM ai_decisions
                    WHERE resolved = 1
                    GROUP BY week
                    ORDER BY week DESC
-                   LIMIT 8"""
-            ).fetchall()
+                   LIMIT 8""").fetchall()
 
         return {
             "total_trades": total,
@@ -219,12 +216,14 @@ def _get_calibration_data() -> dict:
             if bucket_data:
                 avg_pred = sum(p for p, _ in bucket_data) / len(bucket_data)
                 avg_actual = sum(a for _, a in bucket_data) / len(bucket_data)
-                calibration_bins.append({
-                    "bin": f"{i * 10}-{(i + 1) * 10}%",
-                    "avg_predicted": round(avg_pred, 3),
-                    "avg_actual": round(avg_actual, 3),
-                    "count": len(bucket_data),
-                })
+                calibration_bins.append(
+                    {
+                        "bin": f"{i * 10}-{(i + 1) * 10}%",
+                        "avg_predicted": round(avg_pred, 3),
+                        "avg_actual": round(avg_actual, 3),
+                        "count": len(bucket_data),
+                    }
+                )
 
         brier = sum((p - a) ** 2 for p, a in rows) / len(rows)
 

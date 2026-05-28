@@ -3,6 +3,7 @@
 Tests URL generation, callback handling, user info extraction, and find_or_create_user logic.
 Uses pytest and pytest-asyncio for async test functions.
 """
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -54,6 +55,7 @@ MOCK_GITHUB_EMAILS = [
 # State and PKCE Generation Tests
 # ============================================================================
 
+
 class TestStateGeneration:
     """Test state parameter generation for CSRF protection."""
 
@@ -99,9 +101,12 @@ class TestPKCEGeneration:
         # Should be base64url encoded SHA256 hash
         import base64
         import hashlib
-        expected = base64.urlsafe_b64encode(
-            hashlib.sha256(verifier.encode()).digest()
-        ).rstrip(b"=").decode()
+
+        expected = (
+            base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+            .rstrip(b"=")
+            .decode()
+        )
 
         assert challenge == expected
         # Challenge length should be 43 bytes (256 bits)
@@ -119,13 +124,14 @@ class TestPKCEGeneration:
 # OAuth2Client Class Tests
 # ============================================================================
 
+
 class TestOAuth2ClientInit:
     """Test OAuth2Client initialization and dependency checking."""
 
     def test_client_requires_httpx(self):
         """Client should fail when httpx is unavailable and HTTP call is made."""
         # Patch HTTPX_AVAILABLE to False to simulate missing httpx
-        with patch('src.auth.oauth2_providers.HTTPX_AVAILABLE', False):
+        with patch("src.auth.oauth2_providers.HTTPX_AVAILABLE", False):
             client = OAuth2Client()
             with pytest.raises(ImportError, match="httpx not installed"):
                 client._get_http_client()
@@ -134,8 +140,8 @@ class TestOAuth2ClientInit:
 class TestGoogleOAuthURL:
     """Test Google OAuth2 URL generation."""
 
-    @patch('src.auth.oauth2_providers.GOOGLE_CLIENT_ID', 'test-client-id')
-    @patch('src.auth.oauth2_providers.REDIRECT_URI', 'http://localhost:8080/callback')
+    @patch("src.auth.oauth2_providers.GOOGLE_CLIENT_ID", "test-client-id")
+    @patch("src.auth.oauth2_providers.REDIRECT_URI", "http://localhost:8080/callback")
     def test_get_google_oauth_url_generates_correct_url(self):
         """URL should contain all required parameters."""
         client = OAuth2Client()
@@ -151,8 +157,8 @@ class TestGoogleOAuthURL:
         assert "prompt=consent" in url
         assert "&state=" in url  # State parameter present
 
-    @patch('src.auth.oauth2_providers.GOOGLE_CLIENT_ID', 'test-client-id')
-    @patch('src.auth.oauth2_providers.REDIRECT_URI', 'http://localhost:8080/callback')
+    @patch("src.auth.oauth2_providers.GOOGLE_CLIENT_ID", "test-client-id")
+    @patch("src.auth.oauth2_providers.REDIRECT_URI", "http://localhost:8080/callback")
     def test_get_google_oauth_url_with_custom_state(self):
         """Should use provided state parameter."""
         client = OAuth2Client()
@@ -162,8 +168,8 @@ class TestGoogleOAuthURL:
 
         assert f"state={custom_state}" in url
 
-    @patch('src.auth.oauth2_providers.GOOGLE_CLIENT_ID', 'test-client-id')
-    @patch('src.auth.oauth2_providers.REDIRECT_URI', 'http://localhost:8080/callback')
+    @patch("src.auth.oauth2_providers.GOOGLE_CLIENT_ID", "test-client-id")
+    @patch("src.auth.oauth2_providers.REDIRECT_URI", "http://localhost:8080/callback")
     def test_get_google_oauth_url_with_pkce(self):
         """URL should include PKCE parameters when verifier provided."""
         client = OAuth2Client()
@@ -179,8 +185,8 @@ class TestGoogleOAuthURL:
 class TestGitHubOAuthURL:
     """Test GitHub OAuth2 URL generation."""
 
-    @patch('src.auth.oauth2_providers.GITHUB_CLIENT_ID', 'test-github-id')
-    @patch('src.auth.oauth2_providers.REDIRECT_URI', 'http://localhost:8080/github-callback')
+    @patch("src.auth.oauth2_providers.GITHUB_CLIENT_ID", "test-github-id")
+    @patch("src.auth.oauth2_providers.REDIRECT_URI", "http://localhost:8080/github-callback")
     def test_get_github_oauth_url_generates_correct_url(self):
         """URL should contain all required parameters."""
         client = OAuth2Client()
@@ -193,8 +199,8 @@ class TestGitHubOAuthURL:
         assert "scope=user%3Aemail" in url
         assert "&state=" in url
 
-    @patch('src.auth.oauth2_providers.GITHUB_CLIENT_ID', 'test-github-id')
-    @patch('src.auth.oauth2_providers.REDIRECT_URI', 'http://localhost:8080/github-callback')
+    @patch("src.auth.oauth2_providers.GITHUB_CLIENT_ID", "test-github-id")
+    @patch("src.auth.oauth2_providers.REDIRECT_URI", "http://localhost:8080/github-callback")
     def test_get_github_oauth_url_with_custom_state(self):
         """Should use provided state parameter."""
         client = OAuth2Client()
@@ -209,8 +215,8 @@ class TestGoogleCallback:
     """Test Google OAuth2 callback handling."""
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client._exchange_google_token', new_callable=AsyncMock)
-    @patch('src.auth.oauth2_providers.OAuth2Client._get_google_userinfo', new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._exchange_google_token", new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._get_google_userinfo", new_callable=AsyncMock)
     async def test_handle_google_callback_success(self, mock_userinfo, mock_exchange):
         """Should return user info and access token on success."""
         mock_exchange.return_value = {"access_token": "google-token-123"}
@@ -225,9 +231,11 @@ class TestGoogleCallback:
         assert access_token == "google-token-123"
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client._exchange_google_token', new_callable=AsyncMock)
-    @patch('src.auth.oauth2_providers.OAuth2Client._get_google_userinfo', new_callable=AsyncMock)
-    async def test_handle_google_callback_with_state_verification(self, mock_userinfo, mock_exchange):
+    @patch("src.auth.oauth2_providers.OAuth2Client._exchange_google_token", new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._get_google_userinfo", new_callable=AsyncMock)
+    async def test_handle_google_callback_with_state_verification(
+        self, mock_userinfo, mock_exchange
+    ):
         """Should handle state verification if provided."""
         mock_exchange.return_value = {"access_token": "token"}
         mock_userinfo.return_value = MOCK_GOOGLE_USERINFO
@@ -245,8 +253,8 @@ class TestGitHubCallback:
     """Test GitHub OAuth2 callback handling."""
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client._exchange_github_token', new_callable=AsyncMock)
-    @patch('src.auth.oauth2_providers.OAuth2Client._get_github_userinfo', new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._exchange_github_token", new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._get_github_userinfo", new_callable=AsyncMock)
     async def test_handle_github_callback_success(self, mock_userinfo, mock_exchange):
         """Should return user info and access token on success."""
         mock_exchange.return_value = {"access_token": "github-token-123"}
@@ -262,8 +270,8 @@ class TestGitHubCallback:
         assert access_token == "github-token-123"
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client._exchange_github_token', new_callable=AsyncMock)
-    @patch('src.auth.oauth2_providers.OAuth2Client._get_github_userinfo', new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._exchange_github_token", new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._get_github_userinfo", new_callable=AsyncMock)
     async def test_handle_github_callback_no_public_email(self, mock_userinfo, mock_exchange):
         """Should fetch email from GitHub emails endpoint if not in user info.
         _get_github_userinfo internally calls _get_github_primary_email when email is None;
@@ -280,9 +288,11 @@ class TestGitHubCallback:
         assert user_info["email"] == "test@example.com"
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client._exchange_github_token', new_callable=AsyncMock)
-    @patch('src.auth.oauth2_providers.OAuth2Client._get_github_userinfo', new_callable=AsyncMock)
-    async def test_handle_github_callback_fallback_to_first_email(self, mock_userinfo, mock_exchange):
+    @patch("src.auth.oauth2_providers.OAuth2Client._exchange_github_token", new_callable=AsyncMock)
+    @patch("src.auth.oauth2_providers.OAuth2Client._get_github_userinfo", new_callable=AsyncMock)
+    async def test_handle_github_callback_fallback_to_first_email(
+        self, mock_userinfo, mock_exchange
+    ):
         """Should fall back to first email if no primary verified email.
         _get_github_userinfo internally handles fallback logic; mock returns resolved result."""
         resolved_user_info = MOCK_GITHUB_USERINFO.copy()
@@ -301,7 +311,7 @@ class TestUserInfoExtraction:
     """Test user info extraction from providers."""
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.httpx.AsyncClient')
+    @patch("src.auth.oauth2_providers.httpx.AsyncClient")
     async def test_get_google_userinfo_normalizes_response(self, mock_httpx):
         """Should normalize Google user info to common format."""
         mock_response = MagicMock()
@@ -325,7 +335,7 @@ class TestUserInfoExtraction:
         assert userinfo["provider"] == "google"
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.httpx.AsyncClient')
+    @patch("src.auth.oauth2_providers.httpx.AsyncClient")
     async def test_get_github_userinfo_normalizes_response(self, mock_httpx):
         """Should normalize GitHub user info to common format."""
         # setup mock for user info endpoint
@@ -377,11 +387,12 @@ class TestUserInfoExtraction:
 # Convenience Function Tests
 # ============================================================================
 
+
 class TestConvenienceFunctions:
     """Test module-level convenience functions."""
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client')
+    @patch("src.auth.oauth2_providers.OAuth2Client")
     async def test_get_google_oauth_url_convenience(self, mock_client_class):
         """Should create client, get URL, and close client."""
         mock_client = MagicMock()
@@ -395,7 +406,7 @@ class TestConvenienceFunctions:
         mock_client.close.assert_awaited_once()
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client')
+    @patch("src.auth.oauth2_providers.OAuth2Client")
     async def test_get_github_oauth_url_convenience(self, mock_client_class):
         """Should create client, get URL, and close client."""
         mock_client = MagicMock()
@@ -409,14 +420,16 @@ class TestConvenienceFunctions:
         mock_client.close.assert_awaited_once()
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client')
+    @patch("src.auth.oauth2_providers.OAuth2Client")
     async def test_handle_google_callback_convenience(self, mock_client_class):
         """Should create client, handle callback, and close client."""
         mock_client = MagicMock()
-        mock_client.handle_google_callback = AsyncMock(return_value=(
-            {"email": "test@example.com", "provider": "google"},
-            "access-token",
-        ))
+        mock_client.handle_google_callback = AsyncMock(
+            return_value=(
+                {"email": "test@example.com", "provider": "google"},
+                "access-token",
+            )
+        )
         mock_client.close = AsyncMock()
         mock_client_class.return_value = mock_client
 
@@ -426,14 +439,16 @@ class TestConvenienceFunctions:
         mock_client.close.assert_awaited_once()
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.OAuth2Client')
+    @patch("src.auth.oauth2_providers.OAuth2Client")
     async def test_handle_github_callback_convenience(self, mock_client_class):
         """Should create client, handle callback, and close client."""
         mock_client = MagicMock()
-        mock_client.handle_github_callback = AsyncMock(return_value=(
-            {"email": "test@example.com", "provider": "github"},
-            "access-token",
-        ))
+        mock_client.handle_github_callback = AsyncMock(
+            return_value=(
+                {"email": "test@example.com", "provider": "github"},
+                "access-token",
+            )
+        )
         mock_client.close = AsyncMock()
         mock_client_class.return_value = mock_client
 
@@ -447,6 +462,7 @@ class TestConvenienceFunctions:
 # Security Tests
 # ============================================================================
 
+
 class TestCSRFProtection:
     """Test CSRF protection mechanisms."""
 
@@ -454,7 +470,7 @@ class TestCSRFProtection:
         """Each OAuth URL should have a unique state parameter."""
         client = OAuth2Client()
 
-        with patch('src.auth.oauth2_providers.secrets.token_urlsafe') as mock_secret:
+        with patch("src.auth.oauth2_providers.secrets.token_urlsafe") as mock_secret:
             mock_secret.side_effect = ["state-unique-1", "state-unique-2"]
 
             url1 = client.get_google_oauth_url()
@@ -520,11 +536,12 @@ class TestTokenHandling:
 # Integration Tests (with real HTTP mocking)
 # ============================================================================
 
+
 class TestOAuth2Integration:
     """Integration tests using real OAuth2Client with mocked HTTP."""
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.httpx.AsyncClient')
+    @patch("src.auth.oauth2_providers.httpx.AsyncClient")
     async def test_full_google_oauth_flow(self, mock_httpx):
         """Test complete Google OAuth2 flow with mocked HTTP responses."""
         # Mock token exchange response
@@ -549,9 +566,10 @@ class TestOAuth2Integration:
         assert user_info["email"] == "test@example.com"
 
     @pytest.mark.asyncio
-    @patch('src.auth.oauth2_providers.httpx.AsyncClient')
+    @patch("src.auth.oauth2_providers.httpx.AsyncClient")
     async def test_full_github_oauth_flow(self, mock_httpx):
         """Test complete GitHub OAuth2 flow with mocked HTTP responses."""
+
         # Mock setup
         async def get_side_effect(url, headers):
             response = MagicMock()
@@ -582,6 +600,7 @@ class TestOAuth2Integration:
 # Edge Case Tests
 # ============================================================================
 
+
 class TestEdgeCases:
     """Test edge cases and error handling."""
 
@@ -591,7 +610,7 @@ class TestEdgeCases:
         client = OAuth2Client()
 
         # Set empty client ID to test URL generation without credentials
-        with patch('src.auth.oauth2_providers.GOOGLE_CLIENT_ID', ''):
+        with patch("src.auth.oauth2_providers.GOOGLE_CLIENT_ID", ""):
             url = client.get_google_oauth_url()
             # URL should still be generated but won't work without client_id
             assert "https://accounts.google.com" in url
@@ -600,7 +619,7 @@ class TestEdgeCases:
         """URL should be generated even with missing redirect config."""
         client = OAuth2Client()
 
-        with patch('src.auth.oauth2_providers.REDIRECT_URI', ''):
+        with patch("src.auth.oauth2_providers.REDIRECT_URI", ""):
             url = client.get_google_oauth_url()
             assert "https://accounts.google.com" in url
             # The empty redirect_uri will result in an empty query parameter
@@ -615,14 +634,14 @@ class TestEdgeCases:
         # The _exchange_google_token method will handle empty code
         # by sending it to Google's token endpoint (which will error)
         # For testing, we verify the method exists and accepts the parameter
-        assert hasattr(client, '_exchange_google_token')
+        assert hasattr(client, "_exchange_google_token")
 
     @pytest.mark.asyncio
     async def test_empty_code_in_github_callback_raises(self):
         """Token exchange should handle no auth code gracefully."""
         client = OAuth2Client()
 
-        assert hasattr(client, '_exchange_github_token')
+        assert hasattr(client, "_exchange_github_token")
 
     def test_state_can_be_provided_or_generated(self):
         """State should work both when provided and when auto-generated."""
@@ -644,6 +663,7 @@ class TestEdgeCases:
 # ============================================================================
 # PKCE Flow Tests
 # ============================================================================
+
 
 class TestPKCEFlow:
     """Test PKCE (Proof Key for Code Exchange) flow."""
@@ -671,9 +691,11 @@ class TestPKCEFlow:
         challenge = generate_pkce_challenge(verifier)
 
         # Manually compute expected challenge
-        expected = base64.urlsafe_b64encode(
-            hashlib.sha256(verifier.encode()).digest()
-        ).rstrip(b"=").decode()
+        expected = (
+            base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+            .rstrip(b"=")
+            .decode()
+        )
 
         assert challenge == expected
 

@@ -5,7 +5,7 @@ Automatically emits usage events to RaaS Gateway after each billable CLI command
 
 Features:
 - Captures: command name, timestamp, agency_id (from JWT), CLI version
-- POST to https://raas.agencyos.network/v2/usage
+- POST to https://api.cashclaw.cc/v2/usage
 - mk_ API key authentication
 - Idempotency via client-generated UUIDs
 - KV-backed rate limit backoff
@@ -41,6 +41,7 @@ class UsageEvent:
         cli_version: Mekong CLI version
         metadata: Additional context (OS, Python version, etc.)
     """
+
     event_id: str
     event_type: str
     tenant_id: str
@@ -60,7 +61,7 @@ class UsageInstrumentor:
     """
 
     def __init__(self):
-        self.gateway_url = os.getenv("RAAS_GATEWAY_URL", "https://raas.agencyos.network")
+        self.gateway_url = os.getenv("RAAS_GATEWAY_URL", "https://api.cashclaw.cc")
         self.api_key = os.getenv("RAAS_LICENSE_KEY")
         self.tenant_id: Optional[str] = None
         self.cli_version = self._get_cli_version()
@@ -71,6 +72,7 @@ class UsageInstrumentor:
         """Get CLI version from package or fallback to dev."""
         try:
             from importlib.metadata import version
+
             return version("mekong-cli")
         except Exception:
             return "0.2.0-dev"
@@ -83,6 +85,7 @@ class UsageInstrumentor:
         # Try to get from auth session
         try:
             from src.core.raas_auth import get_auth_client
+
             auth_client = get_auth_client()
             session = auth_client.get_session()
             if session.authenticated and session.tenant:
@@ -95,6 +98,7 @@ class UsageInstrumentor:
         if self.api_key:
             # Hash-based derivation (simplified)
             import hashlib
+
             self.tenant_id = hashlib.sha256(self.api_key.encode()).hexdigest()[:16]
             return self.tenant_id
 
@@ -227,6 +231,7 @@ class UsageInstrumentor:
         """Check rate limit from KV store."""
         try:
             from src.core.kv_store_client import get_kv_client
+
             kv_client = get_kv_client()
             state = kv_client.get_rate_limit_state()
             return state.remaining > 0
@@ -238,6 +243,7 @@ class UsageInstrumentor:
         """Update rate limit state from response headers."""
         try:
             from src.core.kv_store_client import get_kv_client
+
             kv_client = get_kv_client()
 
             remaining = int(headers.get("X-RateLimit-Remaining", 0))
@@ -251,9 +257,12 @@ class UsageInstrumentor:
     def _handle_rate_limit(self, headers: dict) -> None:
         """Handle rate limit exceeded."""
         try:
-            reset_in = int(headers.get("X-RateLimit-Reset", 0)) - int(datetime.now(timezone.utc).timestamp())
+            reset_in = int(headers.get("X-RateLimit-Reset", 0)) - int(
+                datetime.now(timezone.utc).timestamp()
+            )
             if reset_in > 0:
                 from src.core.kv_store_client import get_kv_client
+
                 kv_client = get_kv_client()
                 kv_client.set_rate_limit_reset(reset_in)
         except Exception:

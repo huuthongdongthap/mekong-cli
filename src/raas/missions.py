@@ -3,6 +3,7 @@
 Storage layer lives in :mod:`src.raas.mission_store`.
 Models live in :mod:`src.raas.mission_models`.
 """
+
 from __future__ import annotations
 
 import logging
@@ -134,9 +135,7 @@ class MissionService:
                 encoding="utf-8",
             )
         except OSError as exc:
-            self._missions.update_status(
-                record.id, MissionStatus.failed, error_msg=str(exc)
-            )
+            self._missions.update_status(record.id, MissionStatus.failed, error_msg=str(exc))
             record.status = MissionStatus.failed
             record.error_message = str(exc)
 
@@ -225,19 +224,25 @@ mission_router = APIRouter(tags=["missions"])
 
 
 @mission_router.post("/missions", response_model=MissionResponse, status_code=201)
-def create_mission(req: CreateMissionRequest, tenant: TenantContext = Depends(get_tenant_context)) -> MissionResponse:
+def create_mission(
+    req: CreateMissionRequest, tenant: TenantContext = Depends(get_tenant_context)
+) -> MissionResponse:
     """POST /missions — deduct credits, persist, dispatch; returns 201."""
     return _get_service().create_mission(tenant.tenant_id, tenant.tenant_name, req)
 
 
 @mission_router.get("/missions", response_model=List[MissionResponse])
-def list_missions(limit: int = 20, offset: int = 0, tenant: TenantContext = Depends(get_tenant_context)) -> List[MissionResponse]:
+def list_missions(
+    limit: int = 20, offset: int = 0, tenant: TenantContext = Depends(get_tenant_context)
+) -> List[MissionResponse]:
     """GET /missions — paginated list for the authenticated tenant."""
     return _get_service().list_missions(tenant.tenant_id, limit=limit, offset=offset)
 
 
 @mission_router.get("/missions/{mission_id}", response_model=MissionResponse)
-def get_mission(mission_id: str, tenant: TenantContext = Depends(get_tenant_context)) -> MissionResponse:
+def get_mission(
+    mission_id: str, tenant: TenantContext = Depends(get_tenant_context)
+) -> MissionResponse:
     """GET /missions/{mission_id} — retrieve mission by ID (tenant-scoped)."""
     return _get_service().get_mission(tenant.tenant_id, mission_id)
 
@@ -249,6 +254,8 @@ def get_mission_logs(mission_id: str, tenant: TenantContext = Depends(get_tenant
 
 
 @mission_router.post("/missions/{mission_id}/cancel", response_model=MissionResponse)
-def cancel_mission(mission_id: str, tenant: TenantContext = Depends(get_tenant_context)) -> MissionResponse:
+def cancel_mission(
+    mission_id: str, tenant: TenantContext = Depends(get_tenant_context)
+) -> MissionResponse:
     """POST /missions/{mission_id}/cancel — cancel queued mission and refund credits."""
     return _get_service().cancel_mission(tenant.tenant_id, mission_id)

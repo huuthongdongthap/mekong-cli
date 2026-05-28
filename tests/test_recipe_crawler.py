@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.agents.recipe_crawler import RecipeCrawler
 
+
 class TestRecipeCrawler(unittest.TestCase):
     def setUp(self):
         self.agent = RecipeCrawler()
@@ -30,6 +31,7 @@ class TestRecipeCrawler(unittest.TestCase):
         download_res = results[2]
         self.assertEqual(download_res.task_id, "download_recipes")
         self.assertTrue(len(download_res.output["downloaded"]) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()

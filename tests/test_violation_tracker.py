@@ -1,4 +1,5 @@
 """Tests for ViolationTracker — ROIaaS Phase 6 enforcement layer."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -11,7 +12,6 @@ from src.raas.violation_tracker import (
     get_tracker,
     record_violation,
 )
-
 
 # ---------------------------------------------------------------------------
 # Test: ViolationEvent creation and serialization
@@ -318,10 +318,12 @@ async def test_get_violation_summary_queries_all_necessary_data(
     # Then fetch_one for total (second call)
     # Then fetch_one for last violation (third call)
     mock_db.fetch_all = AsyncMock(return_value=[{"violation_type": "rate_limit", "count": 2}])
-    mock_db.fetch_one = AsyncMock(side_effect=[
-        {"total": 2},  # total count
-        {"id": 1, "violation_type": "rate_limit"},  # last violation
-    ])
+    mock_db.fetch_one = AsyncMock(
+        side_effect=[
+            {"total": 2},  # total count
+            {"id": 1, "violation_type": "rate_limit"},  # last violation
+        ]
+    )
 
     result = await tracker_with_mock_db.get_violation_summary("key-summary", days=30)
 

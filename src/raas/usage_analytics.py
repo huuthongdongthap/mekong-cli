@@ -3,6 +3,7 @@
 Aggregates credit consumption and mission metrics over time windows.
 Provides daily/weekly/monthly rollups for dashboard display.
 """
+
 from __future__ import annotations
 
 import sqlite3

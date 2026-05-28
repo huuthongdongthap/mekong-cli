@@ -159,9 +159,7 @@ def execute_step(step_num):
     for desc, cmd in step.get("commands", []):
         success = run_command(cmd, desc)
         if not success:
-            print(
-                f"{YELLOW}⚠️ Command may have had issues. Continue anyway? (y/n){RESET}"
-            )
+            print(f"{YELLOW}⚠️ Command may have had issues. Continue anyway? (y/n){RESET}")
             if input().lower() != "y":
                 return False
 

@@ -73,19 +73,22 @@ class RecipeGenerator:
 
         valid, _ = self.validate_recipe(content)
         return GeneratedRecipe(
-            name=name, content=content, source="successful_run", valid=valid,
+            name=name,
+            content=content,
+            source="successful_run",
+            valid=valid,
         )
 
     def from_goal_pattern(
-        self, goal: str, steps: list[str] | None = None,
+        self,
+        goal: str,
+        steps: list[str] | None = None,
     ) -> GeneratedRecipe:
         """Generate a recipe from a goal pattern with optional steps."""
         name = self._slugify(goal)
 
         if steps:
-            step_text = "\n\n".join(
-                f"### Step {i+1}: {s}" for i, s in enumerate(steps)
-            )
+            step_text = "\n\n".join(f"### Step {i+1}: {s}" for i, s in enumerate(steps))
         elif self.llm_client and hasattr(self.llm_client, "generate"):
             step_text = self._generate_via_llm(goal)
         else:
@@ -102,7 +105,10 @@ class RecipeGenerator:
         valid, _ = self.validate_recipe(content)
         source = "goal_pattern" if steps else ("llm" if self.llm_client else "goal_pattern")
         return GeneratedRecipe(
-            name=name, content=content, source=source, valid=valid,
+            name=name,
+            content=content,
+            source=source,
+            valid=valid,
         )
 
     def validate_recipe(self, recipe_md: str) -> tuple[bool, list[str]]:
@@ -110,6 +116,7 @@ class RecipeGenerator:
         errors: list[str] = []
         try:
             from .parser import RecipeParser
+
             parser = RecipeParser()
             recipe = parser.parse_string(recipe_md, name="validation")
             if not recipe.steps:
@@ -132,11 +139,14 @@ class RecipeGenerator:
 
         bus = get_event_bus()
         if bus:
-            bus.emit(EventType.RECIPE_GENERATED, {
-                "name": recipe.name,
-                "path": str(path),
-                "source": recipe.source,
-            })
+            bus.emit(
+                EventType.RECIPE_GENERATED,
+                {
+                    "name": recipe.name,
+                    "path": str(path),
+                    "source": recipe.source,
+                },
+            )
 
         return str(path)
 

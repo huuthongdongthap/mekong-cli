@@ -1,4 +1,5 @@
 """Backward-compat shim — logic moved to src/raas/billing_event_emitter.py"""
+
 from src.raas.billing_event_emitter import (  # noqa: F401
     BillingEventEmitter,
     get_emitter,

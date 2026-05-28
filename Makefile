@@ -1,7 +1,12 @@
 .PHONY: all install dev test lint format server clean stats help setup health build \
         generate-contracts validate-contracts self-test regenerate \
         start-daemon stop-daemon daemon-status start-gateway \
-        pev-test pev-lint pev-build pev-publish
+        pev-test pev-lint pev-build pev-publish \
+        venv-seed test-seed venv test-venv \
+        test-mekongd lint-mekongd serve-mekongd \
+        test-agent-forest lint-agent-forest \
+        test-agent-core lint-agent-core \
+        test-python-packages lint-python-packages
 
 all: help
 
@@ -60,6 +65,7 @@ clean:
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	rm -rf .pytest_cache .mypy_cache .ruff_cache build dist *.egg-info
 	rm -rf .turbo node_modules/.cache
+	rm -rf .venv-seed .venv
 
 # === Factory / Contracts ===
 generate-contracts:
@@ -103,6 +109,60 @@ pev-publish: pev-lint pev-test pev-build
 # === Gateway ===
 start-gateway:
 	python3 -m uvicorn src.core.gateway:app --reload --port 8000
+
+# === Dev Venv (Python 3.11, all deps) ===
+venv:
+	@echo "Creating dev venv (Python 3.11, all deps)..."
+	@/opt/homebrew/bin/python3.11 -m venv .venv 2>/dev/null || python3.11 -m venv .venv
+	@.venv/bin/pip install --quiet --upgrade pip
+	@.venv/bin/pip install --quiet -e .
+	@.venv/bin/pip install --quiet pytest pytest-asyncio pytest-cov httpx
+	@.venv/bin/pip install --quiet structlog "python-jose[cryptography]" pyjwt stripe asyncpg prometheus-client opentelemetry-api opentelemetry-sdk opentelemetry-instrumentation-fastapi psutil chromadb cachetools sentry-sdk jinja2
+	@echo "✅ .venv ready — activate: source .venv/bin/activate"
+
+test-venv:
+	@if [ ! -d .venv ]; then $(MAKE) venv; fi
+	@echo "Running full test suite in .venv (Python 3.11)..."
+	@.venv/bin/python -m pytest tests/ -v --tb=short --ignore=tests/seed/
+
+# === Seed Layer ===
+venv-seed:
+	@echo "Creating seed layer venv (Python 3.11)..."
+	@/opt/homebrew/bin/python3.11 -m venv .venv-seed 2>/dev/null || python3.11 -m venv .venv-seed
+	@.venv-seed/bin/pip install --quiet --upgrade pip
+	@.venv-seed/bin/pip install --quiet chromadb pytest pytest-asyncio
+	@echo "✅ .venv-seed ready — activate: source .venv-seed/bin/activate"
+
+test-seed:
+	@if [ ! -d .venv-seed ]; then $(MAKE) venv-seed; fi
+	@echo "Running seed layer tests (69 tests)..."
+	@.venv-seed/bin/python -m pytest tests/seed/ -v --tb=short
+
+# === Python Packages (mekongd / agent-forest / agent-core) ===
+test-mekongd:
+	cd packages/mekongd && python3 -m pytest tests/ -v --tb=short
+
+lint-mekongd:
+	cd packages/mekongd && python3 -m ruff check src/ tests/
+
+serve-mekongd:
+	cd packages/mekongd && python3 -m mekongd.cli serve
+
+test-agent-forest:
+	cd packages/agent-forest && python3 -m pytest tests/ -v --tb=short
+
+lint-agent-forest:
+	cd packages/agent-forest && python3 -m ruff check src/ tests/
+
+test-agent-core:
+	cd packages/agent-core && python3 -m pytest tests/ -v --tb=short
+
+lint-agent-core:
+	cd packages/agent-core && python3 -m ruff check src/ tests/
+
+test-python-packages: test-mekongd test-agent-forest test-agent-core
+
+lint-python-packages: lint-mekongd lint-agent-forest lint-agent-core
 
 # === Info ===
 stats:

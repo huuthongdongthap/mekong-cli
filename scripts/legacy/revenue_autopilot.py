@@ -98,9 +98,7 @@ class RevenueAutopilot:
         # Use correct API: access leads directly from self.magnet.leads
         try:
             leads = self.magnet.leads  # List[Lead] stored in ClientMagnet
-            hot_leads = (
-                self.magnet.get_priority_leads()
-            )  # Leads with score >= 75 or budget >= 5000
+            hot_leads = self.magnet.get_priority_leads()  # Leads with score >= 75 or budget >= 5000
 
             result = {
                 "total": len(leads),
@@ -198,9 +196,7 @@ class RevenueAutopilot:
         reports_dir = Path(__file__).parent.parent / "logs" / "reports"
         reports_dir.mkdir(parents=True, exist_ok=True)
 
-        report_file = (
-            reports_dir / f"autopilot_{self.run_date.strftime('%Y%m%d_%H%M')}.txt"
-        )
+        report_file = reports_dir / f"autopilot_{self.run_date.strftime('%Y%m%d_%H%M')}.txt"
         report_file.write_text(report)
 
         logger.info(f"📄 Report saved: {report_file.name}")

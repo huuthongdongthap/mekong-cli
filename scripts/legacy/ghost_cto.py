@@ -38,9 +38,7 @@ def generate_report(days=7):
     print(f"📂 Impact: {stats.strip()}")
 
     # 3. Active Contributors
-    authors = run_git(
-        f"git log --since='{since_date}' --format='%aN' | sort | uniq -c | sort -nr"
-    )
+    authors = run_git(f"git log --since='{since_date}' --format='%aN' | sort | uniq -c | sort -nr")
     print("\n👥 Active Engineers:")
     print(authors)
 

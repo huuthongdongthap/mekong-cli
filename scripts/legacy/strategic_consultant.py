@@ -92,9 +92,7 @@ def run_analysis():
     type_writer("Generating Recommendations...", 0.05)
 
     # Generate Report
-    report_file = (
-        f"strategy_report_{client.lower().replace(' ', '_')}_{int(time.time())}.md"
-    )
+    report_file = f"strategy_report_{client.lower().replace(' ', '_')}_{int(time.time())}.md"
 
     with open(report_file, "w") as f:
         f.write(f"# 🏯 Strategic Assessment: {client}\n")

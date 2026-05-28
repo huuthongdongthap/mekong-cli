@@ -21,6 +21,7 @@ class TestPEVStructuredLogger(unittest.TestCase):
 
     def setUp(self):
         from src.core.pev_structured_logger import PEVStructuredLogger
+
         self.logger = PEVStructuredLogger(logger_name="test.pev")
 
     def test_log_entry_json_format(self):
@@ -115,6 +116,7 @@ class TestPEVStructuredLogger(unittest.TestCase):
     def test_singleton_get_pev_logger(self):
         """Singleton returns same instance."""
         from src.core.pev_structured_logger import get_pev_logger
+
         l1 = get_pev_logger()
         l2 = get_pev_logger()
         assert l1 is l2
@@ -125,6 +127,7 @@ class TestPEVMetricsCollector(unittest.TestCase):
 
     def setUp(self):
         from src.core.pev_metrics_collector import PEVMetricsCollector
+
         self.tmpdir = tempfile.mkdtemp()
         self.collector = PEVMetricsCollector(storage_dir=self.tmpdir)
 
@@ -218,6 +221,7 @@ class TestPEVMetricsCollector(unittest.TestCase):
         self.collector.record_pipeline_end("disk1", "completed")
 
         import pathlib
+
         filepath = pathlib.Path(self.tmpdir) / "disk1.json"
         assert filepath.exists()
         data = json.loads(filepath.read_text())
@@ -259,11 +263,10 @@ class TestPEVDashboardData(unittest.TestCase):
     def setUp(self):
         from src.core.pev_metrics_collector import PEVMetricsCollector
         from src.core.pev_dashboard_data import PEVDashboardData
+
         self.tmpdir = tempfile.mkdtemp()
         self.metrics = PEVMetricsCollector(storage_dir=self.tmpdir)
-        self.dashboard = PEVDashboardData(
-            metrics=self.metrics, storage_dir=self.tmpdir
-        )
+        self.dashboard = PEVDashboardData(metrics=self.metrics, storage_dir=self.tmpdir)
 
     def test_overview_empty(self):
         """Overview with no pipelines returns zero metrics."""
@@ -294,6 +297,7 @@ class TestPEVDashboardData(unittest.TestCase):
     def test_execution_history_from_disk(self):
         """History reads from disk when in-memory is empty."""
         import pathlib
+
         # Write a pipeline file directly to disk
         data = {
             "pipeline_id": "disk-only",
@@ -338,10 +342,10 @@ class TestPEVDashboardData(unittest.TestCase):
         assert rates["t1"] == 1.0
         assert rates["t2"] == 0.0
 
-
     def test_execution_history_disk_limit_reached(self):
         """Disk reading stops when limit reached (covers break at line 74)."""
         import pathlib
+
         # Write many disk files
         for i in range(5):
             data = {"pipeline_id": f"dlim-{i}", "status": "completed"}
@@ -355,6 +359,7 @@ class TestPEVDashboardData(unittest.TestCase):
     def test_execution_history_bad_json_on_disk(self):
         """Malformed JSON files on disk are skipped (covers lines 81-82)."""
         import pathlib
+
         bad_file = pathlib.Path(self.tmpdir) / "bad-json.json"
         bad_file.write_text("NOT VALID JSON {{")
         good_data = {"pipeline_id": "good-disk", "status": "completed"}
@@ -368,6 +373,7 @@ class TestPEVDashboardData(unittest.TestCase):
     def test_pipeline_detail_from_disk(self):
         """get_pipeline_detail reads from disk when not in memory (covers lines 103-107)."""
         import pathlib
+
         data = {
             "pipeline_id": "disk-detail",
             "status": "completed",
@@ -384,6 +390,7 @@ class TestPEVDashboardData(unittest.TestCase):
     def test_pipeline_detail_disk_bad_json(self):
         """get_pipeline_detail returns None for corrupted disk file."""
         import pathlib
+
         bad = pathlib.Path(self.tmpdir) / "corrupt.json"
         bad.write_text("{broken")
 
@@ -392,8 +399,10 @@ class TestPEVDashboardData(unittest.TestCase):
     def test_singleton_get_dashboard_data(self):
         """get_dashboard_data returns singleton (covers lines 139-141)."""
         from src.core.pev_dashboard_data import (
-            get_dashboard_data, reset_dashboard_data,
+            get_dashboard_data,
+            reset_dashboard_data,
         )
+
         reset_dashboard_data()
         d1 = get_dashboard_data()
         d2 = get_dashboard_data()
@@ -403,8 +412,10 @@ class TestPEVDashboardData(unittest.TestCase):
     def test_reset_dashboard_data(self):
         """reset_dashboard_data clears singleton (covers line 147)."""
         from src.core.pev_dashboard_data import (
-            get_dashboard_data, reset_dashboard_data,
+            get_dashboard_data,
+            reset_dashboard_data,
         )
+
         d1 = get_dashboard_data()
         reset_dashboard_data()
         d2 = get_dashboard_data()
@@ -417,26 +428,31 @@ class TestPEVHealthChecks(unittest.TestCase):
 
     def setUp(self):
         from src.core.pev_metrics_collector import PEVMetricsCollector, reset_pev_metrics
+
         # Reset singleton so health checks use fresh metrics
         reset_pev_metrics()
         # Inject test metrics
         import src.core.pev_metrics_collector as mod
+
         self.metrics = PEVMetricsCollector()
         mod._pev_metrics = self.metrics
 
     def tearDown(self):
         from src.core.pev_metrics_collector import reset_pev_metrics
+
         reset_pev_metrics()
 
     def test_healthy_engine_no_pipelines(self):
         """No pipelines = healthy (nothing wrong)."""
         from src.core.pev_health_checks import check_pev_engine
+
         result = check_pev_engine()
         assert result.status == "healthy"
 
     def test_healthy_engine_high_success(self):
         """High success rate = healthy."""
         from src.core.pev_health_checks import check_pev_engine
+
         for i in range(10):
             self.metrics.record_pipeline_start(f"h{i}")
             self.metrics.record_step_result(f"h{i}", 1, True, 100.0)
@@ -448,6 +464,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_degraded_engine_medium_success(self):
         """Success rate 50-80% = degraded."""
         from src.core.pev_health_checks import check_pev_engine
+
         for i in range(10):
             status = "completed" if i < 7 else "failed"
             self.metrics.record_pipeline_start(f"d{i}")
@@ -459,6 +476,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_unhealthy_engine_low_success(self):
         """Success rate < 50% = unhealthy."""
         from src.core.pev_health_checks import check_pev_engine
+
         for i in range(10):
             status = "completed" if i < 3 else "failed"
             self.metrics.record_pipeline_start(f"u{i}")
@@ -470,6 +488,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_pipeline_activity_healthy(self):
         """Few active pipelines = healthy."""
         from src.core.pev_health_checks import check_pipeline_activity
+
         self.metrics.record_pipeline_start("a1")
         result = check_pipeline_activity()
         assert result.status == "healthy"
@@ -477,6 +496,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_pipeline_activity_degraded(self):
         """Many active pipelines = degraded."""
         from src.core.pev_health_checks import check_pipeline_activity
+
         for i in range(6):
             self.metrics.record_pipeline_start(f"act{i}")
 
@@ -486,6 +506,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_retry_rate_healthy(self):
         """Low retry rate = healthy."""
         from src.core.pev_health_checks import check_retry_rate
+
         self.metrics.record_pipeline_start("rr1")
         self.metrics.record_step_result("rr1", 1, True, 100.0, retry_count=0)
         self.metrics.record_pipeline_end("rr1", "completed")
@@ -496,6 +517,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_retry_rate_unhealthy(self):
         """High retry rate = unhealthy."""
         from src.core.pev_health_checks import check_retry_rate
+
         self.metrics.record_pipeline_start("rr2")
         self.metrics.record_step_result("rr2", 1, True, 100.0, retry_count=5)
         self.metrics.record_pipeline_end("rr2", "completed")
@@ -506,6 +528,7 @@ class TestPEVHealthChecks(unittest.TestCase):
     def test_get_pev_health_summary(self):
         """Health summary returns all three checks."""
         from src.core.pev_health_checks import get_pev_health_summary
+
         summary = get_pev_health_summary()
         assert "pev_engine" in summary
         assert "pipeline_activity" in summary

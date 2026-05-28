@@ -35,9 +35,9 @@ def layers_data() -> dict:
 
 def test_all_required_layers_present(layers_data: dict) -> None:
     """All 5 pyramid layers must exist in layers.yaml."""
-    assert REQUIRED_LAYERS == set(layers_data.keys()), (
-        f"Missing layers: {REQUIRED_LAYERS - set(layers_data.keys())}"
-    )
+    assert REQUIRED_LAYERS == set(
+        layers_data.keys()
+    ), f"Missing layers: {REQUIRED_LAYERS - set(layers_data.keys())}"
 
 
 def test_each_layer_has_required_fields(layers_data: dict) -> None:
@@ -64,9 +64,7 @@ def test_no_duplicate_commands_across_layers(layers_data: dict) -> None:
         for cmd in cfg.get("commands", []):
             cmd_lower = cmd.lower()
             if cmd_lower in seen:
-                duplicates.append(
-                    f"'{cmd_lower}' in both '{seen[cmd_lower]}' and '{layer_name}'"
-                )
+                duplicates.append(f"'{cmd_lower}' in both '{seen[cmd_lower]}' and '{layer_name}'")
             else:
                 seen[cmd_lower] = layer_name
 
@@ -78,23 +76,23 @@ def test_cascades_to_references_valid_layers(layers_data: dict) -> None:
     valid_layers = set(layers_data.keys())
     for layer_name, cfg in layers_data.items():
         for target in cfg.get("cascades_to", []):
-            assert target in valid_layers, (
-                f"Layer '{layer_name}' cascades_to unknown layer '{target}'"
-            )
+            assert (
+                target in valid_layers
+            ), f"Layer '{layer_name}' cascades_to unknown layer '{target}'"
 
 
 def test_ops_layer_has_no_cascades(layers_data: dict) -> None:
     """The ops layer is the base — it must not cascade to anything."""
     ops_cfg = layers_data.get("ops", {})
-    assert ops_cfg.get("cascades_to") == [], (
-        "ops layer should have empty cascades_to (it is the base layer)"
-    )
+    assert (
+        ops_cfg.get("cascades_to") == []
+    ), "ops layer should have empty cascades_to (it is the base layer)"
 
 
 def test_entry_prompt_is_non_empty_string(layers_data: dict) -> None:
     """Every layer entry_prompt must be a non-empty string."""
     for layer_name, cfg in layers_data.items():
         prompt = cfg.get("entry_prompt", "")
-        assert isinstance(prompt, str) and prompt.strip(), (
-            f"Layer '{layer_name}' has blank entry_prompt"
-        )
+        assert (
+            isinstance(prompt, str) and prompt.strip()
+        ), f"Layer '{layer_name}' has blank entry_prompt"

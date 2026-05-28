@@ -177,9 +177,7 @@ def cmd_tweet(product):
         print(tweet)
 
     # Save to file
-    output_file = Path(
-        f"content_tweets_{product}_{datetime.now().strftime('%Y%m%d')}.txt"
-    )
+    output_file = Path(f"content_tweets_{product}_{datetime.now().strftime('%Y%m%d')}.txt")
     with open(output_file, "w") as f:
         for i, tweet in enumerate(tweets, 1):
             f.write(f"=== Tweet {i} ===\n{tweet}\n\n")
@@ -194,9 +192,7 @@ def cmd_email(product):
     print("=" * 50)
     print(email)
 
-    output_file = Path(
-        f"content_email_{product}_{datetime.now().strftime('%Y%m%d')}.md"
-    )
+    output_file = Path(f"content_email_{product}_{datetime.now().strftime('%Y%m%d')}.md")
     with open(output_file, "w") as f:
         f.write(email)
     print(f"\n✅ Saved to: {output_file}")
@@ -210,9 +206,7 @@ def cmd_landing(product):
     print("=" * 50)
     print(landing[:500] + "...\n[truncated]")
 
-    output_file = Path(
-        f"content_landing_{product}_{datetime.now().strftime('%Y%m%d')}.md"
-    )
+    output_file = Path(f"content_landing_{product}_{datetime.now().strftime('%Y%m%d')}.md")
     with open(output_file, "w") as f:
         f.write(landing)
     print(f"\n✅ Full copy saved to: {output_file}")

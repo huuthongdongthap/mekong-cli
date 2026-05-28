@@ -106,18 +106,22 @@ def build_trading_windows(earnings_dates: list[str]) -> list[TradingWindow]:
 
         quarter_label = f"Q{i + 1}-{earnings_dt.year}"
 
-        windows.append(TradingWindow(
-            quarter=f"{quarter_label}-blackout",
-            open_date=blackout_start.strftime("%Y-%m-%d"),
-            close_date=blackout_end.strftime("%Y-%m-%d"),
-            is_open=False,
-        ))
-        windows.append(TradingWindow(
-            quarter=quarter_label,
-            open_date=open_start.strftime("%Y-%m-%d"),
-            close_date=open_end.strftime("%Y-%m-%d"),
-            is_open=True,
-        ))
+        windows.append(
+            TradingWindow(
+                quarter=f"{quarter_label}-blackout",
+                open_date=blackout_start.strftime("%Y-%m-%d"),
+                close_date=blackout_end.strftime("%Y-%m-%d"),
+                is_open=False,
+            )
+        )
+        windows.append(
+            TradingWindow(
+                quarter=quarter_label,
+                open_date=open_start.strftime("%Y-%m-%d"),
+                close_date=open_end.strftime("%Y-%m-%d"),
+                is_open=True,
+            )
+        )
 
     return windows
 
@@ -203,15 +207,11 @@ def save_insider_policy(output_dir: str, policy: InsiderPolicy) -> list[str]:
     saved: list[str] = []
 
     windows_path = base / "trading-windows.json"
-    windows_path.write_text(
-        json.dumps([asdict(w) for w in policy.windows], indent=2)
-    )
+    windows_path.write_text(json.dumps([asdict(w) for w in policy.windows], indent=2))
     saved.append(str(windows_path))
 
     plans_path = base / "10b5-1-plans.json"
-    plans_path.write_text(
-        json.dumps([asdict(p) for p in policy.plans], indent=2)
-    )
+    plans_path.write_text(json.dumps([asdict(p) for p in policy.plans], indent=2))
     saved.append(str(plans_path))
 
     policy_data = asdict(policy)

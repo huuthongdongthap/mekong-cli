@@ -25,8 +25,9 @@ from src.config.logging_config import get_logger
 
 class CircuitState(Enum):
     """Circuit breaker states."""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Failing, reject requests
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Failing, reject requests
     HALF_OPEN = "half_open"  # Testing recovery
 
 
@@ -42,6 +43,7 @@ class MetricsEvent:
         duration_ms: Duration in milliseconds (for runtime events)
         metadata: Additional event data
     """
+
     event_type: str
     tenant_id: str
     timestamp: str
@@ -69,6 +71,7 @@ class MetricsBatch:
         events: List of MetricsEvent objects
         batch_timestamp: When batch was created
     """
+
     tenant_id: str
     events: list[MetricsEvent]
     batch_timestamp: str
@@ -152,7 +155,9 @@ class CircuitBreaker:
         if self._state == CircuitState.HALF_OPEN:
             self._state = CircuitState.CLOSED
             self._failure_count = 0
-            self._logger.info("circuitbreaker.state_change", from_state="HALF_OPEN", to_state="CLOSED")
+            self._logger.info(
+                "circuitbreaker.state_change", from_state="HALF_OPEN", to_state="CLOSED"
+            )
         elif self._state == CircuitState.CLOSED:
             # Reset failure count on success
             self._failure_count = 0
@@ -222,7 +227,9 @@ class UsageMeteringService:
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
 
         # API configuration
-        self._api_endpoint = api_endpoint or os.getenv("METRICS_API_ENDPOINT", "http://localhost:8000/api/metrics")
+        self._api_endpoint = api_endpoint or os.getenv(
+            "METRICS_API_ENDPOINT", "http://localhost:8000/api/metrics"
+        )
         self._license_key = license_key or os.getenv("RAAS_LICENSE_KEY", "")
 
         # Batch configuration
@@ -466,7 +473,7 @@ class UsageMeteringService:
 
             # Exponential backoff: 1s → 2s → 4s → 8s → 16s
             if attempt < self._max_retries - 1:
-                backoff = 2 ** attempt  # 1, 2, 4, 8, 16
+                backoff = 2**attempt  # 1, 2, 4, 8, 16
                 self._logger.debug(
                     "metrics.batch_retry_backoff",
                     backoff_seconds=backoff,
@@ -497,17 +504,21 @@ class UsageMeteringService:
 
         events = []
         for row in rows:
-            events.append(MetricsEvent(
-                event_type=row["event_type"],
-                tenant_id=row["tenant_id"],
-                timestamp=row["timestamp"],
-                duration_ms=row["duration_ms"],
-                metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-            ))
+            events.append(
+                MetricsEvent(
+                    event_type=row["event_type"],
+                    tenant_id=row["tenant_id"],
+                    timestamp=row["timestamp"],
+                    duration_ms=row["duration_ms"],
+                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                )
+            )
 
         return events
 
-    def _update_event_status(self, event: MetricsEvent, status: str, error: Optional[str] = None) -> None:
+    def _update_event_status(
+        self, event: MetricsEvent, status: str, error: Optional[str] = None
+    ) -> None:
         """Update event status in database."""
         conn = self._get_connection()
 
@@ -517,7 +528,7 @@ class UsageMeteringService:
                 "DELETE FROM metrics_events WHERE id = ("
                 "SELECT id FROM metrics_events WHERE event_type = ? "
                 "AND tenant_id = ? AND timestamp = ? LIMIT 1)",
-                (event.event_type, event.tenant_id, event.timestamp)
+                (event.event_type, event.tenant_id, event.timestamp),
             )
         else:
             query = """

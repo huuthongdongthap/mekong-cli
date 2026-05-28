@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class TermSheetTerms(BaseModel):
     """Extracted term sheet terms"""
+
     valuation_pre_money: float = 0
     valuation_post_money: float = 0
     investment_amount: float = 0
@@ -27,6 +28,7 @@ class TermSheetTerms(BaseModel):
 
 class RedFlag(BaseModel):
     """Red flag detected in term sheet"""
+
     type: str
     severity: str
     message: str
@@ -35,6 +37,7 @@ class RedFlag(BaseModel):
 
 class CounterOffer(BaseModel):
     """Counter-offer suggestion"""
+
     term: str
     current: Any
     proposed: Any
@@ -44,6 +47,7 @@ class CounterOffer(BaseModel):
 
 class MarketComparison(BaseModel):
     """Market comparison result"""
+
     term: str
     status: str
     benchmark: str
@@ -51,6 +55,7 @@ class MarketComparison(BaseModel):
 
 class ContractAnalysis(BaseModel):
     """Complete contract analysis result"""
+
     terms: Dict[str, Any]
     red_flags: List[RedFlag]
     counter_offers: List[CounterOffer]

@@ -17,7 +17,9 @@ console = Console()
 def run(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
     coverage: bool = typer.Option(False, "--coverage", help="Run with coverage"),
-    specific: str = typer.Option(None, "--specific", "-s", help="Run specific test file or directory"),
+    specific: str = typer.Option(
+        None, "--specific", "-s", help="Run specific test file or directory"
+    ),
     watch: bool = typer.Option(False, "--watch", "-w", help="Watch mode"),
 ) -> Optional[bool]:
     """Run tests with various options"""
@@ -35,7 +37,9 @@ def run(
             # import pytest_watch  # Removed unused
             cmd.insert(1, "pytest-watch")
         except ImportError:
-            console.print("[red]pytest-watch not installed. Install with: pip install pytest-watch[/red]")
+            console.print(
+                "[red]pytest-watch not installed. Install with: pip install pytest-watch[/red]"
+            )
             raise typer.Exit(code=1)
 
     console.print(f"[dim]Running: {' '.join(cmd)}[/dim]")
@@ -81,7 +85,9 @@ def list_tests() -> None:
 
     try:
         result = subprocess.run(cmd, cwd=Path.cwd(), check=True, capture_output=True, text=True)
-        lines = [line.strip() for line in result.stdout.split('\n') if line.strip() and '.py' in line]
+        lines = [
+            line.strip() for line in result.stdout.split("\n") if line.strip() and ".py" in line
+        ]
 
         table = Table(title="Available Tests")
         table.add_column("Test", style="cyan")
@@ -112,8 +118,8 @@ def benchmark() -> None:
 
     # Benchmark file I/O
     start = time.time()
-    with open('/tmp/mekong_benchmark.tmp', 'w') as f:
-        f.write('benchmark' * 1000)
+    with open("/tmp/mekong_benchmark.tmp", "w") as f:
+        f.write("benchmark" * 1000)
     io_time = time.time() - start
 
     # Benchmark computation

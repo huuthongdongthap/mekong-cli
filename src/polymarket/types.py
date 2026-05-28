@@ -10,12 +10,14 @@ from typing import Optional
 
 class TradeDirection(enum.Enum):
     """Direction of a prediction trade."""
+
     YES = "YES"
     NO = "NO"
 
 
 class OrderStatus(enum.Enum):
     """Status of an order."""
+
     PENDING = "pending"
     FILLED = "filled"
     PARTIALLY_FILLED = "partially_filled"
@@ -25,14 +27,16 @@ class OrderStatus(enum.Enum):
 
 class CircuitBreakerState(enum.Enum):
     """Circuit breaker states."""
-    CLOSED = "closed"       # Normal operation
-    OPEN = "open"           # Trading halted
-    HALF_OPEN = "half_open" # Testing recovery
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Trading halted
+    HALF_OPEN = "half_open"  # Testing recovery
 
 
 @dataclass
 class Market:
     """A prediction market opportunity."""
+
     market_id: str
     question: str
     outcomes: list[str]
@@ -58,6 +62,7 @@ class Market:
 @dataclass
 class Prediction:
     """AI prediction for a market."""
+
     market_id: str
     question: str
     predicted_probability: float
@@ -80,6 +85,7 @@ class Prediction:
 @dataclass
 class Signal:
     """Ranked trading signal from prediction pipeline."""
+
     prediction: Prediction
     kelly_fraction: float
     position_size_usd: float
@@ -94,6 +100,7 @@ class Signal:
 @dataclass
 class Trade:
     """A completed or pending trade."""
+
     trade_id: str
     market_id: str
     direction: TradeDirection
@@ -113,6 +120,7 @@ class Trade:
 @dataclass
 class PortfolioState:
     """Current portfolio snapshot."""
+
     capital: float
     open_positions: list[Trade] = field(default_factory=list)
     total_trades: int = 0
@@ -135,6 +143,7 @@ class PortfolioState:
 @dataclass
 class RiskCheckResult:
     """Result of a risk check."""
+
     allowed: bool
     reason: str
     max_position_size: float = 0.0
@@ -143,6 +152,7 @@ class RiskCheckResult:
 @dataclass
 class DailyReport:
     """Daily performance metrics."""
+
     date: str
     total_trades: int
     winning_trades: int

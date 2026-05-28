@@ -133,8 +133,7 @@ def inject_codebase_context(messages: list[dict], goal: str) -> list[dict]:
     """
     cwd = os.getcwd()
     context_note = (
-        f"[Context: Working in project at {cwd}. "
-        f"Analyze the goal and provide actionable code.]"
+        f"[Context: Working in project at {cwd}. " f"Analyze the goal and provide actionable code.]"
     )
     enriched = list(messages)
     if enriched and enriched[-1]["role"] == "user":
@@ -145,13 +144,10 @@ def inject_codebase_context(messages: list[dict], goal: str) -> list[dict]:
     return enriched
 
 
-def inject_metrics_context(
-    messages: list[dict], tenant_id: str
-) -> list[dict]:
+def inject_metrics_context(messages: list[dict], tenant_id: str) -> list[dict]:
     """Inject metrics context for analysis-domain tasks."""
     context_note = (
-        f"[Context: Analyzing data for tenant '{tenant_id}'. "
-        f"Provide data-driven insights.]"
+        f"[Context: Analyzing data for tenant '{tenant_id}'. " f"Provide data-driven insights.]"
     )
     enriched = list(messages)
     if enriched and enriched[-1]["role"] == "user":

@@ -1,0 +1,1129 @@
+<!DOCTYPE html><html><head><title></title><meta charset="utf-8"><style>* {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 100%;
+}
+
+body {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+		'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	line-height: 1.6;
+	font-size: 0.6875em; /* 11 pt */
+	color: #111;
+	margin: 0;
+}
+
+body > :first-child {
+	padding-top: 0;
+	margin-top: 0;
+}
+
+body > :last-child {
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0;
+	padding: 0.5em 0 0.25em;
+}
+
+h5,
+h6 {
+	padding: 0;
+}
+
+h5 {
+	font-size: 1em;
+}
+
+h6 {
+	font-size: 0.875em;
+	text-transform: uppercase;
+}
+
+p {
+	margin: 0.25em 0 1em;
+}
+
+blockquote {
+	margin: 0.5em 0 1em;
+	padding-left: 0.5em;
+	padding-right: 1em;
+	border-left: 4px solid gainsboro;
+	font-style: italic;
+}
+
+ul,
+ol {
+	margin: 0;
+	margin-left: 1em;
+	padding: 0 1.5em 0.5em;
+}
+
+pre {
+	white-space: pre-wrap;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code,
+p code,
+li code,
+pre code {
+	background-color: #f8f8f8;
+	padding: 0.1em 0.375em;
+	border: 1px solid #f8f8f8;
+	border-radius: 0.25em;
+	font-family: monospace;
+	font-size: 1.2em;
+}
+
+pre code {
+	display: block;
+	padding: 0.5em;
+}
+
+.page-break {
+	page-break-after: always;
+}
+
+img {
+	max-width: 100%;
+	margin: 1em 0;
+}
+
+table {
+	border-spacing: 0;
+	border-collapse: collapse;
+	display: block;
+	margin: 0 0 1em;
+	width: 100%;
+	overflow: auto;
+}
+
+table th,
+table td {
+	padding: 0.5em 1em;
+	border: 1px solid gainsboro;
+}
+
+table th {
+	font-weight: 600;
+}
+
+table tr {
+	background-color: white;
+	border-top: 1px solid gainsboro;
+}
+
+table tr:nth-child(2n) {
+	background-color: whitesmoke;
+}
+/*# sourceURL=/Users/mac/.npm/_npx/f444d9d5443f2220/node_modules/md-to-pdf/markdown.css*/</style><style>pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em
+}
+code.hljs {
+  padding: 3px 5px
+}
+/*!
+  Theme: GitHub
+  Description: Light theme as seen on github.com
+  Author: github.com
+  Maintainer: @Hirse
+  Updated: 2021-05-15
+
+  Outdated base version: https://github.com/primer/github-syntax-light
+  Current colors taken from GitHub's CSS
+*/
+.hljs {
+  color: #24292e;
+  background: #ffffff
+}
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+  /* prettylights-syntax-keyword */
+  color: #d73a49
+}
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+  /* prettylights-syntax-entity */
+  color: #6f42c1
+}
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id {
+  /* prettylights-syntax-constant */
+  color: #005cc5
+}
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string {
+  /* prettylights-syntax-string */
+  color: #032f62
+}
+.hljs-built_in,
+.hljs-symbol {
+  /* prettylights-syntax-variable */
+  color: #e36209
+}
+.hljs-comment,
+.hljs-code,
+.hljs-formula {
+  /* prettylights-syntax-comment */
+  color: #6a737d
+}
+.hljs-name,
+.hljs-quote,
+.hljs-selector-tag,
+.hljs-selector-pseudo {
+  /* prettylights-syntax-entity-tag */
+  color: #22863a
+}
+.hljs-subst {
+  /* prettylights-syntax-storage-modifier-import */
+  color: #24292e
+}
+.hljs-section {
+  /* prettylights-syntax-markup-heading */
+  color: #005cc5;
+  font-weight: bold
+}
+.hljs-bullet {
+  /* prettylights-syntax-markup-list */
+  color: #735c0f
+}
+.hljs-emphasis {
+  /* prettylights-syntax-markup-italic */
+  color: #24292e;
+  font-style: italic
+}
+.hljs-strong {
+  /* prettylights-syntax-markup-bold */
+  color: #24292e;
+  font-weight: bold
+}
+.hljs-addition {
+  /* prettylights-syntax-markup-inserted */
+  color: #22863a;
+  background-color: #f0fff4
+}
+.hljs-deletion {
+  /* prettylights-syntax-markup-deleted */
+  color: #b31d28;
+  background-color: #ffeef0
+}
+.hljs-char.escape_,
+.hljs-link,
+.hljs-params,
+.hljs-property,
+.hljs-punctuation,
+.hljs-tag {
+  /* purposely ignored */
+  
+}/*# sourceURL=/Users/mac/.npm/_npx/f444d9d5443f2220/node_modules/highlight.js/styles/github.css*/</style></head>
+	<body class="">
+		<h1 id="mekong-cli--hướng-dẫn-sử-dụng-hiệu-quả">MEKONG CLI — Hướng Dẫn Sử Dụng Hiệu Quả</h1>
+<blockquote>
+<p><strong>Version 5.0.0</strong> | AI-Operated Business Platform | MIT License
+<em>"Speed is the essence of war."</em> — Sun Tzu</p>
+</blockquote>
+<hr>
+<h2 id="1-tổng-quan">1. TỔNG QUAN</h2>
+<p>Mekong CLI là nền tảng AI tự động hóa doanh nghiệp, biến mục tiêu ngôn ngữ tự nhiên thành hành động thực thi qua pipeline <strong>Plan → Execute → Verify (PEV)</strong>.</p>
+<p><strong>Thống kê</strong>: 289 commands • 245 skills • 176 contracts • 13 agents • 9 sub-apps</p>
+<h3 id="cách-hoạt-động">Cách hoạt động</h3>
+<pre><code>"Tạo FastAPI service với JWT auth"
+  ↓ PLAN → Phân tách thành các bước (LLM-powered)
+  ↓ EXECUTE → Thực thi từng bước (shell/llm/tool/browse/evolve)
+  ↓ VERIFY → Kiểm tra kết quả theo quality gates
+  ↓ DONE → Hoàn thành, MCU credits trừ
+</code></pre>
+<hr>
+<h2 id="2-cài-đặt--khởi-động">2. CÀI ĐẶT &amp; KHỞI ĐỘNG</h2>
+<h3 id="21-cài-đặt">2.1 Cài đặt</h3>
+<pre><code class="hljs bash">pip install mekong-cli
+</code></pre>
+<h3 id="22-cấu-hình-llm-3-biến-môi-trường">2.2 Cấu hình LLM (3 biến môi trường)</h3>
+<pre><code class="hljs bash"><span class="hljs-built_in">export</span> LLM_BASE_URL=<span class="hljs-string">"https://api.openai.com/v1"</span>
+<span class="hljs-built_in">export</span> LLM_API_KEY=<span class="hljs-string">"sk-..."</span>
+<span class="hljs-built_in">export</span> LLM_MODEL=<span class="hljs-string">"gpt-4o"</span>
+</code></pre>
+<h3 id="23-chạy-lệnh-đầu-tiên">2.3 Chạy lệnh đầu tiên</h3>
+<pre><code class="hljs bash">mekong cook <span class="hljs-string">"Tạo Python calculator với tests"</span>
+</code></pre>
+<h3 id="24-llm-fallback-chain-9-tầng">2.4 LLM Fallback Chain (9 tầng)</h3>
+<table>
+<thead>
+<tr>
+<th>Ưu tiên</th>
+<th>Provider</th>
+<th>Env Var</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>Primary (user config)</td>
+<td><code>LLM_BASE_URL</code> + <code>LLM_API_KEY</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>OpenRouter</td>
+<td><code>OPENROUTER_API_KEY</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>AgentRouter</td>
+<td><code>AGENTROUTER_API_KEY</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Qwen/DashScope</td>
+<td><code>DASHSCOPE_API_KEY</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>DeepSeek</td>
+<td><code>DEEPSEEK_API_KEY</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Anthropic</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>OpenAI</td>
+<td><code>OPENAI_API_KEY</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Google Gemini</td>
+<td><code>GOOGLE_API_KEY</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Ollama (local)</td>
+<td><code>OLLAMA_BASE_URL</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Offline</td>
+<td>(luôn có sẵn)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="3-kiến-trúc-5-lớp">3. KIẾN TRÚC 5 LỚP</h2>
+<table>
+<thead>
+<tr>
+<th>Lớp</th>
+<th>Emoji</th>
+<th>Chức năng</th>
+<th>Ví dụ Commands</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Founder</strong></td>
+<td>👑</td>
+<td>Chiến lược</td>
+<td><code>/annual /okr /fundraise /swot /pitch /vc/* /ipo/*</code></td>
+</tr>
+<tr>
+<td><strong>Business</strong></td>
+<td>🏢</td>
+<td>Vận hành</td>
+<td><code>/sales /marketing /finance /hr /pricing /brand</code></td>
+</tr>
+<tr>
+<td><strong>Product</strong></td>
+<td>📦</td>
+<td>Sản phẩm</td>
+<td><code>/plan /sprint /roadmap /brainstorm /scope</code></td>
+</tr>
+<tr>
+<td><strong>Engineer</strong></td>
+<td>⚙️</td>
+<td>Kỹ thuật</td>
+<td><code>/cook /fix /code /test /deploy /review</code></td>
+</tr>
+<tr>
+<td><strong>Ops</strong></td>
+<td>🔧</td>
+<td>Vận hành hạ tầng</td>
+<td><code>/audit /health /security /status /clean</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-top-10-commands-quan-trọng">4. TOP 10 COMMANDS QUAN TRỌNG</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Chức năng</th>
+<th>MCU</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mekong cook</code></td>
+<td>Full PEV pipeline - thực thi mọi task</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>mekong fix</code></td>
+<td>Debug &amp; fix bugs tự động</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>mekong plan</code></td>
+<td>Tạo implementation plan</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>mekong review</code></td>
+<td>Code quality review</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>mekong deploy</code></td>
+<td>Deployment orchestration</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>mekong company/init</code></td>
+<td>Khởi tạo agentic company</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>mekong founder/validate</code></td>
+<td>Customer discovery &amp; PMF</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>mekong founder/pitch</code></td>
+<td>Pitch deck practice</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>mekong founder/vc/cap-table</code></td>
+<td>Dilution modeling</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>mekong founder/ipo/ipo-day</code></td>
+<td>IPO Day execution</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<h3 id="cli-flags">CLI Flags</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Tác dụng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--verbose / -v</code></td>
+<td>Hiển thị chi tiết từng bước</td>
+</tr>
+<tr>
+<td><code>--dry-run / -n</code></td>
+<td>Chỉ plan, không thực thi</td>
+</tr>
+<tr>
+<td><code>--strict</code></td>
+<td>Dừng ngay khi gặp lỗi verification</td>
+</tr>
+<tr>
+<td><code>--json / -j</code></td>
+<td>Output JSON cho máy đọc</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="5-commands-chi-tiết-theo-lớp">5. COMMANDS CHI TIẾT THEO LỚP</h2>
+<h3 id="51-founder-layer-👑">5.1 Founder Layer 👑</h3>
+<p><strong>VC Suite</strong> (5 modules):</p>
+<ul>
+<li><code>vc/bootstrap</code> — Bootstrap funding</li>
+<li><code>vc/cap-table</code> — Cap table &amp; dilution modeling</li>
+<li><code>vc/map</code> — VC landscape mapping</li>
+<li><code>vc/negotiate</code> — Term negotiation</li>
+<li><code>vc/term-sheet</code> — Term sheet drafting</li>
+</ul>
+<p><strong>IPO Suite</strong> (8 modules):</p>
+<ul>
+<li><code>ipo/pre-ipo</code> — Chuẩn bị Pre-IPO</li>
+<li><code>ipo/s1</code> — S-1 filing</li>
+<li><code>ipo/roadshow</code> — IPO roadshow planning</li>
+<li><code>ipo/ipo-day</code> — IPO Day execution</li>
+<li><code>ipo/public-co</code> — Post-IPO governance</li>
+<li><code>ipo/insider</code> — Insider trading compliance</li>
+<li><code>ipo/succession</code> — CEO succession planning</li>
+</ul>
+<h3 id="52-business-layer-🏢">5.2 Business Layer 🏢</h3>
+<ul>
+<li><code>/sales</code> — Pipeline management, outreach, lead qualify</li>
+<li><code>/marketing</code> — Campaigns, content, ads, SEO, CRO</li>
+<li><code>/finance</code> — P&amp;L, budgets, financial reporting</li>
+<li><code>/hr</code> — Hiring, team building</li>
+<li><code>/client</code> — Client onboarding, contracts, invoices</li>
+</ul>
+<h3 id="53-product-layer-📦">5.3 Product Layer 📦</h3>
+<ul>
+<li><code>/plan</code> — Implementation planning (modes: hard/fast/standard)</li>
+<li><code>/sprint</code> — Sprint management</li>
+<li><code>/roadmap</code> — Product roadmap</li>
+<li><code>/brainstorm</code> — Ideation sessions</li>
+<li><code>/idea</code> — Full company architecture from idea (25 steps, Zero→IPO)</li>
+</ul>
+<h3 id="54-engineer-layer-⚙️">5.4 Engineer Layer ⚙️</h3>
+<ul>
+<li><code>/cook</code> — Full PEV pipeline (modes: auto/fast/parallel/interactive)</li>
+<li><code>/fix</code> — Debug &amp; auto-fix</li>
+<li><code>/code</code> — Code analysis, TDD, optimization</li>
+<li><code>/test</code> — Test suite execution</li>
+<li><code>/deploy</code> — Deployment orchestration</li>
+<li><code>/review</code> — Code review</li>
+<li><code>/dev</code> — Audit, debug, scaffold, refactor</li>
+</ul>
+<h3 id="55-ops-layer-🔧">5.5 Ops Layer 🔧</h3>
+<ul>
+<li><code>/audit</code> — System audit</li>
+<li><code>/health</code> — Health sweep</li>
+<li><code>/security</code> — Security checks</li>
+<li><code>/status</code> — System status</li>
+<li><code>/daily</code> — Daily status report</li>
+<li><code>/ship</code> — Ship code: lint → test → commit → push → deploy</li>
+</ul>
+<hr>
+<h2 id="6-pev-engine-core">6. PEV ENGINE (Core)</h2>
+<h3 id="61-orchestrator-1023-lines">6.1 Orchestrator (1023 lines)</h3>
+<pre><code>RecipeOrchestrator
+├── StepExecutor      — Thực thi + verify từng bước
+├── RollbackHandler   — Rollback khi thất bại
+└── ReportFormatter   — Rich terminal reporting
+</code></pre>
+<h3 id="62-planner-660-lines">6.2 Planner (660 lines)</h3>
+<ul>
+<li>Phân tách goal thành atomic tasks qua LLM</li>
+<li>DAG-aware planning (parallel khi có thể)</li>
+<li>Re-planning tự động khi branch thất bại</li>
+<li>Agent keyword routing (git/file/shell/lead/content/browse/evolve)</li>
+</ul>
+<h3 id="63-executor-490-lines--5-chế-độ">6.3 Executor (490 lines) — 5 chế độ</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Mô tả</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>shell</code></td>
+<td>subprocess.run với retry + sanitization</td>
+</tr>
+<tr>
+<td><code>llm</code></td>
+<td>LLM generation qua provider</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>HTTP request (GET/POST/PUT/DELETE)</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td>ToolRegistry execution</td>
+</tr>
+<tr>
+<td><code>browse</code></td>
+<td>BrowserAgent (web extraction)</td>
+</tr>
+</tbody></table>
+<h3 id="64-verifier-483-lines">6.4 Verifier (483 lines)</h3>
+<ul>
+<li>Exit code check</li>
+<li>File exists/not exists</li>
+<li>Output contains/not contains</li>
+<li>Custom check (shell command)</li>
+<li><strong>Binh Pháp Quality Gates</strong>: 0 TODO, 0 console.log, 0 <code>:any</code>, 0 vulnerabilities</li>
+</ul>
+<h3 id="65-self-healing-flow">6.5 Self-Healing Flow</h3>
+<pre><code>Step fails → Reflection Engine phân tích root cause
+  ↓ World Model kiểm tra environment
+  ↓ LLM tạo correction strategy
+  ↓ Retry với exponential backoff (max 3 retries)
+  ↓ Nếu vẫn fail → Rollback + Dead Letter Queue
+</code></pre>
+<hr>
+<h2 id="7-hệ-thống-13-agents">7. HỆ THỐNG 13 AGENTS</h2>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Chức năng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GitAgent</td>
+<td>Git operations (commit, branch, merge)</td>
+</tr>
+<tr>
+<td>FileAgent</td>
+<td>File CRUD operations</td>
+</tr>
+<tr>
+<td>ShellAgent</td>
+<td>Shell command execution</td>
+</tr>
+<tr>
+<td>RecipeCrawler</td>
+<td>Recipe file discovery</td>
+</tr>
+<tr>
+<td>LeadHunter</td>
+<td>Sales lead generation</td>
+</tr>
+<tr>
+<td>ContentWriter</td>
+<td>Content/blog/SEO writing</td>
+</tr>
+<tr>
+<td>DatabaseAgent</td>
+<td>Database operations</td>
+</tr>
+<tr>
+<td>MonitorAgent</td>
+<td>System resource monitoring</td>
+</tr>
+<tr>
+<td>PluginAgent</td>
+<td>Plugin management</td>
+</tr>
+<tr>
+<td>WorkspaceAgent</td>
+<td>Workspace management</td>
+</tr>
+<tr>
+<td>NetworkAgent</td>
+<td>Network operations</td>
+</tr>
+<tr>
+<td>AGIBridge</td>
+<td>AGI subsystem bridge</td>
+</tr>
+</tbody></table>
+<p>Tất cả agents kế thừa từ <code>AgentBase</code> và tuân theo flow: <strong>plan → execute → verify</strong>.</p>
+<hr>
+<h2 id="8-agi-v2--9-hệ-thống-con">8. AGI v2 — 9 HỆ THỐNG CON</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Hệ thống</th>
+<th>Chức năng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>NLU</td>
+<td>Intent classification, command parsing</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Memory</td>
+<td>Persistent execution memory</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Reflection</td>
+<td>Past failure analysis</td>
+</tr>
+<tr>
+<td>4</td>
+<td>WorldModel</td>
+<td>Environment state tracking</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ToolRegistry</td>
+<td>Dynamic tool management</td>
+</tr>
+<tr>
+<td>6</td>
+<td>BrowserAgent</td>
+<td>Web content extraction</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Collaboration</td>
+<td>Multi-agent coordination</td>
+</tr>
+<tr>
+<td>8</td>
+<td>CodeEvolution</td>
+<td>Code quality evolution</td>
+</tr>
+<tr>
+<td>9</td>
+<td>VectorMemory</td>
+<td>Semantic vector search</td>
+</tr>
+</tbody></table>
+<h3 id="agi-score-engine-0-100">AGI Score Engine (0-100)</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Module availability</td>
+<td>45%</td>
+</tr>
+<tr>
+<td>Cross-wiring depth</td>
+<td>25%</td>
+</tr>
+<tr>
+<td>Runtime metrics</td>
+<td>15%</td>
+</tr>
+<tr>
+<td>Self-improvement</td>
+<td>15%</td>
+</tr>
+</tbody></table>
+<p><strong>Grade</strong>: S (95+), A (85+), B (75+), C (65+), D (50+), F (&lt;50)</p>
+<hr>
+<h2 id="9-workflows-slash-commands">9. WORKFLOWS (Slash Commands)</h2>
+<h3 id="chiến-lược--doanh-nghiệp">Chiến lược &amp; Doanh nghiệp</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Mô tả</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/idea</code></td>
+<td>Tạo full company architecture từ ý tưởng</td>
+</tr>
+<tr>
+<td><code>/binh-phap</code></td>
+<td>Strategic execution framework</td>
+</tr>
+<tr>
+<td><code>/studio</code></td>
+<td>Strategy, portfolio, bootstrap, invest</td>
+</tr>
+<tr>
+<td><code>/business</code></td>
+<td>Client onboard, revenue engine</td>
+</tr>
+<tr>
+<td><code>/daily</code></td>
+<td>Daily status report</td>
+</tr>
+<tr>
+<td><code>/win</code></td>
+<td>WIN-WIN-WIN validation</td>
+</tr>
+</tbody></table>
+<h3 id="kỹ-thuật--phát-triển">Kỹ thuật &amp; Phát triển</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Mô tả</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/cook</code></td>
+<td>Intelligent feature implementation</td>
+</tr>
+<tr>
+<td><code>/plan</code></td>
+<td>Research and analysis planning</td>
+</tr>
+<tr>
+<td><code>/code</code></td>
+<td>TDD, code analysis, optimization</td>
+</tr>
+<tr>
+<td><code>/dev</code></td>
+<td>Audit, debug, deploy, design</td>
+</tr>
+<tr>
+<td><code>/ship</code></td>
+<td>Lint → test → commit → push → deploy</td>
+</tr>
+<tr>
+<td><code>/git</code></td>
+<td>Commit, PR, rebase, worktrees</td>
+</tr>
+<tr>
+<td><code>/build</code></td>
+<td>Code generation + tests + CI + deploy</td>
+</tr>
+</tbody></table>
+<h3 id="sales--marketing">Sales &amp; Marketing</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Mô tả</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/sales</code></td>
+<td>Pipeline, outreach, deal close</td>
+</tr>
+<tr>
+<td><code>/marketing</code></td>
+<td>Campaigns, content, ads, SEO</td>
+</tr>
+<tr>
+<td><code>/content</code></td>
+<td>Article, SEO, social posts</td>
+</tr>
+<tr>
+<td><code>/money</code></td>
+<td>Lead generation + content + outreach</td>
+</tr>
+</tbody></table>
+<h3 id="operations">Operations</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Mô tả</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/ops</code></td>
+<td>Health sweep, sprints, budgets</td>
+</tr>
+<tr>
+<td><code>/cto</code></td>
+<td>Architecture, deploy, incident response</td>
+</tr>
+<tr>
+<td><code>/approve</code></td>
+<td>Approve pending content/decisions</td>
+</tr>
+<tr>
+<td><code>/quick-start</code></td>
+<td>New project → production in 5 steps</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-plugin-ecosystem">10. PLUGIN ECOSYSTEM</h2>
+<h3 id="cài-đặt-plugin">Cài đặt Plugin</h3>
+<pre><code class="hljs bash">mekong plugin install &lt;name&gt;
+</code></pre>
+<h3 id="plugin-types">Plugin Types</h3>
+<ul>
+<li><strong>agent</strong> — Agent mở rộng</li>
+<li><strong>provider</strong> — LLM provider mới</li>
+<li><strong>hook</strong> — Hook vào pipeline</li>
+<li><strong>recipe</strong> — Recipe templates</li>
+</ul>
+<h3 id="marketplace-api">Marketplace API</h3>
+<ul>
+<li>Search, sort by: popularity/downloads/rating</li>
+<li>Featured &amp; trending discovery</li>
+<li>Rating system</li>
+</ul>
+<hr>
+<h2 id="11-telegram-commander-bot">11. TELEGRAM COMMANDER BOT</h2>
+<h3 id="commands">Commands</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Chức năng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/cook &lt;goal&gt;</code></td>
+<td>Queue task</td>
+</tr>
+<tr>
+<td><code>/spawn &lt;project&gt; &lt;goal&gt;</code></td>
+<td>Task cho project cụ thể</td>
+</tr>
+<tr>
+<td><code>/tasks</code></td>
+<td>Xem pending tasks</td>
+</tr>
+<tr>
+<td><code>/sessions</code></td>
+<td>List active terminals</td>
+</tr>
+<tr>
+<td><code>/status</code></td>
+<td>System health</td>
+</tr>
+<tr>
+<td><code>/schedule</code></td>
+<td>Scheduled jobs</td>
+</tr>
+<tr>
+<td><code>/agi start</code></td>
+<td>Bắt đầu AGI self-improvement</td>
+</tr>
+</tbody></table>
+<h3 id="cấu-hình">Cấu hình</h3>
+<pre><code class="hljs bash"><span class="hljs-built_in">export</span> MEKONG_TELEGRAM_TOKEN=<span class="hljs-string">"bot-token-here"</span>
+</code></pre>
+<p>File config: <code>.mekong/telegram.yaml</code></p>
+<hr>
+<h2 id="12-swarm-registry-multi-node">12. SWARM REGISTRY (Multi-Node)</h2>
+<p>Phân phối task across multiple Mekong gateways:</p>
+<pre><code class="hljs bash"><span class="hljs-comment"># Register node</span>
+registry.register_node(name, host, port, token)
+
+<span class="hljs-comment"># Health check all nodes</span>
+registry.check_all_health()
+
+<span class="hljs-comment"># Dispatch goal to specific node</span>
+registry.dispatch_goal(node_id, goal)
+</code></pre>
+<p>Priority: Healthy remote node → Local agent fallback</p>
+<hr>
+<h2 id="13-eventbus--telemetry">13. EVENTBUS &amp; TELEMETRY</h2>
+<h3 id="40-event-types-7-categories">40+ Event Types (7 categories)</h3>
+<ul>
+<li><strong>Pipeline</strong>: plan/execute/verify start/done</li>
+<li><strong>Step</strong>: start/done/fail/retry/rollback</li>
+<li><strong>Recipe</strong>: load/save/auto_save</li>
+<li><strong>Agent</strong>: register/invoke/response</li>
+<li><strong>System</strong>: health/error/shutdown</li>
+<li><strong>AGI</strong>: score/self_heal/evolve</li>
+<li><strong>Billing</strong>: recorded/overage/period_closed</li>
+</ul>
+<h3 id="tiered-telemetry">Tiered Telemetry</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Retention</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T0 (Hot)</td>
+<td>24h</td>
+<td>Real-time metrics</td>
+</tr>
+<tr>
+<td>T1 (Warm)</td>
+<td>30 days</td>
+<td>Aggregated stats</td>
+</tr>
+<tr>
+<td>T2 (Cold)</td>
+<td>Vĩnh viễn</td>
+<td>Full audit trail</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="14-deploy-4-layer-0-cost">14. DEPLOY (4-Layer, $0 Cost)</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Platform</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Frontend</td>
+<td>Cloudflare Pages</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>Edge API</td>
+<td>Cloudflare Workers</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>App</td>
+<td>Vercel / CF Pages SSR</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td>Fly.io</td>
+<td>$0-20</td>
+</tr>
+</tbody></table>
+<pre><code class="hljs bash">bash mekong/infra/scaffold.sh myproject startup  <span class="hljs-comment"># frontend + API</span>
+bash mekong/infra/scaffold.sh myproject scale     <span class="hljs-comment"># all 4 layers</span>
+</code></pre>
+<p><strong>⚠️ BANNED</strong>: <code>vercel --prod</code> — chỉ deploy qua <code>git push</code></p>
+<hr>
+<h2 id="15-binh-pháp-quality-framework-孫子兵法">15. BINH PHÁP QUALITY FRAMEWORK (孫子兵法)</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Tiêu chuẩn</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>始計 Tech Debt</td>
+<td>0 TODO/FIXME, 0 console.log</td>
+</tr>
+<tr>
+<td>作戰 Type Safety</td>
+<td>0 <code>any</code> types, strict mode</td>
+</tr>
+<tr>
+<td>謀攻 Performance</td>
+<td>Build &lt; 10s, LCP &lt; 2.5s</td>
+</tr>
+<tr>
+<td>軍形 Security</td>
+<td>Input validation, no secrets</td>
+</tr>
+<tr>
+<td>兵勢 UX</td>
+<td>Loading states, error boundaries</td>
+</tr>
+<tr>
+<td>虛實 Documentation</td>
+<td>Self-documenting code</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="16-mcu-billing">16. MCU BILLING</h2>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Credits/tháng</th>
+<th>Giá</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Starter</td>
+<td>200</td>
+<td>$49</td>
+</tr>
+<tr>
+<td>Pro</td>
+<td>1,000</td>
+<td>$149</td>
+</tr>
+<tr>
+<td>Enterprise</td>
+<td>Unlimited</td>
+<td>$499</td>
+</tr>
+</tbody></table>
+<ul>
+<li>1 MCU = 1 credit, trừ sau khi delivery thành công</li>
+<li>Zero balance → HTTP 402</li>
+<li>Polar.sh webhooks = payment source chính</li>
+</ul>
+<hr>
+<h2 id="17-sub-applications-9-apps">17. SUB-APPLICATIONS (9 Apps)</h2>
+<table>
+<thead>
+<tr>
+<th>App</th>
+<th>Chức năng</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>openclaw-worker</td>
+<td>Tôm Hùm autonomous daemon</td>
+</tr>
+<tr>
+<td>raas-gateway</td>
+<td>RaaS API gateway</td>
+</tr>
+<tr>
+<td>algo-trader</td>
+<td>Algorithm trading bot</td>
+</tr>
+<tr>
+<td>engine</td>
+<td>Core execution engine</td>
+</tr>
+<tr>
+<td>vibe-coding-cafe</td>
+<td>Vibe coding app</td>
+</tr>
+<tr>
+<td>docs</td>
+<td>Documentation site</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="18-bảo-mật">18. BẢO MẬT</h2>
+<h3 id="dangerous-patterns-tự-động-chặn">Dangerous Patterns (tự động chặn)</h3>
+<p><code>rm -rf /</code>, <code>mkfs</code>, <code>dd if=</code>, <code>chmod -R 777 /</code>, <code>curl|sh</code>, <code>shutdown</code>, <code>reboot</code></p>
+<h3 id="auth-stack">Auth Stack</h3>
+<ul>
+<li>JWT authentication</li>
+<li>Session management</li>
+<li>Tenant-scoped auth</li>
+<li>Permission registry</li>
+<li>Device certificates</li>
+<li>Machine fingerprinting</li>
+</ul>
+<hr>
+<h2 id="19-quick-reference">19. QUICK REFERENCE</h2>
+<pre><code class="hljs bash"><span class="hljs-comment"># Khởi tạo</span>
+pip install mekong-cli
+mekong doctor check
+
+<span class="hljs-comment"># Sử dụng hàng ngày</span>
+mekong cook <span class="hljs-string">"mô tả task"</span>          <span class="hljs-comment"># Thực thi task</span>
+mekong plan <span class="hljs-string">"feature mới"</span>         <span class="hljs-comment"># Lập kế hoạch</span>
+mekong fix <span class="hljs-string">"bug description"</span>      <span class="hljs-comment"># Fix bug</span>
+mekong deploy                     <span class="hljs-comment"># Deploy</span>
+mekong daily                      <span class="hljs-comment"># Báo cáo ngày</span>
+
+<span class="hljs-comment"># Kiểm tra</span>
+mekong health                     <span class="hljs-comment"># Health check</span>
+mekong status                     <span class="hljs-comment"># System status</span>
+mekong <span class="hljs-built_in">help</span>                       <span class="hljs-comment"># Danh sách commands</span>
+</code></pre>
+<hr>
+<p><em>© 2026 Binh Phap Venture Studio — mekong-cli v5.0.0</em>
+<em>"Speed is the essence of war." — Sun Tzu</em></p>
+
+	
+
+</body></html>

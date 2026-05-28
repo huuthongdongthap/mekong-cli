@@ -101,8 +101,7 @@ def login(
 
         console.print(
             Panel(
-                f"Gateway: {client.gateway_url}\n"
-                f"Credentials: {client.credentials_path}",
+                f"Gateway: {client.gateway_url}\n" f"Credentials: {client.credentials_path}",
                 title="📌 Session Info",
                 border_style="cyan",
             )
@@ -201,8 +200,7 @@ def status(
 
     if not session.authenticated:
         console.print(
-            "\n[yellow]⚠️ No active session.[/yellow]\n"
-            "Login: [bold]mekong auth login[/bold]\n"
+            "\n[yellow]⚠️ No active session.[/yellow]\n" "Login: [bold]mekong auth login[/bold]\n"
         )
 
 
@@ -227,7 +225,7 @@ def validate(
     Examples:
         mekong auth validate
         mekong auth validate -t mk_abc123
-        mekong auth validate -g https://raas.agencyos.network
+        mekong auth validate -g https://api.cashclaw.cc
     """
     from src.core.raas_auth import RaaSAuthClient
 
@@ -309,6 +307,7 @@ def whoami() -> None:
 def _register_activate_command() -> None:
     """Register activate command as subcommand of auth."""
     from src.cli.activate_commands import activate
+
     app.command("activate")(activate)
 
 

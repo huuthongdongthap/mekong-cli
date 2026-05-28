@@ -181,7 +181,8 @@ class Dispatcher:
 
         # Filter by capability and idle state
         available = [
-            w for w in workers
+            w
+            for w in workers
             if w.state == WorkerState.IDLE and (capability is None or w.capability == capability)
         ]
 
@@ -200,7 +201,8 @@ class Dispatcher:
 
         # Filter by capability and idle state
         available = [
-            w for w in workers
+            w
+            for w in workers
             if w.state == WorkerState.IDLE and (capability is None or w.capability == capability)
         ]
 

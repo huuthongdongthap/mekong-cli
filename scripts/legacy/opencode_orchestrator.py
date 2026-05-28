@@ -102,9 +102,7 @@ class OpenCodeOrchestrator:
     def log(self, message: str, level: str = "INFO"):
         """Log with timestamp."""
         timestamp = datetime.now().strftime("%H:%M:%S")
-        prefix = {"INFO": "📝", "SUCCESS": "✅", "ERROR": "❌", "WARN": "⚠️"}.get(
-            level, "•"
-        )
+        prefix = {"INFO": "📝", "SUCCESS": "✅", "ERROR": "❌", "WARN": "⚠️"}.get(level, "•")
         print(f"[{timestamp}] {prefix} {message}")
 
     def run_command(self, cmd: str) -> dict:
@@ -177,9 +175,7 @@ class OpenCodeOrchestrator:
                 output = str(result.get("output") or result.get("data", ""))[:200]
                 self.log(f"   → {output}...", "SUCCESS")
             else:
-                self.log(
-                    f"   → Failed: {result.get('error', 'Unknown error')}", "ERROR"
-                )
+                self.log(f"   → Failed: {result.get('error', 'Unknown error')}", "ERROR")
 
         success = all(r.get("success") for r in results)
         self.results[phase_num] = {
@@ -250,9 +246,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Autonomous OpenCode Orchestrator")
-    parser.add_argument(
-        "--phase", type=int, default=1, help="Start from specific phase"
-    )
+    parser.add_argument("--phase", type=int, default=1, help="Start from specific phase")
     parser.add_argument("--only", type=int, help="Run only specific phase")
     args = parser.parse_args()
 

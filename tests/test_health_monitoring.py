@@ -67,7 +67,6 @@ from src.core.anomaly_detector import (
     reset_detector,
 )
 
-
 # ============================================================================
 # Phase 1: Health Endpoint Tests
 # ============================================================================
@@ -128,6 +127,7 @@ class TestHealthEndpoint:
         register_component_check("mock_component", mock_check)
         # Verify component was registered (check internal dict, not app attributes)
         from src.core.health_endpoint import _component_checks
+
         assert "mock_component" in _component_checks
         assert _component_checks["mock_component"]() == ComponentStatus(status="healthy")
 
@@ -463,6 +463,7 @@ class TestAnomalyDetectionBasics:
         """Test spike anomaly detection."""
         # Establish stable baseline with variance (not all identical values)
         import random
+
         random.seed(42)
         for _ in range(30):
             # Add small variation (100 +/- 5)
@@ -479,6 +480,7 @@ class TestAnomalyDetectionBasics:
         """Test drop anomaly detection."""
         # Establish high baseline with variance
         import random
+
         random.seed(42)
         for _ in range(30):
             # Add small variation (1000 +/- 50)
@@ -744,7 +746,7 @@ class TestAlertRouter:
 
     def test_event_subscription(self, router: AlertRouter) -> None:
         """Test router subscribes to critical events."""
-        #_router should have subscribed to health critical events
+        # _router should have subscribed to health critical events
         # subscriptions = len(bus._subscribers)
         # assert subscriptions > 0
 
@@ -916,6 +918,7 @@ class TestAutoRecovery:
     def test_attempt_recovery_failure_then_success(self, recovery: AutoRecovery) -> None:
         """Test recovery attempts multiple times on failure."""
         import asyncio
+
         call_count = 0
 
         def mock_run(*args, **kwargs):
@@ -929,6 +932,7 @@ class TestAutoRecovery:
         # Mock the script paths to not exist so we always fall through
         with patch("src.core.auto_recovery.Path.exists", return_value=False):
             with patch("src.core.auto_recovery.subprocess.run", side_effect=mock_run):
+
                 async def run_test():
                     result = await recovery.attempt_recovery(
                         recovery_type=RecoveryType.PROXY_RECOVERY,
@@ -956,6 +960,7 @@ class TestAutoRecovery:
         # Mock the script paths to not exist so we always fall through
         with patch("src.core.auto_recovery.Path.exists", return_value=False):
             with patch("src.core.auto_recovery.subprocess.run", side_effect=mock_run):
+
                 async def run_test():
                     result = await recovery.attempt_recovery(
                         recovery_type=RecoveryType.PROXY_RECOVERY,
@@ -979,6 +984,7 @@ class TestAutoRecovery:
     def test_get_recent_recoveries(self, recovery: AutoRecovery) -> None:
         """Test getting recent recovery attempts."""
         import asyncio
+
         # First make a recovery attempt
         with patch("src.core.auto_recovery.subprocess.run") as mock_run:
             mock_result = MagicMock()
@@ -1061,12 +1067,11 @@ class TestHealthMonitoringIntegration:
     def test_anomaly_detection_integration(self, streaming_bus: MagicMock) -> None:
         """Test anomaly detection with baseline persistence."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            detector = UsageAnomalyDetector(
-                baseline_file=tmpdir + "/baseline.json"
-            )
+            detector = UsageAnomalyDetector(baseline_file=tmpdir + "/baseline.json")
 
             # Record many normal values with some variance
             import random
+
             random.seed(42)
             for _ in range(30):
                 value = 100.0 + random.uniform(-5, 5)
@@ -1219,7 +1224,9 @@ class TestPerformance:
         """Test license monitor handles many failures efficiently."""
         with tempfile.TemporaryDirectory() as tmpdir:
             threshold = FailureThreshold(max_failures=100)  # High threshold
-            monitor = LicenseMonitor(storage_path=tmpdir + "/test-perf-failures.json", threshold=threshold)
+            monitor = LicenseMonitor(
+                storage_path=tmpdir + "/test-perf-failures.json", threshold=threshold
+            )
 
             start = time.time()
             for i in range(50):

@@ -16,7 +16,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-
 DB_PATH = os.getenv("DATABASE_PATH", "data/algo-trade.db")
 REPORTS_DIR = "data/reports"
 

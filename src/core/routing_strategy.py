@@ -81,13 +81,15 @@ class StrategyParser:
 
         targets = []
         for t in config.get("targets", []):
-            targets.append(RoutingTarget(
-                provider=t.get("provider", ""),
-                model=t.get("model", ""),
-                weight=t.get("weight", 1.0),
-                override_params=t.get("override_params", {}),
-                on_status_codes=t.get("on_status_codes", []),
-            ))
+            targets.append(
+                RoutingTarget(
+                    provider=t.get("provider", ""),
+                    model=t.get("model", ""),
+                    weight=t.get("weight", 1.0),
+                    override_params=t.get("override_params", {}),
+                    on_status_codes=t.get("on_status_codes", []),
+                )
+            )
 
         retry_data = config.get("retry", {})
         retry = RetryConfig(
@@ -220,10 +222,7 @@ class StrategyRouter:
 
     def _route_loadbalance(self, excluded: set) -> RouteDecision:
         """Route using weighted random selection."""
-        available = [
-            t for t in self.strategy.targets
-            if t.provider not in excluded
-        ]
+        available = [t for t in self.strategy.targets if t.provider not in excluded]
         if not available:
             msg = "No available targets for load balancing"
             raise RoutingError(msg)
@@ -286,7 +285,7 @@ class StrategyRouter:
         """
         base = self.strategy.retry.backoff_base
         max_delay = self.strategy.retry.backoff_max
-        delay = min(base * (2 ** attempt), max_delay)
+        delay = min(base * (2**attempt), max_delay)
         return random.uniform(0, delay)
 
 

@@ -28,6 +28,7 @@ class TestTrackUsageDecorator:
     @pytest.mark.asyncio
     async def test_track_usage_command_decorator(self):
         """Test decorator tracks command events."""
+
         @track_usage(event_type="command", tracker=self.mock_tracker)
         async def test_function():
             return "result"
@@ -43,6 +44,7 @@ class TestTrackUsageDecorator:
     @pytest.mark.asyncio
     async def test_track_usage_feature_decorator(self):
         """Test decorator tracks feature events."""
+
         @track_usage(
             event_type="feature",
             feature_tag="test-feature",
@@ -91,6 +93,7 @@ class TestTrackUsageDecorator:
     @pytest.mark.asyncio
     async def test_track_usage_preserves_function_metadata(self):
         """Test decorator preserves function name and docstring."""
+
         @track_usage(event_type="command", tracker=self.mock_tracker)
         async def documented_function():
             """This is a documented function."""
@@ -117,6 +120,7 @@ class TestTrackCommandDecorator:
     @pytest.mark.asyncio
     async def test_track_command_decorator(self):
         """Test @track_command decorator."""
+
         @track_command(tracker=self.mock_tracker)
         async def cook_recipe():
             return "cooked"
@@ -131,6 +135,7 @@ class TestTrackCommandDecorator:
     @pytest.mark.asyncio
     async def test_track_command_with_args(self):
         """Test decorator with function arguments."""
+
         @track_command(tracker=self.mock_tracker)
         async def cook_with_args(name: str, ingredients: list):
             return f"cooked {name} with {len(ingredients)} ingredients"
@@ -158,6 +163,7 @@ class TestTrackFeatureDecorator:
     @pytest.mark.asyncio
     async def test_track_feature_decorator(self):
         """Test @track_feature decorator."""
+
         @track_feature(feature_tag="analytics", tracker=self.mock_tracker)
         async def analytics_feature():
             return "analytics data"
@@ -171,6 +177,7 @@ class TestTrackFeatureDecorator:
 
     def test_track_feature_missing_tag(self):
         """Test that missing feature_tag raises error when calling the function."""
+
         # The error is raised when the decorated function is called, not at decoration time
         @track_usage(event_type="feature", tracker=self.mock_tracker)
         async def bad_feature():
@@ -206,6 +213,7 @@ class TestDecoratorIntegration:
         mock_tracker.track_command.return_value = (True, "tracked")
 
         with patch("src.usage.decorators.get_tracker", return_value=mock_tracker):
+
             @track_command()
             async def test_cmd():
                 return "done"

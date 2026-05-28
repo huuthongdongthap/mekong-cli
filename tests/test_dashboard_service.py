@@ -3,6 +3,7 @@ Unit Tests for DashboardService
 
 Test suite for DashboardService class in src/analytics/dashboard_service.py
 """
+
 import pytest
 import json
 from unittest.mock import MagicMock, AsyncMock
@@ -137,6 +138,7 @@ class TestDashboardService:
         first_call_count = fully_mocked_service._queries.get_daily_usage.call_count
 
         import asyncio
+
         await asyncio.sleep(0.1)  # Small delay to allow TTL expiry
 
         await fully_mocked_service.get_metrics()

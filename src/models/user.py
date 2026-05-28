@@ -81,7 +81,11 @@ class UserSession:
         """Create UserSession from database row dict."""
         return cls(
             id=data["id"] if isinstance(data["id"], uuid.UUID) else uuid.UUID(data["id"]),
-            user_id=data["user_id"] if isinstance(data["user_id"], uuid.UUID) else uuid.UUID(data["user_id"]),
+            user_id=(
+                data["user_id"]
+                if isinstance(data["user_id"], uuid.UUID)
+                else uuid.UUID(data["user_id"])
+            ),
             token_hash=data["token_hash"],
             expires_at=data["expires_at"],
             created_at=data.get("created_at") or datetime.utcnow(),

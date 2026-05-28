@@ -39,9 +39,9 @@ BOLD = "\033[1m"
 
 def notify(title, message, sound="Glass"):
     """Send macOS notification."""
-    script = f'''
+    script = f"""
     display notification "{message}" with title "{title}" sound name "{sound}"
-    '''
+    """
     subprocess.run(["osascript", "-e", script], capture_output=True)
     print(f"  🔔 {title}: {message}")
 
@@ -132,15 +132,11 @@ def check_followups():
     followups = load_json(FOLLOWUPS_FILE)
 
     due_today = [
-        f
-        for f in followups
-        if f.get("due_date") == today and f.get("status") == "pending"
+        f for f in followups if f.get("due_date") == today and f.get("status") == "pending"
     ]
 
     if due_today:
-        notify(
-            "📬 FOLLOW-UP DUE", f"{len(due_today)} follow-up(s) to send today!", "Basso"
-        )
+        notify("📬 FOLLOW-UP DUE", f"{len(due_today)} follow-up(s) to send today!", "Basso")
 
 
 def check_queue():
@@ -148,9 +144,7 @@ def check_queue():
     today = datetime.now().strftime("%Y-%m-%d")
     queue = load_json(QUEUE_FILE)
 
-    due_today = [
-        q for q in queue if q.get("date") == today and q.get("status") == "queued"
-    ]
+    due_today = [q for q in queue if q.get("date") == today and q.get("status") == "queued"]
 
     if due_today:
         notify("📣 POST DUE", f"{len(due_today)} post(s) scheduled for today!", "Pop")

@@ -6,6 +6,7 @@ Classifies user churn risk as low/medium/high/critical using weighted rules:
 - No onboarding completion
 - Low engagement score
 """
+
 from __future__ import annotations
 
 import logging
@@ -33,8 +34,9 @@ class ChurnRisk:
 class ChurnPredictor:
     """Rule-based churn risk classifier."""
 
-    def __init__(self, store: Optional[EngagementStore] = None,
-                 tracker: Optional[EngagementTracker] = None) -> None:
+    def __init__(
+        self, store: Optional[EngagementStore] = None, tracker: Optional[EngagementTracker] = None
+    ) -> None:
         self._store = store or EngagementStore(db_path=_DB_PATH)
         self._tracker = tracker or EngagementTracker(store=self._store)
 

@@ -19,10 +19,11 @@ DEFAULT_DB_PATH = "data/algo-trade.db"
 @dataclass
 class LoopConfig:
     """Configuration for the prediction loop."""
+
     cycle_interval_sec: float = 60.0
-    min_edge: float = 0.05          # 5% minimum edge to signal
+    min_edge: float = 0.05  # 5% minimum edge to signal
     max_signals_per_cycle: int = 10
-    ensemble_n: int = 3             # Number of ensemble votes
+    ensemble_n: int = 3  # Number of ensemble votes
     db_path: str = DEFAULT_DB_PATH
     paper_trading: bool = True
 
@@ -84,6 +85,7 @@ class TemperatureScaler:
         if not self.is_fitted:
             return probability
         import math
+
         logit = math.log(probability / (1.0 - probability + 1e-10))
         scaled_logit = self.a * logit + self.b
         return 1.0 / (1.0 + math.exp(-scaled_logit))
@@ -101,15 +103,16 @@ class TemperatureScaler:
                 self.a, self.b = a, b
                 self.is_fitted = True
                 brier = sum(
-                    (self.scale(p) - a_val) ** 2
-                    for p, a_val in zip(predicted, actual)
+                    (self.scale(p) - a_val) ** 2 for p, a_val in zip(predicted, actual)
                 ) / len(predicted)
                 if brier < best_brier:
                     best_brier = brier
                     best_a, best_b = a, b
         self.a, self.b = best_a, best_b
         self.is_fitted = True
-        logger.info("TemperatureScaler fitted: a=%.2f, b=%.2f, brier=%.4f", best_a, best_b, best_brier)
+        logger.info(
+            "TemperatureScaler fitted: a=%.2f, b=%.2f, brier=%.4f", best_a, best_b, best_brier
+        )
 
 
 class DecisionLogger:
@@ -201,6 +204,7 @@ class PredictionLoop:
         """Run one prediction cycle: scan → estimate → rank → log."""
         # 1. Scan (filter markets)
         from src.polymarket.market_scanner import MarketScanner
+
         if isinstance(self.scanner, MarketScanner):
             filtered = self.scanner.scan(markets)
         else:
@@ -237,9 +241,7 @@ class PredictionLoop:
         # 6. Log decisions
         if self.decision_logger:
             for pred in predictions:
-                self.decision_logger.log_prediction(
-                    pred, is_paper=self.config.paper_trading
-                )
+                self.decision_logger.log_prediction(pred, is_paper=self.config.paper_trading)
 
         # 7. Notify callback
         if self.on_signal:
@@ -249,7 +251,10 @@ class PredictionLoop:
         self.cycle_count += 1
         logger.info(
             "Cycle %d: %d markets → %d filtered → %d signals",
-            self.cycle_count, len(markets), len(filtered), len(signals),
+            self.cycle_count,
+            len(markets),
+            len(filtered),
+            len(signals),
         )
         return signals
 

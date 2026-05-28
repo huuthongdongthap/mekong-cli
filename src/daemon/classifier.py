@@ -21,6 +21,7 @@ DEFAULT_KEYWORDS = {
 @dataclass
 class ClassificationResult:
     """Mission complexity classification."""
+
     level: str
     timeout: int
     matched_keyword: Optional[str] = None

@@ -58,8 +58,31 @@ class RecipePlanner:
 
     # Keyword → agent mapping for smart routing
     AGENT_KEYWORDS: Dict[str, List[str]] = {
-        "git": ["git", "commit", "branch", "merge", "rebase", "diff", "log", "push", "pull", "clone", "stash"],
-        "file": ["file", "read", "write", "copy", "move", "delete", "rename", "directory", "folder", "tree"],
+        "git": [
+            "git",
+            "commit",
+            "branch",
+            "merge",
+            "rebase",
+            "diff",
+            "log",
+            "push",
+            "pull",
+            "clone",
+            "stash",
+        ],
+        "file": [
+            "file",
+            "read",
+            "write",
+            "copy",
+            "move",
+            "delete",
+            "rename",
+            "directory",
+            "folder",
+            "tree",
+        ],
         "shell": ["run", "execute", "script", "command", "install", "build", "compile"],
         "lead": ["lead", "prospect", "ceo", "email", "company", "hunt", "outreach"],
         "content": ["content", "article", "blog", "seo", "write", "copywriting"],
@@ -134,7 +157,9 @@ class RecipePlanner:
             return "evolve"
 
         # Browse keywords
-        if any(w in goal_lower for w in ["browse", "check website", "analyze page", "crawl", "scrape"]):
+        if any(
+            w in goal_lower for w in ["browse", "check website", "analyze page", "crawl", "scrape"]
+        ):
             return "browse"
 
         return ""  # No special type detected
@@ -150,12 +175,11 @@ class RecipePlanner:
     def _extract_url(self, goal: str) -> str:
         """AGI v2: Extract URL from a goal string."""
         import re as _re
-        match = _re.search(r'https?://\S+|www\.\S+', goal)
+
+        match = _re.search(r"https?://\S+|www\.\S+", goal)
         return match.group(0) if match else ""
 
-    def decompose_goal(
-        self, goal: str, context: PlanningContext
-    ) -> List[Dict[str, Any]]:
+    def decompose_goal(self, goal: str, context: PlanningContext) -> List[Dict[str, Any]]:
         """
         Decompose high-level goal into atomic tasks.
 
@@ -173,9 +197,7 @@ class RecipePlanner:
         # Fallback: Rule-based decomposition
         return self._rule_based_decompose(goal, context)
 
-    def _rule_based_decompose(
-        self, goal: str, context: PlanningContext
-    ) -> List[Dict[str, Any]]:
+    def _rule_based_decompose(self, goal: str, context: PlanningContext) -> List[Dict[str, Any]]:
         """
         Rule-based task decomposition (fallback when no LLM).
 
@@ -198,43 +220,49 @@ class RecipePlanner:
         # AGI v2: URL/browse pattern → generate browse step
         if detected_type == "browse":
             url = self._extract_url(goal)
-            tasks.append({
-                "title": goal,
-                "description": f"Browse and analyze: {url or goal}",
-                "dependencies": [],
-                "type": "browse",
-                "url": url or "https://example.com",
-                "action": "analyze" if "analyze" in goal_lower else "check",
-            })
+            tasks.append(
+                {
+                    "title": goal,
+                    "description": f"Browse and analyze: {url or goal}",
+                    "dependencies": [],
+                    "type": "browse",
+                    "url": url or "https://example.com",
+                    "action": "analyze" if "analyze" in goal_lower else "check",
+                }
+            )
 
         # AGI v2: Tool pattern → generate tool step
         elif detected_type == "tool":
             tool_name = self._get_tool_name(goal)
-            tasks.append({
-                "title": goal,
-                "description": f"Execute tool: {tool_name}",
-                "dependencies": [],
-                "type": "tool",
-                "tool_name": tool_name,
-                "tool_args": {},
-            })
+            tasks.append(
+                {
+                    "title": goal,
+                    "description": f"Execute tool: {tool_name}",
+                    "dependencies": [],
+                    "type": "tool",
+                    "tool_name": tool_name,
+                    "tool_args": {},
+                }
+            )
 
         # AGI v2: Evolve pattern → generate evolve step (shell with evolve command)
         elif detected_type == "evolve":
-            tasks.extend([
-                {
-                    "title": f"Analyze: {goal}",
-                    "description": "Scan source code for improvement opportunities",
-                    "dependencies": [],
-                    "type": "shell",
-                },
-                {
-                    "title": f"Apply: {goal}",
-                    "description": goal,
-                    "dependencies": [0],
-                    "type": "llm",
-                },
-            ])
+            tasks.extend(
+                [
+                    {
+                        "title": f"Analyze: {goal}",
+                        "description": "Scan source code for improvement opportunities",
+                        "dependencies": [],
+                        "type": "shell",
+                    },
+                    {
+                        "title": f"Apply: {goal}",
+                        "description": goal,
+                        "dependencies": [0],
+                        "type": "llm",
+                    },
+                ]
+            )
 
         # Pattern: "implement X" or "create X"
         elif any(word in goal_lower for word in ["implement", "create", "build"]):
@@ -340,15 +368,11 @@ class RecipePlanner:
                 cmd = "find . -maxdepth 3 -not -path '*/node_modules/*' -not -path '*/.git/*' | head -50"
             else:
                 cmd = "find . -maxdepth 2 -not -path '*/.git/*' | sort | head -30"
-            tasks.append(
-                {"title": goal, "description": cmd, "dependencies": [], "type": "shell"}
-            )
+            tasks.append({"title": goal, "description": cmd, "dependencies": [], "type": "shell"})
 
         # Default: delegate to LLM if available, else echo the goal
         else:
-            tasks.append(
-                {"title": goal, "description": goal, "dependencies": [], "type": "llm"}
-            )
+            tasks.append({"title": goal, "description": goal, "dependencies": [], "type": "llm"})
 
         # Attach suggested agent to all tasks that don't already have one
         if suggested_agent:
@@ -359,9 +383,7 @@ class RecipePlanner:
 
         return tasks
 
-    def _llm_decompose(
-        self, goal: str, context: PlanningContext
-    ) -> List[Dict[str, Any]]:
+    def _llm_decompose(self, goal: str, context: PlanningContext) -> List[Dict[str, Any]]:
         """
         LLM-powered task decomposition.
 
@@ -426,9 +448,7 @@ Example: [{{"title": "Setup", "description": "npm install", "dependencies": []}}
             logger.error("[PLANNER] LLM decomposition failed: %s", e)
             return self._rule_based_decompose(goal, context)
 
-    def generate_verification_criteria(
-        self, task: Dict[str, Any]
-    ) -> VerificationCriteria:
+    def generate_verification_criteria(self, task: Dict[str, Any]) -> VerificationCriteria:
         """
         Generate verification criteria for a task.
 
@@ -571,7 +591,8 @@ Example: [{{"title": "Setup", "description": "npm install", "dependencies": []}}
 
         # Find the failed step
         failed_step = next(
-            (s for s in recipe.steps if s.order == failed_step_order), None,
+            (s for s in recipe.steps if s.order == failed_step_order),
+            None,
         )
         if not failed_step:
             return recipe
@@ -580,8 +601,7 @@ Example: [{{"title": "Setup", "description": "npm install", "dependencies": []}}
         goal = failed_step.description
         if error_context:
             goal = (
-                f"{goal} (previous attempt failed: {error_context}. "
-                f"Try a different approach.)"
+                f"{goal} (previous attempt failed: {error_context}. " f"Try a different approach.)"
             )
 
         context = PlanningContext(
@@ -591,10 +611,7 @@ Example: [{{"title": "Setup", "description": "npm install", "dependencies": []}}
         new_tasks = self.decompose_goal(goal, context)
 
         # Build new step list: keep successful steps, replace failed branch
-        kept_steps = [
-            s for s in recipe.steps
-            if s.order not in failed_and_downstream
-        ]
+        kept_steps = [s for s in recipe.steps if s.order not in failed_and_downstream]
 
         next_order = max((s.order for s in kept_steps), default=0) + 1
         for idx, task in enumerate(new_tasks):
@@ -606,8 +623,7 @@ Example: [{{"title": "Setup", "description": "npm install", "dependencies": []}}
                 params={
                     "type": task.get("type", "shell"),
                     "dependencies": [
-                        next_order + d for d in task.get("dependencies", [])
-                        if isinstance(d, int)
+                        next_order + d for d in task.get("dependencies", []) if isinstance(d, int)
                     ],
                     "verification": self.generate_verification_criteria(
                         task,

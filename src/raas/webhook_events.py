@@ -3,6 +3,7 @@
 Emits typed events for mission lifecycle, credit changes, and system alerts.
 All events conform to a standard envelope for Polar.sh webhook delivery.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -190,9 +191,11 @@ def credits_provisioned_event(
 
 def _new_id() -> str:
     import uuid
+
     return str(uuid.uuid4())
 
 
 def _now_iso() -> str:
     from datetime import datetime, timezone
+
     return datetime.now(timezone.utc).isoformat()

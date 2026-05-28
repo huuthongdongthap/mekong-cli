@@ -74,9 +74,11 @@ class CRMService:
                     contact_id=record["contact_id"],
                     title=record["title"],
                     value=float(record["value"]),
-                    stage=DealStage(record["stage"])
-                    if record["stage"] in DealStage._value2member_map_
-                    else DealStage.QUALIFIED,
+                    stage=(
+                        DealStage(record["stage"])
+                        if record["stage"] in DealStage._value2member_map_
+                        else DealStage.QUALIFIED
+                    ),
                     probability=record.get("probability", 20),
                 )
                 self.deals[deal.id] = deal

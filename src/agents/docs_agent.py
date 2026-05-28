@@ -11,7 +11,6 @@ from typing import List
 
 from ..core.agent_base import AgentBase, Result, Task
 
-
 _DOC_SPECS = [
     ("codebase-summary", "High-level overview of the project structure"),
     ("code-standards", "Coding standards and conventions used"),

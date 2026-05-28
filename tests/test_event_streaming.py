@@ -139,6 +139,7 @@ class TestGetStreamingBus:
 
     def test_get_streaming_bus_creates_streaming_instance(self):
         import src.core.event_bus as mod
+
         mod._default_bus = None  # Reset singleton
         bus = get_streaming_bus()
         assert isinstance(bus, StreamingEventBus)

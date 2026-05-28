@@ -83,9 +83,7 @@ class PayPalProductionSetup:
             value = os.environ.get(var)
             if value:
                 if var == "PAYPAL_MODE":
-                    status = (
-                        "✅" if value == "live" else "⚠️ (currently: {})".format(value)
-                    )
+                    status = "✅" if value == "live" else "⚠️ (currently: {})".format(value)
                 else:
                     status = "✅"
                 print(f"  {status} {var}")
@@ -150,9 +148,7 @@ class PayPalProductionSetup:
 
         base_url = self.PRODUCTION_HOST if self.mode == "live" else self.SANDBOX_HOST
 
-        auth = base64.b64encode(
-            f"{self.client_id}:{self.client_secret}".encode()
-        ).decode()
+        auth = base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
 
         try:
             response = requests.post(
@@ -244,9 +240,7 @@ class PayPalProductionSetup:
 
         # 3. Check endpoint
         print("\n3️⃣ API Endpoint:")
-        expected_url = (
-            self.PRODUCTION_HOST if self.mode == "live" else self.SANDBOX_HOST
-        )
+        expected_url = self.PRODUCTION_HOST if self.mode == "live" else self.SANDBOX_HOST
         print(f"   🌐 Using: {expected_url}")
 
         # 4. Check webhook

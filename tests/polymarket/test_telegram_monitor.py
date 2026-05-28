@@ -23,10 +23,13 @@ class TestTelegramConfig:
             assert config.enabled is False
 
     def test_from_env_enabled(self) -> None:
-        with patch.dict("os.environ", {
-            "TELEGRAM_BOT_TOKEN": "test-token",
-            "TELEGRAM_CHAT_ID": "12345",
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_BOT_TOKEN": "test-token",
+                "TELEGRAM_CHAT_ID": "12345",
+            },
+        ):
             config = TelegramConfig.from_env()
             assert config.enabled is True
 
@@ -72,8 +75,12 @@ class TestMessageFormatting:
         monitor = TelegramMonitor(config)
         with patch.object(monitor, "send_message", return_value=True) as mock_send:
             monitor.alert_daily_summary(
-                date="2024-01-15", trades=10, pnl=25.50,
-                win_rate=0.60, brier=0.18, capital=225.50,
+                date="2024-01-15",
+                trades=10,
+                pnl=25.50,
+                win_rate=0.60,
+                brier=0.18,
+                capital=225.50,
             )
             msg = mock_send.call_args[0][0]
             assert "2024-01-15" in msg
@@ -94,8 +101,11 @@ class TestMessageFormatting:
         monitor = TelegramMonitor(config)
         with patch.object(monitor, "send_message", return_value=True) as mock_send:
             monitor.send_status(
-                capital=500.0, pnl=25.0, open_positions=3,
-                tier_level=2, circuit_breaker="closed",
+                capital=500.0,
+                pnl=25.0,
+                open_positions=3,
+                tier_level=2,
+                circuit_breaker="closed",
             )
             msg = mock_send.call_args[0][0]
             assert "500.00" in msg

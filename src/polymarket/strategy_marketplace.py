@@ -27,6 +27,7 @@ PLATFORM_REVENUE_SHARE = 0.30
 @dataclass
 class StrategyListing:
     """A strategy listed on the marketplace."""
+
     listing_id: str
     strategy_id: str
     creator_id: str
@@ -54,6 +55,7 @@ class StrategyListing:
 @dataclass
 class BacktestResult:
     """Result of backtesting a strategy."""
+
     strategy_id: str
     period_days: int
     total_trades: int
@@ -77,6 +79,7 @@ class BacktestResult:
 @dataclass
 class StrategyReview:
     """A user review of a marketplace strategy."""
+
     review_id: str
     listing_id: str
     reviewer_id: str
@@ -169,8 +172,16 @@ class StrategyMarketplace:
                    (listing_id, strategy_id, creator_id, name, description,
                     category, price_monthly, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (listing_id, strategy_id, creator_id, name,
-                 description, category, price_monthly, now),
+                (
+                    listing_id,
+                    strategy_id,
+                    creator_id,
+                    name,
+                    description,
+                    category,
+                    price_monthly,
+                    now,
+                ),
             )
         return listing
 
@@ -240,9 +251,17 @@ class StrategyMarketplace:
                    (strategy_id, period_days, total_trades, win_rate,
                     total_pnl_pct, sharpe_ratio, max_drawdown, brier_score, passed)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (result.strategy_id, result.period_days, result.total_trades,
-                 result.win_rate, result.total_pnl_pct, result.sharpe_ratio,
-                 result.max_drawdown, result.brier_score, 1 if result.passed else 0),
+                (
+                    result.strategy_id,
+                    result.period_days,
+                    result.total_trades,
+                    result.win_rate,
+                    result.total_pnl_pct,
+                    result.sharpe_ratio,
+                    result.max_drawdown,
+                    result.brier_score,
+                    1 if result.passed else 0,
+                ),
             )
 
     def get_backtests(self, strategy_id: str) -> list[BacktestResult]:

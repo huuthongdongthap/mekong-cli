@@ -16,6 +16,7 @@ from src.db.repository import get_repository, LicenseRepository
 @dataclass
 class UsageEvent:
     """Represents a usage event."""
+
     key_id: str
     event_type: str  # 'command' or 'feature'
     event_data: Dict[str, Any]
@@ -28,8 +29,10 @@ class UsageEvent:
         """Validate and set defaults."""
         if self.timestamp is None:
             self.timestamp = datetime.now(timezone.utc)
-        if self.event_type not in ('command', 'feature'):
-            raise ValueError(f"Invalid event_type: {self.event_type}. Must be 'command' or 'feature'")
+        if self.event_type not in ("command", "feature"):
+            raise ValueError(
+                f"Invalid event_type: {self.event_type}. Must be 'command' or 'feature'"
+            )
 
 
 class UsageTracker:
@@ -155,9 +158,7 @@ class UsageTracker:
         event_metadata["source"] = "command"
 
         # Generate idempotency key
-        idempotency_key = self._generate_idempotency_key(
-            key_id, "command", event_data, timestamp
-        )
+        idempotency_key = self._generate_idempotency_key(key_id, "command", event_data, timestamp)
 
         # Check for duplicate
         is_duplicate = await self._check_duplicate(idempotency_key)
@@ -235,9 +236,7 @@ class UsageTracker:
         event_metadata["source"] = "feature"
 
         # Generate idempotency key
-        idempotency_key = self._generate_idempotency_key(
-            key_id, "feature", event_data, timestamp
-        )
+        idempotency_key = self._generate_idempotency_key(key_id, "feature", event_data, timestamp)
 
         # Check for duplicate
         is_duplicate = await self._check_duplicate(idempotency_key)

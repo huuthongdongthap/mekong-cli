@@ -75,7 +75,10 @@ class TestExecuteShellStep:
         executor = RecipeExecutor(recipe)
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = subprocess.CompletedProcess(
-                args=["echo", "hello"], returncode=0, stdout="hello\n", stderr="",
+                args=["echo", "hello"],
+                returncode=0,
+                stdout="hello\n",
+                stderr="",
             )
             result = executor._execute_shell_step(step)
             assert result.exit_code == 0
@@ -108,9 +111,12 @@ class TestExecuteShellStep:
     def test_retry_on_failure(self):
         """Command retries on failure up to retry limit."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="cmd", params={"retry": 2, "retry_delay": 0})
+        step = RecipeStep(
+            order=1, title="Test", description="cmd", params={"retry": 2, "retry_delay": 0}
+        )
         executor = RecipeExecutor(recipe)
         call_count = 0
+
         def side_effect(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -120,6 +126,7 @@ class TestExecuteShellStep:
                 exc.stderr = ""
                 raise exc
             return subprocess.CompletedProcess(args=["cmd"], returncode=0, stdout="ok", stderr="")
+
         with patch("subprocess.run", side_effect=side_effect):
             result = executor._execute_shell_step(step)
         assert result.exit_code == 0
@@ -166,7 +173,12 @@ class TestExecuteApiStep:
     def test_api_get_success(self):
         """Successful GET request returns response."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="Fetch", params={"type": "api", "url": "https://api.example.com/1"})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="Fetch",
+            params={"type": "api", "url": "https://api.example.com/1"},
+        )
         executor = RecipeExecutor(recipe)
         mock_response = Mock()
         mock_response.ok = True
@@ -191,7 +203,12 @@ class TestExecuteApiStep:
     def test_api_http_error(self):
         """HTTP error response returns error exit_code."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="Fetch", params={"type": "api", "url": "https://api.example.com/1"})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="Fetch",
+            params={"type": "api", "url": "https://api.example.com/1"},
+        )
         executor = RecipeExecutor(recipe)
         mock_response = Mock()
         mock_response.ok = False
@@ -216,7 +233,9 @@ class TestRunFullRecipe:
         recipe = Recipe(name="success-recipe", description="Success test", steps=steps)
         executor = RecipeExecutor(recipe)
         with patch("subprocess.run") as mock_run:
-            mock_run.return_value = subprocess.CompletedProcess(args=["echo"], returncode=0, stdout="out", stderr="")
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=["echo"], returncode=0, stdout="out", stderr=""
+            )
             result = executor.run()
             assert result is True
             assert mock_run.call_count >= 2  # May retry
@@ -249,11 +268,19 @@ class TestExecuteToolStep:
     def test_tool_success(self):
         """Successful tool execution returns result."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="npm:install",
-                          params={"type": "tool", "tool_name": "npm:install", "tool_args": {}})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="npm:install",
+            params={"type": "tool", "tool_name": "npm:install", "tool_args": {}},
+        )
         executor = RecipeExecutor(recipe)
         mock_registry = Mock()
-        mock_registry.execute.return_value = {"output": "installed", "success": True, "duration_ms": 100}
+        mock_registry.execute.return_value = {
+            "output": "installed",
+            "success": True,
+            "duration_ms": 100,
+        }
         with patch("src.core.tool_registry.ToolRegistry", return_value=mock_registry):
             result = executor._execute_tool_step(step)
             assert result.exit_code == 0
@@ -263,11 +290,20 @@ class TestExecuteToolStep:
     def test_tool_failure(self):
         """Failed tool execution returns error."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="bad:tool",
-                          params={"type": "tool", "tool_name": "bad:tool", "tool_args": {}})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="bad:tool",
+            params={"type": "tool", "tool_name": "bad:tool", "tool_args": {}},
+        )
         executor = RecipeExecutor(recipe)
         mock_registry = Mock()
-        mock_registry.execute.return_value = {"output": "", "success": False, "error": "not found", "duration_ms": 0}
+        mock_registry.execute.return_value = {
+            "output": "",
+            "success": False,
+            "error": "not found",
+            "duration_ms": 0,
+        }
         with patch("src.core.tool_registry.ToolRegistry", return_value=mock_registry):
             result = executor._execute_tool_step(step)
             assert result.exit_code == 1
@@ -275,8 +311,12 @@ class TestExecuteToolStep:
     def test_tool_import_error(self):
         """Missing ToolRegistry should return error gracefully."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="tool",
-                          params={"type": "tool", "tool_name": "test", "tool_args": {}})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="tool",
+            params={"type": "tool", "tool_name": "test", "tool_args": {}},
+        )
         executor = RecipeExecutor(recipe)
         with patch("src.core.tool_registry.ToolRegistry", side_effect=ImportError("no module")):
             result = executor._execute_tool_step(step)
@@ -290,8 +330,12 @@ class TestExecuteBrowseStep:
     def test_browse_import_error(self):
         """Missing BrowserAgent should return error gracefully."""
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="https://example.com",
-                          params={"type": "browse", "url": "https://example.com", "action": "check"})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="https://example.com",
+            params={"type": "browse", "url": "https://example.com", "action": "check"},
+        )
         executor = RecipeExecutor(recipe)
         with patch.dict("sys.modules", {"src.core.browser_agent": None}):
             result = executor._execute_browse_step(step)
@@ -304,9 +348,14 @@ class TestApiStepEdgeCases:
     def test_api_request_exception(self):
         """Request exception should return error."""
         import requests
+
         recipe = Recipe(name="test", description="Test")
-        step = RecipeStep(order=1, title="Test", description="Fetch",
-                          params={"type": "api", "url": "https://api.example.com/fail"})
+        step = RecipeStep(
+            order=1,
+            title="Test",
+            description="Fetch",
+            params={"type": "api", "url": "https://api.example.com/fail"},
+        )
         executor = RecipeExecutor(recipe)
         with patch("requests.request", side_effect=requests.exceptions.ConnectionError("timeout")):
             result = executor._execute_api_step(step)

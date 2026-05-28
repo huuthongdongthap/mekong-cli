@@ -87,19 +87,25 @@ class TestCheckThresholds(unittest.TestCase):
 
     def test_within_memory_threshold(self):
         self.bench.record(step=1, duration=100.0, memory=512.0)
-        result = self.bench.check_thresholds(1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0))
+        result = self.bench.check_thresholds(
+            1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0)
+        )
         self.assertTrue(result.thresholds_met)
 
     def test_exceeds_memory_threshold(self):
         self.bench.record(step=1, duration=100.0, memory=2048.0)
-        result = self.bench.check_thresholds(1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0))
+        result = self.bench.check_thresholds(
+            1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0)
+        )
         self.assertFalse(result.thresholds_met)
         self.assertEqual(len(result.violations), 1)
         self.assertIn("2048.0KB", result.violations[0])
 
     def test_both_violations(self):
         self.bench.record(step=1, duration=1000.0, memory=2048.0)
-        result = self.bench.check_thresholds(1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0))
+        result = self.bench.check_thresholds(
+            1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0)
+        )
         self.assertFalse(result.thresholds_met)
         self.assertEqual(len(result.violations), 2)
 
@@ -109,12 +115,16 @@ class TestCheckThresholds(unittest.TestCase):
 
     def test_memory_threshold_none_skips_memory_check(self):
         self.bench.record(step=1, duration=100.0, memory=9999.0)
-        result = self.bench.check_thresholds(1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=None))
+        result = self.bench.check_thresholds(
+            1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=None)
+        )
         self.assertTrue(result.thresholds_met)
 
     def test_no_memory_recorded_skips_memory_check(self):
         self.bench.record(step=1, duration=100.0, memory=None)
-        result = self.bench.check_thresholds(1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0))
+        result = self.bench.check_thresholds(
+            1, PerfThreshold(max_duration_ms=500.0, max_memory_kb=1024.0)
+        )
         self.assertTrue(result.thresholds_met)
 
 

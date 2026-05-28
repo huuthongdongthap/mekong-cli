@@ -259,7 +259,7 @@ def get_env_template() -> str:
         "# Stripe (for billing)",
         "STRIPE_SECRET_KEY=",
         "STRIPE_WEBHOOK_SECRET=",
-        "STRIPE_PRICE_IDS={\"price_enterprise\": \"owner\", \"price_pro\": \"admin\", \"price_trial\": \"member\", \"price_free\": \"viewer\"}",
+        'STRIPE_PRICE_IDS={"price_enterprise": "owner", "price_pro": "admin", "price_trial": "member", "price_free": "viewer"}',
         "",
     ]
     return "\n".join(lines)

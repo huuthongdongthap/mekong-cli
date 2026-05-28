@@ -38,43 +38,66 @@ class _DetectorRule:
 def _build_rules() -> list[_DetectorRule]:
     """Build the 17+ detector rules."""
     return [
-        _DetectorRule("python", ["pyproject.toml", "setup.py", "requirements.txt"],
-                      [("*.py", "import ")], "python.md"),
-        _DetectorRule("fastapi", ["requirements.txt"],
-                      [("*.py", "from fastapi"), ("pyproject.toml", "fastapi")], "fastapi.md"),
-        _DetectorRule("flask", ["requirements.txt"],
-                      [("*.py", "from flask"), ("pyproject.toml", "flask")]),
-        _DetectorRule("nextjs", ["next.config.js", "next.config.mjs", "next.config.ts"],
-                      [("package.json", '"next"')]),
-        _DetectorRule("react", [],
-                      [("package.json", '"react"'), ("*.tsx", "import React")]),
-        _DetectorRule("typescript", ["tsconfig.json"],
-                      [("package.json", '"typescript"')]),
-        _DetectorRule("tailwind", ["tailwind.config.js", "tailwind.config.ts"],
-                      [("package.json", '"tailwindcss"')]),
-        _DetectorRule("docker", ["Dockerfile", "docker-compose.yml", "docker-compose.yaml"],
-                      [], "docker.md"),
-        _DetectorRule("cloudflare", ["wrangler.toml", "wrangler.jsonc"],
-                      [("package.json", '"wrangler"')], "cloudflare.md"),
-        _DetectorRule("postgresql", [],
-                      [("*.py", "psycopg"), ("*.py", "asyncpg"),
-                       ("docker-compose.yml", "postgres")]),
-        _DetectorRule("sqlite", [],
-                      [("*.py", "sqlite3"), ("*.py", "aiosqlite")]),
-        _DetectorRule("supabase", [],
-                      [("package.json", '"@supabase"'), ("*.py", "supabase")]),
-        _DetectorRule("terraform", ["main.tf", "terraform.tfvars"],
-                      [("*.tf", "resource ")]),
-        _DetectorRule("kubernetes", ["k8s/", "kubernetes/"],
-                      [("*.yaml", "apiVersion:"), ("*.yml", "kind: Deployment")]),
-        _DetectorRule("github_actions", [".github/workflows/"],
-                      [(".github/workflows/*.yml", "on:")]),
-        _DetectorRule("pytest", ["conftest.py", "pytest.ini"],
-                      [("pyproject.toml", "[tool.pytest")], "testing.md"),
-        _DetectorRule("poetry", ["poetry.lock"],
-                      [("pyproject.toml", "[tool.poetry")]),
-        _DetectorRule("polar", [],
-                      [("*.py", "polar"), ("package.json", '"polar"')]),
+        _DetectorRule(
+            "python",
+            ["pyproject.toml", "setup.py", "requirements.txt"],
+            [("*.py", "import ")],
+            "python.md",
+        ),
+        _DetectorRule(
+            "fastapi",
+            ["requirements.txt"],
+            [("*.py", "from fastapi"), ("pyproject.toml", "fastapi")],
+            "fastapi.md",
+        ),
+        _DetectorRule(
+            "flask", ["requirements.txt"], [("*.py", "from flask"), ("pyproject.toml", "flask")]
+        ),
+        _DetectorRule(
+            "nextjs",
+            ["next.config.js", "next.config.mjs", "next.config.ts"],
+            [("package.json", '"next"')],
+        ),
+        _DetectorRule("react", [], [("package.json", '"react"'), ("*.tsx", "import React")]),
+        _DetectorRule("typescript", ["tsconfig.json"], [("package.json", '"typescript"')]),
+        _DetectorRule(
+            "tailwind",
+            ["tailwind.config.js", "tailwind.config.ts"],
+            [("package.json", '"tailwindcss"')],
+        ),
+        _DetectorRule(
+            "docker", ["Dockerfile", "docker-compose.yml", "docker-compose.yaml"], [], "docker.md"
+        ),
+        _DetectorRule(
+            "cloudflare",
+            ["wrangler.toml", "wrangler.jsonc"],
+            [("package.json", '"wrangler"')],
+            "cloudflare.md",
+        ),
+        _DetectorRule(
+            "postgresql",
+            [],
+            [("*.py", "psycopg"), ("*.py", "asyncpg"), ("docker-compose.yml", "postgres")],
+        ),
+        _DetectorRule("sqlite", [], [("*.py", "sqlite3"), ("*.py", "aiosqlite")]),
+        _DetectorRule("supabase", [], [("package.json", '"@supabase"'), ("*.py", "supabase")]),
+        _DetectorRule("terraform", ["main.tf", "terraform.tfvars"], [("*.tf", "resource ")]),
+        _DetectorRule(
+            "kubernetes",
+            ["k8s/", "kubernetes/"],
+            [("*.yaml", "apiVersion:"), ("*.yml", "kind: Deployment")],
+        ),
+        _DetectorRule(
+            "github_actions", [".github/workflows/"], [(".github/workflows/*.yml", "on:")]
+        ),
+        _DetectorRule(
+            "pytest",
+            ["conftest.py", "pytest.ini"],
+            [("pyproject.toml", "[tool.pytest")],
+            "testing.md",
+        ),
+        _DetectorRule("poetry", ["poetry.lock"], [("pyproject.toml", "[tool.poetry")]),
+        _DetectorRule("polar", [], [("*.py", "polar"), ("package.json", '"polar"')]),
     ]
 
 

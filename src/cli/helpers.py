@@ -4,11 +4,17 @@ CLI Helpers - Output formatting and display utilities
 Centralized helpers for Rich console output, tables, and panels.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Optional, List, Dict, Tuple
+from dataclasses import dataclass
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from typing import Any, Optional, List, Dict, Tuple
-from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    from src.core.orchestrator.models import StepResult, OrchestrationResult
 
 
 console = Console()
@@ -17,15 +23,13 @@ console = Console()
 @dataclass
 class HumanSummary:
     """Human-readable summary in EN/VI."""
+
     en: str
     vi: str
 
 
 def create_status_panel(
-    title: str,
-    content: str,
-    border_style: str = "cyan",
-    **kwargs: Any
+    title: str, content: str, border_style: str = "cyan", **kwargs: Any
 ) -> Panel:
     """Create a status panel with consistent styling."""
     return Panel(content, title=title, border_style=border_style, **kwargs)
@@ -66,17 +70,15 @@ def create_step_table(title: str = "Steps", show_lines: bool = False) -> Table:
     return table
 
 
-def format_step_row(order: int, title: str, description: str, max_desc_len: int = 80) -> Tuple[str, str, str]:
+def format_step_row(
+    order: int, title: str, description: str, max_desc_len: int = 80
+) -> Tuple[str, str, str]:
     """Format a step row for table display."""
     return (str(order), title, description[:max_desc_len])
 
 
 def format_agent_step_row(
-    order: int,
-    title: str,
-    agent: Optional[str],
-    description: str,
-    max_desc_len: int = 80
+    order: int, title: str, agent: Optional[str], description: str, max_desc_len: int = 80
 ) -> tuple[str, str, str]:
     """Format a step row with optional agent hint."""
     agent_hint = f" [{agent}]" if agent else ""
@@ -85,7 +87,9 @@ def format_agent_step_row(
 
 def print_success(message: str, title: str = "Success") -> None:
     """Print a success message."""
-    console.print(create_status_panel(title, f"[bold green]{message}[/bold green]", border_style="green"))
+    console.print(
+        create_status_panel(title, f"[bold green]{message}[/bold green]", border_style="green")
+    )
 
 
 def print_error(message: str, title: str = "Error", errors: Optional[List[str]] = None) -> None:
@@ -107,10 +111,11 @@ def print_warning(message: str, title: str = "Warning", items: Optional[List[str
 def print_json_output(data: Dict[str, Any]) -> None:
     """Print JSON output."""
     import json
+
     console.print(json.dumps(data, indent=2))
 
 
-def build_execution_result_table(step_results: List[Any]) -> Table:
+def build_execution_result_table(step_results: "List[StepResult]") -> Table:
     """Build a detailed execution result table."""
     table = create_step_table("Step Details")
     table.add_column("Status")
@@ -127,20 +132,19 @@ def build_execution_result_table(step_results: List[Any]) -> Table:
     return table
 
 
-def format_human_summary(result: Any) -> HumanSummary:
+def format_human_summary(result: "OrchestrationResult") -> HumanSummary:
     """Build human-readable summary from orchestration result."""
     if result.status.value == "success":
         return HumanSummary(
             en="Mission accomplished! All steps completed successfully.",
-            vi="Mission accomplished! All steps completed successfully."
+            vi="Mission accomplished! All steps completed successfully.",
         )
     elif result.status.value == "partial":
         return HumanSummary(
             en=f"Partial completion: {result.completed_steps}/{result.total_steps} steps done.",
-            vi=f"Partial completion: {result.completed_steps}/{result.total_steps} steps done."
+            vi=f"Partial completion: {result.completed_steps}/{result.total_steps} steps done.",
         )
     else:
         return HumanSummary(
-            en="Mission failed. Check errors above.",
-            vi="Mission failed. Check errors above."
+            en="Mission failed. Check errors above.", vi="Mission failed. Check errors above."
         )

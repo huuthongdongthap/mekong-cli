@@ -35,6 +35,7 @@ def require_billing(
     if not service.check_quota(tenant.tenant_id):
         balance = service.get_balance(tenant.tenant_id)
         import time
+
         now = int(time.time())
         midnight = now - (now % 86400) + 86400
         raise HTTPException(
@@ -73,6 +74,7 @@ def build_mcu_headers(tenant_id: str, mcu_cost: int) -> dict[str, str]:
     balance = service.get_balance(tenant_id)
 
     import time
+
     # Reset time: midnight UTC
     now = int(time.time())
     midnight = now - (now % 86400) + 86400
@@ -95,7 +97,9 @@ def build_mcu_headers(tenant_id: str, mcu_cost: int) -> dict[str, str]:
     return headers
 
 
-def record_task_usage(tenant_id: str, task_id: str, mcu_cost: int = DEFAULT_MCU_COST) -> dict[str, str]:
+def record_task_usage(
+    tenant_id: str, task_id: str, mcu_cost: int = DEFAULT_MCU_COST
+) -> dict[str, str]:
     """Record MCU usage for a completed task and return headers.
 
     Args:

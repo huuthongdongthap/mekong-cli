@@ -36,6 +36,7 @@ class GroupStatus(Enum):
 @dataclass
 class CommandResult:
     """Result of a single command execution."""
+
     command: str
     chapter: int
     success: bool
@@ -48,6 +49,7 @@ class CommandResult:
 @dataclass
 class CycleLesson:
     """What we learned from one diagonal cycle."""
+
     cycle: int
     mrr: float
     customers: int
@@ -105,6 +107,7 @@ LLM_ROUTING: dict[EscalationLevel, str] = {
 @dataclass
 class BattleGroup:
     """A group of commands that execute in parallel."""
+
     name: str
     commands: list[str]
     depends_on: list[str] = field(default_factory=list)
@@ -114,9 +117,7 @@ class BattleGroup:
 
     def all_deps_completed(self, groups: dict[str, "BattleGroup"]) -> bool:
         return all(
-            groups[dep].status == GroupStatus.COMPLETED
-            for dep in self.depends_on
-            if dep in groups
+            groups[dep].status == GroupStatus.COMPLETED for dep in self.depends_on if dep in groups
         )
 
 
@@ -200,9 +201,7 @@ class TopologyEngine:
             self.company_path.parent.mkdir(parents=True, exist_ok=True)
             data = {}
 
-        self.state["current_groups"] = {
-            name: g.status.value for name, g in self.groups.items()
-        }
+        self.state["current_groups"] = {name: g.status.value for name, g in self.groups.items()}
         data["binh_phap_state"] = self.state
         self.company_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 
@@ -295,17 +294,19 @@ class TopologyEngine:
     def record_cycle_lesson(self, lesson: CycleLesson) -> None:
         """Record what we learned from this cycle."""
         history = self.state.get("cycle_history", [])
-        history.append({
-            "cycle": lesson.cycle,
-            "result": {
-                "mrr": lesson.mrr,
-                "customers": lesson.customers,
-                "channels_tested": lesson.channels_tested,
-            },
-            "lessons": lesson.lessons,
-            "adaptations": lesson.adaptations,
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        })
+        history.append(
+            {
+                "cycle": lesson.cycle,
+                "result": {
+                    "mrr": lesson.mrr,
+                    "customers": lesson.customers,
+                    "channels_tested": lesson.channels_tested,
+                },
+                "lessons": lesson.lessons,
+                "adaptations": lesson.adaptations,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            }
+        )
         self.state["cycle_history"] = history
         self.save_state()
 

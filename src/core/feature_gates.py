@@ -56,9 +56,7 @@ class FeatureGateError(Exception):
     def __init__(self, feature: str, tier: str):
         self.feature = feature
         self.tier = tier
-        super().__init__(
-            f"Feature '{feature}' requires higher tier (current: {tier})"
-        )
+        super().__init__(f"Feature '{feature}' requires higher tier (current: {tier})")
 
 
 def get_enabled_features() -> List[str]:
@@ -131,13 +129,9 @@ def require_feature(feature: str) -> Callable:
                 tenant = auth_client.get_tenant_context()
                 tier = tenant.tier if tenant else "free"
 
-                console.print(
-                    f"[bold red]✗ Feature Required: {feature}[/bold red]"
-                )
+                console.print(f"[bold red]✗ Feature Required: {feature}[/bold red]")
                 console.print(f"[dim]Current tier: {tier}[/dim]")
-                console.print(
-                    "[yellow]Upgrade at: https://raas.agencyos.network[/yellow]"
-                )
+                console.print("[yellow]Upgrade at: https://api.cashclaw.cc[/yellow]")
                 raise typer.Exit(code=1)
 
             return func(*args, **kwargs)
@@ -178,11 +172,7 @@ def show_features_status() -> None:
     tier = session.tier if session.authenticated else "free"
     tenant_id = session.tenant_id if session.authenticated else "anonymous"
 
-    console.print(
-        Panel(
-            f"[dim]Tier: {tier.upper()} | Tenant: {tenant_id}[/dim]"
-        )
-    )
+    console.print(Panel(f"[dim]Tier: {tier.upper()} | Tenant: {tenant_id}[/dim]"))
 
 
 __all__ = [

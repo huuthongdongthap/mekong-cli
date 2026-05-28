@@ -1,4 +1,5 @@
 """Backward-compat shim — logic moved to src/raas/billing_engine.py"""
+
 from src.raas.billing_engine import (  # noqa: F401
     RateCard,
     LineItem,

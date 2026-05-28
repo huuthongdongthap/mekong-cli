@@ -33,12 +33,12 @@ import requests
 from src.core.raas_auth import RaaSAuthClient, get_auth_client
 from src.core.raas_audit_logger import get_audit_logger
 
-
 logger = logging.getLogger(__name__)
 
 
 class SubagentType(str, Enum):
     """Supported subagent types for delegation."""
+
     COOK = "cook"
     PLANNER = "planner"
     DEBUGGER = "debugger"
@@ -57,6 +57,7 @@ class SubagentType(str, Enum):
 
 class TaskStatus(str, Enum):
     """Task execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -67,6 +68,7 @@ class TaskStatus(str, Enum):
 @dataclass
 class TaskRequest:
     """Request payload for subagent delegation."""
+
     subagent_type: SubagentType
     goal: str
     complexity: str = "moderate"
@@ -90,6 +92,7 @@ class TaskRequest:
 @dataclass
 class TaskResult:
     """Result from subagent execution."""
+
     task_id: str
     status: TaskStatus
     output: Optional[str] = None
@@ -121,7 +124,8 @@ class TaskResult:
 @dataclass
 class GatewayConfig:
     """RaaS Gateway configuration."""
-    base_url: str = "https://raas.agencyos.network"
+
+    base_url: str = "https://api.cashclaw.cc"
     api_version: str = "v2"
     timeout_seconds: int = 30
     retry_attempts: int = 3
@@ -162,10 +166,12 @@ class RaasTaskClient:
         self._session = requests.Session()
 
         # Setup session with default headers
-        self._session.headers.update({
-            "Content-Type": "application/json",
-            "User-Agent": "mekong-cli/0.2.0",
-        })
+        self._session.headers.update(
+            {
+                "Content-Type": "application/json",
+                "User-Agent": "mekong-cli/0.2.0",
+            }
+        )
 
     def _get_base_url(self) -> str:
         """Get gateway base URL with API version."""
@@ -375,6 +381,7 @@ class RaasTaskClient:
         """
         # For now, wrap sync call in async
         import asyncio
+
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             None,
@@ -458,8 +465,9 @@ class RaasTaskClient:
             return response.json().get("subagents", [])
         except requests.RequestException:
             # Return default list
-            return [{"type": t.value, "name": t.value.replace("-", " ").title()}
-                    for t in SubagentType]
+            return [
+                {"type": t.value, "name": t.value.replace("-", " ").title()} for t in SubagentType
+            ]
 
     def get_usage_summary(self) -> Dict[str, Any]:
         """

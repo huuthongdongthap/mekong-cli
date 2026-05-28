@@ -201,9 +201,7 @@ class NVPClient:
             # Make POST request
             headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-            response = requests.post(
-                self.endpoint, data=nvp_request, headers=headers, timeout=60
-            )
+            response = requests.post(self.endpoint, data=nvp_request, headers=headers, timeout=60)
 
             # Decode NVP response
             response_data = NVPEncoder.decode(response.text)
@@ -227,9 +225,7 @@ class NVPClient:
         if self.api_type == "nvp":
             has_creds = bool(self.nvp_user and self.nvp_pwd and self.nvp_signature)
         else:
-            has_creds = bool(
-                self.payflow_vendor and self.payflow_user and self.payflow_pwd
-            )
+            has_creds = bool(self.payflow_vendor and self.payflow_user and self.payflow_pwd)
 
         return {
             "api_type": self.api_type,

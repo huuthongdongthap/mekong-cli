@@ -119,18 +119,18 @@ class ExecutionHistory:
         return last_completed if last_completed > 0 else None
 
     def get_step_events(
-        self, workflow_id: str, step_order: int,
+        self,
+        workflow_id: str,
+        step_order: int,
     ) -> list[ExecutionEvent]:
         """Get all events for a specific step."""
-        return [
-            e for e in self.get_history(workflow_id)
-            if e.step_order == step_order
-        ]
+        return [e for e in self.get_history(workflow_id) if e.step_order == step_order]
 
     def get_retry_count(self, workflow_id: str, step_order: int) -> int:
         """Count how many times a step has been retried."""
         return sum(
-            1 for e in self.get_step_events(workflow_id, step_order)
+            1
+            for e in self.get_step_events(workflow_id, step_order)
             if e.kind == EventKind.STEP_RETRIED
         )
 

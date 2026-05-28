@@ -39,8 +39,10 @@ class TestSelfHealing(unittest.TestCase):
         fail_result = ExecutionResult(exit_code=1, stdout="", stderr="No such file")
         ok_result = ExecutionResult(exit_code=0, stdout="success", stderr="")
 
-        with patch("src.core.executor.RecipeExecutor.execute_step") as mock_exec, \
-             patch("src.core.command_sanitizer.CommandSanitizer.is_safe_command", return_value=True):
+        with (
+            patch("src.core.executor.RecipeExecutor.execute_step") as mock_exec,
+            patch("src.core.command_sanitizer.CommandSanitizer.is_safe_command", return_value=True),
+        ):
             mock_exec.side_effect = [fail_result, ok_result]
             result = orch.run_from_recipe(recipe)
 
@@ -82,9 +84,7 @@ class TestSelfHealing(unittest.TestCase):
         sr = StepResult(step=step, execution=exec_result, verification=report)
         self.assertFalse(sr.self_healed)
 
-        sr2 = StepResult(
-            step=step, execution=exec_result, verification=report, self_healed=True
-        )
+        sr2 = StepResult(step=step, execution=exec_result, verification=report, self_healed=True)
         self.assertTrue(sr2.self_healed)
 
 

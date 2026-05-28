@@ -24,7 +24,6 @@ from fastapi.testclient import TestClient
 from src.raas.billing import PolarWebhookHandler
 from src.raas.credits import CreditStore
 
-
 # Test webhook secret (in production, use os.getenv("POLAR_WEBHOOK_SECRET"))
 TEST_WEBHOOK_SECRET = "whsec_test_secret_key_12345678901234567890"
 
@@ -72,11 +71,7 @@ def test_app(credit_store: CreditStore) -> TestClient:
 
 def generate_polar_signature(payload: bytes, secret: str) -> str:
     """Generate valid Polar.sh HMAC-SHA256 signature."""
-    signature = hmac.new(
-        secret.encode(),
-        payload,
-        hashlib.sha256
-    ).hexdigest()
+    signature = hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
     return f"sha256={signature}"
 
 
@@ -96,9 +91,7 @@ class TestSignatureVerification:
         payload = b'{"test": "data"}'
         invalid_signature = "sha256=invalid_signature"
 
-        result = polar_handler.verify_signature(
-            payload, invalid_signature, TEST_WEBHOOK_SECRET
-        )
+        result = polar_handler.verify_signature(payload, invalid_signature, TEST_WEBHOOK_SECRET)
         assert result is False
 
     def test_wrong_secret(self, polar_handler: PolarWebhookHandler):
@@ -111,7 +104,7 @@ class TestSignatureVerification:
 
     def test_empty_payload(self, polar_handler: PolarWebhookHandler):
         """Test signature with empty payload."""
-        payload = b''
+        payload = b""
         signature = generate_polar_signature(payload, TEST_WEBHOOK_SECRET)
 
         result = polar_handler.verify_signature(payload, signature, TEST_WEBHOOK_SECRET)
@@ -318,9 +311,7 @@ class TestWebhookEndpoint:
         assert data["status"] == "ok"
         assert data["new_balance"] == 10
 
-    def test_webhook_with_invalid_signature(
-        self, test_app: TestClient, webhook_secret_env
-    ):
+    def test_webhook_with_invalid_signature(self, test_app: TestClient, webhook_secret_env):
         """Test webhook endpoint rejects invalid signature."""
         event = {"id": "evt_bad_sig", "type": "order.created", "data": {}}
         payload = json.dumps(event).encode()
@@ -335,9 +326,7 @@ class TestWebhookEndpoint:
         assert response.status_code == 401
         assert "Invalid webhook signature" in response.json()["detail"]
 
-    def test_webhook_without_signature(
-        self, test_app: TestClient, webhook_secret_env
-    ):
+    def test_webhook_without_signature(self, test_app: TestClient, webhook_secret_env):
         """Test webhook endpoint when signature header is missing."""
         event = {"id": "evt_no_sig", "type": "order.created", "data": {}}
         payload = json.dumps(event).encode()
@@ -385,9 +374,7 @@ class TestWebhookEndpoint:
         assert response2.status_code == 200
         assert response2.json()["status"] == "duplicate"
 
-    def test_webhook_invalid_json(
-        self, test_app: TestClient, webhook_secret_env
-    ):
+    def test_webhook_invalid_json(self, test_app: TestClient, webhook_secret_env):
         """Test webhook endpoint rejects invalid JSON."""
         payload = b"not valid json"
         signature = generate_polar_signature(payload, TEST_WEBHOOK_SECRET)
@@ -430,9 +417,7 @@ class TestAuditTrail:
         assert "Polar purchase" in tx.reason
         assert tx.timestamp is not None
 
-    def test_multiple_transactions_recorded(
-        self, polar_handler: PolarWebhookHandler
-    ):
+    def test_multiple_transactions_recorded(self, polar_handler: PolarWebhookHandler):
         """Test multiple transactions are recorded in order."""
         tenant_id = "tenant_audit_002"
 

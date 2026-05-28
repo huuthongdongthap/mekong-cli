@@ -10,7 +10,9 @@ import os
 import pytest
 
 AIDER_BRIDGE_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "apps", "openclaw-worker", "lib", "aider-bridge.js")
+    os.path.join(
+        os.path.dirname(__file__), "..", "apps", "openclaw-worker", "lib", "aider-bridge.js"
+    )
 )
 
 
@@ -19,8 +21,7 @@ class TestAiderBridgeSyntax:
     def test_js_syntax_valid(self):
         """aider-bridge.js passes Node.js syntax check."""
         result = subprocess.run(
-            ["node", "--check", AIDER_BRIDGE_PATH],
-            capture_output=True, text=True, timeout=10
+            ["node", "--check", AIDER_BRIDGE_PATH], capture_output=True, text=True, timeout=10
         )
         assert result.returncode == 0, f"Syntax error: {result.stderr}"
 
@@ -31,10 +32,7 @@ const m = require('{AIDER_BRIDGE_PATH}');
 const keys = Object.keys(m);
 console.log(JSON.stringify(keys));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         exports = json.loads(result.stdout.strip())
         assert "tryAiderFix" in exports
@@ -51,10 +49,7 @@ const {{ extractAffectedFiles }} = require('{AIDER_BRIDGE_PATH}');
 const files = extractAffectedFiles('Error in src/core/memory.py line 42\\nAlso lib/utils.js:10');
 console.log(JSON.stringify(files));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         files = json.loads(result.stdout.strip())
         assert isinstance(files, list)
@@ -69,10 +64,7 @@ const {{ extractAffectedFiles }} = require('{AIDER_BRIDGE_PATH}');
 const files = extractAffectedFiles('Error in node_modules/lodash/index.js at line 5');
 console.log(JSON.stringify(files));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         files = json.loads(result.stdout.strip())
         for f in files:
@@ -85,10 +77,7 @@ const {{ extractAffectedFiles }} = require('{AIDER_BRIDGE_PATH}');
 const files = extractAffectedFiles('Error in .claude/commands/cook.md and src/core/planner.py');
 console.log(JSON.stringify(files));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         files = json.loads(result.stdout.strip())
         for f in files:
@@ -102,10 +91,7 @@ const {{ extractAffectedFiles }} = require('{AIDER_BRIDGE_PATH}');
 const files = extractAffectedFiles('{many_files}');
 console.log(JSON.stringify(files));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         files = json.loads(result.stdout.strip())
         assert len(files) <= 5
@@ -117,10 +103,7 @@ const {{ extractAffectedFiles }} = require('{AIDER_BRIDGE_PATH}');
 const files = extractAffectedFiles('generic error message with no file paths here');
 console.log(JSON.stringify(files));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         files = json.loads(result.stdout.strip())
         assert isinstance(files, list)
@@ -134,10 +117,7 @@ class TestIsAiderAvailable:
 const {{ isAiderAvailable }} = require('{AIDER_BRIDGE_PATH}');
 console.log(JSON.stringify(isAiderAvailable()));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         val = json.loads(result.stdout.strip())
         assert isinstance(val, bool)
@@ -150,10 +130,7 @@ const r1 = isAiderAvailable();
 const r2 = isAiderAvailable();
 console.log(JSON.stringify(r1 === r2));
 """
-        result = subprocess.run(
-            ["node", "-e", script],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0, f"Script error: {result.stderr}"
         consistent = json.loads(result.stdout.strip())
         assert consistent is True

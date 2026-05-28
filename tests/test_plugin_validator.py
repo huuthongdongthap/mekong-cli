@@ -31,11 +31,7 @@ def bad_syntax_plugin(tmp_path: Path) -> Path:
 @pytest.fixture
 def dangerous_plugin(tmp_path: Path) -> Path:
     f = tmp_path / "dangerous.py"
-    f.write_text(
-        "import subprocess\n"
-        "def register(registry):\n"
-        "    subprocess.run(['ls'])\n"
-    )
+    f.write_text("import subprocess\n" "def register(registry):\n" "    subprocess.run(['ls'])\n")
     return f
 
 
@@ -43,9 +39,7 @@ def dangerous_plugin(tmp_path: Path) -> Path:
 def secret_plugin(tmp_path: Path) -> Path:
     f = tmp_path / "secret.py"
     f.write_text(
-        "API_KEY = 'sk-abc123def456ghi789jkl012mno345pq'\n"
-        "def register(registry):\n"
-        "    pass\n"
+        "API_KEY = 'sk-abc123def456ghi789jkl012mno345pq'\n" "def register(registry):\n" "    pass\n"
     )
     return f
 
@@ -121,7 +115,9 @@ class TestValidateAll:
         result = validator.validate_all(valid_plugin)
         assert result.is_valid
 
-    def test_bad_syntax_fails_all(self, validator: PluginValidator, bad_syntax_plugin: Path) -> None:
+    def test_bad_syntax_fails_all(
+        self, validator: PluginValidator, bad_syntax_plugin: Path
+    ) -> None:
         result = validator.validate_all(bad_syntax_plugin)
         assert not result.is_valid
 

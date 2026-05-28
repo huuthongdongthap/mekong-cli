@@ -181,7 +181,7 @@ class WebhookDeliveryEngine:
             except requests.RequestException:
                 pass
             if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
+                time.sleep(2**attempt)
         return False
 
     def list_endpoints(self) -> list[WebhookEndpoint]:

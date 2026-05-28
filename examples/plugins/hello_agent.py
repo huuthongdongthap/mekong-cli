@@ -17,11 +17,13 @@ class HelloAgent(AgentBase):
     description = "Example plugin agent — echoes input"
 
     def plan(self, input_data: str):
-        return [Task(
-            id="hello-1",
-            title="Say hello",
-            description=input_data,
-        )]
+        return [
+            Task(
+                id="hello-1",
+                title="Say hello",
+                description=input_data,
+            )
+        ]
 
     def execute(self, task):
         return Result(

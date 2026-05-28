@@ -71,9 +71,7 @@ class TestProcessGoalForbidden(unittest.TestCase):
         engine = AutonomousEngine()
         result = engine.process_goal("drop database prod")
         self.assertIsNotNone(result.governance_decision)
-        self.assertEqual(
-            result.governance_decision.action_class, ActionClass.FORBIDDEN
-        )
+        self.assertEqual(result.governance_decision.action_class, ActionClass.FORBIDDEN)
 
 
 class TestProcessGoalHalted(unittest.TestCase):

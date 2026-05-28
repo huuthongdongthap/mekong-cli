@@ -85,11 +85,7 @@ class UsageMeter:
         limits = get_tier_limits(tier)
         max_commands = limits["commands_per_day"]
         current_count = usage["commands_count"] if usage else 0
-        remaining = (
-            max_commands - current_count
-            if max_commands >= 0
-            else "unlimited"
-        )
+        remaining = max_commands - current_count if max_commands >= 0 else "unlimited"
 
         # Get 30-day summary
         summary_30d = await self._repo.get_usage_summary(key_id, days=30)

@@ -152,18 +152,22 @@ class ReviewAgent(AgentBase):
 
         if self._llm is not None:
             # LLM-powered review would go here
-            findings.append({
-                "perspective": perspective.value,
-                "severity": "info",
-                "message": f"LLM review for {perspective.value} completed",
-            })
+            findings.append(
+                {
+                    "perspective": perspective.value,
+                    "severity": "info",
+                    "message": f"LLM review for {perspective.value} completed",
+                }
+            )
         else:
             # Static analysis fallback
-            findings.append({
-                "perspective": perspective.value,
-                "severity": "info",
-                "message": f"Static {perspective.value} review: {len(files)} files scanned",
-            })
+            findings.append(
+                {
+                    "perspective": perspective.value,
+                    "severity": "info",
+                    "message": f"Static {perspective.value} review: {len(files)} files scanned",
+                }
+            )
 
         for f_data in findings:
             self._summary.add(

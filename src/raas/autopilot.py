@@ -13,12 +13,12 @@ Architecture:
     Background: TenantDaemon picks up configs, executes on schedule,
     delivers results via webhook/email.
 """
+
 from __future__ import annotations
 
 import json
 import logging
 import sqlite3
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
@@ -60,14 +60,20 @@ DEPARTMENT_TEMPLATES = {
     "content": {
         "name": "Content",
         "default_goals": [
-            {"goal": "Write one blog post on a trending topic in our industry", "schedule": "weekly"},
+            {
+                "goal": "Write one blog post on a trending topic in our industry",
+                "schedule": "weekly",
+            },
             {"goal": "Create email newsletter draft for this week", "schedule": "weekly"},
         ],
     },
     "engineering": {
         "name": "Engineering",
         "default_goals": [
-            {"goal": "Code review — scan for security vulnerabilities and tech debt", "schedule": "weekly"},
+            {
+                "goal": "Code review — scan for security vulnerabilities and tech debt",
+                "schedule": "weekly",
+            },
             {"goal": "Generate sprint retrospective report", "schedule": "biweekly"},
         ],
     },
@@ -87,7 +93,10 @@ DEPARTMENT_TEMPLATES = {
     "security": {
         "name": "Security",
         "default_goals": [
-            {"goal": "Security scan — check API endpoints, headers, auth flow", "schedule": "weekly"},
+            {
+                "goal": "Security scan — check API endpoints, headers, auth flow",
+                "schedule": "weekly",
+            },
         ],
     },
     "ops": {
@@ -99,7 +108,10 @@ DEPARTMENT_TEMPLATES = {
     "analyst": {
         "name": "Analyst",
         "default_goals": [
-            {"goal": "Competitive analysis — what did competitors ship this week", "schedule": "weekly"},
+            {
+                "goal": "Competitive analysis — what did competitors ship this week",
+                "schedule": "weekly",
+            },
         ],
     },
     "growth": {
@@ -113,6 +125,7 @@ DEPARTMENT_TEMPLATES = {
 
 
 # ─── Models ──────────────────────────────────────────────────
+
 
 class AutopilotGoal(BaseModel):
     goal: str = Field(..., description="What the department should do")
@@ -150,6 +163,7 @@ class AutopilotRun(BaseModel):
 
 # ─── Database ────────────────────────────────────────────────
 
+
 def _init_db():
     _DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(_DB_PATH))
@@ -177,10 +191,19 @@ def _init_db():
     conn.close()
 
 
-_init_db()
+_db_initialized = False
+
+
+def _ensure_db():
+    """Lazy init — only create tables on first actual use."""
+    global _db_initialized
+    if not _db_initialized:
+        _init_db()
+        _db_initialized = True
 
 
 # ─── Endpoints ───────────────────────────────────────────────
+
 
 @router.get("/autopilot/departments")
 def list_departments():
@@ -215,8 +238,16 @@ def configure_autopilot(
             """INSERT INTO autopilot_configs (tenant_id, config, active, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?)
                ON CONFLICT(tenant_id) DO UPDATE SET config=?, active=?, updated_at=?""",
-            (tenant.tenant_id, config_json, int(config.active), now, now,
-             config_json, int(config.active), now),
+            (
+                tenant.tenant_id,
+                config_json,
+                int(config.active),
+                now,
+                now,
+                config_json,
+                int(config.active),
+                now,
+            ),
         )
         conn.commit()
     finally:
@@ -249,8 +280,11 @@ def get_autopilot(tenant: TenantContext = Depends(get_tenant_context)):
         if not row:
             return AutopilotStatus(
                 tenant_id=tenant.tenant_id,
-                active=False, departments=0, total_goals=0,
-                total_runs=0, last_run=None,
+                active=False,
+                departments=0,
+                total_goals=0,
+                total_runs=0,
+                last_run=None,
                 config={"departments": {}, "active": False},
             )
 

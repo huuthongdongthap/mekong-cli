@@ -267,9 +267,9 @@ class AntigravityAlgorithm:
         """Get algorithm usage analytics."""
         return {
             "calculations_count": self.calculations_count,
-            "last_calculation": self.last_calculation.isoformat()
-            if self.last_calculation
-            else None,
+            "last_calculation": (
+                self.last_calculation.isoformat() if self.last_calculation else None
+            ),
             "pricing_products": list(self.PRICING.keys()),
             "bant_thresholds": self.BANT_THRESHOLDS,
         }

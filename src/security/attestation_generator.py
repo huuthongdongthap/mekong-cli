@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # RaaS Gateway configuration
 RAAS_GATEWAY_CONFIG = {
-    "base_url": os.getenv("RAAS_GATEWAY_URL", "https://raas.agencyos.network"),
+    "base_url": os.getenv("RAAS_GATEWAY_URL", "https://api.cashclaw.cc"),
     "api_key_prefix": "mk_",
     "jwt_audience": "mekong-cli-security",
     "kv_namespace": "security-attestations",
@@ -74,10 +74,7 @@ class SecurityAttestationGenerator:
             if result.returncode == 0 and result.stdout:
                 findings = result.stdout.strip().split("\n")
                 # Filter out env var reads
-                findings = [
-                    f for f in findings
-                    if "os.getenv" not in f and "os.environ" not in f
-                ]
+                findings = [f for f in findings if "os.getenv" not in f and "os.environ" not in f]
         except Exception as _exc:
             logger.warning("Hardcoded-secrets scan failed: %s", _exc)
 
@@ -99,10 +96,7 @@ class SecurityAttestationGenerator:
             if result.returncode == 0 and result.stdout:
                 files = result.stdout.strip().split("\n")
                 # Filter out allowed patterns
-                exposed = [
-                    f for f in files
-                    if f and ".env.example" not in f and ".venv" not in f
-                ]
+                exposed = [f for f in files if f and ".env.example" not in f and ".venv" not in f]
         except Exception as _exc:
             logger.warning("Env-file exposure scan failed: %s", _exc)
 
@@ -176,9 +170,7 @@ class SecurityAttestationGenerator:
                 "command_injection_protection": (
                     "PASS" if security_results["sanitizer_ok"] else "FAIL"
                 ),
-                "env_file_exclusion": (
-                    "PASS" if security_results["env_ok"] else "FAIL"
-                ),
+                "env_file_exclusion": ("PASS" if security_results["env_ok"] else "FAIL"),
             },
             "compliance": {
                 "owasp_top_10": "COMPLIANT" if all_passed else "NON_COMPLIANT",

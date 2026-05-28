@@ -12,12 +12,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 try:
     from packages.core.bmad.catalog import WorkflowCatalog  # noqa: E402
-    from packages.core.bmad.loader import BMADWorkflowLoader  # noqa: E402
-    BMAD_AVAILABLE = True
 except ImportError:
     WorkflowCatalog = None  # type: ignore
+    pass  # packages not available in standalone mode
+try:
+    from packages.core.bmad.loader import BMADWorkflowLoader  # noqa: E402
+except ImportError:
     BMADWorkflowLoader = None  # type: ignore
-    BMAD_AVAILABLE = False
+    pass
 
 app = typer.Typer(name="bmad", help="BMAD workflow management")
 console = Console()
@@ -28,8 +30,8 @@ def list_workflows(
     agent_type: str = typer.Option(None, "--agent-type", help="Filter by agent type")
 ) -> None:
     """List available BMAD workflows."""
-    if not BMAD_AVAILABLE:
-        console.print("[red]BMAD not available. Install packages.core.bmad to use this command.[/red]")
+    if BMADWorkflowLoader is None:
+        console.print("[red]BMAD packages not available in standalone mode[/red]")
         raise typer.Exit(1)
     try:
         loader = BMADWorkflowLoader()
@@ -42,13 +44,12 @@ def list_workflows(
         table.add_column("Description")
 
         for workflow in workflows:
-            desc = workflow.description[:60] + "..." if len(workflow.description) > 60 else workflow.description
-            table.add_row(
-                workflow.id,
-                workflow.name,
-                workflow.agent_type,
-                desc
+            desc = (
+                workflow.description[:60] + "..."
+                if len(workflow.description) > 60
+                else workflow.description
             )
+            table.add_row(workflow.id, workflow.name, workflow.agent_type, desc)
 
         console.print(table)
     except Exception as e:
@@ -59,8 +60,8 @@ def list_workflows(
 @app.command("info")
 def workflow_info(workflow_id: str) -> None:
     """Show detailed workflow information."""
-    if not BMAD_AVAILABLE:
-        console.print("[red]BMAD not available. Install packages.core.bmad to use this command.[/red]")
+    if BMADWorkflowLoader is None:
+        console.print("[red]BMAD packages not available in standalone mode[/red]")
         raise typer.Exit(1)
     try:
         loader = BMADWorkflowLoader()
@@ -91,8 +92,8 @@ def workflow_info(workflow_id: str) -> None:
 @app.command("catalog")
 def build_catalog() -> None:
     """Build and cache workflow catalog."""
-    if not BMAD_AVAILABLE:
-        console.print("[red]BMAD not available. Install packages.core.bmad to use this command.[/red]")
+    if WorkflowCatalog is None:
+        console.print("[red]BMAD packages not available in standalone mode[/red]")
         raise typer.Exit(1)
     try:
         catalog = WorkflowCatalog()
@@ -110,8 +111,8 @@ def build_catalog() -> None:
 @app.command("search")
 def search_workflows(query: str) -> None:
     """Search workflows by name or description."""
-    if not BMAD_AVAILABLE:
-        console.print("[red]BMAD not available. Install packages.core.bmad to use this command.[/red]")
+    if BMADWorkflowLoader is None:
+        console.print("[red]BMAD packages not available in standalone mode[/red]")
         raise typer.Exit(1)
     try:
         loader = BMADWorkflowLoader()
@@ -128,13 +129,9 @@ def search_workflows(query: str) -> None:
 
 @app.command("run")
 def run_workflow(
-    workflow_id: str,
-    context: str = typer.Option(None, help="Context as JSON string")
+    workflow_id: str, context: str = typer.Option(None, help="Context as JSON string")
 ) -> None:
     """Execute a BMAD workflow."""
-    if not BMAD_AVAILABLE:
-        console.print("[red]BMAD not available. Install packages.core.bmad to use this command.[/red]")
-        raise typer.Exit(1)
     console.print("[yellow]Note: Workflow execution requires orchestrator integration[/yellow]")
     console.print(f"[bold]Workflow ID:[/bold] {workflow_id}")
 

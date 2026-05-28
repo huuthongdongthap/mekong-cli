@@ -222,9 +222,7 @@ class WakeupScheduler:
 
 def main():
     """CLI entry point for wake-up scheduler."""
-    parser = argparse.ArgumentParser(
-        description="⏰ Antigravity Quota Wake-up Scheduler"
-    )
+    parser = argparse.ArgumentParser(description="⏰ Antigravity Quota Wake-up Scheduler")
 
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
@@ -255,9 +253,7 @@ def main():
 
     # Show history
     history_parser = subparsers.add_parser("history", help="Show execution history")
-    history_parser.add_argument(
-        "--limit", type=int, default=10, help="Number of entries"
-    )
+    history_parser.add_argument("--limit", type=int, default=10, help="Number of entries")
 
     args = parser.parse_args()
     scheduler = WakeupScheduler()
@@ -268,9 +264,7 @@ def main():
         print(f"\n{status} Wake-up completed!")
         for r in result["results"]:
             emoji = "✅" if r["success"] else "❌"
-            print(
-                f"   {emoji} {r['model_id']}: {r.get('message', r.get('error', 'Unknown'))}"
-            )
+            print(f"   {emoji} {r['model_id']}: {r.get('message', r.get('error', 'Unknown'))}")
 
     elif args.command == "add":
         scheduler.add_schedule(args.type, args.time, args.models)

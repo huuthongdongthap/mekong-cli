@@ -93,7 +93,8 @@ class TestCodeEvolutionEngine(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             engine = self._make_engine(tmpdir)
             result = engine.propose_evolution(
-                "src/core/sample.py", "Add logging",
+                "src/core/sample.py",
+                "Add logging",
             )
             self.assertIsNone(result)
 

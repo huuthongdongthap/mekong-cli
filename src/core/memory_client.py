@@ -24,8 +24,11 @@ class NeuralMemoryClient:
     """Client for NeuralMemory (Spreading Activation Memory)."""
 
     def __init__(
-        self, base_url: str = "http://localhost:8000", brain_id: str = "default",
-        timeout: float = 5.0, health_ttl: float = 30.0,
+        self,
+        base_url: str = "http://localhost:8000",
+        brain_id: str = "default",
+        timeout: float = 5.0,
+        health_ttl: float = 30.0,
     ) -> None:
         """Initialize NeuralMemoryClient with connection settings.
 
@@ -136,6 +139,7 @@ def get_memory_client() -> NeuralMemoryClient:
 # Provider factory
 # ---------------------------------------------------------------------------
 
+
 def get_memory_provider() -> NeuralMemoryClient | Any | None:
     """Return the active memory provider based on MEMORY_PROVIDER env var.
 
@@ -155,13 +159,13 @@ def get_memory_provider() -> NeuralMemoryClient | Any | None:
     if provider_name == "mem0":
         try:
             from packages.memory.memory_facade import get_memory_facade
+
             facade = get_memory_facade()
             facade.connect()  # idempotent — safe to call multiple times
             return facade
         except ImportError:
             logger.warning(
-                "MEMORY_PROVIDER=mem0 but packages.memory not installed. "
-                "Falling back to yaml.",
+                "MEMORY_PROVIDER=mem0 but packages.memory not installed. " "Falling back to yaml.",
             )
             return None
 

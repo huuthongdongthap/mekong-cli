@@ -26,6 +26,7 @@ from src.core.raas_auth import RaaSAuthClient
 @dataclass
 class ValidationResult:
     """Result of a single validation check."""
+
     name: str
     passed: bool
     message: str
@@ -36,6 +37,7 @@ class ValidationResult:
 @dataclass
 class Phase6ValidationResult:
     """Complete Phase 6 validation result."""
+
     all_passed: bool
     project_id: str
     license_key_hash: str
@@ -64,9 +66,7 @@ class FinalPhaseValidator:
 
     def __init__(self, gateway_url: Optional[str] = None) -> None:
         self.console = Console()
-        self.gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL
-        )
+        self.gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL)
         self._auth_client: Optional[RaaSAuthClient] = None
 
     def _get_auth_client(self) -> RaaSAuthClient:
@@ -92,6 +92,7 @@ class FinalPhaseValidator:
         # Try to get from git
         try:
             import subprocess
+
             result = subprocess.run(
                 ["git", "remote", "get-url", "origin"],
                 capture_output=True,
@@ -189,6 +190,7 @@ class FinalPhaseValidator:
         # Check 1: Usage meter module available
         try:
             from src.lib import usage_meter  # noqa: F401
+
             result.details["usage_meter_loaded"] = True
         except ImportError:
             result.details["usage_meter_loaded"] = False
@@ -197,6 +199,7 @@ class FinalPhaseValidator:
         # Check 2: Usage tracking functional
         try:
             from src.usage import usage_tracker  # noqa: F401
+
             result.details["usage_tracker_loaded"] = True
         except ImportError:
             result.details["usage_tracker_loaded"] = False
@@ -250,6 +253,7 @@ class FinalPhaseValidator:
         # Check 1: Billing middleware available
         try:
             from src.api import raas_billing_middleware  # noqa: F401
+
             result.details["billing_middleware_loaded"] = True
         except ImportError:
             result.details["billing_middleware_loaded"] = False
@@ -281,6 +285,7 @@ class FinalPhaseValidator:
         # Check 3: Overage calculation available
         try:
             from src.raas import credit_rate_limiter  # noqa: F401
+
             result.details["credit_rate_limiter_loaded"] = True
         except ImportError:
             result.details["credit_rate_limiter_loaded"] = False
@@ -335,9 +340,7 @@ class FinalPhaseValidator:
                 result.details["gateway_version"] = data.get("gateway", {}).get(
                     "version", "unknown"
                 )
-                result.details["gateway_url"] = data.get("gateway", {}).get(
-                    "url", self.gateway_url
-                )
+                result.details["gateway_url"] = data.get("gateway", {}).get("url", self.gateway_url)
                 result.details["tenant_id"] = data.get("tenant_id")
                 result.details["tier"] = data.get("tier")
                 result.details["features"] = data.get("features", [])
@@ -410,7 +413,9 @@ class FinalPhaseValidator:
             attestation_data = attestation_result.details.get("attestation_data", {})
             gateway_issuer = attestation_data.get("gateway", {}).get("url", self.gateway_url)
             # Create signed attestation hash
-            attestation_payload = f"{project_id}:{self._hash_license_key(license_key)}:{int(time.time())}"
+            attestation_payload = (
+                f"{project_id}:{self._hash_license_key(license_key)}:{int(time.time())}"
+            )
             attestation = hashlib.sha256(attestation_payload.encode()).hexdigest()
 
         phase6_result = Phase6ValidationResult(

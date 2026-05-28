@@ -90,9 +90,7 @@ class TestMissionCompletedPayload:
 
 class TestMissionFailedPayload:
     def test_failed(self) -> None:
-        p = MissionFailedPayload(
-            mission_id="m-1", goal="Build", error="OOM"
-        )
+        p = MissionFailedPayload(mission_id="m-1", goal="Build", error="OOM")
         assert p.status == "failed"
         assert p.refund_eligible is True
 

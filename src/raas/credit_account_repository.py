@@ -1,4 +1,5 @@
 """Credit account repository for workspace-level billing (SQLite version)."""
+
 from __future__ import annotations
 
 import logging
@@ -302,9 +303,7 @@ class CreditAccountRepository:
         except sqlite3.Error as exc:
             raise RuntimeError(f"Failed to deduct credits: {exc}") from exc
 
-    def get_history(
-        self, workspace_id: str, limit: int = 50
-    ) -> list[CreditTransaction]:
+    def get_history(self, workspace_id: str, limit: int = 50) -> list[CreditTransaction]:
         """Return recent transactions for a workspace."""
         try:
             with self._connect() as conn:

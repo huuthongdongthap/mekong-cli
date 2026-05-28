@@ -14,21 +14,34 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ScannerFilters:
     """Filter criteria for market scanning (DNA strategy)."""
-    min_volume_24h: float = 1_000.0    # $1K minimum
+
+    min_volume_24h: float = 1_000.0  # $1K minimum
     max_volume_24h: float = 100_000.0  # $100K max (long-tail, less arb-saturated)
     min_days_to_resolution: float = 7.0
     max_days_to_resolution: float = 30.0
     min_outcomes: int = 2
     exclude_price_markets: bool = True  # LLM has no edge on BTC price
     min_spread: float = 0.0
-    max_spread: float = 0.10           # 10% max spread
+    max_spread: float = 0.10  # 10% max spread
 
 
 # Keywords indicating price/numeric prediction markets (no LLM edge)
 PRICE_MARKET_KEYWORDS: list[str] = [
-    "price", "btc", "eth", "bitcoin", "ethereum", "above $",
-    "below $", "stock", "nasdaq", "s&p", "dow jones",
-    "interest rate", "cpi", "gdp", "inflation",
+    "price",
+    "btc",
+    "eth",
+    "bitcoin",
+    "ethereum",
+    "above $",
+    "below $",
+    "stock",
+    "nasdaq",
+    "s&p",
+    "dow jones",
+    "interest rate",
+    "cpi",
+    "gdp",
+    "inflation",
 ]
 
 
@@ -54,21 +67,24 @@ class MarketScanner:
             filtered = self._filter_price_markets(filtered)
         logger.info(
             "MarketScanner: %d/%d markets passed filters",
-            len(filtered), len(markets),
+            len(filtered),
+            len(markets),
         )
         return filtered
 
     def _filter_volume(self, markets: list[Market]) -> list[Market]:
         """Filter by 24h volume: $1K–$100K sweet spot."""
         return [
-            m for m in markets
+            m
+            for m in markets
             if self.filters.min_volume_24h <= m.volume_24h <= self.filters.max_volume_24h
         ]
 
     def _filter_resolution_window(self, markets: list[Market]) -> list[Market]:
         """Filter by resolution window: 7–30 days."""
         return [
-            m for m in markets
+            m
+            for m in markets
             if self.filters.min_days_to_resolution
             <= m.days_to_resolution
             <= self.filters.max_days_to_resolution
@@ -76,17 +92,11 @@ class MarketScanner:
 
     def _filter_outcomes(self, markets: list[Market]) -> list[Market]:
         """Filter by minimum outcome count."""
-        return [
-            m for m in markets
-            if len(m.outcomes) >= self.filters.min_outcomes
-        ]
+        return [m for m in markets if len(m.outcomes) >= self.filters.min_outcomes]
 
     def _filter_spread(self, markets: list[Market]) -> list[Market]:
         """Filter by bid-ask spread."""
-        return [
-            m for m in markets
-            if m.spread <= self.filters.max_spread
-        ]
+        return [m for m in markets if m.spread <= self.filters.max_spread]
 
     def _filter_price_markets(self, markets: list[Market]) -> list[Market]:
         """Exclude price/numeric markets where LLM has no edge."""

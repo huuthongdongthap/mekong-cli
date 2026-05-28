@@ -8,6 +8,7 @@ Usage:
     hints = engine.get_personalized_hints(user_id="u123")
     engine.dismiss_hint(user_id="u123", hint_id="workspace_naming_tip")
 """
+
 from __future__ import annotations
 
 import logging
@@ -433,7 +434,5 @@ class OnboardingHintsEngine:
             "total_hints": len(all_hints),
             "dismissed_count": len(dismissed),
             "active_count": len(active),
-            "dismissal_rate": round(
-                (len(dismissed) / len(all_hints) * 100) if all_hints else 0, 2
-            ),
+            "dismissal_rate": round((len(dismissed) / len(all_hints) * 100) if all_hints else 0, 2),
         }

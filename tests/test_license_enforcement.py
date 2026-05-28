@@ -25,7 +25,6 @@ from src.services.license_enforcement import (
     is_tier_sufficient,
 )
 
-
 # ============================================================================
 # TEST SECTION 1: LicenseStatus Enum Tests (~4 tests)
 # ============================================================================
@@ -73,14 +72,16 @@ class TestCheckLicenseStatus:
     @pytest.mark.asyncio
     async def test_check_active_license_returns_active(self, service, mock_db):
         """Test check_license_status returns ACTIVE for valid license."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "1",
-            "key_id": "key123",
-            "tier": "pro",
-            "status": "active",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "1",
+                "key_id": "key123",
+                "tier": "pro",
+                "status": "active",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            }
+        )
 
         status = await service.check_license_status("raasjwt-pro-abc123")
 
@@ -89,14 +90,16 @@ class TestCheckLicenseStatus:
     @pytest.mark.asyncio
     async def test_check_suspended_license_returns_suspended(self, service, mock_db):
         """Test check_license_status returns SUSPENDED for suspended license."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "2",
-            "key_id": "key456",
-            "tier": "pro",
-            "status": "suspended",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "2",
+                "key_id": "key456",
+                "tier": "pro",
+                "status": "suspended",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            }
+        )
 
         status = await service.check_license_status("raasjwt-pro-def456")
 
@@ -105,14 +108,16 @@ class TestCheckLicenseStatus:
     @pytest.mark.asyncio
     async def test_check_revoked_license_returns_revoked(self, service, mock_db):
         """Test check_license_status returns REVOKED for revoked license."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "3",
-            "key_id": "key789",
-            "tier": "enterprise",
-            "status": "revoked",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=60),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "3",
+                "key_id": "key789",
+                "tier": "enterprise",
+                "status": "revoked",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=60),
+            }
+        )
 
         status = await service.check_license_status("raasjwt-enterprise-ghi789")
 
@@ -121,14 +126,16 @@ class TestCheckLicenseStatus:
     @pytest.mark.asyncio
     async def test_check_expired_license_returns_expired(self, service, mock_db):
         """Test check_license_status returns EXPIRED for expired license."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "4",
-            "key_id": "key000",
-            "tier": "trial",
-            "status": "active",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) - timedelta(days=1),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "4",
+                "key_id": "key000",
+                "tier": "trial",
+                "status": "active",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) - timedelta(days=1),
+            }
+        )
 
         status = await service.check_license_status("raasjwt-trial-jkl000")
 
@@ -146,14 +153,16 @@ class TestCheckLicenseStatus:
     @pytest.mark.asyncio
     async def test_check_license_status_caches_result(self, service, mock_db):
         """Test check_license_status caches result for 5 minutes."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "6",
-            "key_id": "key222",
-            "tier": "pro",
-            "status": "active",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "6",
+                "key_id": "key222",
+                "tier": "pro",
+                "status": "active",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            }
+        )
 
         # First call - hits DB
         status1 = await service.check_license_status("raasjwt-pro-vwx222")
@@ -169,14 +178,16 @@ class TestCheckLicenseStatus:
     @pytest.mark.asyncio
     async def test_check_license_status_clear_cache(self, service, mock_db):
         """Test clear_cache invalidates all cached entries."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "7",
-            "key_id": "key333",
-            "tier": "pro",
-            "status": "active",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "7",
+                "key_id": "key333",
+                "tier": "pro",
+                "status": "active",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            }
+        )
 
         # Populate cache
         await service.check_license_status("raasjwt-pro-yza333")
@@ -450,8 +461,10 @@ class TestLicenseEnforcementMiddlewareResponse:
     @pytest.fixture
     def middleware_app(self):
         """Create mock ASGI app."""
+
         async def app(req, recv, send):
             return {"status": 200}
+
         return app
 
     def test_middleware_403_response_body_suspended(self, middleware_app):
@@ -468,7 +481,7 @@ class TestLicenseEnforcementMiddlewareResponse:
             )
 
             assert response.status_code == 403
-            content = response.body.decode() if hasattr(response.body, 'decode') else response.body
+            content = response.body.decode() if hasattr(response.body, "decode") else response.body
             assert "license_suspended" in content
             assert "suspended" in content
 
@@ -486,7 +499,7 @@ class TestLicenseEnforcementMiddlewareResponse:
             )
 
             assert response.status_code == 403
-            content = response.body.decode() if hasattr(response.body, 'decode') else response.body
+            content = response.body.decode() if hasattr(response.body, "decode") else response.body
             assert "license_revoked" in content
             assert "revoked" in content
 
@@ -504,7 +517,7 @@ class TestLicenseEnforcementMiddlewareResponse:
             )
 
             assert response.status_code == 403
-            content = response.body.decode() if hasattr(response.body, 'decode') else response.body
+            content = response.body.decode() if hasattr(response.body, "decode") else response.body
             assert "license_expired" in content
             assert "expired" in content
 
@@ -522,7 +535,7 @@ class TestLicenseEnforcementMiddlewareResponse:
             )
 
             assert response.status_code == 403
-            content = response.body.decode() if hasattr(response.body, 'decode') else response.body
+            content = response.body.decode() if hasattr(response.body, "decode") else response.body
             assert "license_invalid" in content
 
     def test_middleware_403_response_body_insufficient_tier(self, middleware_app):
@@ -539,7 +552,7 @@ class TestLicenseEnforcementMiddlewareResponse:
             )
 
             assert response.status_code == 403
-            content = response.body.decode() if hasattr(response.body, 'decode') else response.body
+            content = response.body.decode() if hasattr(response.body, "decode") else response.body
             assert "tier_insufficient" in content
 
     def test_middleware_403_response_contains_license_status(self, middleware_app):
@@ -555,7 +568,7 @@ class TestLicenseEnforcementMiddlewareResponse:
                 path="/api/test",
             )
 
-            content = response.body.decode() if hasattr(response.body, 'decode') else response.body
+            content = response.body.decode() if hasattr(response.body, "decode") else response.body
             # JSON may not have space after colon - check for either format
             assert "license_status" in content and "suspended" in content
 
@@ -563,7 +576,10 @@ class TestLicenseEnforcementMiddlewareResponse:
         """Test middleware logs license enforcement actions."""
         with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement"):
             with patch("src.lib.tier_rate_limit_middleware.logger") as mock_logger:
-                from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware, LicenseStatus
+                from src.lib.tier_rate_limit_middleware import (
+                    TierRateLimitMiddleware,
+                    LicenseStatus,
+                )
 
                 mw = TierRateLimitMiddleware(middleware_app, enable_rate_limiting=True)
 
@@ -580,7 +596,10 @@ class TestLicenseEnforcementMiddlewareResponse:
         """Test middleware logs license enforcement allowed action."""
         with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement"):
             with patch("src.lib.tier_rate_limit_middleware.logger") as mock_logger:
-                from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware, LicenseStatus
+                from src.lib.tier_rate_limit_middleware import (
+                    TierRateLimitMiddleware,
+                    LicenseStatus,
+                )
 
                 mw = TierRateLimitMiddleware(middleware_app, enable_rate_limiting=True)
 
@@ -595,13 +614,17 @@ class TestLicenseEnforcementMiddlewareResponse:
 
     def test_middleware_tier_sufficient_check(self, middleware_app):
         """Test middleware can check tier sufficiency."""
-        with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement") as mock_get_service:
+        with patch(
+            "src.lib.tier_rate_limit_middleware.get_license_enforcement"
+        ) as mock_get_service:
             mock_service = MagicMock()
-            mock_service.is_tier_sufficient = MagicMock(side_effect=lambda current, required: {
-                ("free", "enterprise"): False,
-                ("pro", "free"): True,
-                ("pro", "pro"): True,
-            }.get((current, required), True))
+            mock_service.is_tier_sufficient = MagicMock(
+                side_effect=lambda current, required: {
+                    ("free", "enterprise"): False,
+                    ("pro", "free"): True,
+                    ("pro", "pro"): True,
+                }.get((current, required), True)
+            )
             mock_get_service.return_value = mock_service
 
             from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware
@@ -635,7 +658,10 @@ class TestAuditLogging:
         """Test enforcement action is logged."""
         with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement"):
             with patch("src.lib.tier_rate_limit_middleware.logger") as mock_logger:
-                from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware, LicenseStatus
+                from src.lib.tier_rate_limit_middleware import (
+                    TierRateLimitMiddleware,
+                    LicenseStatus,
+                )
 
                 mw = TierRateLimitMiddleware(lambda: None, enable_rate_limiting=True)
 
@@ -658,7 +684,10 @@ class TestAuditLogging:
         """Test license_status field included in log entry."""
         with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement"):
             with patch("src.lib.tier_rate_limit_middleware.logger") as mock_logger:
-                from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware, LicenseStatus
+                from src.lib.tier_rate_limit_middleware import (
+                    TierRateLimitMiddleware,
+                    LicenseStatus,
+                )
 
                 mw = TierRateLimitMiddleware(lambda: None, enable_rate_limiting=True)
 
@@ -680,7 +709,10 @@ class TestAuditLogging:
 
         with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement"):
             with patch("src.lib.tier_rate_limit_middleware.logger") as mock_logger:
-                from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware, LicenseStatus
+                from src.lib.tier_rate_limit_middleware import (
+                    TierRateLimitMiddleware,
+                    LicenseStatus,
+                )
 
                 mw = TierRateLimitMiddleware(lambda: None, enable_rate_limiting=True)
 
@@ -728,7 +760,10 @@ class TestAuditLogging:
         for endpoint in endpoints:
             with patch("src.lib.tier_rate_limit_middleware.get_license_enforcement"):
                 with patch("src.lib.tier_rate_limit_middleware.logger") as mock_logger:
-                    from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware, LicenseStatus
+                    from src.lib.tier_rate_limit_middleware import (
+                        TierRateLimitMiddleware,
+                        LicenseStatus,
+                    )
 
                     mw = TierRateLimitMiddleware(lambda: None, enable_rate_limiting=True)
                     mw._log_license_enforcement(
@@ -793,14 +828,16 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_mixed_case_tier_in_db(self, service, mock_db):
         """Test mixed case tier in database response."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "1",
-            "key_id": "key1",
-            "tier": "PRO",
-            "status": "ACTIVE",
-            "email": "user@example.com",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "1",
+                "key_id": "key1",
+                "tier": "PRO",
+                "status": "ACTIVE",
+                "email": "user@example.com",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            }
+        )
 
         status = await service.check_license_status("raasjwt-pro-test")
 
@@ -809,13 +846,15 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_license_with_null_tier(self, service, mock_db):
         """Test license with null/missing tier in DB."""
-        mock_db.fetch_one = AsyncMock(return_value={
-            "id": "2",
-            "key_id": "key2",
-            "tier": None,
-            "status": "active",
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        })
+        mock_db.fetch_one = AsyncMock(
+            return_value={
+                "id": "2",
+                "key_id": "key2",
+                "tier": None,
+                "status": "active",
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            }
+        )
 
         status = await service.check_license_status("raasjwt-pro-test")
 
@@ -845,5 +884,5 @@ class TestEdgeCases:
         assert service.is_tier_sufficient("pro", "free") is True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__, "-v"])

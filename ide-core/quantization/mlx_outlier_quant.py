@@ -51,12 +51,18 @@ class MLXOutlierPolarQuant:
 
         # Separate quantizers for outlier and normal channel groups
         self.pq_outlier = (
-            MLXPolarQuant(n_outlier, bit_width=high_bits, seed=seed, norm_correction=norm_correction)
-            if n_outlier > 0 else None
+            MLXPolarQuant(
+                n_outlier, bit_width=high_bits, seed=seed, norm_correction=norm_correction
+            )
+            if n_outlier > 0
+            else None
         )
         self.pq_normal = (
-            MLXPolarQuant(n_normal, bit_width=low_bits, seed=seed + 500, norm_correction=norm_correction)
-            if n_normal > 0 else None
+            MLXPolarQuant(
+                n_normal, bit_width=low_bits, seed=seed + 500, norm_correction=norm_correction
+            )
+            if n_normal > 0
+            else None
         )
 
     def quantize(self, x: mx.array) -> dict:
@@ -73,8 +79,8 @@ class MLXOutlierPolarQuant:
             x = x[None, :]
 
         # Split channels
-        x_outlier = x[:, :self.n_outlier]
-        x_normal = x[:, self.n_outlier:]
+        x_outlier = x[:, : self.n_outlier]
+        x_normal = x[:, self.n_outlier :]
 
         result = {}
 
@@ -108,7 +114,11 @@ class MLXOutlierPolarQuant:
             parts.append(x_outlier)
         else:
             single = compressed.get("single", False)
-            shape = (self.n_outlier,) if single else (compressed["normal_indices"].shape[0], self.n_outlier)
+            shape = (
+                (self.n_outlier,)
+                if single
+                else (compressed["normal_indices"].shape[0], self.n_outlier)
+            )
             parts.append(mx.zeros(shape))
 
         if self.pq_normal is not None and compressed["normal_indices"] is not None:
@@ -118,7 +128,11 @@ class MLXOutlierPolarQuant:
             parts.append(x_normal)
         else:
             single = compressed.get("single", False)
-            shape = (self.n_normal,) if single else (compressed["outlier_indices"].shape[0], self.n_normal)
+            shape = (
+                (self.n_normal,)
+                if single
+                else (compressed["outlier_indices"].shape[0], self.n_normal)
+            )
             parts.append(mx.zeros(shape))
 
         x_hat = mx.concatenate(parts, axis=-1)

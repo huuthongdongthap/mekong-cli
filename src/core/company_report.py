@@ -50,8 +50,7 @@ def generate_report(
     gen = generators.get(report_type)
     if not gen:
         raise ValueError(
-            f"Unknown report type: {report_type}. "
-            f"Valid: {list(generators.keys())}"
+            f"Unknown report type: {report_type}. " f"Valid: {list(generators.keys())}"
         )
 
     base = Path(base_dir)
@@ -214,9 +213,7 @@ def _load_memory(base: Path) -> list[dict]:
         return []
 
 
-def _load_ledger(
-    base: Path, mcu_gate: MCUGate | None, tenant_id: str
-) -> list[dict]:
+def _load_ledger(base: Path, mcu_gate: MCUGate | None, tenant_id: str) -> list[dict]:
     if mcu_gate:
         rows = mcu_gate._conn.execute(
             "SELECT id, tenant_id, mission_id, amount, type, status, created_at "

@@ -26,9 +26,7 @@ try:
     from packages.antigravity.core.revenue_engine import Currency, RevenueEngine
 except ImportError:
     # Fallback for dev environment without package install
-    sys.path.append(
-        os.path.join(os.path.dirname(__file__), "../packages/antigravity/core")
-    )
+    sys.path.append(os.path.join(os.path.dirname(__file__), "../packages/antigravity/core"))
     try:
         from revenue_engine import Currency, RevenueEngine
     except ImportError:
@@ -335,9 +333,7 @@ class PaymentHub:
         if pp_txns:
             for t in pp_txns[:5]:
                 amt = float(
-                    t.get("transaction_info", {})
-                    .get("transaction_amount", {})
-                    .get("value", 0)
+                    t.get("transaction_info", {}).get("transaction_amount", {}).get("value", 0)
                 )
                 pp_total += amt
                 print(f"   • ${amt:.2f}")
@@ -355,9 +351,7 @@ class PaymentHub:
         for platform, amount in breakdown.items():
             pct = (amount / total * 100) if total > 0 else 0
             bar = "█" * int(pct / 5) if pct > 0 else "░"
-            print(
-                f"     {platform.capitalize():<10} ${amount:>8.2f} ({pct:>5.1f}%) {bar}"
-            )
+            print(f"     {platform.capitalize():<10} ${amount:>8.2f} ({pct:>5.1f}%) {bar}")
 
         # Estimated fees
         gumroad_fee = gr_total * 0.10  # 10% Gumroad fee
@@ -506,9 +500,7 @@ class PaymentHub:
             export_data.append(
                 {
                     "name": p.get("name", ""),
-                    "description": p.get("description", "")[:250]
-                    if p.get("description")
-                    else "",
+                    "description": p.get("description", "")[:250] if p.get("description") else "",
                     "price": p.get("price", 0) / 100 if p.get("price") else 0,
                     "type": "DIGITAL",
                     "category": "SOFTWARE",

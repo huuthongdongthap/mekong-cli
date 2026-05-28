@@ -2,7 +2,8 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.core.founder_ipo.founder_public_co import (
     build_earnings_calendar,
@@ -34,6 +35,7 @@ def test_build_earnings_calendar_has_dates():
 def test_build_earnings_calendar_q4_filing_deadline_longer():
     calendar = build_earnings_calendar(fiscal_year_start_month=1)
     from datetime import date
+
     q4 = calendar[3]
     q3 = calendar[2]
     q4_filing = date.fromisoformat(q4.filing_deadline)
@@ -69,9 +71,14 @@ def test_calculate_guidance_safety_margin():
 
 def test_build_quarterly_report_beat():
     report = build_quarterly_report(
-        quarter="Q2", revenue=11_000_000, arr=44_000_000,
-        gm_pct=75.0, nrr_pct=118.0, customers=420,
-        fcf=500_000, prev_guidance_mid=10_000_000,
+        quarter="Q2",
+        revenue=11_000_000,
+        arr=44_000_000,
+        gm_pct=75.0,
+        nrr_pct=118.0,
+        customers=420,
+        fcf=500_000,
+        prev_guidance_mid=10_000_000,
     )
     assert report.guidance_beat_pct == 10.0
     assert report.quarter == "Q2"
@@ -80,18 +87,28 @@ def test_build_quarterly_report_beat():
 
 def test_build_quarterly_report_miss():
     report = build_quarterly_report(
-        quarter="Q3", revenue=9_500_000, arr=38_000_000,
-        gm_pct=72.0, nrr_pct=112.0, customers=390,
-        fcf=-200_000, prev_guidance_mid=10_000_000,
+        quarter="Q3",
+        revenue=9_500_000,
+        arr=38_000_000,
+        gm_pct=72.0,
+        nrr_pct=112.0,
+        customers=390,
+        fcf=-200_000,
+        prev_guidance_mid=10_000_000,
     )
     assert report.guidance_beat_pct < 0
 
 
 def test_build_quarterly_report_no_prev_guidance():
     report = build_quarterly_report(
-        quarter="Q1", revenue=8_000_000, arr=32_000_000,
-        gm_pct=70.0, nrr_pct=110.0, customers=350,
-        fcf=0.0, prev_guidance_mid=0,
+        quarter="Q1",
+        revenue=8_000_000,
+        arr=32_000_000,
+        gm_pct=70.0,
+        nrr_pct=110.0,
+        customers=350,
+        fcf=0.0,
+        prev_guidance_mid=0,
     )
     assert report.guidance_beat_pct == 0.0
 

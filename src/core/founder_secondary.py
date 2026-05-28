@@ -137,8 +137,12 @@ SECONDARY_PLATFORMS = [
     SecondaryPlatform("Forge Global", "forge.com", "Pre-IPO marketplace", "10-30%"),
     SecondaryPlatform("CartaX", "carta.com/secondary", "Carta secondary market", "10-25%"),
     SecondaryPlatform("EquityZen", "equityzen.com", "Pre-IPO investing platform", "15-35%"),
-    SecondaryPlatform("Nasdaq Private Market", "nasdaqprivatemarket.com",
-                      "Nasdaq-operated private secondary", "10-20%"),
+    SecondaryPlatform(
+        "Nasdaq Private Market",
+        "nasdaqprivatemarket.com",
+        "Nasdaq-operated private secondary",
+        "10-20%",
+    ),
 ]
 
 TENDER_CHECKLIST = [
@@ -174,36 +178,57 @@ def calculate_tax_scenarios(
     scenarios = []
 
     if jurisdiction == "us":
-        scenarios.append(TaxScenario.calculate(
-            "Long-term capital gains (held > 1yr)",
-            20.0, gross_proceeds,
-            "Standard LTCG rate for high earners",
-        ))
-        scenarios.append(TaxScenario.calculate(
-            "QSBS eligible (held > 5yr, C-Corp)",
-            0.0, gross_proceeds,
-            "Up to $10M gain excluded federally — file 83(b)!",
-        ))
-        scenarios.append(TaxScenario.calculate(
-            "Short-term / no 83(b) election",
-            37.0, gross_proceeds,
-            "Ordinary income rate — most expensive scenario",
-        ))
+        scenarios.append(
+            TaxScenario.calculate(
+                "Long-term capital gains (held > 1yr)",
+                20.0,
+                gross_proceeds,
+                "Standard LTCG rate for high earners",
+            )
+        )
+        scenarios.append(
+            TaxScenario.calculate(
+                "QSBS eligible (held > 5yr, C-Corp)",
+                0.0,
+                gross_proceeds,
+                "Up to $10M gain excluded federally — file 83(b)!",
+            )
+        )
+        scenarios.append(
+            TaxScenario.calculate(
+                "Short-term / no 83(b) election",
+                37.0,
+                gross_proceeds,
+                "Ordinary income rate — most expensive scenario",
+            )
+        )
     elif jurisdiction == "singapore":
-        scenarios.append(TaxScenario.calculate(
-            "Singapore capital gains", 0.0, gross_proceeds,
-            "Singapore has 0% capital gains tax",
-        ))
+        scenarios.append(
+            TaxScenario.calculate(
+                "Singapore capital gains",
+                0.0,
+                gross_proceeds,
+                "Singapore has 0% capital gains tax",
+            )
+        )
     elif jurisdiction == "vietnam":
-        scenarios.append(TaxScenario.calculate(
-            "Vietnam stock sale tax", 20.0, gross_proceeds,
-            "20% capital gains on stock sales",
-        ))
+        scenarios.append(
+            TaxScenario.calculate(
+                "Vietnam stock sale tax",
+                20.0,
+                gross_proceeds,
+                "20% capital gains on stock sales",
+            )
+        )
     else:
-        scenarios.append(TaxScenario.calculate(
-            "Standard capital gains (estimate)", 20.0, gross_proceeds,
-            "Consult local CPA for exact rate",
-        ))
+        scenarios.append(
+            TaxScenario.calculate(
+                "Standard capital gains (estimate)",
+                20.0,
+                gross_proceeds,
+                "Consult local CPA for exact rate",
+            )
+        )
 
     return scenarios
 
@@ -232,7 +257,9 @@ def analyze_liquidity(
     # Best-case net (QSBS or 0% jurisdiction)
     best_net = max(s.net_proceeds for s in tax_scenarios) if tax_scenarios else secondary_amount
     total_after = (stake_value - secondary_amount) + liquid_assets + best_net
-    startup_pct_after = ((stake_value - secondary_amount) / total_after * 100) if total_after > 0 else 0
+    startup_pct_after = (
+        ((stake_value - secondary_amount) / total_after * 100) if total_after > 0 else 0
+    )
 
     # Recommendation
     if shares_to_sell_pct > 30:
@@ -302,15 +329,21 @@ def save_liquidity_analysis(
     saved.append(str(path))
 
     tax_path = base / "tax-scenarios.json"
-    tax_path.write_text(json.dumps(
-        [asdict(t) for t in analysis.tax_scenarios], indent=2,
-    ))
+    tax_path.write_text(
+        json.dumps(
+            [asdict(t) for t in analysis.tax_scenarios],
+            indent=2,
+        )
+    )
     saved.append(str(tax_path))
 
     mech_path = base / "secondary-options.json"
-    mech_path.write_text(json.dumps(
-        [asdict(m) for m in get_mechanisms()], indent=2,
-    ))
+    mech_path.write_text(
+        json.dumps(
+            [asdict(m) for m in get_mechanisms()],
+            indent=2,
+        )
+    )
     saved.append(str(mech_path))
 
     return saved

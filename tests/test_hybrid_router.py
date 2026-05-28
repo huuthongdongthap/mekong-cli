@@ -41,7 +41,9 @@ def api_state():
 
 class TestMissionResult:
     def test_success_result(self):
-        r = MissionResult(success=True, mission_id="m1", model_used="claude-sonnet-4-6", mcu_charged=3)
+        r = MissionResult(
+            success=True, mission_id="m1", model_used="claude-sonnet-4-6", mcu_charged=3
+        )
         assert r.success is True
         assert r.mcu_charged == 3
 
@@ -64,24 +66,28 @@ class TestRouteAndExecuteStage2:
         gate_low = MCUGate(":memory:")
         gate_low.seed_balance("t1", 2)
 
-        result = asyncio.run(route_and_execute(
-            goal="build a complex distributed system with microservices",
-            tenant_id="t1",
-            mcu_gate=gate_low,
-            system_state=api_state,
-        ))
+        result = asyncio.run(
+            route_and_execute(
+                goal="build a complex distributed system with microservices",
+                tenant_id="t1",
+                mcu_gate=gate_low,
+                system_state=api_state,
+            )
+        )
         assert result.success is False
         assert "insufficient_mcu" in result.error or "tenant_not_found" in result.error
         gate_low.close()
 
     def test_unknown_tenant(self, api_state):
         gate = MCUGate(":memory:")
-        result = asyncio.run(route_and_execute(
-            goal="hello",
-            tenant_id="ghost",
-            mcu_gate=gate,
-            system_state=api_state,
-        ))
+        result = asyncio.run(
+            route_and_execute(
+                goal="hello",
+                tenant_id="ghost",
+                mcu_gate=gate,
+                system_state=api_state,
+            )
+        )
         assert result.success is False
         assert result.error == "tenant_not_found"
         gate.close()
@@ -90,8 +96,9 @@ class TestRouteAndExecuteStage2:
 class TestRouteAndExecuteSuccess:
     """Test successful execution (Stages 1-9)."""
 
+    @patch("src.raas.credits.CreditStore")
     @patch("src.core.hybrid_router.execute_with_fallback")
-    def test_full_pipeline_success(self, mock_exec, gate, api_state):
+    def test_full_pipeline_success(self, mock_exec, mock_credit_store_class, gate, api_state):
         mock_exec.return_value = FallbackResult(
             success=True,
             model_used="gemini-2.0-flash",
@@ -100,12 +107,19 @@ class TestRouteAndExecuteSuccess:
             output="Hello world response",
         )
 
-        result = asyncio.run(route_and_execute(
-            goal="write a simple hello world script",
-            tenant_id="t1",
-            mcu_gate=gate,
-            system_state=api_state,
-        ))
+        # Mock CreditStore to return high balance (>200) to skip watermark
+        mock_store_instance = MagicMock()
+        mock_store_instance.get_balance.return_value = 250
+        mock_credit_store_class.return_value = mock_store_instance
+
+        result = asyncio.run(
+            route_and_execute(
+                goal="write a simple hello world script",
+                tenant_id="t1",
+                mcu_gate=gate,
+                system_state=api_state,
+            )
+        )
 
         assert result.success is True
         assert result.model_used == "gemini-2.0-flash"
@@ -124,28 +138,35 @@ class TestRouteAndExecuteSuccess:
         )
 
         bal_before = gate.get_balance("t1")["balance"]
-        asyncio.run(route_and_execute(
-            goal="fix a small bug",
-            tenant_id="t1",
-            mcu_gate=gate,
-            system_state=api_state,
-        ))
+        asyncio.run(
+            route_and_execute(
+                goal="fix a small bug",
+                tenant_id="t1",
+                mcu_gate=gate,
+                system_state=api_state,
+            )
+        )
         bal_after = gate.get_balance("t1")["balance"]
         assert bal_after < bal_before
 
     @patch("src.core.hybrid_router.execute_with_fallback")
     def test_auto_generates_mission_id(self, mock_exec, gate, api_state):
         mock_exec.return_value = FallbackResult(
-            success=True, model_used="gemini-2.0-flash",
-            tokens_output=1, attempts=["gemini-2.0-flash"], output="ok",
+            success=True,
+            model_used="gemini-2.0-flash",
+            tokens_output=1,
+            attempts=["gemini-2.0-flash"],
+            output="ok",
         )
 
-        result = asyncio.run(route_and_execute(
-            goal="hello",
-            tenant_id="t1",
-            mcu_gate=gate,
-            system_state=api_state,
-        ))
+        result = asyncio.run(
+            route_and_execute(
+                goal="hello",
+                tenant_id="t1",
+                mcu_gate=gate,
+                system_state=api_state,
+            )
+        )
         assert len(result.mission_id) > 0
 
 
@@ -161,12 +182,14 @@ class TestRouteAndExecuteFailure:
         )
 
         bal_before = gate.get_balance("t1")["balance"]
-        result = asyncio.run(route_and_execute(
-            goal="do something",
-            tenant_id="t1",
-            mcu_gate=gate,
-            system_state=api_state,
-        ))
+        result = asyncio.run(
+            route_and_execute(
+                goal="do something",
+                tenant_id="t1",
+                mcu_gate=gate,
+                system_state=api_state,
+            )
+        )
         bal_after = gate.get_balance("t1")["balance"]
 
         assert result.success is False
@@ -176,12 +199,14 @@ class TestRouteAndExecuteFailure:
     @patch("src.core.hybrid_router.execute_with_fallback", side_effect=ConnectionError("down"))
     def test_execution_exception_refunds_mcu(self, mock_exec, gate, api_state):
         bal_before = gate.get_balance("t1")["balance"]
-        result = asyncio.run(route_and_execute(
-            goal="test task",
-            tenant_id="t1",
-            mcu_gate=gate,
-            system_state=api_state,
-        ))
+        result = asyncio.run(
+            route_and_execute(
+                goal="test task",
+                tenant_id="t1",
+                mcu_gate=gate,
+                system_state=api_state,
+            )
+        )
         bal_after = gate.get_balance("t1")["balance"]
 
         assert result.success is False

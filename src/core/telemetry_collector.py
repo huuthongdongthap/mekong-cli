@@ -72,6 +72,7 @@ class TelemetryCollector:
     def start_trace(self, goal: str) -> None:
         """Start a new execution trace."""
         from .telemetry_models import ExecutionTrace
+
         self._current_trace = ExecutionTrace(goal=goal)
         self._trace_start_time = time.time()
 
@@ -79,6 +80,7 @@ class TelemetryCollector:
         """Finish the current trace and optionally write to file."""
         if self._current_trace is None:
             from .telemetry_models import ExecutionTrace
+
             self._current_trace = ExecutionTrace(goal="")
 
         if self._trace_start_time is not None:
@@ -88,6 +90,7 @@ class TelemetryCollector:
 
         if self._output_dir is not None:
             import dataclasses
+
             self._output_dir.mkdir(parents=True, exist_ok=True)
             trace_file = self._output_dir / "execution_trace.json"
             trace_dict = dataclasses.asdict(trace)
@@ -118,6 +121,7 @@ class TelemetryCollector:
         if duration is not None:
             duration_seconds = duration
         from .telemetry_models import StepTrace
+
         step = StepTrace(
             step_order=step_order,
             title=title,
@@ -160,9 +164,11 @@ class TelemetryCollector:
         """Get Python version string."""
         try:
             import sys
+
             return f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
         except Exception as e:
             import logging
+
             logging.debug(f"Failed to get Python version: {e}")
             return "unknown"
 
@@ -170,9 +176,11 @@ class TelemetryCollector:
         """Get OS information."""
         try:
             import platform
+
             return platform.system()
         except Exception as e:
             import logging
+
             logging.debug(f"Failed to get OS info: {e}")
             return "unknown"
 

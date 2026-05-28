@@ -15,6 +15,7 @@ class RiskLevel(str, Enum):
 
 class RiskAssessment(BaseModel):
     """Risk assessment result"""
+
     score: int
     rating: str
     factors: List[str]
@@ -24,6 +25,7 @@ class RiskAssessment(BaseModel):
 
 class RiskThresholds(BaseModel):
     """Risk threshold configuration"""
+
     liquidation_preference_max: float = 1.5
     equity_max: int = 30
     option_pool_max: int = 15

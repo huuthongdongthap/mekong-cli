@@ -186,7 +186,9 @@ class TierRateLimitMiddleware(BaseHTTPMiddleware):
         # Log as JSON
         logger.info(json.dumps(log_entry))
 
-    async def _get_tenant_override(self, tenant_id: str, preset: str, endpoint: str = "") -> Optional[RateLimitConfig]:
+    async def _get_tenant_override(
+        self, tenant_id: str, preset: str, endpoint: str = ""
+    ) -> Optional[RateLimitConfig]:
         """
         Check for tenant-specific rate limit override.
 
@@ -212,7 +214,11 @@ class TierRateLimitMiddleware(BaseHTTPMiddleware):
                     endpoint=endpoint or "unknown",
                     preset=preset,
                     quota_limit=override.custom_limit,
-                    metadata={"expires_at": override.expires_at.isoformat() if override.expires_at else None},
+                    metadata={
+                        "expires_at": (
+                            override.expires_at.isoformat() if override.expires_at else None
+                        )
+                    },
                 )
                 return config
         except Exception as e:
@@ -220,7 +226,9 @@ class TierRateLimitMiddleware(BaseHTTPMiddleware):
             logger.warning(f"Failed to get tenant override: {e}")
         return None
 
-    async def _check_license_status(self, license_key: Optional[str]) -> Tuple[LicenseStatus, Optional[str]]:
+    async def _check_license_status(
+        self, license_key: Optional[str]
+    ) -> Tuple[LicenseStatus, Optional[str]]:
         """
         Check license status using LicenseEnforcementService.
 
@@ -453,7 +461,11 @@ class TierRateLimitMiddleware(BaseHTTPMiddleware):
 
         # Calculate quota utilization
         remaining = max(0, int(limiter._tokens))
-        quota_utilization = ((config.requests_per_minute - remaining) / config.requests_per_minute * 100) if config.requests_per_minute > 0 else 0
+        quota_utilization = (
+            ((config.requests_per_minute - remaining) / config.requests_per_minute * 100)
+            if config.requests_per_minute > 0
+            else 0
+        )
 
         # Log request_allowed event
         self._log_rate_limit_event(
@@ -509,6 +521,7 @@ def create_tier_rate_limit_middleware(enable_rate_limiting: bool = True) -> type
     Returns:
         Middleware class to add to FastAPI app
     """
+
     class ConfiguredMiddleware(TierRateLimitMiddleware):
         def __init__(self, app: ASGIApp) -> None:
             super().__init__(app, enable_rate_limiting=enable_rate_limiting)

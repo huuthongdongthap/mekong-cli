@@ -9,9 +9,9 @@ Endpoints:
     GET    /raas/usage/summary       - Usage analytics (last 30 days)
     GET    /raas/usage/activity      - Recent activity feed
 """
+
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import List
 
@@ -112,6 +112,7 @@ async def _execute_mission_background(
         # Credits already deducted by MissionLifecycle.submit()
         # Pass a pre-approved MCU gate so hybrid router skips double-billing
         from src.core.mcu_gate import MCUGate
+
         pre_approved_gate = MCUGate(":memory:")
         pre_approved_gate.seed_balance(tenant_id, 9999, reason="raas_pre_approved")
 
@@ -128,7 +129,8 @@ async def _execute_mission_background(
             logger.info("Mission %s completed in %.1fs", mission_id, duration)
         else:
             lifecycle.fail(
-                mission_id, tenant_id,
+                mission_id,
+                tenant_id,
                 reason=result.error or "Execution failed",
                 refund=True,
             )
@@ -137,7 +139,8 @@ async def _execute_mission_background(
     except Exception as exc:
         logger.exception("Mission %s crashed: %s", mission_id, exc)
         lifecycle.fail(
-            mission_id, tenant_id,
+            mission_id,
+            tenant_id,
             reason=str(exc)[:500],
             refund=True,
         )

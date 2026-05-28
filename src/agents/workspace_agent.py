@@ -101,9 +101,7 @@ class WorkspaceAgent(AgentBase):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() or e.stdout.strip()
             if "accessNotConfigured" in error_msg or "invalid_grant" in error_msg:
-                error_msg += (
-                    "\n💡 Hint: Run 'gws auth setup' or check 'scripts/gws-auth-setup.sh'"
-                )
+                error_msg += "\n💡 Hint: Run 'gws auth setup' or check 'scripts/gws-auth-setup.sh'"
 
             return Result(
                 task_id=task.id,

@@ -15,6 +15,7 @@ from src.lib.tier_config import Tier, RateLimitConfig, get_preset_config
 @dataclass
 class CachedConfig:
     """Cached configuration with TTL."""
+
     config: RateLimitConfig
     expires_at: float  # Unix timestamp
 
@@ -99,10 +100,7 @@ class RateLimiterFactory:
                 self._cache.clear()
             else:
                 # Remove only entries for this tier
-                keys_to_remove = [
-                    key for key in self._cache
-                    if key.startswith(f"{tier.lower()}:")
-                ]
+                keys_to_remove = [key for key in self._cache if key.startswith(f"{tier.lower()}:")]
                 for key in keys_to_remove:
                     del self._cache[key]
 

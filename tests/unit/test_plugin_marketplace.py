@@ -154,7 +154,13 @@ class TestMarketplaceSearch(unittest.TestCase):
     def test_search_sorting(self, mock_request):
         """Should apply sort params."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"total": 0, "page": 1, "page_size": 20, "total_pages": 0, "plugins": []}
+        mock_response.json.return_value = {
+            "total": 0,
+            "page": 1,
+            "page_size": 20,
+            "total_pages": 0,
+            "plugins": [],
+        }
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
 
@@ -170,7 +176,13 @@ class TestMarketplaceSearch(unittest.TestCase):
     def test_search_page_size_limit(self, mock_request):
         """Should cap page_size at 100."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"total": 0, "page": 1, "page_size": 100, "total_pages": 0, "plugins": []}
+        mock_response.json.return_value = {
+            "total": 0,
+            "page": 1,
+            "page_size": 100,
+            "total_pages": 0,
+            "plugins": [],
+        }
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
 
@@ -218,6 +230,7 @@ class TestGetPlugin(unittest.TestCase):
     def test_get_plugin_not_found(self, mock_request):
         """Should raise NotFoundError for missing plugin."""
         import httpx
+
         mock_request.side_effect = httpx.HTTPStatusError(
             "Not Found",
             request=MagicMock(),
@@ -238,8 +251,20 @@ class TestFeaturedAndTrending(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "plugins": [
-                {"name": "featured-1", "version": "1.0", "description": "Desc 1", "author": "A1", "plugin_type": "agent"},
-                {"name": "featured-2", "version": "1.0", "description": "Desc 2", "author": "A2", "plugin_type": "agent"},
+                {
+                    "name": "featured-1",
+                    "version": "1.0",
+                    "description": "Desc 1",
+                    "author": "A1",
+                    "plugin_type": "agent",
+                },
+                {
+                    "name": "featured-2",
+                    "version": "1.0",
+                    "description": "Desc 2",
+                    "author": "A2",
+                    "plugin_type": "agent",
+                },
             ]
         }
         mock_response.raise_for_status.return_value = None
@@ -257,7 +282,13 @@ class TestFeaturedAndTrending(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "plugins": [
-                {"name": "trending-1", "version": "1.0", "description": "Desc 1", "author": "A1", "plugin_type": "agent"},
+                {
+                    "name": "trending-1",
+                    "version": "1.0",
+                    "description": "Desc 1",
+                    "author": "A1",
+                    "plugin_type": "agent",
+                },
             ]
         }
         mock_response.raise_for_status.return_value = None
@@ -288,7 +319,9 @@ class TestInstall(unittest.TestCase):
         client = MarketplaceClient()
         info = client.install("mekong-plugin-seo")
 
-        self.assertEqual(info["download_url"], "https://cdn.mekong.dev/plugins/seo-plugin-1.0.0.tar.gz")
+        self.assertEqual(
+            info["download_url"], "https://cdn.mekong.dev/plugins/seo-plugin-1.0.0.tar.gz"
+        )
         self.assertEqual(info["checksum"], "sha256:abc123...")
 
 
@@ -379,6 +412,7 @@ class TestHealthCheck(unittest.TestCase):
     def test_health_check_unhealthy(self, mock_request):
         """Should return False when unhealthy."""
         import httpx
+
         mock_request.side_effect = httpx.ConnectError("Connection refused")
 
         client = MarketplaceClient()
@@ -394,6 +428,7 @@ class TestErrorHandling(unittest.TestCase):
     def test_network_error_connect(self, mock_request):
         """Should raise NetworkError on connection failure."""
         import httpx
+
         mock_request.side_effect = httpx.ConnectError("Connection refused")
 
         client = MarketplaceClient()
@@ -404,6 +439,7 @@ class TestErrorHandling(unittest.TestCase):
     def test_network_error_timeout(self, mock_request):
         """Should raise NetworkError on timeout."""
         import httpx
+
         mock_request.side_effect = httpx.TimeoutException("Request timed out")
 
         client = MarketplaceClient()
@@ -414,6 +450,7 @@ class TestErrorHandling(unittest.TestCase):
     def test_marketplace_error_500(self, mock_request):
         """Should raise MarketplaceError on server error."""
         import httpx
+
         mock_response = MagicMock()
         mock_response.status_code = 500
         mock_response.text = "Internal Server Error"

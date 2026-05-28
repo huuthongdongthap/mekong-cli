@@ -108,10 +108,13 @@ def dispatch_task(item: Any) -> MissionResult:
     task = _queue_item_to_task(item)
 
     # Mark active in journal
-    _update_journal(item.task_id, {
-        "status": "active",
-        "started_at": datetime.now().isoformat(),
-    })
+    _update_journal(
+        item.task_id,
+        {
+            "status": "active",
+            "started_at": datetime.now().isoformat(),
+        },
+    )
 
     model_config = router.route(task)
 
@@ -119,6 +122,7 @@ def dispatch_task(item: Any) -> MissionResult:
     if task.capability in AGENT_CAPABILITIES:
         try:
             from .agent_loop import run_agent_sync
+
             # Map capability to tier: coding-capable → deep, else fast
             tier = "deep" if task.capability in {"builder", "reviewer"} else "fast"
             output = run_agent_sync(item.description, model_tier=tier)
@@ -136,13 +140,16 @@ def dispatch_task(item: Any) -> MissionResult:
             router.record_failure(model_config)
 
     # Update journal with outcome
-    _update_journal(item.task_id, {
-        "status": "success" if result.success else "failed",
-        "completed_at": datetime.now().isoformat(),
-        "duration_ms": int(result.duration * 1000),
-        "output": result.output[:500] if result.output else "",
-        "error": result.error[:300] if result.error else "",
-    })
+    _update_journal(
+        item.task_id,
+        {
+            "status": "success" if result.success else "failed",
+            "completed_at": datetime.now().isoformat(),
+            "duration_ms": int(result.duration * 1000),
+            "output": result.output[:500] if result.output else "",
+            "error": result.error[:300] if result.error else "",
+        },
+    )
 
     logger.info(
         f"[Dispatch] {item.task_id} ({task.capability}) "
@@ -169,7 +176,9 @@ def dispatch_next() -> MissionResult | None:
         return None
 
     item = pending[0]
-    logger.info(f"[Dispatch] dispatch_next → {item.task_id} [{item.priority}] {item.description[:60]}")
+    logger.info(
+        f"[Dispatch] dispatch_next → {item.task_id} [{item.priority}] {item.description[:60]}"
+    )
     return dispatch_task(item)
 
 

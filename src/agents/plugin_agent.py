@@ -34,7 +34,9 @@ class PluginAgent(AgentBase):
         """
         super().__init__(name="PluginAgent")
         self.cwd = Path(cwd).resolve()
-        self.registry_path = Path(registry_path) if registry_path else self.cwd / ".mekong" / "plugins.json"
+        self.registry_path = (
+            Path(registry_path) if registry_path else self.cwd / ".mekong" / "plugins.json"
+        )
 
     def plan(self, input_data: str) -> list[Task]:
         """Parse plugin command string into tasks.

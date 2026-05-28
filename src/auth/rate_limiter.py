@@ -34,6 +34,7 @@ class RateLimitConfig:
         limit: Maximum number of requests allowed
         window: Time window in seconds
     """
+
     limit: int
     window: int
 
@@ -45,13 +46,13 @@ class RateLimitConfig:
 
 # Default rate limit configurations
 DEFAULT_RATE_LIMITS: Dict[RateLimitPreset, RateLimitConfig] = {
-    RateLimitPreset.AUTH_LOGIN: RateLimitConfig(limit=5, window=60),       # 5/min
-    RateLimitPreset.AUTH_CALLBACK: RateLimitConfig(limit=10, window=60),   # 10/min
+    RateLimitPreset.AUTH_LOGIN: RateLimitConfig(limit=5, window=60),  # 5/min
+    RateLimitPreset.AUTH_CALLBACK: RateLimitConfig(limit=10, window=60),  # 10/min
     RateLimitPreset.AUTH_REFRESH: RateLimitConfig(limit=30, window=3600),  # 30/hour
     RateLimitPreset.AUTH_DEV_LOGIN: RateLimitConfig(limit=10, window=60),  # 10/min
-    RateLimitPreset.API_DEFAULT: RateLimitConfig(limit=100, window=60),    # 100/min
-    RateLimitPreset.API_WRITE: RateLimitConfig(limit=20, window=60),       # 20/min
-    RateLimitPreset.API_READ: RateLimitConfig(limit=200, window=60),       # 200/min
+    RateLimitPreset.API_DEFAULT: RateLimitConfig(limit=100, window=60),  # 100/min
+    RateLimitPreset.API_WRITE: RateLimitConfig(limit=20, window=60),  # 20/min
+    RateLimitPreset.API_READ: RateLimitConfig(limit=200, window=60),  # 200/min
 }
 
 
@@ -162,6 +163,7 @@ class BucketEntry:
         last_access: Last access timestamp (unix time)
         key: The rate limit key
     """
+
     bucket: TokenBucket
     last_access: float = field(default_factory=time.time)
     key: str = ""
@@ -235,8 +237,7 @@ class InMemoryRateStorage:
             now = time.time()
             ttl = max_age if max_age is not None else self._ttl_seconds
             stale_keys = [
-                key for key, entry in self._buckets.items()
-                if now - entry.last_access > ttl
+                key for key, entry in self._buckets.items() if now - entry.last_access > ttl
             ]
             for key in stale_keys:
                 del self._buckets[key]
@@ -254,9 +255,7 @@ class InMemoryRateStorage:
             return {
                 "active_buckets": len(self._buckets),
                 "oldest_entry_age": max(ages) if ages else 0,
-                "total_capacity": sum(
-                    entry.bucket.capacity for entry in self._buckets.values()
-                ),
+                "total_capacity": sum(entry.bucket.capacity for entry in self._buckets.values()),
             }
 
     async def clear(self) -> None:

@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-
 DB_PATH = Path.home() / ".mekong" / "raas" / "quota_cache.db"
 
 DEFAULT_TTL_SECONDS = 300  # 5 minutes (cache TTL for normal operation)
@@ -39,6 +38,7 @@ class QuotaState:
         is_offline_mode: True if currently in offline mode
         last_reset_date: Date string (YYYY-MM-DD) of last daily reset
     """
+
     key_id: str
     daily_used: int
     daily_limit: int
@@ -187,9 +187,7 @@ class QuotaCache:
         for col_name, col_def in columns_to_add.items():
             if col_name not in existing_columns:
                 try:
-                    conn.execute(
-                        f"ALTER TABLE quota_cache ADD COLUMN {col_name} {col_def}"
-                    )
+                    conn.execute(f"ALTER TABLE quota_cache ADD COLUMN {col_name} {col_def}")
                 except sqlite3.OperationalError:
                     # Column may already exist or table may be locked
                     pass
@@ -246,10 +244,24 @@ class QuotaCache:
                         monthly_limit=row["monthly_limit"] if "monthly_limit" in row.keys() else 0,
                         cached_at=row["cached_at"],
                         expires_at=row["expires_at"],
-                        grace_period_remaining=row["grace_period_remaining"] if "grace_period_remaining" in row.keys() else GRACE_PERIOD_SECONDS,
-                        last_online_validation=row["last_online_validation"] if "last_online_validation" in row.keys() else "",
-                        is_offline_mode=bool(row["is_offline_mode"]) if "is_offline_mode" in row.keys() else False,
-                        last_reset_date=row["last_reset_date"] if "last_reset_date" in row.keys() else "",
+                        grace_period_remaining=(
+                            row["grace_period_remaining"]
+                            if "grace_period_remaining" in row.keys()
+                            else GRACE_PERIOD_SECONDS
+                        ),
+                        last_online_validation=(
+                            row["last_online_validation"]
+                            if "last_online_validation" in row.keys()
+                            else ""
+                        ),
+                        is_offline_mode=(
+                            bool(row["is_offline_mode"])
+                            if "is_offline_mode" in row.keys()
+                            else False
+                        ),
+                        last_reset_date=(
+                            row["last_reset_date"] if "last_reset_date" in row.keys() else ""
+                        ),
                     )
 
                     # Fix 1: Daily Quota Reset - Check if date changed
@@ -380,10 +392,7 @@ class QuotaCache:
         """
         try:
             with closing(self._connect()) as conn:
-                cursor = conn.execute(
-                    "DELETE FROM quota_cache WHERE key_id = ?",
-                    (key_id,)
-                )
+                cursor = conn.execute("DELETE FROM quota_cache WHERE key_id = ?", (key_id,))
                 conn.commit()
                 return cursor.rowcount > 0
         except sqlite3.Error as exc:
@@ -399,8 +408,7 @@ class QuotaCache:
         try:
             with closing(self._connect()) as conn:
                 cursor = conn.execute(
-                    "DELETE FROM quota_cache WHERE expires_at <= ?",
-                    (self._iso(self._now()),)
+                    "DELETE FROM quota_cache WHERE expires_at <= ?", (self._iso(self._now()),)
                 )
                 conn.commit()
                 return cursor.rowcount
@@ -432,8 +440,7 @@ class QuotaCache:
         try:
             with closing(self._connect()) as conn:
                 rows = conn.execute(
-                    "SELECT * FROM quota_cache WHERE expires_at > ?",
-                    (self._iso(self._now()),)
+                    "SELECT * FROM quota_cache WHERE expires_at > ?", (self._iso(self._now()),)
                 ).fetchall()
 
                 return [

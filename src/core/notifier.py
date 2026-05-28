@@ -22,9 +22,13 @@ logger = logging.getLogger(__name__)
 class NotifyConfig:
     """Notification configuration."""
 
-    events: list[str] = field(default_factory=lambda: [
-        "goal_completed", "job_started", "job_completed",
-    ])
+    events: list[str] = field(
+        default_factory=lambda: [
+            "goal_completed",
+            "job_started",
+            "job_completed",
+        ]
+    )
     enabled: bool = True
 
 
@@ -77,6 +81,7 @@ class Notifier:
         for chat_id in self.bot.config.chat_ids:
             try:
                 import asyncio
+
                 asyncio.run_coroutine_threadsafe(
                     self.bot.send_notification(chat_id, message),
                     asyncio.get_event_loop(),

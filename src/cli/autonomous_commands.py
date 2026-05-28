@@ -23,6 +23,7 @@ telegram_app = typer.Typer(help="Telegram: remote commander bot")
 # Autonomous commands
 # ---------------------------------------------------------------------------
 
+
 @autonomous_app.command(name="status")
 def autonomous_status() -> None:
     """Show Consciousness Score and subsystem health (AGI v2: all 9 subsystems)."""
@@ -73,7 +74,9 @@ def autonomous_run(
 
     engine = AutonomousEngine()
     if engine.is_halted():
-        console.print("[bold red]System is HALTED. Use 'mekong autonomous resume' first.[/bold red]")
+        console.print(
+            "[bold red]System is HALTED. Use 'mekong autonomous resume' first.[/bold red]"
+        )
         raise typer.Exit(code=1)
 
     result = engine.process_goal(goal)
@@ -98,7 +101,9 @@ def autonomous_run(
     if result.reflection_summary:
         console.print(Panel(result.reflection_summary, title="🪞 Reflection", border_style="cyan"))
     if result.world_diff_summary:
-        console.print(Panel(result.world_diff_summary, title="🌍 World Changes", border_style="blue"))
+        console.print(
+            Panel(result.world_diff_summary, title="🌍 World Changes", border_style="blue")
+        )
     if result.decision_trace:
         t = result.decision_trace
         console.print(
@@ -151,7 +156,9 @@ def autonomous_world() -> None:
     """Show current world model snapshot."""
     from src.core.world_model import WorldModel
 
-    console.print(Panel(WorldModel().get_context_summary(), title="🌍 World Model", border_style="blue"))
+    console.print(
+        Panel(WorldModel().get_context_summary(), title="🌍 World Model", border_style="blue")
+    )
 
 
 @autonomous_app.command(name="predict")
@@ -169,7 +176,8 @@ def autonomous_predict(
             f"[bold]Risk Level:[/bold] [{risk_style}]{pred.risk_level.upper()}[/{risk_style}]\n"
             + (
                 "\n[bold]Warnings:[/bold]\n" + "\n".join(f"  ⚠️  {w}" for w in pred.warnings)
-                if pred.warnings else ""
+                if pred.warnings
+                else ""
             ),
             title="🔮 Side Effect Prediction",
             border_style=risk_style,
@@ -180,6 +188,7 @@ def autonomous_predict(
 # ---------------------------------------------------------------------------
 # Telegram commands
 # ---------------------------------------------------------------------------
+
 
 @telegram_app.command(name="start")
 def telegram_start() -> None:
@@ -239,6 +248,7 @@ def telegram_status_cmd() -> None:
 # ---------------------------------------------------------------------------
 # Wiring: attach all AGI sub-apps + system commands to main app
 # ---------------------------------------------------------------------------
+
 
 def register_agi_commands(app: typer.Typer) -> None:
     """Wire all AGI sub-typers and system commands onto the main app."""

@@ -80,7 +80,10 @@ _CHECKLIST_DATA = (
     ("Set up quiet period calendar — 25 days post-IPO no analyst guidance", "IPO Day +3"),
     ("Schedule analyst initiation coverage kickoffs (post quiet period)", "IPO Day +5"),
     ("Configure Edgar filing calendar — 10-Q due 45 days post quarter end", "IPO Day +5"),
-    ("Review Reg FD policy with legal — no material non-public info to select investors", "IPO Day +7"),
+    (
+        "Review Reg FD policy with legal — no material non-public info to select investors",
+        "IPO Day +7",
+    ),
     ("Establish earnings call cadence and first earnings date", "IPO Day +7"),
     ("Set up stock admin platform (Carta/Shareworks) for employee equity", "IPO Day +7"),
 )
@@ -119,13 +122,15 @@ def model_pricing(
         [0.15, 0.10, 0.05],
     ):
         shares_offered = int(shares_outstanding * (shares_offered_pct / 100))
-        scenarios.append(PricingScenario(
-            price=round(price, 2),
-            shares_offered=shares_offered,
-            gross_proceeds=round(price * shares_offered, 2),
-            market_cap=round(price * shares_outstanding, 2),
-            first_day_pop_pct=pop,
-        ))
+        scenarios.append(
+            PricingScenario(
+                price=round(price, 2),
+                shares_offered=shares_offered,
+                gross_proceeds=round(price * shares_offered, 2),
+                market_cap=round(price * shares_outstanding, 2),
+                first_day_pop_pct=pop,
+            )
+        )
     return scenarios
 
 

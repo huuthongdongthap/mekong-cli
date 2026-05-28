@@ -3,6 +3,7 @@
 Tracks user progression through onboarding funnel steps.
 Provides aggregation queries for conversion analytics.
 """
+
 from __future__ import annotations
 
 import json

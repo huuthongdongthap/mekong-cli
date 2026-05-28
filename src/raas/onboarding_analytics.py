@@ -8,6 +8,7 @@ Usage:
     rates = analytics.get_conversion_rates(days=30)
     drops = analytics.get_drop_off_points(days=30)
 """
+
 from __future__ import annotations
 
 import logging
@@ -490,13 +491,15 @@ class OnboardingAnalytics:
                 }
                 for cr in conversion_rates
             ],
-            "biggest_drop_off": {
-                "step": biggest_drop_off.step_name,
-                "rate": biggest_drop_off.drop_off_rate,
-                "severity": biggest_drop_off.drop_off_severity,
-            }
-            if biggest_drop_off
-            else None,
+            "biggest_drop_off": (
+                {
+                    "step": biggest_drop_off.step_name,
+                    "rate": biggest_drop_off.drop_off_rate,
+                    "severity": biggest_drop_off.drop_off_severity,
+                }
+                if biggest_drop_off
+                else None
+            ),
             "critical_drop_offs": [
                 {"step": d.step_name, "rate": d.drop_off_rate}
                 for d in drop_offs

@@ -12,12 +12,14 @@ class TestAgentDefinitions:
     @pytest.mark.parametrize("agent", CORE_AGENTS)
     def test_agent_has_default_prompt(self, agent: str) -> None:
         from src.core.agent_dispatcher import DEFAULT_PROMPTS
+
         assert agent in DEFAULT_PROMPTS, f"Missing default prompt for: {agent}"
         assert len(DEFAULT_PROMPTS[agent]) > 20, f"Default prompt too short for: {agent}"
 
     @pytest.mark.parametrize("agent", CORE_AGENTS)
     def test_agent_has_hub_mapping(self, agent: str) -> None:
         from src.core.agent_dispatcher import ROLE_HUB_MAP
+
         assert agent in ROLE_HUB_MAP, f"Missing hub mapping for: {agent}"
 
 
@@ -26,23 +28,27 @@ class TestHubLoading:
 
     def test_load_agent_with_hub(self) -> None:
         from src.core.agent_dispatcher import load_agent_prompt
+
         prompt = load_agent_prompt("cto", include_hub=True)
         assert "CTO" in prompt or "cto" in prompt.lower()
         assert len(prompt) > 20  # Must be non-trivial
 
     def test_load_agent_without_hub(self) -> None:
         from src.core.agent_dispatcher import load_agent_prompt
+
         prompt = load_agent_prompt("cto", include_hub=False)
         assert "CTO" in prompt or "cto" in prompt.lower()
 
     def test_hub_mapping_exists(self) -> None:
         from src.core.agent_dispatcher import ROLE_HUB_MAP
+
         assert "cto" in ROLE_HUB_MAP
         assert "cfo" in ROLE_HUB_MAP
         assert "cmo" in ROLE_HUB_MAP
 
     def test_fallback_for_unknown_agent(self) -> None:
         from src.core.agent_dispatcher import load_agent_prompt
+
         prompt = load_agent_prompt("unknown_role_xyz", include_hub=False)
         assert "unknown_role_xyz" in prompt
 
@@ -52,11 +58,13 @@ class TestContextFlow:
 
     def test_empty_flow(self, tmp_path: Path) -> None:
         from src.core.context_flow import ContextFlow
+
         flow = ContextFlow(task_id="test1", mekong_dir=str(tmp_path))
         assert flow.get_context_for("cto") == ""
 
     def test_single_contribution(self, tmp_path: Path) -> None:
         from src.core.context_flow import ContextFlow
+
         flow = ContextFlow(task_id="test2", mekong_dir=str(tmp_path))
         flow.add("cfo", "Revenue: $42K MRR", status="DONE")
         context = flow.get_context_for("cmo")
@@ -66,6 +74,7 @@ class TestContextFlow:
 
     def test_multi_contribution(self, tmp_path: Path) -> None:
         from src.core.context_flow import ContextFlow
+
         flow = ContextFlow(task_id="test3", mekong_dir=str(tmp_path))
         flow.add("cfo", "Revenue: $42K", status="DONE")
         flow.add("cmo", "Blog draft ready", status="DONE")
@@ -76,12 +85,14 @@ class TestContextFlow:
 
     def test_blocker_detection(self, tmp_path: Path) -> None:
         from src.core.context_flow import ContextFlow
+
         flow = ContextFlow(task_id="test4", mekong_dir=str(tmp_path))
         flow.add("cfo", "", status="BLOCKED", concerns="Missing Q1 data")
         assert flow.has_blocker()
 
     def test_persistence(self, tmp_path: Path) -> None:
         from src.core.context_flow import ContextFlow
+
         flow = ContextFlow(task_id="test5", mekong_dir=str(tmp_path))
         flow.add("cto", "Architecture designed", status="DONE")
         # Load from disk
@@ -91,6 +102,7 @@ class TestContextFlow:
 
     def test_summary(self, tmp_path: Path) -> None:
         from src.core.context_flow import ContextFlow
+
         flow = ContextFlow(task_id="test6", mekong_dir=str(tmp_path))
         flow.add("cfo", "Done", status="DONE")
         flow.add("cmo", "Done", status="DONE")
@@ -103,23 +115,27 @@ class TestMultiAgentRouting:
 
     def test_single_agent_default(self) -> None:
         from src.core.task_classifier import classify_multi_agent
+
         agents = classify_multi_agent("fix the login bug")
         assert len(agents) == 1
         assert agents[0] == "cto"
 
     def test_multi_agent_revenue_report(self) -> None:
         from src.core.task_classifier import classify_multi_agent
+
         agents = classify_multi_agent("create a revenue report for Q1")
         assert "cfo" in agents
         assert "data" in agents
 
     def test_multi_agent_product_launch(self) -> None:
         from src.core.task_classifier import classify_multi_agent
+
         agents = classify_multi_agent("prepare product launch campaign")
         assert "cmo" in agents
 
     def test_multi_agent_incident(self) -> None:
         from src.core.task_classifier import classify_multi_agent
+
         agents = classify_multi_agent("handle incident response for API downtime")
         assert "coo" in agents
         assert "cto" in agents

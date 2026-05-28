@@ -48,11 +48,7 @@ def daemon_status() -> None:
 
     for w in workers:
         status_style = (
-            "green"
-            if w.status == "online"
-            else "red"
-            if w.status == "errored"
-            else "yellow"
+            "green" if w.status == "online" else "red" if w.status == "errored" else "yellow"
         )
         uptime_sec = w.uptime_ms // 1000
         uptime_str = f"{uptime_sec // 3600}h {(uptime_sec % 3600) // 60}m"
@@ -75,9 +71,7 @@ def daemon_status() -> None:
         console.print(Panel(f"[green]✅ All {len(workers)} workers online[/green]"))
     else:
         console.print(
-            Panel(
-                f"[yellow]⚠ {len(workers) - online} of {len(workers)} workers offline[/yellow]"
-            )
+            Panel(f"[yellow]⚠ {len(workers) - online} of {len(workers)} workers offline[/yellow]")
         )
 
 
@@ -95,11 +89,15 @@ def daemon_metrics() -> None:
     table.add_row("Throughput", f"{metrics.throughput_per_minute:.2f} tasks/min")
     table.add_row(
         "Success Rate",
-        f"[green]{metrics.success_rate:.1f}%[/green]"
-        if metrics.success_rate >= 95
-        else f"[yellow]{metrics.success_rate:.1f}%[/yellow]"
-        if metrics.success_rate >= 80
-        else f"[red]{metrics.success_rate:.1f}%[/red]",
+        (
+            f"[green]{metrics.success_rate:.1f}%[/green]"
+            if metrics.success_rate >= 95
+            else (
+                f"[yellow]{metrics.success_rate:.1f}%[/yellow]"
+                if metrics.success_rate >= 80
+                else f"[red]{metrics.success_rate:.1f}%[/red]"
+            )
+        ),
     )
     table.add_row("Queue Depth", str(metrics.queue_depth))
     table.add_row("Avg Response Time", f"{metrics.avg_response_time_ms:.0f}ms")

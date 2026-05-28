@@ -252,7 +252,9 @@ class APIAdapter:
             return self._sync_openai(model_config, messages, system_prompt, api_key)
         return ""
 
-    def _sync_anthropic(self, config: ModelConfig, messages: list[dict], system_prompt: str | None, api_key: str) -> str:
+    def _sync_anthropic(
+        self, config: ModelConfig, messages: list[dict], system_prompt: str | None, api_key: str
+    ) -> str:
         import urllib.request
 
         base_url = os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
@@ -284,7 +286,9 @@ class APIAdapter:
             logger.error("Anthropic sync failed: %s", e)
             return ""
 
-    def _sync_google(self, config: ModelConfig, messages: list[dict], system_prompt: str | None, api_key: str) -> str:
+    def _sync_google(
+        self, config: ModelConfig, messages: list[dict], system_prompt: str | None, api_key: str
+    ) -> str:
         import urllib.request
 
         contents = format_for_gemini(messages, system_prompt)
@@ -317,7 +321,9 @@ class APIAdapter:
             logger.error("Google sync failed: %s", e)
             return ""
 
-    def _sync_openai(self, config: ModelConfig, messages: list[dict], system_prompt: str | None, api_key: str) -> str:
+    def _sync_openai(
+        self, config: ModelConfig, messages: list[dict], system_prompt: str | None, api_key: str
+    ) -> str:
         import urllib.request
 
         formatted = format_for_openai(messages, system_prompt)

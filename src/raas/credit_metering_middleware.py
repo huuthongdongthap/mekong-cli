@@ -15,7 +15,6 @@ from typing import Dict, List, Optional
 
 from src.raas.credits import CreditStore, DB_PATH
 
-
 # ---------------------------------------------------------------------------
 # Task-level cost table
 # ---------------------------------------------------------------------------
@@ -44,9 +43,7 @@ class InsufficientCreditsError(Exception):
         self.tenant_id = tenant_id
         self.required = required
         self.available = available
-        super().__init__(
-            f"Tenant '{tenant_id}' has {available} credits but {required} required."
-        )
+        super().__init__(f"Tenant '{tenant_id}' has {available} credits but {required} required.")
 
 
 # ---------------------------------------------------------------------------
@@ -115,8 +112,7 @@ class CreditMeter:
         """Create usage_events table if it does not exist."""
         try:
             with self._connect() as conn:
-                conn.execute(
-                    """
+                conn.execute("""
                     CREATE TABLE IF NOT EXISTS usage_events (
                         id           TEXT PRIMARY KEY,
                         tenant_id    TEXT NOT NULL,
@@ -125,8 +121,7 @@ class CreditMeter:
                         credits_used INTEGER NOT NULL,
                         timestamp    TEXT NOT NULL
                     )
-                    """
-                )
+                    """)
         except sqlite3.Error as exc:
             raise RuntimeError(f"CreditMeter: failed to initialize DB: {exc}") from exc
 
@@ -158,15 +153,11 @@ class CreditMeter:
         """
         cost = TASK_COSTS.get(complexity)
         if cost is None:
-            raise ValueError(
-                f"Unknown task type '{complexity}'. Valid types: {list(TASK_COSTS)}"
-            )
+            raise ValueError(f"Unknown task type '{complexity}'. Valid types: {list(TASK_COSTS)}")
 
         balance = self._credit_store.get_balance(tenant_id)
         if balance < cost:
-            raise InsufficientCreditsError(
-                tenant_id=tenant_id, required=cost, available=balance
-            )
+            raise InsufficientCreditsError(tenant_id=tenant_id, required=cost, available=balance)
 
     def record_usage(
         self,
@@ -216,9 +207,7 @@ class CreditMeter:
             raise RuntimeError(f"CreditMeter.record_usage failed: {exc}") from exc
         return event
 
-    def get_usage_summary(
-        self, tenant_id: str, period: str = "daily"
-    ) -> UsageSummary:
+    def get_usage_summary(self, tenant_id: str, period: str = "daily") -> UsageSummary:
         """Aggregate credit usage for a tenant over a period.
 
         Args:
@@ -272,9 +261,7 @@ class CreditMeter:
             breakdown=breakdown,
         )
 
-    def list_events(
-        self, tenant_id: str, limit: int = 50
-    ) -> List[UsageEvent]:
+    def list_events(self, tenant_id: str, limit: int = 50) -> List[UsageEvent]:
         """Return recent usage events for a tenant, newest first.
 
         Args:

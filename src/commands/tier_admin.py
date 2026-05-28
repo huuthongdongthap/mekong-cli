@@ -28,6 +28,7 @@ def list_configs() -> None:
     try:
         repo = get_repository()
         import asyncio
+
         configs = asyncio.run(repo.get_all_configs())
 
         if not configs:
@@ -214,11 +215,14 @@ def set_config(
         console.print("[bold green]✓ Configuration updated![/bold green]\n")
         console.print(f"  [cyan]Tier:[/cyan] {config.tier}")
         console.print(f"  [cyan]Preset:[/cyan] {config.preset}")
-        console.print(f"  [cyan]Rate Limit:[/cyan] {config.rate_limit} requests / {config.window_seconds}s")
+        console.print(
+            f"  [cyan]Rate Limit:[/cyan] {config.rate_limit} requests / {config.window_seconds}s"
+        )
         console.print(f"  [cyan]Window:[/cyan] {config.window_seconds} seconds")
 
         # Invalidate cache
         from src.lib.rate_limiter_factory import invalidate_cache
+
         invalidate_cache(tier.lower())
 
     except Exception as e:
@@ -271,7 +275,9 @@ def set_override(
         console.print("[bold green]✓ Tenant override created![/bold green]\n")
         console.print(f"  [cyan]Tenant ID:[/cyan] {override.tenant_id}")
         console.print(f"  [cyan]Preset:[/cyan] {override.preset}")
-        console.print(f"  [cyan]Custom Limit:[/cyan] {override.custom_limit} requests / {override.custom_window}s")
+        console.print(
+            f"  [cyan]Custom Limit:[/cyan] {override.custom_limit} requests / {override.custom_window}s"
+        )
         if override.tier:
             console.print(f"  [cyan]Tier Override:[/cyan] {override.tier}")
         if override.expires_at:

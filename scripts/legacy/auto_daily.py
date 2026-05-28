@@ -25,20 +25,14 @@ def run_cmd(cmd, cwd=".", use_shell=False):
     try:
         if use_shell:
             # Only use shell for complex commands with pipes that can't be converted
-            result = subprocess.run(
-                cmd, shell=True, capture_output=True, text=True, cwd=cwd
-            )
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=cwd)
         else:
             # Safe: Split command into arguments or use list directly
             if isinstance(cmd, str):
                 cmd_parts = cmd.split()
-                result = subprocess.run(
-                    cmd_parts, capture_output=True, text=True, cwd=cwd
-                )
+                result = subprocess.run(cmd_parts, capture_output=True, text=True, cwd=cwd)
             else:
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True, cwd=cwd
-                )
+                result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
         return result.stdout.strip(), result.returncode == 0
     except Exception as e:
         return str(e), False
@@ -51,13 +45,13 @@ def run_safe_pytest():
         result = subprocess.run(
             ["python3", "-m", "pytest", "tests/test_wow.py", "-v", "--tb=short"],
             capture_output=True,
-            text=True
+            text=True,
         )
-        
+
         # Get last 5 lines of output using Python instead of shell tail
-        lines = result.stdout.strip().split('\n')
-        last_lines = '\n'.join(lines[-5:]) if lines else ""
-        
+        lines = result.stdout.strip().split("\n")
+        last_lines = "\n".join(lines[-5:]) if lines else ""
+
         return last_lines, result.returncode == 0
     except Exception as e:
         return str(e), False

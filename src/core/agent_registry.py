@@ -39,8 +39,7 @@ class AgentRegistry:
         """
         if not isinstance(cls, type) or not issubclass(cls, AgentBase):
             msg = (
-                f"{cls!r} must be a subclass of AgentBase to be registered "
-                f"under name '{name}'"
+                f"{cls!r} must be a subclass of AgentBase to be registered " f"under name '{name}'"
             )
             raise TypeError(
                 msg,
@@ -62,10 +61,7 @@ class AgentRegistry:
         """
         if name not in self._agents:
             available = list(self._agents.keys())
-            msg = (
-                f"Unknown agent: '{name}'. "
-                f"Available agents: {available}"
-            )
+            msg = f"Unknown agent: '{name}'. " f"Available agents: {available}"
             raise KeyError(
                 msg,
             )
@@ -84,9 +80,11 @@ class AgentRegistry:
                 ...
 
         """
+
         def wrapper(cls: type) -> type:
             self.register(name, cls)
             return cls
+
         return wrapper
 
     def __contains__(self, name: object) -> bool:

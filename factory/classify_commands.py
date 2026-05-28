@@ -111,9 +111,7 @@ def main() -> None:
         format="%(levelname)s %(message)s",
     )
 
-    parser = argparse.ArgumentParser(
-        description="Classify command files into factory layers."
-    )
+    parser = argparse.ArgumentParser(description="Classify command files into factory layers.")
     parser.add_argument(
         "--strict",
         action="store_true",

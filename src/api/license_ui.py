@@ -68,18 +68,20 @@ def create_license_ui_app() -> FastAPI:
         features = validator.get_features()
 
         # Check if no license
-        result = validator._run_validator() if hasattr(validator, '_run_validator') else {}
+        result = validator._run_validator() if hasattr(validator, "_run_validator") else {}
         no_license = result.get("no_license", False) if result else False
 
-        return JSONResponse({
-            "valid": is_valid,
-            "tier": tier,
-            "features": features,
-            "feature_count": len(features),
-            "no_license": no_license,
-            "error": error if not is_valid else None,
-            "status": "active" if is_valid else ("no_license" if no_license else "invalid"),
-        })
+        return JSONResponse(
+            {
+                "valid": is_valid,
+                "tier": tier,
+                "features": features,
+                "feature_count": len(features),
+                "no_license": no_license,
+                "error": error if not is_valid else None,
+                "status": "active" if is_valid else ("no_license" if no_license else "invalid"),
+            }
+        )
 
     @app.post("/api/activate")
     async def activate_license(req: ActivateLicenseRequest):
@@ -87,13 +89,17 @@ def create_license_ui_app() -> FastAPI:
         license_key = req.license_key.strip()
 
         # Validate key format
-        if not license_key.startswith("raas") and not license_key.startswith("RPP-") and not license_key.startswith("REP-"):
+        if (
+            not license_key.startswith("raas")
+            and not license_key.startswith("RPP-")
+            and not license_key.startswith("REP-")
+        ):
             return JSONResponse(
                 status_code=400,
                 content={
                     "success": False,
                     "error": "Invalid license key format. Must start with 'raas', 'RPP-', or 'REP-'",
-                }
+                },
             )
 
         # Save to .env file
@@ -127,19 +133,21 @@ def create_license_ui_app() -> FastAPI:
         if is_valid:
             tier = validator.get_tier()
             features = validator.get_features()
-            return JSONResponse({
-                "success": True,
-                "message": "License activated successfully",
-                "tier": tier,
-                "features": features,
-            })
+            return JSONResponse(
+                {
+                    "success": True,
+                    "message": "License activated successfully",
+                    "tier": tier,
+                    "features": features,
+                }
+            )
         else:
             return JSONResponse(
                 status_code=400,
                 content={
                     "success": False,
                     "error": error or "License validation failed",
-                }
+                },
             )
 
     @app.post("/api/validate")
@@ -151,16 +159,18 @@ def create_license_ui_app() -> FastAPI:
         validator = get_validator()
         is_valid, error = validator.validate(license_key)
 
-        tier = validator.get_tier() if hasattr(validator, 'get_tier') else "unknown"
-        features = validator.get_features() if hasattr(validator, 'get_features') else []
+        tier = validator.get_tier() if hasattr(validator, "get_tier") else "unknown"
+        features = validator.get_features() if hasattr(validator, "get_features") else []
 
-        return JSONResponse({
-            "valid": is_valid,
-            "tier": tier,
-            "features": features,
-            "feature_count": len(features),
-            "error": error if not is_valid else None,
-        })
+        return JSONResponse(
+            {
+                "valid": is_valid,
+                "tier": tier,
+                "features": features,
+                "feature_count": len(features),
+                "error": error if not is_valid else None,
+            }
+        )
 
     @app.post("/api/deactivate")
     async def deactivate_license():
@@ -183,11 +193,13 @@ def create_license_ui_app() -> FastAPI:
         if "RAAS_LICENSE_KEY" in os.environ:
             del os.environ["RAAS_LICENSE_KEY"]
 
-        return JSONResponse({
-            "success": True,
-            "message": "License deactivated",
-            "tier": "free",
-        })
+        return JSONResponse(
+            {
+                "success": True,
+                "message": "License deactivated",
+                "tier": "free",
+            }
+        )
 
     return app
 
@@ -212,6 +224,7 @@ def run_license_ui(host: str = "127.0.0.1", port: int = 8080, open_browser: bool
 
     if open_browser:
         import webbrowser
+
         webbrowser.open(url, new=2)
 
     uvicorn.run(app, host=host, port=port, log_level="info")

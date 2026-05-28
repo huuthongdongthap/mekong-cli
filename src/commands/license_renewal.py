@@ -37,11 +37,15 @@ def renewal_open(
 
     console.print(
         Panel(
-            f"[bold]License Renewal Portal[/bold]\n\n"
-            f"Key ID: {key_id or 'N/A'}\n"
-            f"Tier: {tier or 'N/A'}\n\n"
-            f"Renewal URL:\n[link={renewal_url}]{renewal_url}[/link]\n\n"
-            f"Opening in browser..." if auto else "Use --auto to open in browser",
+            (
+                f"[bold]License Renewal Portal[/bold]\n\n"
+                f"Key ID: {key_id or 'N/A'}\n"
+                f"Tier: {tier or 'N/A'}\n\n"
+                f"Renewal URL:\n[link={renewal_url}]{renewal_url}[/link]\n\n"
+                f"Opening in browser..."
+                if auto
+                else "Use --auto to open in browser"
+            ),
             title="🔄 License Renewal",
             border_style="yellow",
         )
@@ -93,7 +97,10 @@ def renewal_status() -> None:
             expiry_date = "unknown"
             if expires_at:
                 from datetime import datetime, timezone
-                expiry_date = datetime.fromtimestamp(expires_at, tz=timezone.utc).strftime("%Y-%m-%d")
+
+                expiry_date = datetime.fromtimestamp(expires_at, tz=timezone.utc).strftime(
+                    "%Y-%m-%d"
+                )
 
             renewal_url = get_renewal_url(
                 key_id=info.get("key_id", ""),

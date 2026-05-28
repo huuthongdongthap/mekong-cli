@@ -29,7 +29,7 @@ class TestGatewayClient:
         client = GatewayClient(custom_url)
         assert client.base_url == custom_url
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_session_creation(self, mock_session_class):
         """Test that GatewayClient creates a configured requests session."""
         # Arrange
@@ -42,7 +42,7 @@ class TestGatewayClient:
         # Assert
         assert client.session == mock_session
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_verify_license_success(self, mock_session_class):
         """Test successful license verification through the gateway."""
         # Arrange
@@ -53,7 +53,7 @@ class TestGatewayClient:
             "tier": "PRO",
             "email": "test@example.com",
             "expires_at": "2024-12-31",
-            "features": ["unlimited", "priority"]
+            "features": ["unlimited", "priority"],
         }
 
         mock_session = MagicMock()
@@ -74,16 +74,13 @@ class TestGatewayClient:
         assert result.features == ["unlimited", "priority"]
         assert result.error is None
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_verify_license_invalid(self, mock_session_class):
         """Test verification with invalid license key."""
         # Arrange
         mock_response = MagicMock()
         mock_response.status_code = 401
-        mock_response.json.return_value = {
-            "valid": False,
-            "error": "Invalid license key"
-        }
+        mock_response.json.return_value = {"valid": False, "error": "Invalid license key"}
 
         mock_session = MagicMock()
         mock_session.post.return_value = mock_response
@@ -99,11 +96,12 @@ class TestGatewayClient:
         assert result.valid is False
         assert result.error == "Invalid license key"
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_verify_license_connection_error(self, mock_session_class):
         """Test handling of connection errors."""
         # Arrange
         import requests
+
         mock_session = MagicMock()
         mock_session.post.side_effect = requests.exceptions.ConnectionError("Connection timed out")
         mock_session_class.return_value = mock_session
@@ -114,7 +112,7 @@ class TestGatewayClient:
         with pytest.raises(GatewayClientError):
             client.verify_license("valid-license-key", "test@example.com")
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_verify_license_server_error(self, mock_session_class):
         """Test handling of server errors."""
         # Arrange
@@ -132,7 +130,7 @@ class TestGatewayClient:
         with pytest.raises(GatewayClientError):
             client.verify_license("valid-license-key", "test@example.com")
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_user_agent_header(self, mock_session_class):
         """Test that the correct user-agent header is set."""
         # Arrange
@@ -153,7 +151,7 @@ class TestGatewayClient:
         # Check that session was created and request was made
         mock_session.post.assert_called_once()
 
-    @patch('src.auth.login_client.requests.Session')
+    @patch("src.auth.login_client.requests.Session")
     def test_retries_on_transient_errors(self, mock_session_class):
         """Test that GatewayClient raises error for 5xx responses."""
         # Arrange
@@ -182,7 +180,7 @@ class TestLicenseInfo:
             email="test@example.com",
             expires_at="2024-12-31",
             features=["unlimited"],
-            error=None
+            error=None,
         )
 
         assert license_info.valid is True
@@ -194,10 +192,7 @@ class TestLicenseInfo:
 
     def test_license_info_with_error(self):
         """Test that LicenseInfo handles error information."""
-        license_info = LicenseInfo(
-            valid=False,
-            error="Invalid license"
-        )
+        license_info = LicenseInfo(valid=False, error="Invalid license")
 
         assert license_info.valid is False
         assert license_info.error == "Invalid license"
@@ -213,9 +208,7 @@ class TestVerifyRequest:
     def test_verify_request_creation(self):
         """Test that VerifyRequest dataclass is properly initialized."""
         request = VerifyRequest(
-            license_key="test-license-key",
-            email="test@example.com",
-            action="verify"
+            license_key="test-license-key", email="test@example.com", action="verify"
         )
 
         assert request.license_key == "test-license-key"
@@ -224,9 +217,7 @@ class TestVerifyRequest:
 
     def test_verify_request_defaults(self):
         """Test that VerifyRequest with minimal parameters uses defaults."""
-        request = VerifyRequest(
-            license_key="test-license-key"
-        )
+        request = VerifyRequest(license_key="test-license-key")
 
         assert request.license_key == "test-license-key"
         assert request.email is None

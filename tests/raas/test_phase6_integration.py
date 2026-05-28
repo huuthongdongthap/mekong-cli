@@ -26,7 +26,7 @@ class TestUsageInstrumentor:
 
         instrumentor = UsageInstrumentor()
 
-        assert instrumentor.gateway_url == "https://raas.agencyos.network"
+        assert instrumentor.gateway_url == "https://api.cashclaw.cc"
         assert instrumentor.cli_version is not None
         assert instrumentor.usage_dir.exists()
 
@@ -66,7 +66,7 @@ class TestUsageInstrumentor:
         assert "python_version" in metadata
         assert metadata["command"] == "test-command"
 
-    @patch('src.cli.usage_auto_instrument.UsageInstrumentor._send_to_gateway')
+    @patch("src.cli.usage_auto_instrument.UsageInstrumentor._send_to_gateway")
     def test_emit_event_success(self, mock_send):
         """Test successful event emission."""
         from src.cli.usage_auto_instrument import UsageInstrumentor
@@ -82,8 +82,8 @@ class TestUsageInstrumentor:
         assert event_id is not None
         mock_send.assert_called_once()
 
-    @patch('src.cli.usage_auto_instrument.UsageInstrumentor._send_to_gateway')
-    @patch('src.cli.usage_auto_instrument.UsageInstrumentor._cache_event')
+    @patch("src.cli.usage_auto_instrument.UsageInstrumentor._send_to_gateway")
+    @patch("src.cli.usage_auto_instrument.UsageInstrumentor._cache_event")
     def test_emit_event_fallback_cache(self, mock_cache, mock_send):
         """Test event caching when gateway fails."""
         from src.cli.usage_auto_instrument import UsageInstrumentor
@@ -115,7 +115,7 @@ class TestUsageInstrumentor:
         from src.cli.usage_auto_instrument import UsageInstrumentor, UsageEvent
 
         # Mock requests.post at module level where it's imported
-        with patch('requests.post') as mock_post:
+        with patch("requests.post") as mock_post:
             # Mock successful response
             mock_response = Mock()
             mock_response.status_code = 200
@@ -150,7 +150,7 @@ class TestUsageInstrumentor:
         """Test rate limit handling."""
         from src.cli.usage_auto_instrument import UsageInstrumentor, UsageEvent
 
-        with patch('requests.post') as mock_post:
+        with patch("requests.post") as mock_post:
             # Mock 429 response
             mock_response = Mock()
             mock_response.status_code = 429
@@ -254,7 +254,7 @@ class TestSyncRaasCommands:
         from src.commands import sync_raas_commands
 
         # Verify module imports and has app
-        assert hasattr(sync_raas_commands, 'app')
+        assert hasattr(sync_raas_commands, "app")
         assert sync_raas_commands.app is not None
 
 
@@ -295,6 +295,7 @@ class TestGlobalInstrumentor:
 
         # Reset global
         import src.cli.usage_auto_instrument as module
+
         module._instrumentor = None
 
         # Get instance

@@ -4,16 +4,15 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
-    "name_vi": "Goals",
     "name_en": "Goals",
     "icon": "",
-    "description_vi": "Execute Goals command",
-    "description_en": "Execute Goals command"
+    "description_en": "Founder goal setting and command configuration"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "strategist",
+      "researcher",
+      "planner"
     ],
     "hub": "founder-hub",
     "complexity": "standard",
@@ -31,9 +30,60 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "project": {
+      "context": {
         "type": "string",
-        "description": "Target project path"
+        "description": "Business context or background"
+      },
+      "urgency": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "description": "Priority level"
+      },
+      "provider": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "codex",
+          "claude",
+          "gemini",
+          "opencode",
+          "aider"
+        ],
+        "description": "Preferred execution provider"
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "plan",
+          "auto"
+        ],
+        "description": "Whether to only plan or configure autonomous execution"
+      },
+      "codex_auto_command": {
+        "type": "string",
+        "description": "Current Codex CLI auto-mode equivalent"
+      },
+      "sandbox": {
+        "type": "string",
+        "enum": [
+          "read-only",
+          "workspace-write",
+          "danger-full-access"
+        ],
+        "description": "Codex sandbox mode"
+      },
+      "approval_policy": {
+        "type": "string",
+        "enum": [
+          "untrusted",
+          "on-request",
+          "never"
+        ],
+        "description": "Codex approval policy"
       }
     }
   },
@@ -41,16 +91,39 @@
     "type": "object",
     "properties": {
       "summary": {
-        "type": "string"
+        "type": "string",
+        "description": "Executive summary"
       },
-      "files_modified": {
+      "recommendations": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "credits_used": {
-        "type": "integer"
+      "next_steps": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "command_config": {
+        "type": "object",
+        "description": "Effective command/adapter configuration"
+      },
+      "codex_auto_command": {
+        "type": "string",
+        "description": "Resolved Codex auto-mode command"
+      },
+      "dag_groups": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
       }
     }
   },

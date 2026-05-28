@@ -25,8 +25,9 @@ from typing import Optional
 
 from src.config.logging_config import get_logger
 from src.lib.license_generator import LicenseKeyGenerator
+from src.lib.license_email import send_license_email
 
-router = APIRouter(prefix="/api/v1/polar", tags=["Polar.sh Webhooks"])
+router = APIRouter(prefix="/webhook/polar", tags=["Polar.sh Webhooks"])
 
 # Config
 POLAR_WEBHOOK_SECRET = os.getenv("POLAR_WEBHOOK_SECRET")
@@ -35,7 +36,9 @@ WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS = 300  # 5 minutes
 logger = get_logger(__name__)
 
 
-def verify_webhook_signature(payload: bytes, signature: str, timestamp: Optional[int] = None) -> bool:
+def verify_webhook_signature(
+    payload: bytes, signature: str, timestamp: Optional[int] = None
+) -> bool:
     """
     Verify Polar.sh webhook signature with timestamp validation.
 
@@ -63,9 +66,7 @@ def verify_webhook_signature(payload: bytes, signature: str, timestamp: Optional
 
         # Calculate expected signature
         expected_signature = hmac.new(
-            POLAR_WEBHOOK_SECRET.encode(),
-            payload,
-            hashlib.sha256
+            POLAR_WEBHOOK_SECRET.encode(), payload, hashlib.sha256
         ).hexdigest()
 
         # Compare signatures
@@ -112,14 +113,14 @@ def process_subscription_created(event_data: dict) -> dict:
     customer_id = customer.get("id", "unknown")
     product_name = product.get("name", "Unknown Product")
 
-    # Determine tier from product name/metadata
-    tier = "pro"  # Default
-    if "enterprise" in product_name.lower():
-        tier = "enterprise"
-    elif "trial" in product_name.lower():
-        tier = "trial"
-    elif "free" in product_name.lower():
-        tier = "free"
+    # Determine tier from product name/metadata (a16z solo tiers)
+    tier = "starter"  # Default
+    if "pro" in product_name.lower():
+        tier = "pro"
+    elif "growth" in product_name.lower():
+        tier = "growth"
+    elif "starter" in product_name.lower():
+        tier = "starter"
 
     # Generate license key
     generator = LicenseKeyGenerator()
@@ -146,6 +147,12 @@ def process_subscription_created(event_data: dict) -> dict:
 
     with open(licenses_path, "w") as f:
         json.dump(licenses, f, indent=2)
+
+    # Best-effort email delivery (never blocks the webhook ack)
+    try:
+        send_license_email(email, license_key, tier)
+    except Exception as exc:  # defensive — send_license_email already swallows
+        logger.warning("webhook.email_dispatch_error", error=str(exc))
 
     key_preview = f"{license_key[:20]}..."
     logger.info(
@@ -269,7 +276,7 @@ def _is_event_duplicate(event_id: str) -> bool:
     return False
 
 
-@router.post("/webhook")
+@router.post("")
 async def handle_webhook(
     request: Request,
     x_polar_signature: Optional[str] = Header(None, alias="X-Polar-Signature"),
@@ -348,7 +355,9 @@ async def handle_webhook(
         logger.info("webhook.processed", event_type=event_type, event_id=event_id or "unknown")
         return result
     except Exception as e:
-        logger.error("webhook.error", event_type=event_type, event_id=event_id or "unknown", error=str(e))
+        logger.error(
+            "webhook.error", event_type=event_type, event_id=event_id or "unknown", error=str(e)
+        )
         raise HTTPException(status_code=500, detail=f"Processing error: {e}")
 
 

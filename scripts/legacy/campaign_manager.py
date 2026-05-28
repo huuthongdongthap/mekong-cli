@@ -213,9 +213,7 @@ def create_campaign(slug, url=None):
 
     # Fallback / Generic
     if not product:
-        print(
-            f"{YELLOW}⚠️ Product '{slug}' not found in DB. Using generic template.{RESET}"
-        )
+        print(f"{YELLOW}⚠️ Product '{slug}' not found in DB. Using generic template.{RESET}")
         product = {
             "name": slug.replace("-", " ").title(),
             "audience": "Pro Users",
@@ -266,9 +264,7 @@ def create_campaign(slug, url=None):
         generated_files.append(filepath)
 
     print(f"\n{GREEN}✨ Campaign Generated Successfully!{RESET}")
-    print(
-        f"To broadcast Day 1: mekong broadcast content/campaigns/{slug}/day1_teaser.md"
-    )
+    print(f"To broadcast Day 1: mekong broadcast content/campaigns/{slug}/day1_teaser.md")
 
 
 def schedule_campaign(slug, start_date=None):
@@ -375,9 +371,7 @@ def main():
         create_campaign(slug, url)
     elif cmd == "schedule":
         if len(sys.argv) < 3:
-            print(
-                "Usage: campaign_manager.py schedule <product_slug> [start_date YYYY-MM-DD]"
-            )
+            print("Usage: campaign_manager.py schedule <product_slug> [start_date YYYY-MM-DD]")
             return
         slug = sys.argv[2]
         date = sys.argv[3] if len(sys.argv) > 3 else None

@@ -55,4 +55,3 @@ def test_benchmark_suite_quick():
     # Run only 1 task for quick validation
     report = run_benchmark(BENCHMARK_TASKS[:1], target_success_rate=0.85)
     assert report.total_tasks >= 1
-

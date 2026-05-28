@@ -12,8 +12,12 @@ from src.core.local_adapter import LocalLLMAdapter, OllamaAdapter, QUANTIZATION_
 class TestQuantizationMap:
     def test_all_models_have_quant(self):
         expected = [
-            "llama3.3:70b", "deepseek-coder-v2:33b", "deepseek-coder-v2:16b",
-            "llama3.2:3b", "qwen2.5:7b", "mistral:7b",
+            "llama3.3:70b",
+            "deepseek-coder-v2:33b",
+            "deepseek-coder-v2:16b",
+            "llama3.2:3b",
+            "qwen2.5:7b",
+            "mistral:7b",
         ]
         for model in expected:
             assert model in QUANTIZATION_MAP
@@ -72,13 +76,15 @@ class TestListModels:
     @patch("urllib.request.urlopen")
     def test_lists_models(self, mock_urlopen):
         mock_resp = MagicMock()
-        mock_resp.read.return_value = json.dumps({
-            "object": "list",
-            "data": [
-                {"id": "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit", "object": "model"},
-                {"id": "mlx-community/Qwen2.5-Coder-32B-4bit", "object": "model"},
-            ]
-        }).encode()
+        mock_resp.read.return_value = json.dumps(
+            {
+                "object": "list",
+                "data": [
+                    {"id": "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit", "object": "model"},
+                    {"id": "mlx-community/Qwen2.5-Coder-32B-4bit", "object": "model"},
+                ],
+            }
+        ).encode()
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value = mock_resp
@@ -98,10 +104,9 @@ class TestGetStatus:
     @patch("urllib.request.urlopen")
     def test_healthy_status(self, mock_urlopen):
         mock_resp = MagicMock()
-        mock_resp.read.return_value = json.dumps({
-            "object": "list",
-            "data": [{"id": "test-model", "object": "model"}]
-        }).encode()
+        mock_resp.read.return_value = json.dumps(
+            {"object": "list", "data": [{"id": "test-model", "object": "model"}]}
+        ).encode()
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value = mock_resp
@@ -122,9 +127,9 @@ class TestSyncGenerate:
     @patch("urllib.request.urlopen")
     def test_strips_mlx_prefix(self, mock_urlopen):
         mock_resp = MagicMock()
-        mock_resp.read.return_value = json.dumps({
-            "choices": [{"message": {"content": "Hello world"}}]
-        }).encode()
+        mock_resp.read.return_value = json.dumps(
+            {"choices": [{"message": {"content": "Hello world"}}]}
+        ).encode()
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value = mock_resp
@@ -136,9 +141,9 @@ class TestSyncGenerate:
     @patch("urllib.request.urlopen")
     def test_strips_ollama_prefix(self, mock_urlopen):
         mock_resp = MagicMock()
-        mock_resp.read.return_value = json.dumps({
-            "choices": [{"message": {"content": "Hello world"}}]
-        }).encode()
+        mock_resp.read.return_value = json.dumps(
+            {"choices": [{"message": {"content": "Hello world"}}]}
+        ).encode()
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
         mock_urlopen.return_value = mock_resp

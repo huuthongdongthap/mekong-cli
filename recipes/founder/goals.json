@@ -1,0 +1,61 @@
+{
+  "id": "goals",
+  "name": "Founder Goals Deep Config",
+  "description": "Translate a founder goal into command configuration, Codex auto-mode policy, success metrics, and next actions.",
+  "version": "1.0.0",
+  "layer": "founder",
+  "trigger": "/goals",
+  "input": "$ARGUMENTS",
+  "output_dir": "reports/founder/goals",
+  "estimated_credits": 3,
+  "estimated_minutes": 10,
+  "dag": {
+    "groups": [
+      {
+        "id": "deep-config",
+        "name": "Inspect Goal And Command Surface",
+        "mode": "sequential",
+        "commands": [
+          {
+            "id": "pm-scope",
+            "args": "--output reports/founder/goals/config-scope.md"
+          }
+        ],
+        "depends_on": []
+      },
+      {
+        "id": "codex-auto",
+        "name": "Verify Codex Auto Mode",
+        "mode": "sequential",
+        "commands": [
+          {
+            "id": "platform-environment-setup",
+            "args": "--check codex-auto --output reports/founder/goals/codex-auto.md"
+          }
+        ],
+        "depends_on": [
+          "deep-config"
+        ]
+      },
+      {
+        "id": "goal-output",
+        "name": "Write Goal Operating Spec",
+        "mode": "sequential",
+        "commands": [
+          {
+            "id": "pm-okr",
+            "args": "--output reports/founder/goals/goal-spec.md"
+          }
+        ],
+        "depends_on": [
+          "codex-auto"
+        ]
+      }
+    ],
+    "on_complete": {
+      "compile_summary": true,
+      "summary_file": "reports/founder/goals/SUMMARY.md",
+      "template": "Compile the goal into: final command config, Codex auto-mode command, objective, measurable key results, owner, risks, rollback plan, and next steps."
+    }
+  }
+}

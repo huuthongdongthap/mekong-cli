@@ -79,7 +79,15 @@ def scan_secrets(
     for pattern, name in patterns:
         try:
             result = subprocess.run(
-                ["grep", "-rE", pattern, path, "--include=*.py", "--include=*.ts", "--include=*.js"],
+                [
+                    "grep",
+                    "-rE",
+                    pattern,
+                    path,
+                    "--include=*.py",
+                    "--include=*.ts",
+                    "--include=*.js",
+                ],
                 capture_output=True,
                 text=True,
             )
@@ -116,7 +124,18 @@ def check_env_files(
 
     try:
         result = subprocess.run(
-            ["find", repo, "-name", ".env*", "-not", "-path", "*/node_modules/*", "-not", "-path", "*/.venv/*"],
+            [
+                "find",
+                repo,
+                "-name",
+                ".env*",
+                "-not",
+                "-path",
+                "*/node_modules/*",
+                "-not",
+                "-path",
+                "*/.venv/*",
+            ],
             capture_output=True,
             text=True,
         )
@@ -179,11 +198,13 @@ def security_status(
     console.print(table)
 
     # Overall status
-    checks_passed = sum([
-        sanitizer_path.exists(),
-        attestation_path.exists(),
-        security_workflow.exists(),
-    ])
+    checks_passed = sum(
+        [
+            sanitizer_path.exists(),
+            attestation_path.exists(),
+            security_workflow.exists(),
+        ]
+    )
 
     console.print(f"\nSecurity Score: {checks_passed}/3")
 

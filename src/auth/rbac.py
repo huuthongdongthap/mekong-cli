@@ -62,22 +62,18 @@ ROLE_PERMISSIONS: Dict[Permission, Set[Role]] = {
     Permission.VIEW_DASHBOARD: {Role.OWNER, Role.ADMIN, Role.MEMBER, Role.VIEWER},
     Permission.VIEW_ANALYTICS: {Role.OWNER, Role.ADMIN, Role.MEMBER, Role.VIEWER},
     Permission.EXPORT_DATA: {Role.OWNER, Role.ADMIN, Role.MEMBER},
-
     # Member permissions (create/update)
     Permission.CREATE_RESOURCES: {Role.OWNER, Role.ADMIN, Role.MEMBER},
     Permission.UPDATE_RESOURCES: {Role.OWNER, Role.ADMIN, Role.MEMBER},
-
     # Admin permissions
     Permission.DELETE_RESOURCES: {Role.OWNER, Role.ADMIN},
     Permission.MANAGE_USERS: {Role.OWNER, Role.ADMIN},
     Permission.MANAGE_SETTINGS: {Role.OWNER, Role.ADMIN},
     Permission.MANAGE_LICENSES: {Role.OWNER, Role.ADMIN},
     Permission.ADMIN_ACCESS: {Role.OWNER, Role.ADMIN},
-
     # Billing permissions (owner only)
     Permission.VIEW_BILLING: {Role.OWNER},
     Permission.MANAGE_BILLING: {Role.OWNER},
-
     # System permissions (owner only)
     Permission.SYSTEM_CONFIG: {Role.OWNER},
 }
@@ -172,13 +168,14 @@ def require_role(*allowed_roles: Role):
     Returns:
         Decorator function
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Find request in args or kwargs (supports both real Request and MagicMock)
             request = None
             for arg in args:
-                if isinstance(arg, Request) or hasattr(arg, 'state'):
+                if isinstance(arg, Request) or hasattr(arg, "state"):
                     request = arg
                     break
             if request is None:
@@ -223,7 +220,9 @@ def require_role(*allowed_roles: Role):
                 )
 
             return await func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -242,13 +241,14 @@ def require_permission(*permissions: Permission):
     Returns:
         Decorator function
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Find request in args or kwargs (supports both real Request and MagicMock)
             request = None
             for arg in args:
-                if isinstance(arg, Request) or hasattr(arg, 'state'):
+                if isinstance(arg, Request) or hasattr(arg, "state"):
                     request = arg
                     break
             if request is None:
@@ -293,7 +293,9 @@ def require_permission(*permissions: Permission):
                     )
 
             return await func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 

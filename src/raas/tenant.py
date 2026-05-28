@@ -1,4 +1,5 @@
 """Tenant storage and management for RaaS multi-tenant isolation."""
+
 from __future__ import annotations
 
 import hashlib
@@ -8,7 +9,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
-
 
 _DB_PATH = Path.home() / ".mekong" / "raas" / "tenants.db"
 
@@ -202,9 +202,7 @@ class TenantStore:
         """
         try:
             with self._connect() as conn:
-                rows = conn.execute(
-                    "SELECT * FROM tenants ORDER BY created_at ASC"
-                ).fetchall()
+                rows = conn.execute("SELECT * FROM tenants ORDER BY created_at ASC").fetchall()
         except sqlite3.Error as exc:
             raise RuntimeError(f"Failed to list tenants: {exc}") from exc
 

@@ -1,0 +1,7 @@
+# Mekong CLI v6.0 — Codex CLI Project Config
+# This file is merged with ~/.codex/config.toml (project overrides user)
+
+model_reasoning_effort = "high"
+
+[project]
+trust_level = "trusted"

@@ -39,7 +39,9 @@ class LearningHistoryTracker:
         # Initialize local storage as backup for YAML fallback
         self.local_storage_path = Path.home() / ".mekong" / "learning_history"
         self.local_storage_path.mkdir(parents=True, exist_ok=True)
-        self.local_history_file = self.local_storage_path / f"{self.agent_id.replace(':', '_').replace('/', '_')}.json"
+        self.local_history_file = (
+            self.local_storage_path / f"{self.agent_id.replace(':', '_').replace('/', '_')}.json"
+        )
 
     def _save_to_local_storage(self, data: dict) -> None:
         """Save data to local file storage as backup."""
@@ -152,7 +154,10 @@ class LearningHistoryTracker:
                 memory_content = result.get("memory", str(result))
                 if memory_content.startswith("{"):  # JSON string
                     parsed = json.loads(memory_content)
-                    if parsed.get("type") == "learning_event" and topic.lower() in parsed.get("topic", "").lower():
+                    if (
+                        parsed.get("type") == "learning_event"
+                        and topic.lower() in parsed.get("topic", "").lower()
+                    ):
                         events.append(parsed)
             except json.JSONDecodeError:
                 continue
@@ -175,7 +180,9 @@ class LearningHistoryTracker:
         events.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
         return events[:limit]
 
-    def identify_knowledge_gaps(self, min_performance_threshold: float = 0.6) -> list[dict[str, Any]]:
+    def identify_knowledge_gaps(
+        self, min_performance_threshold: float = 0.6
+    ) -> list[dict[str, Any]]:
         """Identify knowledge gaps based on poor performance.
 
         Args:
@@ -239,14 +246,21 @@ class LearningHistoryTracker:
             recent_avg = sum(data["recent"]) / len(data["recent"]) if data["recent"] else 0
 
             # Identify as gap if both overall and recent performance are below threshold
-            if avg_performance < min_performance_threshold and recent_avg < min_performance_threshold:
-                gaps.append({
-                    "topic": topic,
-                    "average_performance": avg_performance,
-                    "recent_average": recent_avg,
-                    "attempts": data["count"],
-                    "gap_severity": "HIGH" if recent_avg < 0.3 else "MEDIUM" if recent_avg < 0.6 else "LOW",
-                })
+            if (
+                avg_performance < min_performance_threshold
+                and recent_avg < min_performance_threshold
+            ):
+                gaps.append(
+                    {
+                        "topic": topic,
+                        "average_performance": avg_performance,
+                        "recent_average": recent_avg,
+                        "attempts": data["count"],
+                        "gap_severity": (
+                            "HIGH" if recent_avg < 0.3 else "MEDIUM" if recent_avg < 0.6 else "LOW"
+                        ),
+                    }
+                )
 
         # Sort by average performance (worst performers first)
         gaps.sort(key=lambda x: x["average_performance"])
@@ -329,7 +343,9 @@ class LearningHistoryTracker:
                 middle_performance = events[middle_idx].get("performance_score", 0.0)
 
                 # Determine trend: consistent improvement, plateau, regression, etc.
-                if improvement > 0.2 and (last_performance > middle_performance > first_performance):
+                if improvement > 0.2 and (
+                    last_performance > middle_performance > first_performance
+                ):
                     trend = "CONSISTENT_IMPROVEMENT"
                 elif abs(improvement) < 0.1:
                     trend = "STABLE_PERFORMANCE"
@@ -340,15 +356,17 @@ class LearningHistoryTracker:
             else:
                 trend = "MINIMAL_DATA"
 
-            patterns.append({
-                "topic": topic,
-                "first_performance": first_performance,
-                "last_performance": last_performance,
-                "improvement": improvement,
-                "total_events": len(events),
-                "trend": trend,
-                "significant_improvement": improvement > 0.3,
-            })
+            patterns.append(
+                {
+                    "topic": topic,
+                    "first_performance": first_performance,
+                    "last_performance": last_performance,
+                    "improvement": improvement,
+                    "total_events": len(events),
+                    "trend": trend,
+                    "significant_improvement": improvement > 0.3,
+                }
+            )
 
         # Sort by improvement (most improved first)
         patterns.sort(key=lambda x: x["improvement"], reverse=True)
@@ -406,11 +424,17 @@ class LearningHistoryTracker:
         # Calculate trend (compare first 25% with last 25%)
         quarter_size = max(1, total_events // 4)
         first_quarter = combined_events[:quarter_size]
-        last_quarter = combined_events[-quarter_size:] if quarter_size < total_events else combined_events
+        last_quarter = (
+            combined_events[-quarter_size:] if quarter_size < total_events else combined_events
+        )
 
         if first_quarter and last_quarter:
-            first_avg = sum(e.get("performance_score", 0.0) for e in first_quarter) / len(first_quarter)
-            last_avg = sum(e.get("performance_score", 0.0) for e in last_quarter) / len(last_quarter)
+            first_avg = sum(e.get("performance_score", 0.0) for e in first_quarter) / len(
+                first_quarter
+            )
+            last_avg = sum(e.get("performance_score", 0.0) for e in last_quarter) / len(
+                last_quarter
+            )
             trend_change = last_avg - first_avg
 
             if trend_change > 0.1:
@@ -500,7 +524,9 @@ class LearningAnalyticsDashboard:
 
 
 # Convenience function for initialization
-def create_learning_tracker(agent_id: str = "system:default_learning_tracker") -> LearningHistoryTracker:
+def create_learning_tracker(
+    agent_id: str = "system:default_learning_tracker",
+) -> LearningHistoryTracker:
     """Create a learning history tracker instance.
 
     Args:

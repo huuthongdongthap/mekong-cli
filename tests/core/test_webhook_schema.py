@@ -254,9 +254,7 @@ class TestGetPayloadClass:
         assert get_payload_class("mission.created") == MissionCreatedPayload
         assert get_payload_class("mission.planning") == MissionPlanningPayload
         assert get_payload_class("mission.step.started") == MissionStepStartedPayload
-        assert (
-            get_payload_class("mission.step.completed") == MissionStepCompletedPayload
-        )
+        assert get_payload_class("mission.step.completed") == MissionStepCompletedPayload
         assert get_payload_class("mission.step.failed") == MissionStepFailedPayload
         assert get_payload_class("mission.completed") == MissionCompletedPayload
         assert get_payload_class("mission.failed") == MissionFailedPayload

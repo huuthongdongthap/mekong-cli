@@ -30,7 +30,6 @@ from .raas_audit_logger import get_audit_logger
 from .rate_limit_client import RateLimitClient
 from .telemetry_reporter import TelemetryReporter
 
-
 # Multi-gateway URLs with failover priority
 GATEWAY_URLS = [
     os.getenv("RAAS_GATEWAY_URL", "https://raas.agencyos.network"),
@@ -58,6 +57,7 @@ class GatewayResponse:
 @dataclass
 class CircuitState:
     """Circuit breaker state for a single gateway."""
+
     failure_count: int = 0
     circuit_open: bool = False
     last_failure_time: float = 0.0
@@ -97,9 +97,7 @@ class GatewayClient:
             gateway_url: RaaS Gateway URL (default: from env or DEFAULT)
             auth_client: Optional auth client instance
         """
-        self.gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL
-        )
+        self.gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", self.DEFAULT_GATEWAY_URL)
         self.auth = auth_client or get_auth_client()
         self.rate_limit = RateLimitClient()
         self.telemetry = TelemetryReporter()
@@ -168,6 +166,7 @@ class GatewayClient:
         if state.failure_count >= CIRCUIT_FAILURE_THRESHOLD:
             state.circuit_open = True
             import logging
+
             logging.warning(
                 "CIRCUIT OPEN: Gateway %s (%d consecutive failures)",
                 gateway_url,
@@ -356,6 +355,7 @@ class GatewayClient:
             failover_info = self._get_available_gateway()
             if failover_info and failover_info[0] != gateway_idx:
                 import logging
+
                 logging.warning(
                     "FAILOVER: %s → %s (error: %s)",
                     current_url,
@@ -364,9 +364,14 @@ class GatewayClient:
                 )
                 # Retry with failover gateway
                 return self._retry_with_gateway(
-                    failover_info[0], failover_info[1],
-                    method, path, request_headers, tenant_id,
-                    start, **kwargs
+                    failover_info[0],
+                    failover_info[1],
+                    method,
+                    path,
+                    request_headers,
+                    tenant_id,
+                    start,
+                    **kwargs,
                 )
 
             self.telemetry.record_call(
@@ -506,6 +511,7 @@ class GatewayClient:
             return response.status_code == 200
         except Exception as e:
             import logging
+
             logging.debug(f"Gateway health check failed: {e}")
             return False
 
@@ -519,10 +525,15 @@ class GatewayClient:
         status = {}
         for url, state in self._circuit_states.items():
             status[url] = {
-                "state": "open" if state.circuit_open else ("half-open" if state.failure_count > 0 else "closed"),
+                "state": (
+                    "open"
+                    if state.circuit_open
+                    else ("half-open" if state.failure_count > 0 else "closed")
+                ),
                 "failure_count": state.failure_count,
                 "last_failure": state.last_failure_time,
-                "recovery_allowed": not state.circuit_open or (time.time() - state.last_failure_time >= CIRCUIT_RECOVERY_TIMEOUT),
+                "recovery_allowed": not state.circuit_open
+                or (time.time() - state.last_failure_time >= CIRCUIT_RECOVERY_TIMEOUT),
             }
         return status
 

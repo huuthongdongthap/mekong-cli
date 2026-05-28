@@ -23,9 +23,15 @@ logger = logging.getLogger(__name__)
 
 # Dangerous patterns that LLM should not generate
 DANGEROUS_PATTERNS = {
-    "eval(", "exec(", "compile(", "__import__",
-    "os.system", "os.popen", "subprocess.call",
-    "subprocess.run", "subprocess.Popen",
+    "eval(",
+    "exec(",
+    "compile(",
+    "__import__",
+    "os.system",
+    "os.popen",
+    "subprocess.call",
+    "subprocess.run",
+    "subprocess.Popen",
 }
 
 
@@ -136,10 +142,7 @@ class CodeEvolutionEngine:
             try:
                 content = py_file.read_text()
                 lines = content.split("\n")
-                functions = [
-                    ln.strip() for ln in lines
-                    if ln.strip().startswith("def ")
-                ]
+                functions = [ln.strip() for ln in lines if ln.strip().startswith("def ")]
 
                 file_info: Dict[str, Any] = {
                     "path": rel_path,
@@ -150,31 +153,23 @@ class CodeEvolutionEngine:
                 # Simple code quality checks
                 if len(lines) > 500:
                     report["issues"].append(
-                        f"{rel_path}: Too large ({len(lines)} lines). "
-                        f"Consider splitting."
+                        f"{rel_path}: Too large ({len(lines)} lines). " f"Consider splitting."
                     )
                 for line in lines:
                     if len(line) > 120:
                         file_info.setdefault("long_lines", 0)
-                        file_info["long_lines"] = (
-                            file_info.get("long_lines", 0) + 1
-                        )
+                        file_info["long_lines"] = file_info.get("long_lines", 0) + 1
 
                 # Check for bare except
                 if "except:" in content or "except Exception:" in content:
-                    report["issues"].append(
-                        f"{rel_path}: Uses broad exception handling"
-                    )
+                    report["issues"].append(f"{rel_path}: Uses broad exception handling")
 
                 # Check for TODO/FIXME
                 todos = [
-                    ln.strip() for ln in lines
-                    if "TODO" in ln or "FIXME" in ln or "HACK" in ln
+                    ln.strip() for ln in lines if "TODO" in ln or "FIXME" in ln or "HACK" in ln
                 ]
                 if todos:
-                    report["issues"].append(
-                        f"{rel_path}: {len(todos)} TODO/FIXME markers"
-                    )
+                    report["issues"].append(f"{rel_path}: {len(todos)} TODO/FIXME markers")
 
                 report["files"].append(file_info)
                 report["total_lines"] += len(lines)
@@ -203,7 +198,8 @@ class CodeEvolutionEngine:
         # Safety check
         if not self._is_safe_to_modify(file_path):
             logger.warning(
-                "[EVOLUTION] File %s is not safe to modify", file_path,
+                "[EVOLUTION] File %s is not safe to modify",
+                file_path,
             )
             return None
 
@@ -217,11 +213,13 @@ class CodeEvolutionEngine:
         attempt = EvolutionAttempt(
             id=attempt_id,
             description=improvement_description,
-            changes=[CodeChange(
-                file_path=file_path,
-                original_content=original,
-                description=improvement_description,
-            )],
+            changes=[
+                CodeChange(
+                    file_path=file_path,
+                    original_content=original,
+                    description=improvement_description,
+                )
+            ],
             branch_name=f"evolution/{attempt_id}",
             reasoning=improvement_description,
         )
@@ -230,7 +228,9 @@ class CodeEvolutionEngine:
         if self.llm_client and hasattr(self.llm_client, "generate"):
             try:
                 modified = self._llm_generate_improvement(
-                    file_path, original, improvement_description,
+                    file_path,
+                    original,
+                    improvement_description,
                 )
                 if modified and modified != original:
                     attempt.changes[0].modified_content = modified
@@ -247,12 +247,15 @@ class CodeEvolutionEngine:
         self._save_journal()
 
         bus = get_event_bus()
-        bus.emit(EventType.AUTONOMOUS_CYCLE, {
-            "event": "evolution_proposed",
-            "id": attempt_id,
-            "file": file_path,
-            "description": improvement_description,
-        })
+        bus.emit(
+            EventType.AUTONOMOUS_CYCLE,
+            {
+                "event": "evolution_proposed",
+                "id": attempt_id,
+                "file": file_path,
+                "description": improvement_description,
+            },
+        )
 
         return attempt
 
@@ -284,30 +287,26 @@ class CodeEvolutionEngine:
                 full_path = self.project_root / change.file_path
                 if change.modified_content:
                     # CRITICAL: Validate code before writing
-                    validation_errors = self._validate_code(
-                        change.modified_content, full_path
-                    )
+                    validation_errors = self._validate_code(change.modified_content, full_path)
                     if validation_errors:
                         logger.error(
                             "[EVOLUTION] Code validation failed: %s",
                             validation_errors,
                         )
                         attempt.status = EvolutionStatus.FAILED
-                        attempt.test_results = (
-                            f"Code validation failed: {validation_errors}"
-                        )
+                        attempt.test_results = f"Code validation failed: {validation_errors}"
                         return False
 
                     # Store rollback data
-                    attempt.rollback_data[change.file_path] = (
-                        change.original_content
-                    )
+                    attempt.rollback_data[change.file_path] = change.original_content
                     full_path.write_text(change.modified_content)
 
             # Run tests
             test_result = subprocess.run(
                 ["python3", "-m", "pytest", "tests/", "-x", "--tb=short", "-q"],
-                capture_output=True, text=True, timeout=120,
+                capture_output=True,
+                text=True,
+                timeout=120,
                 cwd=str(self.project_root),
             )
 
@@ -318,9 +317,7 @@ class CodeEvolutionEngine:
                 attempt.status = EvolutionStatus.PASSED
                 # Commit the changes
                 self._git_cmd("add -A")
-                self._git_cmd(
-                    f'commit -m "evolution({attempt.id}): {attempt.description[:50]}"'
-                )
+                self._git_cmd(f'commit -m "evolution({attempt.id}): {attempt.description[:50]}"')
             else:
                 attempt.status = EvolutionStatus.FAILED
                 # Restore original files
@@ -385,9 +382,12 @@ class CodeEvolutionEngine:
 
         # 3. Import verification
         dangerous_imports = [
-            "import ctypes", "from ctypes",
-            "import pickle", "from pickle",
-            "import marshal", "from marshal",
+            "import ctypes",
+            "from ctypes",
+            "import pickle",
+            "from pickle",
+            "import marshal",
+            "from marshal",
         ]
         for imp in dangerous_imports:
             if imp in code:
@@ -414,11 +414,14 @@ class CodeEvolutionEngine:
             self._save_journal()
 
             bus = get_event_bus()
-            bus.emit(EventType.AUTONOMOUS_CYCLE, {
-                "event": "evolution_applied",
-                "id": attempt.id,
-                "description": attempt.description,
-            })
+            bus.emit(
+                EventType.AUTONOMOUS_CYCLE,
+                {
+                    "event": "evolution_applied",
+                    "id": attempt.id,
+                    "description": attempt.description,
+                },
+            )
 
             return True
         except Exception:
@@ -464,12 +467,10 @@ class CodeEvolutionEngine:
                 "applied": 0,
             }
 
-        applied = sum(
-            1 for a in self._journal
-            if a.status == EvolutionStatus.APPLIED
-        )
+        applied = sum(1 for a in self._journal if a.status == EvolutionStatus.APPLIED)
         passed = sum(
-            1 for a in self._journal
+            1
+            for a in self._journal
             if a.status in (EvolutionStatus.PASSED, EvolutionStatus.APPLIED)
         )
         total = len(self._journal)
@@ -478,14 +479,8 @@ class CodeEvolutionEngine:
             "total_attempts": total,
             "passed": passed,
             "applied": applied,
-            "failed": sum(
-                1 for a in self._journal
-                if a.status == EvolutionStatus.FAILED
-            ),
-            "rolled_back": sum(
-                1 for a in self._journal
-                if a.status == EvolutionStatus.ROLLED_BACK
-            ),
+            "failed": sum(1 for a in self._journal if a.status == EvolutionStatus.FAILED),
+            "rolled_back": sum(1 for a in self._journal if a.status == EvolutionStatus.ROLLED_BACK),
             "success_rate": passed / total if total > 0 else 0.0,
         }
 
@@ -496,16 +491,17 @@ class CodeEvolutionEngine:
         basename = Path(file_path).name
         if basename in self.FORBIDDEN_FILES:
             return False
-        return any(
-            file_path.startswith(d) for d in self.SAFE_DIRS
-        )
+        return any(file_path.startswith(d) for d in self.SAFE_DIRS)
 
     def _git_cmd(self, cmd: str) -> str:
         """Run a git command safely without shell injection."""
         import shlex
+
         result = subprocess.run(
             ["git"] + shlex.split(cmd),
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
             cwd=str(self.project_root),
         )
         return result.stdout.strip()
@@ -547,15 +543,17 @@ class CodeEvolutionEngine:
                     status = EvolutionStatus(item.get("status", "proposed"))
                 except ValueError:
                     status = EvolutionStatus.PROPOSED
-                self._journal.append(EvolutionAttempt(
-                    id=item.get("id", ""),
-                    description=item.get("description", ""),
-                    status=status,
-                    test_results=item.get("test_results", ""),
-                    branch_name=item.get("branch_name", ""),
-                    timestamp=item.get("timestamp", 0),
-                    reasoning=item.get("reasoning", ""),
-                ))
+                self._journal.append(
+                    EvolutionAttempt(
+                        id=item.get("id", ""),
+                        description=item.get("description", ""),
+                        status=status,
+                        test_results=item.get("test_results", ""),
+                        branch_name=item.get("branch_name", ""),
+                        timestamp=item.get("timestamp", 0),
+                        reasoning=item.get("reasoning", ""),
+                    )
+                )
         except Exception:
             self._journal = []
 
@@ -572,7 +570,7 @@ class CodeEvolutionEngine:
                 "timestamp": a.timestamp,
                 "reasoning": a.reasoning,
             }
-            for a in self._journal[-self.MAX_JOURNAL:]
+            for a in self._journal[-self.MAX_JOURNAL :]
         ]
         self._journal_path.write_text(yaml.dump(data, default_flow_style=False))
 

@@ -69,15 +69,12 @@ def verify_signature(payload: bytes, signature: str) -> bool:
     if not POLAR_WEBHOOK_SECRET:
         return False
 
-    expected = hmac.new(
-        POLAR_WEBHOOK_SECRET.encode(),
-        payload,
-        hashlib.sha256
-    ).hexdigest()
+    expected = hmac.new(POLAR_WEBHOOK_SECRET.encode(), payload, hashlib.sha256).hexdigest()
 
     return hmac.compare_digest(expected, signature)
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

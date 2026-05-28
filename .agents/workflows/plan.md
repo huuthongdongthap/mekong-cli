@@ -37,6 +37,8 @@ plans/{date}-{slug}/
 ## Hard Mode (deep analysis)
 
 When mode is `hard`:
+- Run a multi-agent debate to validate design decisions using the CheetahClaws bridge:
+  `bash scripts/cheetahclaws-bridge.sh "/brainstorm <topic>"`
 - Analyze architecture implications across the codebase
 - Include risk assessment and alternatives
 - Create detailed phase files with step-by-step instructions

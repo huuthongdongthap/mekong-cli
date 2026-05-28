@@ -12,7 +12,6 @@ from src.binh_phap.immortal_loop import main as run_immortal_loop
 from src.binh_phap.topology import (
     TopologyEngine,
     CHAPTER_COMMANDS,
-    DIAGONAL_LOOP,
     CycleLesson,
 )
 
@@ -34,45 +33,55 @@ def dispatch(
         ch = result["chapter"]
         llm = result["llm"]
         approval = "APPROVAL REQUIRED" if result["needs_approval"] else "auto"
-        console.print(Panel(
-            f"[bold]/{cmd}[/bold]  (Chapter {ch})\n"
-            f"Dimension: {result['dimension']}  |  LLM: {llm}  |  Gate: {approval}",
-            title="Next Dispatch",
-            style="green",
-        ))
+        console.print(
+            Panel(
+                f"[bold]/{cmd}[/bold]  (Chapter {ch})\n"
+                f"Dimension: {result['dimension']}  |  LLM: {llm}  |  Gate: {approval}",
+                title="Next Dispatch",
+                style="green",
+            )
+        )
     elif action == "execute_parallel":
         cmds = result["commands"]
-        console.print(Panel(
-            f"[bold]Battle Group: {result['group']}[/bold]\n"
-            f"Commands: {', '.join('/' + c for c in cmds)}\n"
-            f"Dimension: horizontal (parallel)",
-            title="Parallel Dispatch",
-            style="cyan",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Battle Group: {result['group']}[/bold]\n"
+                f"Commands: {', '.join('/' + c for c in cmds)}\n"
+                f"Dimension: horizontal (parallel)",
+                title="Parallel Dispatch",
+                style="cyan",
+            )
+        )
     elif action == "execute_loop":
         cycle = result["cycle"]
         cmds = result["commands"]
-        console.print(Panel(
-            f"[bold]Diagonal Cycle #{cycle}[/bold]\n"
-            f"Loop: {' → '.join('/' + c for c in cmds)}\n"
-            f"Lessons: {result.get('previous_lessons', ['(first cycle)'])}",
-            title="Diagonal Loop",
-            style="magenta",
-        ))
+        console.print(
+            Panel(
+                f"[bold]Diagonal Cycle #{cycle}[/bold]\n"
+                f"Loop: {' → '.join('/' + c for c in cmds)}\n"
+                f"Lessons: {result.get('previous_lessons', ['(first cycle)'])}",
+                title="Diagonal Loop",
+                style="magenta",
+            )
+        )
     elif action == "stop":
-        console.print(Panel(
-            f"[bold red]STOPPED[/bold red]: {result['reason']}\n"
-            f"Recommendation: {result.get('recommendation', '')}",
-            title="Dispatch Halted",
-            style="red",
-        ))
+        console.print(
+            Panel(
+                f"[bold red]STOPPED[/bold red]: {result['reason']}\n"
+                f"Recommendation: {result.get('recommendation', '')}",
+                title="Dispatch Halted",
+                style="red",
+            )
+        )
     elif action == "pause":
-        console.print(Panel(
-            f"Cycle {result.get('cycle', 0)} paused.\n"
-            f"Recent lessons: {result.get('lessons', [])}",
-            title="Diagonal Paused",
-            style="yellow",
-        ))
+        console.print(
+            Panel(
+                f"Cycle {result.get('cycle', 0)} paused.\n"
+                f"Recent lessons: {result.get('lessons', [])}",
+                title="Diagonal Paused",
+                style="yellow",
+            )
+        )
     else:
         console.print(json.dumps(result, indent=2))
 
@@ -113,10 +122,18 @@ def status() -> None:
 def chapters() -> None:
     """Show all 13 chapters with their mapped commands."""
     chapter_names = {
-        1: "Calculations", 2: "Waging War", 3: "Strategic Attack",
-        4: "Disposition", 5: "Momentum", 6: "Void & Substance",
-        7: "Maneuvering", 8: "Nine Variations", 9: "The March",
-        10: "Terrain", 11: "Nine Situations", 12: "Fire Attack",
+        1: "Calculations",
+        2: "Waging War",
+        3: "Strategic Attack",
+        4: "Disposition",
+        5: "Momentum",
+        6: "Void & Substance",
+        7: "Maneuvering",
+        8: "Nine Variations",
+        9: "The March",
+        10: "Terrain",
+        11: "Nine Situations",
+        12: "Fire Attack",
         13: "Intelligence",
     }
     table = Table(title="13 Chapters → Commands")
@@ -140,13 +157,15 @@ def learn(
     """Record a lesson from the current diagonal cycle."""
     engine = TopologyEngine()
     cycle_num = engine.state.get("cycle_number", 1)
-    engine.record_cycle_lesson(CycleLesson(
-        cycle=cycle_num,
-        mrr=mrr,
-        customers=customers,
-        lessons=[lesson],
-        adaptations=[],
-    ))
+    engine.record_cycle_lesson(
+        CycleLesson(
+            cycle=cycle_num,
+            mrr=mrr,
+            customers=customers,
+            lessons=[lesson],
+            adaptations=[],
+        )
+    )
     console.print(f"[green]Lesson recorded for cycle {cycle_num}[/green]")
     console.print(f"MRR: ${mrr} | Customers: {customers}")
 
@@ -171,4 +190,5 @@ def daemon(
 ) -> None:
     """CTO Daemon: Autonomous 3D topology dispatch loop for M1 Max."""
     from src.binh_phap.cto_daemon import run_daemon
+
     run_daemon(dry_run=dry_run, max_cycles=cycles, interval_seconds=interval)

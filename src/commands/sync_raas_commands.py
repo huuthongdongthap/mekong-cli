@@ -28,9 +28,7 @@ app = typer.Typer(
 
 @app.command()
 def sync_raas(
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show detailed sync information"
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed sync information"),
     dry_run: bool = typer.Option(
         False, "--dry-run", "-n", help="Show what would be synced without sending"
     ),
@@ -46,7 +44,7 @@ def sync_raas(
     2. Fetch license entitlements
     3. Register with webhook system (Stripe/Polar)
     4. Sync local usage metrics
-    5. Push anonymized analytics to AgencyOS
+    5. Push anonymized analytics to MekongMind
 
     Examples:
         mekong sync-raas
@@ -85,9 +83,13 @@ def sync_raas(
     else:
         webhook_result = client.register_webhook(push_to_billing=not no_billing)
         if webhook_result.get("success"):
-            console.print(f"[green]✓ Registered with {webhook_result.get('provider', 'billing')}[/green]\n")
+            console.print(
+                f"[green]✓ Registered with {webhook_result.get('provider', 'billing')}[/green]\n"
+            )
         else:
-            console.print(f"[yellow]⚠ Webhook registration: {webhook_result.get('error', 'skipped')}[/yellow]\n")
+            console.print(
+                f"[yellow]⚠ Webhook registration: {webhook_result.get('error', 'skipped')}[/yellow]\n"
+            )
 
     # Step 4: Sync usage metrics
     console.print("[dim]Step 4/5: Syncing usage metrics...[/dim]")
@@ -101,7 +103,7 @@ def sync_raas(
             console.print(f"[yellow]⚠ Sync: {sync_result.error}[/yellow]\n")
 
     # Step 5: Push analytics
-    console.print("[dim]Step 5/5: Pushing analytics to AgencyOS...[/dim]")
+    console.print("[dim]Step 5/5: Pushing analytics to MekongMind...[/dim]")
     if dry_run:
         console.print("[yellow]⊘ Skipped (dry run)[/yellow]\n")
         console.print("[bold]Dry Run Complete[/bold]\n")
@@ -135,7 +137,7 @@ def _authenticate() -> bool:
             "[yellow]Set your license key:[/yellow]\n"
             "  [cyan]export RAAS_LICENSE_KEY=mk_your_key[/cyan]\n\n"
             "Or get a key from:\n"
-            "  [cyan]https://raas.agencyos.network[/cyan]\n"
+            "  [cyan]https://www.mekongmind.com[/cyan]\n"
         )
         return False
 
@@ -180,14 +182,14 @@ def _display_sync_summary(entitlements: dict, verbose: bool = False) -> None:
     summary_table.add_column("Value", style="cyan")
 
     summary_table.add_row("Sync Time", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"))
-    summary_table.add_row("Gateway", "https://raas.agencyos.network")
+    summary_table.add_row("Gateway", "https://www.mekongmind.com")
     summary_table.add_row("Version", "v2.0.0 (CF Worker)")
 
     console.print(summary_table)
 
     if verbose:
-        console.print("\n[dim]Anonymized analytics pushed to AgencyOS dashboard[/dim]")
-        console.print("[dim]Dashboard: https://agencyos.network[/dim]\n")
+        console.print("\n[dim]Anonymized analytics pushed to MekongMind dashboard[/dim]")
+        console.print("[dim]Dashboard: https://www.mekongmind.com[/dim]\n")
 
 
 @app.command("status")
@@ -210,7 +212,9 @@ def sync_status() -> None:
     connection_table.add_column("Property", style="dim")
     connection_table.add_column("Value", style="green" if status.get("connected") else "red")
 
-    connection_table.add_row("Gateway", "✓ Connected" if status.get("connected") else "✗ Disconnected")
+    connection_table.add_row(
+        "Gateway", "✓ Connected" if status.get("connected") else "✗ Disconnected"
+    )
     connection_table.add_row("License", "✓ Valid" if status.get("license_valid") else "✗ Invalid")
     connection_table.add_row("Last Sync", status.get("last_sync", "Never"))
 
@@ -243,14 +247,14 @@ def sync_status() -> None:
                 "half-open": "yellow",
                 "open": "red",
             }.get(info.get("state"), "white")
-            console.print(f"  {gateway}: [{state_color}]{info.get('state')}[/{state_color}] ({info.get('failure_count', 0)} failures)")
+            console.print(
+                f"  {gateway}: [{state_color}]{info.get('state')}[/{state_color}] ({info.get('failure_count', 0)} failures)"
+            )
 
 
 @app.command("entitlement")
 def show_entitlement(
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show raw entitlement response"
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show raw entitlement response"),
 ) -> None:
     """
     📋 Show license entitlements from RaaS Gateway.
@@ -280,15 +284,14 @@ def show_entitlement(
 
     if verbose:
         import json
+
         console.print("\n[dim]Raw response:[/dim]")
         console.print(f"[dim]{json.dumps(entitlements, indent=2)}[/dim]\n")
 
 
 @app.command("events")
 def show_events(
-    limit: int = typer.Option(
-        20, "--limit", "-l", help="Number of events to show"
-    ),
+    limit: int = typer.Option(20, "--limit", "-l", help="Number of events to show"),
     event_type: Optional[str] = typer.Option(
         None, "--type", "-t", help="Filter by event type (cli:command, llm:call, etc.)"
     ),

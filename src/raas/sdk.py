@@ -1,4 +1,5 @@
 """Mekong RaaS SDK — Python client aligned with /v1/ API endpoints."""
+
 from __future__ import annotations
 
 import json
@@ -224,9 +225,13 @@ class MekongClient:
 
     # -- Tasks ---------------------------------------------------------------
 
-    def submit_task(self, goal: str, agent: Optional[str] = None,
-                    recipe: Optional[str] = None,
-                    options: Optional[Dict[str, Any]] = None) -> TaskResult:
+    def submit_task(
+        self,
+        goal: str,
+        agent: Optional[str] = None,
+        recipe: Optional[str] = None,
+        options: Optional[Dict[str, Any]] = None,
+    ) -> TaskResult:
         """Submit a goal for async execution (POST /v1/tasks)."""
         payload: Dict[str, Any] = {"goal": goal}
         if agent is not None:
@@ -237,7 +242,8 @@ class MekongClient:
             payload["options"] = options
         data = self._request("POST", "/v1/tasks", json=payload)
         return TaskResult(
-            task_id=data["task_id"], status=data["status"],
+            task_id=data["task_id"],
+            status=data["status"],
             tenant_id=data["tenant_id"],
         )
 
@@ -266,16 +272,19 @@ class MekongClient:
         data = self._request("GET", "/v1/agents")
         return [AgentInfo(name=a["name"], description=a["description"]) for a in data]
 
-    def run_agent(self, name: str, goal: str,
-                  options: Optional[Dict[str, Any]] = None) -> AgentResult:
+    def run_agent(
+        self, name: str, goal: str, options: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         """Run a named agent (POST /v1/agents/{name}/run)."""
         payload: Dict[str, Any] = {"goal": goal}
         if options:
             payload["options"] = options
         data = self._request("POST", f"/v1/agents/{name}/run", json=payload)
         return AgentResult(
-            agent=data["agent"], status=data["status"],
-            output=data["output"], errors=data.get("errors", []),
+            agent=data["agent"],
+            status=data["status"],
+            output=data["output"],
+            errors=data.get("errors", []),
         )
 
     # -- Marketing -----------------------------------------------------------
@@ -465,9 +474,13 @@ class MekongAsyncClient:
 
     # -- Tasks ---------------------------------------------------------------
 
-    async def submit_task(self, goal: str, agent: Optional[str] = None,
-                          recipe: Optional[str] = None,
-                          options: Optional[Dict[str, Any]] = None) -> TaskResult:
+    async def submit_task(
+        self,
+        goal: str,
+        agent: Optional[str] = None,
+        recipe: Optional[str] = None,
+        options: Optional[Dict[str, Any]] = None,
+    ) -> TaskResult:
         """Submit a goal for async execution (POST /v1/tasks)."""
         payload: Dict[str, Any] = {"goal": goal}
         if agent is not None:
@@ -478,7 +491,8 @@ class MekongAsyncClient:
             payload["options"] = options
         data = await self._request("POST", "/v1/tasks", json=payload)
         return TaskResult(
-            task_id=data["task_id"], status=data["status"],
+            task_id=data["task_id"],
+            status=data["status"],
             tenant_id=data["tenant_id"],
         )
 
@@ -508,16 +522,19 @@ class MekongAsyncClient:
         data = await self._request("GET", "/v1/agents")
         return [AgentInfo(name=a["name"], description=a["description"]) for a in data]
 
-    async def run_agent(self, name: str, goal: str,
-                        options: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def run_agent(
+        self, name: str, goal: str, options: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         """Run a named agent (POST /v1/agents/{name}/run)."""
         payload: Dict[str, Any] = {"goal": goal}
         if options:
             payload["options"] = options
         data = await self._request("POST", f"/v1/agents/{name}/run", json=payload)
         return AgentResult(
-            agent=data["agent"], status=data["status"],
-            output=data["output"], errors=data.get("errors", []),
+            agent=data["agent"],
+            status=data["status"],
+            output=data["output"],
+            errors=data.get("errors", []),
         )
 
     # -- Marketing -----------------------------------------------------------

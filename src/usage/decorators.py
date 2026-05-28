@@ -11,7 +11,6 @@ from typing import Optional, Callable, Any
 from src.config.logging_config import get_logger
 from src.usage.usage_tracker import get_tracker, UsageTracker
 
-
 logger = get_logger(__name__)
 
 
@@ -40,6 +39,7 @@ def track_usage(
         async def binh_phap_analysis():
             ...
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -93,6 +93,7 @@ def track_usage(
             return await func(*args, **kwargs)
 
         return wrapper
+
     return decorator
 
 

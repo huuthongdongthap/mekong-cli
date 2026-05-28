@@ -125,7 +125,7 @@ class TestFinalPhaseValidator:
         """Test license validation with no key."""
         monkeypatch.delenv("RAAS_LICENSE_KEY", raising=False)
 
-        with patch.object(validator, '_get_license_key', return_value=None):
+        with patch.object(validator, "_get_license_key", return_value=None):
             result = await validator.validate_license_authentication()
 
             assert result.passed is False
@@ -134,8 +134,8 @@ class TestFinalPhaseValidator:
     @pytest.mark.asyncio
     async def test_validate_license_auth_success(self, validator):
         """Test successful license authentication."""
-        with patch.object(validator, '_get_license_key', return_value="mk_test_key"):
-            with patch.object(validator, '_get_auth_client') as mock_client:
+        with patch.object(validator, "_get_license_key", return_value="mk_test_key"):
+            with patch.object(validator, "_get_auth_client") as mock_client:
                 mock_auth_client = Mock()
                 mock_auth_client.validate_credentials.return_value = AuthResult(
                     valid=True,
@@ -158,7 +158,7 @@ class TestFinalPhaseValidator:
     @pytest.mark.asyncio
     async def test_validate_usage_reporting_success(self, validator):
         """Test usage reporting validation."""
-        with patch.object(validator, '_get_license_key', return_value=None):
+        with patch.object(validator, "_get_license_key", return_value=None):
             result = await validator.validate_usage_reporting()
 
             # Should pass if usage meter module is available
@@ -167,7 +167,7 @@ class TestFinalPhaseValidator:
     @pytest.mark.asyncio
     async def test_validate_billing_sync_success(self, validator):
         """Test billing sync validation."""
-        with patch.object(validator, '_get_license_key', return_value=None):
+        with patch.object(validator, "_get_license_key", return_value=None):
             result = await validator.validate_billing_sync()
 
             # Check billing middleware availability
@@ -178,7 +178,7 @@ class TestFinalPhaseValidator:
         """Test gateway attestation with no key."""
         monkeypatch.delenv("RAAS_LICENSE_KEY", raising=False)
 
-        with patch.object(validator, '_get_license_key', return_value=None):
+        with patch.object(validator, "_get_license_key", return_value=None):
             result = await validator.validate_gateway_attestation()
 
             assert result.passed is False
@@ -187,8 +187,8 @@ class TestFinalPhaseValidator:
     @pytest.mark.asyncio
     async def test_validate_all(self, validator):
         """Test running all validations."""
-        with patch.object(validator, '_get_license_key', return_value=None):
-            with patch.object(validator, '_get_auth_client') as mock_client:
+        with patch.object(validator, "_get_license_key", return_value=None):
+            with patch.object(validator, "_get_auth_client") as mock_client:
                 mock_auth_client = Mock()
                 mock_auth_client.validate_credentials.return_value = AuthResult(
                     valid=False,

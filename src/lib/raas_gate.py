@@ -99,8 +99,27 @@ class RaasLicenseGate:
         "autonomous": 5,
     }
 
-    FREE_COMMANDS = {"init", "version", "list", "search", "status", "config", "doctor", "help", "dash"}
-    PREMIUM_COMMANDS = {"cook", "gateway", "binh-phap", "swarm", "schedule", "telegram", "autonomous", "agi"}
+    FREE_COMMANDS = {
+        "init",
+        "version",
+        "list",
+        "search",
+        "status",
+        "config",
+        "doctor",
+        "help",
+        "dash",
+    }
+    PREMIUM_COMMANDS = {
+        "cook",
+        "gateway",
+        "binh-phap",
+        "swarm",
+        "schedule",
+        "telegram",
+        "autonomous",
+        "agi",
+    }
 
     def __init__(self, enable_remote: bool = True) -> None:
         self._license_key: Optional[str] = os.getenv("RAAS_LICENSE_KEY")
@@ -161,27 +180,32 @@ class RaasLicenseGate:
         # Phase 6c: Check license status first
         if self._license_status == "revoked":
             from rich.console import Console
+
             console = Console()
             console.print(f"\n{format_license_revoked()}\n")
             return
         if self._license_status == "expired":
             from rich.console import Console
+
             console = Console()
             expiry_date = ""
             if self._license_expires_at:
                 from datetime import datetime, timezone
-                expiry_date = datetime.fromtimestamp(self._license_expires_at, tz=timezone.utc).strftime("%Y-%m-%d")
+
+                expiry_date = datetime.fromtimestamp(
+                    self._license_expires_at, tz=timezone.utc
+                ).strftime("%Y-%m-%d")
             console.print(f"\n{format_license_expired(expiry_date)}\n")
             return
 
         # Get current usage
         try:
             from src.db.repository import get_repository
+
             repo = get_repository()
             import asyncio
-            usage = asyncio.get_event_loop().run_until_complete(
-                repo.get_usage(self._key_id)
-            )
+
+            usage = asyncio.get_event_loop().run_until_complete(repo.get_usage(self._key_id))
             daily_used = usage["commands_count"] if usage else 0
         except Exception:
             return  # Don't fail on warning
@@ -214,6 +238,7 @@ class RaasLicenseGate:
 
         if threshold:
             from rich.console import Console
+
             console = Console()
 
             ctx = QuotaWarningContext(
@@ -235,11 +260,14 @@ class RaasLicenseGate:
         # Show free tier upgrade prompt
         if self._license_tier == "free" and daily_used > 0:
             from rich.console import Console
+
             console = Console()
             console.print(f"\n{format_free_tier_upgrade()}\n")
             self._warning_displayed.add(f"{self._key_id}:free_upgrade")
 
-    def _validate_jwt_token(self, license_key: str) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+    def _validate_jwt_token(
+        self, license_key: str
+    ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
         """
         Validate JWT license token.
 
@@ -463,6 +491,7 @@ class RaasLicenseGate:
             - Logs all validation attempts
         """
         import time
+
         start_time = time.time()
         offline_mode = False
         grace_period_remaining = None
@@ -526,6 +555,7 @@ class RaasLicenseGate:
                         expiry_date = ""
                         if cached_state.expires_at_ts:
                             from datetime import datetime, timezone
+
                             expiry_date = datetime.fromtimestamp(
                                 cached_state.expires_at_ts, tz=timezone.utc
                             ).strftime("%Y-%m-%d")
@@ -603,7 +633,9 @@ class RaasLicenseGate:
                 # Check monthly and daily quota (PostgreSQL backend)
                 # Fix 2: Use command cost tiers instead of always 1 credit
                 command_cost = self.get_command_cost(command)
-                allowed, usage_error = record_usage(self._key_id, self._license_tier, commands_count=command_cost)
+                allowed, usage_error = record_usage(
+                    self._key_id, self._license_tier, commands_count=command_cost
+                )
                 if not allowed:
                     # Record violation for analytics
                     usage_parts = usage_error.split("/")
@@ -675,7 +707,11 @@ class RaasLicenseGate:
 
     def get_license_info(self) -> dict:
         if not self.has_license:
-            return {"status": "no_license", "message": "No license key found", "upgrade_url": "https://raas.mekong.dev/pricing"}
+            return {
+                "status": "no_license",
+                "message": "No license key found",
+                "upgrade_url": "https://raas.mekong.dev/pricing",
+            }
 
         is_valid, error = self.validate_license_format()
         tier = (self._license_key or "").split("-")[1] if self._license_key else "unknown"
@@ -785,6 +821,7 @@ def require_license(command: str) -> None:
     allowed, error = gate.check(command)
     if not allowed:
         from rich.console import Console
+
         console = Console()
         console.print(f"[bold red]License Error:[/bold red] {error}")
         raise SystemExit(1)
@@ -800,6 +837,7 @@ def check_license(command: str) -> bool:
 # Backward-compat aliases used by license_cli.py, roi_auth.py, roi_commands.py
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class _ValidationResult:
     valid: bool
@@ -810,19 +848,60 @@ class _ValidationResult:
 # Feature catalogue keyed by tier
 PREMIUM_FEATURES: Dict[str, List[str]] = {
     "free": [
-        "init", "version", "list", "search", "status", "config", "doctor", "help", "dash",
+        "init",
+        "version",
+        "list",
+        "search",
+        "status",
+        "config",
+        "doctor",
+        "help",
+        "dash",
     ],
     "pro": [
-        "init", "version", "list", "search", "status", "config", "doctor", "help", "dash",
-        "cook", "gateway", "binh-phap", "telegram", "agi",
-        "recipe_library", "llm_routing", "usage_analytics",
+        "init",
+        "version",
+        "list",
+        "search",
+        "status",
+        "config",
+        "doctor",
+        "help",
+        "dash",
+        "cook",
+        "gateway",
+        "binh-phap",
+        "telegram",
+        "agi",
+        "recipe_library",
+        "llm_routing",
+        "usage_analytics",
     ],
     "enterprise": [
-        "init", "version", "list", "search", "status", "config", "doctor", "help", "dash",
-        "cook", "gateway", "binh-phap", "telegram", "agi",
-        "swarm", "schedule", "autonomous",
-        "recipe_library", "llm_routing", "usage_analytics",
-        "multi_tenant", "sso", "audit_logs", "priority_support",
+        "init",
+        "version",
+        "list",
+        "search",
+        "status",
+        "config",
+        "doctor",
+        "help",
+        "dash",
+        "cook",
+        "gateway",
+        "binh-phap",
+        "telegram",
+        "agi",
+        "swarm",
+        "schedule",
+        "autonomous",
+        "recipe_library",
+        "llm_routing",
+        "usage_analytics",
+        "multi_tenant",
+        "sso",
+        "audit_logs",
+        "priority_support",
     ],
 }
 

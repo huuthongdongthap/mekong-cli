@@ -94,7 +94,9 @@ class PerfBenchmark:
         )
 
     def check_thresholds(
-        self, step: int, threshold: PerfThreshold,
+        self,
+        step: int,
+        threshold: PerfThreshold,
     ) -> BenchmarkResult:
         """Check recorded step data against thresholds.
 

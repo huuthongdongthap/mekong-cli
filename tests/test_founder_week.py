@@ -106,7 +106,11 @@ class TestDailyStandup(unittest.TestCase):
 class TestInvestorUpdate(unittest.TestCase):
     def test_generate(self):
         update = generate_investor_update(
-            "Acme", 10000, 15.0, 200, 30,
+            "Acme",
+            10000,
+            15.0,
+            200,
+            30,
             "Launched v2.0",
             ["Built auth", "Shipped payments", "Hit $10K MRR"],
             "Hiring is hard",
@@ -118,7 +122,15 @@ class TestInvestorUpdate(unittest.TestCase):
 
     def test_custom_ask(self):
         update = generate_investor_update(
-            "Co", 0, 0, 0, 0, "win", ["a"], "challenge", ["next"],
+            "Co",
+            0,
+            0,
+            0,
+            0,
+            "win",
+            ["a"],
+            "challenge",
+            ["next"],
             ask="Intro to enterprise buyers",
         )
         self.assertEqual(update.ask, "Intro to enterprise buyers")
@@ -154,7 +166,15 @@ class TestSaveFiles(unittest.TestCase):
     def test_save_investor_update(self):
         with TemporaryDirectory() as tmpdir:
             update = generate_investor_update(
-                "Co", 5000, 10, 100, 10, "win", ["a"], "hard", ["next"],
+                "Co",
+                5000,
+                10,
+                100,
+                10,
+                "win",
+                ["a"],
+                "hard",
+                ["next"],
             )
             path = save_investor_update(tmpdir, update)
             self.assertTrue(Path(path).exists())

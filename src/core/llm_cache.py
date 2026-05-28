@@ -101,11 +101,14 @@ class LLMCache:
             SHA-256 hex digest as cache key
 
         """
-        payload = json.dumps({
-            "messages": messages,
-            "model": model,
-            "temperature": temperature,
-        }, sort_keys=True)
+        payload = json.dumps(
+            {
+                "messages": messages,
+                "model": model,
+                "temperature": temperature,
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(payload.encode()).hexdigest()
 
     def get(
@@ -228,9 +231,7 @@ class LLMCache:
             Number of entries removed
 
         """
-        expired_keys = [
-            k for k, v in self._cache.items() if v.is_expired
-        ]
+        expired_keys = [k for k, v in self._cache.items() if v.is_expired]
         for key in expired_keys:
             del self._cache[key]
         self.stats.total_entries = len(self._cache)

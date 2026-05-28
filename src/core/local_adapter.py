@@ -44,6 +44,7 @@ class LocalLLMAdapter:
         """Check if local LLM server is running and responsive."""
         try:
             import urllib.request
+
             # Use OpenAI-standard /models endpoint
             url = f"{self.base_url}/models"
             if not self.base_url.endswith("/v1"):
@@ -59,6 +60,7 @@ class LocalLLMAdapter:
         """List locally available models via OpenAI-compatible endpoint."""
         try:
             import urllib.request
+
             url = f"{self.base_url}/models"
             if not self.base_url.endswith("/v1"):
                 url = f"{self.base_url}/v1/models"
@@ -105,7 +107,7 @@ class LocalLLMAdapter:
         # Strip provider prefix if present
         for prefix in ("ollama:", "mlx:", "local:"):
             if model.startswith(prefix):
-                model = model[len(prefix):]
+                model = model[len(prefix) :]
                 break
 
         payload = {
@@ -155,16 +157,18 @@ class LocalLLMAdapter:
 
         for prefix in ("ollama:", "mlx:", "local:"):
             if model.startswith(prefix):
-                model = model[len(prefix):]
+                model = model[len(prefix) :]
                 break
 
-        payload = json.dumps({
-            "model": model,
-            "messages": messages,
-            "stream": False,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }).encode()
+        payload = json.dumps(
+            {
+                "model": model,
+                "messages": messages,
+                "stream": False,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+        ).encode()
 
         url = f"{self.base_url}/chat/completions"
         if not self.base_url.endswith("/v1"):

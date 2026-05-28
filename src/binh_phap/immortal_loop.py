@@ -48,7 +48,11 @@ def run_audit(standards: Dict[str, "StandardCheck"]) -> Dict[str, "StandardCheck
     return results
 
 
-def calculate_score(raas_results: Dict[str, "StandardCheck"], oss_results: Dict[str, "StandardCheck"], project_results: Dict[str, "StandardCheck"]) -> int:
+def calculate_score(
+    raas_results: Dict[str, "StandardCheck"],
+    oss_results: Dict[str, "StandardCheck"],
+    project_results: Dict[str, "StandardCheck"],
+) -> int:
     """Calculate overall quality score as percentage of passed checks.
 
     Args:
@@ -74,9 +78,7 @@ def delegate_task(failed_check: "StandardCheck") -> str:
     """
     Delegates a fix task to the CC CLI via the task-watcher protocol.
     """
-    task_description = (
-        f"Fix Binh Phap Standard: {failed_check.name}. {failed_check.details}"
-    )
+    task_description = f"Fix Binh Phap Standard: {failed_check.name}. {failed_check.details}"
 
     # Prefix with /cook for ClaudeKit agent activation
     command = f"/cook {task_description}"

@@ -3,6 +3,7 @@
 Covers: check_balance enforcement, record_usage persistence, get_usage_summary
 aggregation (daily/monthly), list_events retrieval, and error edge cases.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -17,7 +18,6 @@ from src.raas.credit_metering_middleware import (
     UsageEvent,
     UsageSummary,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -68,9 +68,7 @@ def test_check_balance_passes_with_sufficient_credits(
 # ---------------------------------------------------------------------------
 
 
-def test_check_balance_raises_when_insufficient(
-    meter: CreditMeter, db_path: Path
-) -> None:
+def test_check_balance_raises_when_insufficient(meter: CreditMeter, db_path: Path) -> None:
     """check_balance should raise InsufficientCreditsError for broke tenant."""
     broke_tenant = "tenant-broke-001"
     # No credits added → balance == 0; cook_complex costs 5
@@ -88,9 +86,7 @@ def test_check_balance_raises_when_insufficient(
 # ---------------------------------------------------------------------------
 
 
-def test_check_balance_raises_for_unknown_task_type(
-    meter: CreditMeter, funded_tenant: str
-) -> None:
+def test_check_balance_raises_for_unknown_task_type(meter: CreditMeter, funded_tenant: str) -> None:
     """check_balance should raise ValueError when task type is not in TASK_COSTS."""
     with pytest.raises(ValueError, match="Unknown task type"):
         meter.check_balance(funded_tenant, "nonexistent_task")
@@ -101,9 +97,7 @@ def test_check_balance_raises_for_unknown_task_type(
 # ---------------------------------------------------------------------------
 
 
-def test_record_usage_persists_event(
-    meter: CreditMeter, funded_tenant: str
-) -> None:
+def test_record_usage_persists_event(meter: CreditMeter, funded_tenant: str) -> None:
     """record_usage should insert a retrievable UsageEvent into the DB."""
     event = meter.record_usage(
         tenant_id=funded_tenant,
@@ -131,9 +125,7 @@ def test_record_usage_persists_event(
 # ---------------------------------------------------------------------------
 
 
-def test_record_usage_without_mission_id(
-    meter: CreditMeter, funded_tenant: str
-) -> None:
+def test_record_usage_without_mission_id(meter: CreditMeter, funded_tenant: str) -> None:
     """record_usage should accept None mission_id (pipeline-level usage)."""
     event = meter.record_usage(
         tenant_id=funded_tenant,
@@ -150,9 +142,7 @@ def test_record_usage_without_mission_id(
 # ---------------------------------------------------------------------------
 
 
-def test_get_usage_summary_daily_aggregation(
-    meter: CreditMeter, funded_tenant: str
-) -> None:
+def test_get_usage_summary_daily_aggregation(meter: CreditMeter, funded_tenant: str) -> None:
     """get_usage_summary daily should sum credits per task_type for today."""
     meter.record_usage(funded_tenant, "plan", 1)
     meter.record_usage(funded_tenant, "execute_llm", 2)
@@ -176,9 +166,7 @@ def test_get_usage_summary_daily_aggregation(
 # ---------------------------------------------------------------------------
 
 
-def test_get_usage_summary_monthly_period(
-    meter: CreditMeter, funded_tenant: str
-) -> None:
+def test_get_usage_summary_monthly_period(meter: CreditMeter, funded_tenant: str) -> None:
     """get_usage_summary should return a valid UsageSummary for monthly period."""
     meter.record_usage(funded_tenant, "cook_standard", 3)
 
@@ -222,9 +210,7 @@ def test_get_usage_summary_empty_for_new_tenant(
 # ---------------------------------------------------------------------------
 
 
-def test_list_events_order_and_limit(
-    meter: CreditMeter, funded_tenant: str
-) -> None:
+def test_list_events_order_and_limit(meter: CreditMeter, funded_tenant: str) -> None:
     """list_events should return events ordered by timestamp DESC and honour limit."""
     for task in ["plan", "execute_shell", "verify"]:
         meter.record_usage(funded_tenant, task, TASK_COSTS[task])
@@ -259,8 +245,14 @@ def test_insufficient_credits_error_attributes() -> None:
 def test_task_costs_completeness() -> None:
     """TASK_COSTS should define positive costs for all required task types."""
     required_keys = {
-        "plan", "execute_shell", "execute_llm", "execute_api",
-        "verify", "cook_simple", "cook_standard", "cook_complex",
+        "plan",
+        "execute_shell",
+        "execute_llm",
+        "execute_api",
+        "verify",
+        "cook_simple",
+        "cook_standard",
+        "cook_complex",
     }
     assert required_keys.issubset(set(TASK_COSTS.keys()))
     for key, cost in TASK_COSTS.items():
@@ -272,9 +264,7 @@ def test_task_costs_completeness() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_multiple_tenants_are_isolated(
-    meter: CreditMeter, credit_store: CreditStore
-) -> None:
+def test_multiple_tenants_are_isolated(meter: CreditMeter, credit_store: CreditStore) -> None:
     """Usage events for tenant A must not appear in tenant B's summary."""
     credit_store.add("tenant-a", 50, reason="setup")
     credit_store.add("tenant-b", 50, reason="setup")

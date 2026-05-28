@@ -42,9 +42,7 @@ def turbo_attention(
 
     # Try Flash Attention (Metal-optimized)
     try:
-        return mx.fast.scaled_dot_product_attention(
-            queries, keys, values, scale=scale, mask=mask
-        )
+        return mx.fast.scaled_dot_product_attention(queries, keys, values, scale=scale, mask=mask)
     except Exception:
         # Fallback to manual attention
         return _manual_attention(queries, keys, values, scale, mask)
@@ -94,9 +92,7 @@ def verify_flash_attention_compatible(
 
     # Flash attention
     try:
-        flash_out = mx.fast.scaled_dot_product_attention(
-            queries, keys, values, scale=scale
-        )
+        flash_out = mx.fast.scaled_dot_product_attention(queries, keys, values, scale=scale)
         max_error = float(mx.max(mx.abs(manual_out - flash_out)).item())
         return {
             "compatible": True,

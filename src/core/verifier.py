@@ -84,7 +84,9 @@ class RecipeVerifier:
         self.strict_mode = strict_mode
 
     def verify_exit_code(
-        self, result: ExecutionResult, expected: int,
+        self,
+        result: ExecutionResult,
+        expected: int,
     ) -> VerificationCheck:
         """Verify command exit code.
 
@@ -167,7 +169,9 @@ class RecipeVerifier:
         )
 
     def verify_output_contains(
-        self, result: ExecutionResult, pattern: str,
+        self,
+        result: ExecutionResult,
+        pattern: str,
     ) -> VerificationCheck:
         """Verify output contains pattern.
 
@@ -211,7 +215,9 @@ class RecipeVerifier:
         )
 
     def verify_output_not_contains(
-        self, result: ExecutionResult, pattern: str,
+        self,
+        result: ExecutionResult,
+        pattern: str,
     ) -> VerificationCheck:
         """Verify output does NOT contain pattern.
 
@@ -255,7 +261,9 @@ class RecipeVerifier:
         )
 
     def verify(
-        self, result: ExecutionResult, criteria: dict[str, Any],
+        self,
+        result: ExecutionResult,
+        criteria: dict[str, Any],
     ) -> VerificationReport:
         """Run all verification checks against criteria.
 
@@ -323,7 +331,9 @@ class RecipeVerifier:
         return report
 
     def _run_custom_check(
-        self, check_spec: str | dict[str, str], result: ExecutionResult,
+        self,
+        check_spec: str | dict[str, str],
+        result: ExecutionResult,
     ) -> VerificationCheck:
         """Execute a custom verification check.
 
@@ -376,6 +386,7 @@ class RecipeVerifier:
         try:
             # SECURITY: Enforce timeout on custom checks to prevent hangs
             import shlex
+
             proc = subprocess.run(
                 shlex.split(command),
                 capture_output=True,
@@ -463,7 +474,8 @@ class RecipeVerifier:
 
         # Security check
         vuln_check = self.verify_output_not_contains(
-            result, r"vulnerabilit|critical|high severity",
+            result,
+            r"vulnerabilit|critical|high severity",
         )
         vuln_check.name = "binh_phap:security"
         report.checks.append(vuln_check)

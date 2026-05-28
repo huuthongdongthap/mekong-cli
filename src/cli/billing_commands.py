@@ -106,7 +106,9 @@ def simulate_billing(
     token_output: int = typer.Option(500, "--token-output", help="Output tokens (in K)"),
     agent_spawns: int = typer.Option(10, "--agent-spawns", help="Number of agent spawns"),
     model: Optional[str] = typer.Option(None, "--model", "-m", help="Model name"),
-    period_start: Optional[str] = typer.Option(None, "--period-start", help="Period start (YYYY-MM-DD)"),
+    period_start: Optional[str] = typer.Option(
+        None, "--period-start", help="Period start (YYYY-MM-DD)"
+    ),
     period_end: Optional[str] = typer.Option(None, "--period-end", help="Period end (YYYY-MM-DD)"),
 ) -> None:
     """
@@ -160,6 +162,7 @@ def simulate_billing(
 
     # Parse dates
     from datetime import datetime as dt
+
     period_start_dt = dt.now()
     period_end_dt = dt.now()
 
@@ -173,18 +176,18 @@ def simulate_billing(
         engine = get_engine()
         import asyncio
 
-        result = asyncio.run(engine.calculate_charges(
-            license_key=license_key,
-            usage_events=events,
-            period_start=period_start_dt,
-            period_end=period_end_dt,
-        ))
+        result = asyncio.run(
+            engine.calculate_charges(
+                license_key=license_key,
+                usage_events=events,
+                period_start=period_start_dt,
+                period_end=period_end_dt,
+            )
+        )
 
         print_billing_result(result)
 
-        console.print(
-            "\n[ydim]Simulation only — no charges applied[/ydim]"
-        )
+        console.print("\n[ydim]Simulation only — no charges applied[/ydim]")
 
     except Exception as e:
         print_error("Billing simulation failed", str(e))
@@ -194,8 +197,12 @@ def simulate_billing(
 @app.command("submit-usage")
 def submit_usage(
     license_key: str = typer.Option(..., "--license", "-l", help="License key"),
-    events_file: Optional[str] = typer.Option(None, "--events-file", "-f", help="JSON file with usage events"),
-    event_type: Optional[str] = typer.Option(None, "--event-type", "-t", help="Event type (if not using file)"),
+    events_file: Optional[str] = typer.Option(
+        None, "--events-file", "-f", help="JSON file with usage events"
+    ),
+    event_type: Optional[str] = typer.Option(
+        None, "--event-type", "-t", help="Event type (if not using file)"
+    ),
     metric: Optional[str] = typer.Option("requests", "--metric", "-m", help="Metric name"),
     value: Optional[float] = typer.Option(None, "--value", "-v", help="Usage value"),
     model: Optional[str] = typer.Option(None, "--model", help="Model name"),
@@ -309,18 +316,18 @@ def submit_usage(
         return billing_record_id
 
     try:
-        result = asyncio.run(idempotency_manager.process_batch(
-            batch_id=batch_id,
-            license_key=license_key,
-            key_id="",  # Would fetch from license
-            events=events,
-            process_fn=process_batch,
-        ))
+        result = asyncio.run(
+            idempotency_manager.process_batch(
+                batch_id=batch_id,
+                license_key=license_key,
+                key_id="",  # Would fetch from license
+                events=events,
+                process_fn=process_batch,
+            )
+        )
 
         if result.is_duplicate:
-            console.print(
-                "\n[yellow]⚠ Duplicate batch detected (already processed)[/yellow]"
-            )
+            console.print("\n[yellow]⚠ Duplicate batch detected (already processed)[/yellow]")
             console.print(f"Billing Record: {result.billing_record_id}")
         elif result.status == "completed":
             print_success("Batch processed successfully")
@@ -339,8 +346,12 @@ def submit_usage(
 
 @app.command("reconcile")
 def trigger_reconciliation(
-    license_key: Optional[str] = typer.Option(None, "--license", "-l", help="Specific license to reconcile"),
-    audit_date: Optional[str] = typer.Option(None, "--date", "-d", help="Audit date (YYYY-MM-DD, default: yesterday)"),
+    license_key: Optional[str] = typer.Option(
+        None, "--license", "-l", help="Specific license to reconcile"
+    ),
+    audit_date: Optional[str] = typer.Option(
+        None, "--date", "-d", help="Audit date (YYYY-MM-DD, default: yesterday)"
+    ),
     all_licenses: bool = typer.Option(False, "--all", help="Reconcile all licenses"),
 ) -> None:
     """
@@ -431,10 +442,16 @@ def trigger_reconciliation(
 
 @app.command("emit-event")
 def emit_billing_event(
-    event_type: str = typer.Argument(..., help="Event type (billing:recorded, billing:overage, etc.)"),
+    event_type: str = typer.Argument(
+        ..., help="Event type (billing:recorded, billing:overage, etc.)"
+    ),
     payload: Optional[str] = typer.Option(None, "--payload", "-p", help="JSON payload"),
-    payload_file: Optional[str] = typer.Option(None, "--payload-file", "-f", help="JSON file with payload"),
-    webhook_url: Optional[str] = typer.Option(None, "--webhook", "-w", help="Webhook URL to emit to"),
+    payload_file: Optional[str] = typer.Option(
+        None, "--payload-file", "-f", help="JSON file with payload"
+    ),
+    webhook_url: Optional[str] = typer.Option(
+        None, "--webhook", "-w", help="Webhook URL to emit to"
+    ),
 ) -> None:
     """
     📡 Emit billing event to event bus or webhook.
@@ -550,11 +567,13 @@ def billing_status(
         engine = get_engine()
         from datetime import datetime
 
-        result = asyncio.run(engine.calculate_period_charges(
-            license_key=license_key,
-            period_start=datetime.now().replace(day=1),
-            period_end=datetime.now(),
-        ))
+        result = asyncio.run(
+            engine.calculate_period_charges(
+                license_key=license_key,
+                period_start=datetime.now().replace(day=1),
+                period_end=datetime.now(),
+            )
+        )
 
         table = Table(show_header=True, header_style="bold green")
         table.add_column("Metric")
@@ -575,7 +594,9 @@ def billing_status(
 
 @app.command("sync")
 def billing_sync(
-    license_key: Optional[str] = typer.Option(None, "--license", "-l", help="License key (defaults to MEKONG_API_KEY)"),
+    license_key: Optional[str] = typer.Option(
+        None, "--license", "-l", help="License key (defaults to MEKONG_API_KEY)"
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Simulate without submitting"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed sync information"),
     force: bool = typer.Option(False, "--force", "-f", help="Force resync already synced records"),
@@ -610,12 +631,11 @@ def billing_sync(
     api_key = license_key or os.getenv("MEKONG_API_KEY") or os.getenv("RAAS_LICENSE_KEY", "")
     if not api_key:
         print_error(
-            "API key not configured",
-            "Set MEKONG_API_KEY or RAAS_LICENSE_KEY environment variable"
+            "API key not configured", "Set MEKONG_API_KEY or RAAS_LICENSE_KEY environment variable"
         )
         raise SystemExit(1)
 
-    console.print("Gateway: [cyan]https://raas.agencyos.network/v2/usage[/cyan]")
+    console.print("Gateway: [cyan]https://api.cashclaw.cc/v2/usage[/cyan]")
     console.print(f"API Key: [cyan]mk_***{api_key[-4:] if len(api_key) > 4 else api_key}[/cyan]")
     console.print()
 
@@ -629,7 +649,9 @@ def billing_sync(
         else:
             console.print(f"Would sync [cyan]{len(records)}[/cyan] record(s):")
             for record in records[:5]:
-                console.print(f"  • {record.event_type} - {record.endpoint or 'N/A'} - {record.timestamp}")
+                console.print(
+                    f"  • {record.event_type} - {record.endpoint or 'N/A'} - {record.timestamp}"
+                )
             if len(records) > 5:
                 console.print(f"  ... and {len(records) - 5} more")
 
@@ -652,7 +674,9 @@ def billing_sync(
         console.print(f"Idempotency key: [dim]{result.idempotency_key}[/dim]")
 
         if result.gateway_response:
-            console.print(f"\nGateway response: [green]{result.gateway_response.get('status', 'OK')}[/green]")
+            console.print(
+                f"\nGateway response: [green]{result.gateway_response.get('status', 'OK')}[/green]"
+            )
     else:
         print_error("Sync failed", result.error)
         console.print(f"Records failed: [red]{result.records_failed}[/red]")

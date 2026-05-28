@@ -4,6 +4,7 @@ Run with: python3 tests/test_10_missions.py
 
 Requires at least one LLM provider configured.
 """
+
 import asyncio
 import sys
 import os

@@ -49,6 +49,7 @@ class TestCheckGateway:
     def test_gateway_timeout(self, mock_head):
         """Test gateway timeout handling."""
         import requests
+
         mock_head.side_effect = requests.exceptions.Timeout("Connection timed out")
 
         result = runner.invoke(app, ["gateway", "-u", "https://raas.test.network", "-t", "1"])
@@ -61,6 +62,7 @@ class TestCheckGateway:
     def test_gateway_connection_error(self, mock_head):
         """Test gateway connection error handling."""
         import requests
+
         mock_head.side_effect = requests.exceptions.ConnectionError("Failed to connect")
 
         result = runner.invoke(app, ["gateway", "-u", "https://raas.test.network"])
@@ -255,6 +257,7 @@ class TestRunAllDiagnostics:
         assert output_file.exists()
 
         import json
+
         with open(output_file) as f:
             report = json.load(f)
 

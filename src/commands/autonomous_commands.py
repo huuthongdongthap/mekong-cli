@@ -81,6 +81,4 @@ def autonomous_resume() -> None:
 
     gov = Governance()
     gov.resume()
-    console.print(
-        "[bold green]RESUMED[/bold green] — Autonomous operations re-enabled."
-    )
+    console.print("[bold green]RESUMED[/bold green] — Autonomous operations re-enabled.")

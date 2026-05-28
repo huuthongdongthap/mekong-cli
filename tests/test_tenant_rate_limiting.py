@@ -8,6 +8,7 @@ Test Categories:
 
 Total: ~30 tests
 """
+
 from __future__ import annotations
 
 import datetime
@@ -19,7 +20,6 @@ from src.lib.tier_config import RateLimitConfig, get_preset_config
 from src.db.tier_config_repository import TenantRateLimitOverride
 from src.lib.rate_limiter_factory import TierRateLimiter
 from src.lib.tier_rate_limit_middleware import TierRateLimitMiddleware
-
 
 # ============================================================================
 # TEST SECTION 1: Tenant Override Detection (~10 tests)
@@ -38,6 +38,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_returns_override_config(self, mock_repo):
         """Test _get_tenant_override returns override config when present."""
+
         async def app(req, recv, send):
             pass
 
@@ -65,6 +66,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_returns_none_when_no_override(self, mock_repo):
         """Test _get_tenant_override returns None if no override exists."""
+
         async def app(req, recv, send):
             pass
 
@@ -80,6 +82,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_handles_expired_override(self, mock_repo):
         """Test _get_tenant_override handles expired overrides."""
+
         async def app(req, recv, send):
             pass
 
@@ -110,6 +113,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_handles_db_error_gracefully(self, mock_repo):
         """Test _get_tenant_override handles DB errors gracefully."""
+
         async def app(req, recv, send):
             pass
 
@@ -125,6 +129,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_with_none_custom_limit(self, mock_repo):
         """Test _get_tenant_override returns None when custom_limit is None."""
+
         async def app(req, recv, send):
             pass
 
@@ -150,6 +155,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_custom_window_defaults(self, mock_repo):
         """Test _get_tenant_override uses default 60s when custom_window is None."""
+
         async def app(req, recv, send):
             pass
 
@@ -176,6 +182,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_future_expiry_not_expired(self, mock_repo):
         """Test _get_tenant_override returns config for future expiry."""
+
         async def app(req, recv, send):
             pass
 
@@ -207,6 +214,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_different_presets_separate(self, mock_repo):
         """Test different presets return different overrides."""
+
         async def app(req, recv, send):
             pass
 
@@ -251,6 +259,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_multiple_tenants(self, mock_repo):
         """Test each tenant has separate override."""
+
         async def app(req, recv, send):
             pass
 
@@ -295,6 +304,7 @@ class TestTenantOverrideDetection:
     @pytest.mark.asyncio
     async def test_get_tenant_override_db_error_fallback(self, mock_repo):
         """Test DB error causes fallback to tier default."""
+
         async def app(req, recv, send):
             pass
 
@@ -342,6 +352,7 @@ class TestMiddlewareIntegration:
     @pytest.mark.asyncio
     async def test_middleware_applies_override_config(self):
         """Test middleware applies override config when present."""
+
         async def app(req, recv, send):
             pass
 
@@ -372,6 +383,7 @@ class TestMiddlewareIntegration:
     @pytest.mark.asyncio
     async def test_middleware_falls_back_to_default_without_override(self):
         """Test middleware falls back to default when no override."""
+
         async def app(req, recv, send):
             pass
 
@@ -389,6 +401,7 @@ class TestMiddlewareIntegration:
     @pytest.mark.asyncio
     async def test_middleware_override_displays_custom_tier(self):
         """Test override results in custom tier display."""
+
         async def app(req, recv, send):
             pass
 
@@ -505,12 +518,8 @@ class TestRuntimeBehavior:
     @pytest.mark.asyncio
     async def test_multiple_tenants_separate_limits(self):
         """Test multiple tenants have separate rate limit states."""
-        tenant1_limiter = TierRateLimiter(
-            RateLimitConfig(requests_per_minute=10, burst_size=10)
-        )
-        tenant2_limiter = TierRateLimiter(
-            RateLimitConfig(requests_per_minute=50, burst_size=50)
-        )
+        tenant1_limiter = TierRateLimiter(RateLimitConfig(requests_per_minute=10, burst_size=10))
+        tenant2_limiter = TierRateLimiter(RateLimitConfig(requests_per_minute=50, burst_size=50))
 
         # Consume some tokens from each
         for _ in range(5):

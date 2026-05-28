@@ -80,21 +80,56 @@ def score_readiness(
     operations: dict[str, int],
 ) -> ReadinessAssessment:
     """Score IPO readiness across 5 categories (0-100 total)."""
-    fin = _score_category("Financial", 25, financial, [
-        ("audited_financials", 10), ("revenue_growth", 8), ("path_to_profitability", 7),
-    ])
-    biz = _score_category("Business", 25, business, [
-        ("market_size", 8), ("competitive_moat", 9), ("revenue_quality", 8),
-    ])
-    gov = _score_category("Governance", 20, governance, [
-        ("board_independence", 8), ("audit_committee", 7), ("executive_team", 5),
-    ])
-    leg = _score_category("Legal", 15, legal, [
-        ("ip_protection", 6), ("regulatory_compliance", 5), ("litigation_risk", 4),
-    ])
-    ops = _score_category("Operations", 15, operations, [
-        ("scalable_systems", 6), ("internal_controls", 5), ("reporting_infrastructure", 4),
-    ])
+    fin = _score_category(
+        "Financial",
+        25,
+        financial,
+        [
+            ("audited_financials", 10),
+            ("revenue_growth", 8),
+            ("path_to_profitability", 7),
+        ],
+    )
+    biz = _score_category(
+        "Business",
+        25,
+        business,
+        [
+            ("market_size", 8),
+            ("competitive_moat", 9),
+            ("revenue_quality", 8),
+        ],
+    )
+    gov = _score_category(
+        "Governance",
+        20,
+        governance,
+        [
+            ("board_independence", 8),
+            ("audit_committee", 7),
+            ("executive_team", 5),
+        ],
+    )
+    leg = _score_category(
+        "Legal",
+        15,
+        legal,
+        [
+            ("ip_protection", 6),
+            ("regulatory_compliance", 5),
+            ("litigation_risk", 4),
+        ],
+    )
+    ops = _score_category(
+        "Operations",
+        15,
+        operations,
+        [
+            ("scalable_systems", 6),
+            ("internal_controls", 5),
+            ("reporting_infrastructure", 4),
+        ],
+    )
 
     categories = [fin, biz, gov, leg, ops]
     total = sum(c.score for c in categories)
@@ -109,9 +144,7 @@ def score_readiness(
         verdict, months = "18+ months to IPO-ready", 24
 
     gaps = [
-        f"{c.name}: {c.score}/{c.max_points}"
-        for c in categories
-        if c.score < c.max_points * 0.6
+        f"{c.name}: {c.score}/{c.max_points}" for c in categories if c.score < c.max_points * 0.6
     ]
     return ReadinessAssessment(
         total_score=total,

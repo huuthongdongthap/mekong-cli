@@ -28,7 +28,14 @@ CONTRACTS_DIR = FACTORY_DIR / "contracts"
 CMD_CONTRACTS_DIR = CONTRACTS_DIR / "commands"
 
 COMPLEXITY_MAP = {0: "trivial", 1: "simple", 3: "standard", 5: "complex"}
-CREDIT_TO_COMPLEXITY = {0: "trivial", 1: "simple", 2: "simple", 3: "standard", 4: "standard", 5: "complex"}
+CREDIT_TO_COMPLEXITY = {
+    0: "trivial",
+    1: "simple",
+    2: "simple",
+    3: "standard",
+    4: "standard",
+    5: "complex",
+}
 TIMEOUT_MAP = {"trivial": 10_000, "simple": 30_000, "standard": 120_000, "complex": 300_000}
 
 
@@ -74,7 +81,12 @@ def infer_credit_cost(cmd_id: str) -> int:
     ipo_cmds = {"s1", "roadshow", "ipo-day", "public-co", "insider", "succession", "pre-ipo-prep"}
     complex_cmds = {"deploy", "cap-table", "negotiate", "term-sheet", "raas/bootstrap", "secondary"}
     simple_free = {"status", "help", "raas", "raas/status"}
-    if cmd_id in simple_free or cmd_id.endswith("/ARCHITECTURE") or cmd_id.endswith("/SOVEREIGNTY") or cmd_id.endswith("/MASTER-MAP"):
+    if (
+        cmd_id in simple_free
+        or cmd_id.endswith("/ARCHITECTURE")
+        or cmd_id.endswith("/SOVEREIGNTY")
+        or cmd_id.endswith("/MASTER-MAP")
+    ):
         return 0
     stem = cmd_id.split("/")[-1]
     if stem in ipo_cmds or cmd_id in complex_cmds:
@@ -93,7 +105,9 @@ def layer_hub(layers: dict[str, Any], layer_name: str) -> str:
     return hubs[0] if hubs else f"{layer_name}-hub"
 
 
-def build_contract(cmd_id: str, fm: dict[str, Any], layer: str, layers: dict[str, Any]) -> dict[str, Any]:
+def build_contract(
+    cmd_id: str, fm: dict[str, Any], layer: str, layers: dict[str, Any]
+) -> dict[str, Any]:
     credit_cost = infer_credit_cost(cmd_id)
     complexity = CREDIT_TO_COMPLEXITY.get(credit_cost, "standard")
     name_en = cmd_id.split("/")[-1].replace("-", " ").title()
@@ -154,12 +168,14 @@ def generate_skills_registry() -> list[dict[str, Any]]:
         if not skill_md.exists():
             continue
         fm = parse_frontmatter(skill_md)
-        skills.append({
-            "id": skill_dir.name,
-            "name": fm.get("name", skill_dir.name),
-            "description": (fm.get("description", "") or "")[:200],
-            "path": str(skill_md.relative_to(REPO_ROOT)),
-        })
+        skills.append(
+            {
+                "id": skill_dir.name,
+                "name": fm.get("name", skill_dir.name),
+                "description": (fm.get("description", "") or "")[:200],
+                "path": str(skill_md.relative_to(REPO_ROOT)),
+            }
+        )
     return skills
 
 
@@ -169,13 +185,15 @@ def generate_agents_registry() -> list[dict[str, Any]]:
         fm = parse_frontmatter(agent_md)
         if not fm:
             continue
-        agents.append({
-            "id": agent_md.stem,
-            "name": fm.get("name", agent_md.stem),
-            "description": (fm.get("description", "") or "")[:200],
-            "model": fm.get("model", "sonnet"),
-            "path": str(agent_md.relative_to(REPO_ROOT)),
-        })
+        agents.append(
+            {
+                "id": agent_md.stem,
+                "name": fm.get("name", agent_md.stem),
+                "description": (fm.get("description", "") or "")[:200],
+                "model": fm.get("model", "sonnet"),
+                "path": str(agent_md.relative_to(REPO_ROOT)),
+            }
+        )
     return agents
 
 
@@ -216,12 +234,16 @@ def main() -> int:
 
     skills = generate_skills_registry()
     skills_path = CONTRACTS_DIR / "skills.registry.json"
-    skills_path.write_text(json.dumps({"version": "1.0.0", "skills": skills}, ensure_ascii=False, indent=2))
+    skills_path.write_text(
+        json.dumps({"version": "1.0.0", "skills": skills}, ensure_ascii=False, indent=2)
+    )
     logger.info("Skills registry: %d skills → %s", len(skills), skills_path.name)
 
     agents = generate_agents_registry()
     agents_path = CONTRACTS_DIR / "agents.registry.json"
-    agents_path.write_text(json.dumps({"version": "1.0.0", "agents": agents}, ensure_ascii=False, indent=2))
+    agents_path.write_text(
+        json.dumps({"version": "1.0.0", "agents": agents}, ensure_ascii=False, indent=2)
+    )
     logger.info("Agents registry: %d agents → %s", len(agents), agents_path.name)
 
     from_md = len(generated_ids) - stubs

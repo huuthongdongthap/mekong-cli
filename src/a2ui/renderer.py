@@ -130,9 +130,7 @@ class A2UIRenderer:
             surface_id: The surface identifier to render.
         """
         if surface_id not in self.surfaces:
-            self.console.print(
-                f"[bold red][A2UI] Surface '{surface_id}' not found[/bold red]"
-            )
+            self.console.print(f"[bold red][A2UI] Surface '{surface_id}' not found[/bold red]")
             return
 
         components = self.surfaces[surface_id]
@@ -145,9 +143,7 @@ class A2UIRenderer:
                 self.console.print(renderable)
             except Exception as exc:  # noqa: BLE001
                 logger.error("[A2UI] Failed to render component %s: %s", component, exc)
-                self.console.print(
-                    Text(f"[render error: {exc}]", style="bold red")
-                )
+                self.console.print(Text(f"[render error: {exc}]", style="bold red"))
 
     def render_component(self, component: Dict[str, Any]) -> RenderableType:
         """Render a single A2UI component dict.

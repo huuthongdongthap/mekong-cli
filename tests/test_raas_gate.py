@@ -50,7 +50,7 @@ class TestRaasLicenseGateInit:
         """Test default initialization with remote enabled."""
         gate = RaasLicenseGate()
         assert gate._enable_remote is True
-        assert gate._remote_url == "https://raas.agencyos.network"
+        assert gate._remote_url == "https://api.cashclaw.cc"
         assert gate.license_key is None
         assert gate.has_license is False
 
@@ -70,19 +70,38 @@ class TestRaasLicenseGateInit:
 class TestCommandCategorization:
     """Test free vs premium command categorization."""
 
-    @pytest.mark.parametrize("command", [
-        "init", "version", "list", "search", "status",
-        "config", "doctor", "help", "dash",
-    ])
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "init",
+            "version",
+            "list",
+            "search",
+            "status",
+            "config",
+            "doctor",
+            "help",
+            "dash",
+        ],
+    )
     def test_free_commands(self, license_gate, command):
         """Test free commands are correctly categorized."""
         assert license_gate.is_free_command(command) is True
         assert license_gate.is_premium_command(command) is False
 
-    @pytest.mark.parametrize("command", [
-        "cook", "gateway", "binh-phap", "swarm",
-        "schedule", "telegram", "autonomous", "agi",
-    ])
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "cook",
+            "gateway",
+            "binh-phap",
+            "swarm",
+            "schedule",
+            "telegram",
+            "autonomous",
+            "agi",
+        ],
+    )
     def test_premium_commands(self, license_gate, command):
         """Test premium commands are correctly categorized."""
         assert license_gate.is_free_command(command) is False
@@ -191,6 +210,7 @@ class TestRemoteValidation:
         gate = RaasLicenseGate(enable_remote=True)
 
         import requests.exceptions
+
         with patch("src.lib.raas_gate.requests.post") as mock_post:
             mock_post.side_effect = requests.exceptions.RequestException("Connection refused")
 
@@ -384,11 +404,13 @@ class TestUsageMeteringEdgeCases:
         mock_repo = MagicMock()
         mock_repo.get_license_by_key_id = AsyncMock(return_value={"tier": "enterprise"})
         mock_repo.get_usage = AsyncMock(return_value={"commands_count": 500})
-        mock_repo.get_usage_summary = AsyncMock(return_value={
-            "total_commands": 500,
-            "days_with_usage": 5,
-            "avg_daily_commands": 100,
-        })
+        mock_repo.get_usage_summary = AsyncMock(
+            return_value={
+                "total_commands": 500,
+                "days_with_usage": 5,
+                "avg_daily_commands": 100,
+            }
+        )
 
         meter = UsageMeter(repository=mock_repo)
         summary = await meter.get_usage_summary("key-ent")
@@ -447,7 +469,11 @@ class TestIntegrationScenarios:
                     mock_format.return_value = (True, "")
 
                     with patch.object(gate, "validate_remote") as mock_remote:
-                        mock_remote.return_value = (True, {"tier": "enterprise", "key_id": "ent-123"}, "")
+                        mock_remote.return_value = (
+                            True,
+                            {"tier": "enterprise", "key_id": "ent-123"},
+                            "",
+                        )
 
                         # Mock async record_usage
                         with patch("src.lib.raas_gate.record_usage") as mock_record:

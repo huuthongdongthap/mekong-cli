@@ -73,6 +73,7 @@ class SmartRouter:
         # AGI v2: Lazy-load tool registry
         try:
             from .tool_registry import ToolRegistry
+
             self._tool_registry = ToolRegistry()
         except Exception as _exc:
             logger.debug("ToolRegistry unavailable, tool routing disabled: %s", _exc)
@@ -200,4 +201,3 @@ __all__ = [
     "RouteResult",
     "SmartRouter",
 ]
-

@@ -166,10 +166,7 @@ def create_health_app() -> FastAPI:
         for name in _component_checks:
             components[name] = _check_component(name)
 
-        is_ready = all(
-            c.status in ("healthy", "unknown")
-            for c in components.values()
-        )
+        is_ready = all(c.status in ("healthy", "unknown") for c in components.values())
 
         return {
             "ready": is_ready,
@@ -243,6 +240,7 @@ def start_health_server(
 
     # Wait for server to start
     import time
+
     time.sleep(0.5)
 
     return server

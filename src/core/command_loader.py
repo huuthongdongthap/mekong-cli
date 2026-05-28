@@ -4,6 +4,7 @@ Maps task classifier output (agent_role, domain) to the best
 matching command file. Feeds command content as system prompt
 to the LLM, so output reflects Mekong's operational knowledge.
 """
+
 from __future__ import annotations
 
 import re
@@ -20,6 +21,7 @@ COMMANDS_DIR = Path(__file__).parent.parent.parent / ".claude" / "commands"
 @dataclass
 class Command:
     """Parsed command from .md file."""
+
     id: str
     path: Path
     description: str
@@ -40,7 +42,7 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
         if ":" in line:
             key, val = line.split(":", 1)
             frontmatter[key.strip().strip('"')] = val.strip().strip('"')
-    return frontmatter, text[end + 3:].strip()
+    return frontmatter, text[end + 3 :].strip()
 
 
 def load_all_commands() -> list[Command]:
@@ -54,14 +56,18 @@ def load_all_commands() -> list[Command]:
         try:
             text = md_file.read_text(encoding="utf-8")
             fm, body = _parse_frontmatter(text)
-            commands.append(Command(
-                id=md_file.stem,
-                path=md_file,
-                description=fm.get("description", ""),
-                argument_hint=fm.get("argument-hint", ""),
-                allowed_tools=[t.strip() for t in fm.get("allowed-tools", "").split(",") if t.strip()],
-                content=text,
-            ))
+            commands.append(
+                Command(
+                    id=md_file.stem,
+                    path=md_file,
+                    description=fm.get("description", ""),
+                    argument_hint=fm.get("argument-hint", ""),
+                    allowed_tools=[
+                        t.strip() for t in fm.get("allowed-tools", "").split(",") if t.strip()
+                    ],
+                    content=text,
+                )
+            )
         except Exception as e:
             logger.warning("Failed to load %s: %s", md_file, e)
 
@@ -81,9 +87,28 @@ def get_commands() -> list[Command]:
 
 
 ROLE_PREFIXES: dict[str, list[str]] = {
-    "cfo": ["accounting", "cashflow", "expense", "invoice", "finance", "revenue", "budget", "collections", "tax"],
+    "cfo": [
+        "accounting",
+        "cashflow",
+        "expense",
+        "invoice",
+        "finance",
+        "revenue",
+        "budget",
+        "collections",
+        "tax",
+    ],
     "cmo": ["marketing", "content", "campaign", "email", "seo", "brand", "social", "writer"],
-    "cto": ["engineering", "deploy", "infra", "code-review", "architecture", "devops", "cook", "code"],
+    "cto": [
+        "engineering",
+        "deploy",
+        "infra",
+        "code-review",
+        "architecture",
+        "devops",
+        "cook",
+        "code",
+    ],
     "coo": ["ops", "process", "workflow", "onboarding", "hr", "recruiting"],
     "cro": ["sales", "pipeline", "deal", "crm", "outreach", "ae-", "sdr"],
     "cs": ["cs", "care", "ticket", "sla", "nps", "churn"],
@@ -122,12 +147,12 @@ def find_best_command(
     # 2. Score each command
     best_score = 0
     best_cmd = None
-    goal_words = set(re.findall(r'\w+', goal_lower))
+    goal_words = set(re.findall(r"\w+", goal_lower))
     role_keywords = ROLE_PREFIXES.get(agent_role, [])
 
     for cmd in commands:
         score = 0
-        cmd_words = set(re.findall(r'\w+', f"{cmd.id} {cmd.description}".lower()))
+        cmd_words = set(re.findall(r"\w+", f"{cmd.id} {cmd.description}".lower()))
 
         # Role prefix match
         for prefix in role_keywords:
@@ -147,8 +172,9 @@ def find_best_command(
             best_cmd = cmd
 
     if best_cmd and best_score >= 4:
-        logger.info("Matched command: %s (score=%d) for goal: %s",
-                     best_cmd.id, best_score, goal[:60])
+        logger.info(
+            "Matched command: %s (score=%d) for goal: %s", best_cmd.id, best_score, goal[:60]
+        )
         return best_cmd
 
     return None

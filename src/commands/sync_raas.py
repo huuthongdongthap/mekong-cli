@@ -2,7 +2,7 @@
 RaaS Gateway Synchronization Command — ROIaaS Phase 5
 =====================================================
 
-Command for integrating with the live RaaS Gateway at raas.agencyos.network.
+Command for integrating with the live RaaS Gateway at api.cashclaw.cc.
 
 Features:
 1. Validate local RAAS_LICENSE_KEY against gateway's JWT+mk_ API key auth endpoint
@@ -41,7 +41,7 @@ def get_cli_version() -> str:
 
 
 # RaaS Gateway Configuration
-RAAS_GATEWAY_BASE_URL = "https://raas.agencyos.network"
+RAAS_GATEWAY_BASE_URL = "https://api.cashclaw.cc"
 AUTH_ENDPOINT = f"{RAAS_GATEWAY_BASE_URL}/auth/validate"
 REGISTER_ENDPOINT = f"{RAAS_GATEWAY_BASE_URL}/license/register"
 USAGE_ENDPOINT = f"{RAAS_GATEWAY_BASE_URL}/usage"
@@ -118,8 +118,7 @@ def validate_license(license_key: str) -> bool:
     except requests.exceptions.RequestException as e:
         console.print(
             Panel(
-                f"[bold red]✗ Connection Error[/bold red]\n\n"
-                f"[dim]{str(e)}[/dim]",
+                f"[bold red]✗ Connection Error[/bold red]\n\n" f"[dim]{str(e)}[/dim]",
                 title="❌ Network Error",
                 border_style="red",
             )
@@ -167,8 +166,7 @@ def register_cli_instance(license_key: str) -> bool:
     except requests.exceptions.RequestException as e:
         console.print(
             Panel(
-                f"[bold red]✗ Connection Error[/bold red]\n\n"
-                f"[dim]{str(e)}[/dim]",
+                f"[bold red]✗ Connection Error[/bold red]\n\n" f"[dim]{str(e)}[/dim]",
                 title="❌ Network Error",
                 border_style="red",
             )
@@ -248,10 +246,7 @@ def _save_cache(data: Dict):
     """Save analytics data to cache."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    cache_data = {
-        "timestamp": int(time.time()),
-        "data": data
-    }
+    cache_data = {"timestamp": int(time.time()), "data": data}
 
     try:
         with open(CACHE_FILE, "w") as f:
@@ -412,12 +407,12 @@ def display_analytics(analytics: dict):
 
             total = sum(feature["count"] for feature in features)
 
-            for feature in sorted(features, key=lambda x: x["count"], reverse=True)[:10]:  # Top 10 features
+            for feature in sorted(features, key=lambda x: x["count"], reverse=True)[
+                :10
+            ]:  # Top 10 features
                 percent = (feature["count"] / total) * 100 if total > 0 else 0
                 feature_table.add_row(
-                    feature.get("name", "Unknown"),
-                    str(feature.get("count", 0)),
-                    f"{percent:.1f}%"
+                    feature.get("name", "Unknown"), str(feature.get("count", 0)), f"{percent:.1f}%"
                 )
 
             console.print(feature_table)
@@ -438,7 +433,7 @@ def display_analytics(analytics: dict):
                     project.get("id", "N/A"),
                     project.get("name", "N/A"),
                     str(project.get("command_count", 0)),
-                    project.get("last_activity", "N/A")
+                    project.get("last_activity", "N/A"),
                 )
 
             console.print(project_table)
@@ -446,12 +441,16 @@ def display_analytics(analytics: dict):
 
 @app.command()
 def sync(
-    project_id: Optional[str] = typer.Option(None, "--project-id", "-p", help="Project ID for tracking"),
+    project_id: Optional[str] = typer.Option(
+        None, "--project-id", "-p", help="Project ID for tracking"
+    ),
     force: bool = typer.Option(False, "--force", "-f", help="Force synchronization"),
-    no_cache: bool = typer.Option(False, "--no-cache", "-n", help="Bypass local cache and fetch fresh data"),
+    no_cache: bool = typer.Option(
+        False, "--no-cache", "-n", help="Bypass local cache and fetch fresh data"
+    ),
 ) -> None:
     """
-    Synchronize with RaaS Gateway at raas.agencyos.network.
+    Synchronize with RaaS Gateway at api.cashclaw.cc.
 
     Performs license validation, CLI registration, usage tracking, and analytics fetch.
     """
@@ -563,7 +562,9 @@ def validate_only() -> None:
 
 @app.command()
 def analytics(
-    no_cache: bool = typer.Option(False, "--no-cache", "-n", help="Bypass local cache and fetch fresh data"),
+    no_cache: bool = typer.Option(
+        False, "--no-cache", "-n", help="Bypass local cache and fetch fresh data"
+    ),
 ) -> None:
     """Only fetch and display real-time analytics."""
     console.print(

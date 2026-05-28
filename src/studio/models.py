@@ -10,8 +10,8 @@ from typing import Optional
 from pydantic import BaseModel, Field
 import uuid
 
-
 # === ENUMS ===
+
 
 class DealStage(str, Enum):
     SOURCED = "sourced"
@@ -43,6 +43,7 @@ class PartyRole(str, Enum):
 
 class TerrainType(str, Enum):
     """Sun Tzu 6 terrain types for market analysis"""
+
     ACCESSIBLE = "accessible"
     ENTANGLING = "entangling"
     TEMPORIZING = "temporizing"
@@ -61,8 +62,10 @@ class MomentumLevel(str, Enum):
 
 # === CORE ENTITIES ===
 
+
 class StudioConfig(BaseModel):
     """Top-level studio configuration"""
+
     name: str
     thesis_file: str = "thesis.yaml"
     default_equity_pct: float = 30.0
@@ -77,6 +80,7 @@ class StudioConfig(BaseModel):
 
 class InvestmentThesis(BaseModel):
     """Investment thesis — filters all deal flow"""
+
     version: str = "1.0"
     focus_sectors: list[str]
     stage_preference: list[CompanyStage]
@@ -96,6 +100,7 @@ class InvestmentThesis(BaseModel):
 
 class PortfolioCompany(BaseModel):
     """A company in the studio portfolio"""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     slug: str
     name: str
@@ -124,6 +129,7 @@ class PortfolioCompany(BaseModel):
 
 class Deal(BaseModel):
     """Deal in the pipeline"""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     company_name: str
     sector: str
@@ -148,6 +154,7 @@ class Deal(BaseModel):
 
 class Expert(BaseModel):
     """Expert in the pool"""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str
     email: str
@@ -166,6 +173,7 @@ class Expert(BaseModel):
 
 class Founder(BaseModel):
     """Founder in the pool"""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str
     email: str
@@ -183,6 +191,7 @@ class Founder(BaseModel):
 
 class ExpertEngagement(BaseModel):
     """Active expert engagement with a portfolio company"""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     expert_id: str
     company_id: str
@@ -198,6 +207,7 @@ class ExpertEngagement(BaseModel):
 
 class FiveFactorEvaluation(BaseModel):
     """道天地將法 — Complete evaluation for a deal or company"""
+
     target_name: str
     evaluated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     dao: dict = {}
@@ -212,6 +222,7 @@ class FiveFactorEvaluation(BaseModel):
 
 class CrossPortfolioInsight(BaseModel):
     """Intelligence derived from cross-portfolio patterns"""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     type: str
     description: str
@@ -224,6 +235,7 @@ class CrossPortfolioInsight(BaseModel):
 
 class StudioDashboard(BaseModel):
     """Studio-wide dashboard data"""
+
     total_portfolio_companies: int = 0
     active_companies: int = 0
     total_invested_usd: float = 0

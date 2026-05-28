@@ -56,7 +56,9 @@ def display_usage_data(usage_data: dict, verbose: bool) -> None:
             if event_type not in by_type:
                 by_type[event_type] = {"count": 0, "tokens": 0, "duration": 0}
             by_type[event_type]["count"] += 1
-            by_type[event_type]["tokens"] += metric.get("input_tokens", 0) + metric.get("output_tokens", 0)
+            by_type[event_type]["tokens"] += metric.get("input_tokens", 0) + metric.get(
+                "output_tokens", 0
+            )
             by_type[event_type]["duration"] += metric.get("duration_ms", 0)
 
         for event_type, stats in by_type.items():
@@ -91,7 +93,11 @@ def display_local_usage(license_key: str, period: str, verbose: bool) -> None:
     quota_limit = DEFAULT_QUOTA
     quota_pct = (total_requests / quota_limit) * 100
 
-    quota_style = "green" if quota_pct < QUOTA_WARNING_THRESHOLD else "yellow" if quota_pct < QUOTA_CRITICAL_THRESHOLD else "red"
+    quota_style = (
+        "green"
+        if quota_pct < QUOTA_WARNING_THRESHOLD
+        else "yellow" if quota_pct < QUOTA_CRITICAL_THRESHOLD else "red"
+    )
     table.add_row(
         "Quota Usage",
         f"[{quota_style}]{quota_pct:.1f}%[/{quota_style}]",
@@ -332,8 +338,7 @@ def display_usage_warnings(
     if not warnings:
         console.print(
             Panel(
-                "[bold green]✅ All systems nominal[/bold green]\n"
-                "Usage within healthy limits.",
+                "[bold green]✅ All systems nominal[/bold green]\n" "Usage within healthy limits.",
                 title="Status",
                 border_style="green",
             )

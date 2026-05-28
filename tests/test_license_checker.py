@@ -122,8 +122,16 @@ class TestPipelineAccess(unittest.TestCase):
 
     def test_enterprise_allows_everything(self):
         checker = LicenseChecker(tier_override="enterprise")
-        for profile in ("simple", "standard", "complex", "parallel", "dag",
-                         "custom_agent", "priority", "swarm"):
+        for profile in (
+            "simple",
+            "standard",
+            "complex",
+            "parallel",
+            "dag",
+            "custom_agent",
+            "priority",
+            "swarm",
+        ):
             result = checker.check_pipeline_access(profile)
             assert result.allowed is True, f"Enterprise should allow '{profile}'"
 

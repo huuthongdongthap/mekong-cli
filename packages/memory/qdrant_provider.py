@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import Distance, VectorParams
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False

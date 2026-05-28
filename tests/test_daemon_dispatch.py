@@ -16,10 +16,10 @@ from src.daemon.worker_pool import WorkerPool, WorkerInfo, WorkerState
 from src.daemon.dispatcher import Dispatcher, LoadBalanceStrategy
 from src.daemon.circuit_breaker import CircuitBreaker, CircuitState, CircuitBreakerRegistry
 
-
 # ---------------------------------------------------------------------------
 # TaskRouter — priority queue and lifecycle
 # ---------------------------------------------------------------------------
+
 
 class TestTaskRouterEnqueue:
     """Tests for task enqueueing and priority ordering."""
@@ -170,14 +170,18 @@ class TestTaskRouterLifecycle:
 # WorkerPool — worker lifecycle and health
 # ---------------------------------------------------------------------------
 
+
 class TestWorkerPool:
     """WorkerPool state machine tests without PM2."""
 
     def _add_worker(self, pool: WorkerPool, name: str, capability: str = "general") -> WorkerInfo:
         """Directly register a worker without PM2."""
         from datetime import datetime
+
         pool.workers[name] = WorkerInfo(
-            id=name, name=name, capability=capability,
+            id=name,
+            name=name,
+            capability=capability,
             state=WorkerState.IDLE,
             started_at=datetime.now().isoformat(),
         )
@@ -262,6 +266,7 @@ class TestWorkerPool:
 # Dispatcher — task routing and load balancing
 # ---------------------------------------------------------------------------
 
+
 class TestDispatcher:
     """Dispatcher tests with mocked WorkerPool and TaskRouter."""
 
@@ -271,11 +276,17 @@ class TestDispatcher:
         dispatcher = Dispatcher(worker_pool=pool, task_router=router, strategy=strategy)
         return dispatcher, pool, router
 
-    def _add_idle_worker(self, pool: WorkerPool, name: str, capability: str = "general", cpu: float = 0.0):
+    def _add_idle_worker(
+        self, pool: WorkerPool, name: str, capability: str = "general", cpu: float = 0.0
+    ):
         from datetime import datetime
+
         pool.workers[name] = WorkerInfo(
-            id=name, name=name, capability=capability,
-            state=WorkerState.IDLE, cpu=cpu,
+            id=name,
+            name=name,
+            capability=capability,
+            state=WorkerState.IDLE,
+            cpu=cpu,
             started_at=datetime.now().isoformat(),
         )
 
@@ -363,6 +374,7 @@ class TestDispatcher:
 # ---------------------------------------------------------------------------
 # CircuitBreaker — state machine
 # ---------------------------------------------------------------------------
+
 
 class TestCircuitBreaker:
     """Circuit breaker state transitions."""

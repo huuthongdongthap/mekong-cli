@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 class ShutdownReason(str, Enum):
     """Reason for shutdown."""
+
     ALL_PHASES_OPERATIONAL = "all_phases_operational"
     USER_REQUESTED = "user_requested"
     ERROR = "error"
@@ -44,6 +45,7 @@ class ShutdownReason(str, Enum):
 @dataclass
 class ShutdownContext:
     """Context information for shutdown."""
+
     reason: ShutdownReason
     timestamp: str = ""
     details: Dict[str, Any] = field(default_factory=dict)
@@ -185,15 +187,20 @@ class GracefulShutdownHandler:
         # Add phase completion details if available
         if "phases_status" in ctx.details:
             phases = ctx.details["phases_status"]
-            summary_lines.append(f"[dim]Phases operational:[/dim] {len([p for p in phases.values() if p == 'operational'])}/{len(phases)}")
+            summary_lines.append(
+                f"[dim]Phases operational:[/dim] {len([p for p in phases.values() if p == 'operational'])}/{len(phases)}"
+            )
 
         self.console.print("\n" + "=" * 60)
         self.console.print(
             Panel(
-                "\n".join([
-                    "[bold green]Goodbye![/bold green]",
-                    "",
-                ] + summary_lines),
+                "\n".join(
+                    [
+                        "[bold green]Goodbye![/bold green]",
+                        "",
+                    ]
+                    + summary_lines
+                ),
                 title="👋 SHUTDOWN COMPLETE",
                 border_style="green",
             ),

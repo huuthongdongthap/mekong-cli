@@ -1,4 +1,5 @@
 """Dashboard router for RaaS — SSE stream, summary, and cost breakdown endpoints."""
+
 from __future__ import annotations
 
 import asyncio

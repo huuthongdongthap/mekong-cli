@@ -4,6 +4,7 @@
 Strategy: Try think:false first (clean response), fallback to thinking parse.
 Qwen3 in thinking mode puts output in 'thinking' field, 'response' is empty.
 """
+
 import json
 import urllib.request
 import sys
@@ -49,7 +50,8 @@ def call_ollama(url, model, prompt, think=True, timeout=30, retries=3):
     for attempt in range(retries):
         try:
             req = urllib.request.Request(
-                f"{url}/api/generate", data=data,
+                f"{url}/api/generate",
+                data=data,
                 headers={"Content-Type": "application/json"},
             )
             resp = urllib.request.urlopen(req, timeout=timeout)
@@ -57,8 +59,11 @@ def call_ollama(url, model, prompt, think=True, timeout=30, retries=3):
         except Exception as e:
             last_err = e
             if attempt < retries - 1:
-                wait = 2 ** attempt
-                print(f"BRAIN_RETRY: attempt {attempt+1}/{retries} failed ({e}), waiting {wait}s", file=sys.stderr)
+                wait = 2**attempt
+                print(
+                    f"BRAIN_RETRY: attempt {attempt+1}/{retries} failed ({e}), waiting {wait}s",
+                    file=sys.stderr,
+                )
                 time.sleep(wait)
     raise last_err
 
@@ -88,14 +93,15 @@ def extract_from_thinking(text):
         return normalize(matches[-1])
     # Look for conclusion patterns: "So: /fix ...", "I'll use /cook ..."
     m = re.search(
-        rf'(?:so|therefore|thus|final|answer|output|assign|use)[:\s]+'
+        rf"(?:so|therefore|thus|final|answer|output|assign|use)[:\s]+"
         rf'(/{CMD_NAMES}(?:\s+"[^"]+")?)',
-        text, re.IGNORECASE,
+        text,
+        re.IGNORECASE,
     )
     if m:
         return normalize(m.group(1))
     # Last resort: last standalone /command mention (not in reasoning context)
-    matches = re.findall(rf'(?:^|\n)\s*(/{CMD_NAMES})\s', text, re.IGNORECASE)
+    matches = re.findall(rf"(?:^|\n)\s*(/{CMD_NAMES})\s", text, re.IGNORECASE)
     if matches:
         return normalize(matches[-1])
     return ""

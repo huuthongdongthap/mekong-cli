@@ -36,9 +36,7 @@ class CircuitOpenError(Exception):
     def __init__(self, service_name: str, retry_after: float) -> None:
         self.service_name = service_name
         self.retry_after = retry_after
-        super().__init__(
-            f"Circuit open for '{service_name}', retry after {retry_after:.1f}s"
-        )
+        super().__init__(f"Circuit open for '{service_name}', retry after {retry_after:.1f}s")
 
 
 @dataclass
@@ -190,7 +188,9 @@ class CircuitBreaker:
 
         logger.info(
             "Circuit '%s': %s → %s",
-            self.service_name, old_state.value, new_state.value,
+            self.service_name,
+            old_state.value,
+            new_state.value,
         )
 
     def reset(self) -> None:

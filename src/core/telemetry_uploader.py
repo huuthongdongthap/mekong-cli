@@ -81,6 +81,7 @@ class TelemetryUploader:
     def upload_async(self) -> int:
         """Async upload (runs in background)."""
         import threading
+
         thread = threading.Thread(target=self.upload_batch, daemon=True)
         thread.start()
         return 0  # Return immediately, upload happens in background

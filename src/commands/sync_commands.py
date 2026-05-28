@@ -26,9 +26,7 @@ def sync(
     dry_run: bool = typer.Option(
         False, "--dry-run", "-n", help="Calculate metrics but don't upload"
     ),
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show detailed metrics"
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed metrics"),
 ) -> None:
     """
     🔄 Synchronize local usage metrics with RaaS Gateway.
@@ -51,7 +49,7 @@ def sync(
         console.print(f"[red]{error}[/red]")
         console.print()
         console.print("[yellow]Get a license key:[/yellow]")
-        console.print("  [cyan]https://raas.agencyos.network[/cyan]")
+        console.print("  [cyan]https://api.cashclaw.cc[/cyan]")
         console.print()
         console.print("[dim]Or set environment variable:[/dim]")
         console.print("  [cyan]export RAAS_LICENSE_KEY=mk_your_key[/cyan]\n")
@@ -88,9 +86,7 @@ def sync(
             console.print(f"[red]{result.error}[/red]\n")
 
             if result.rate_limit_reset_in:
-                console.print(
-                    f"[dim]Rate limit resets in {result.rate_limit_reset_in}s[/dim]\n"
-                )
+                console.print(f"[dim]Rate limit resets in {result.rate_limit_reset_in}s[/dim]\n")
             raise SystemExit(1)
 
         console.print(f"[green]✓ Synced {result.synced_count} requests[/green]\n")
@@ -99,9 +95,7 @@ def sync(
     _display_summary(summary, result, verbose)
 
 
-def _display_summary(
-    summary: Any, result: Any, verbose: bool = False
-) -> None:
+def _display_summary(summary: Any, result: Any, verbose: bool = False) -> None:
     """Display sync summary in formatted table."""
 
     # Main metrics table
@@ -139,9 +133,7 @@ def _display_summary(
         endpoint_table.add_column("Endpoint", style="cyan")
         endpoint_table.add_column("Requests", style="green")
 
-        for endpoint, count in sorted(
-            summary.endpoints.items(), key=lambda x: x[1], reverse=True
-        ):
+        for endpoint, count in sorted(summary.endpoints.items(), key=lambda x: x[1], reverse=True):
             endpoint_table.add_row(endpoint, str(count))
 
         console.print(endpoint_table)
@@ -153,9 +145,7 @@ def _display_summary(
         method_table.add_column("Method", style="cyan")
         method_table.add_column("Requests", style="green")
 
-        for method, count in sorted(
-            summary.methods.items(), key=lambda x: x[1], reverse=True
-        ):
+        for method, count in sorted(summary.methods.items(), key=lambda x: x[1], reverse=True):
             method_table.add_row(method, str(count))
 
         console.print(method_table)
@@ -177,9 +167,7 @@ def _display_summary(
 
 @app.command("status")
 def status(
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show detailed status"
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed status"),
 ) -> None:
     """
     📊 Show sync status without uploading.
@@ -274,9 +262,7 @@ def status(
 
 @app.command("reset")
 def reset(
-    confirm: bool = typer.Option(
-        False, "--confirm", "-y", help="Skip confirmation prompt"
-    ),
+    confirm: bool = typer.Option(False, "--confirm", "-y", help="Skip confirmation prompt"),
 ) -> None:
     """
     ⚠️  Reset local usage metrics (admin only).
@@ -290,9 +276,7 @@ def reset(
         console.print(
             "[bold yellow]⚠️  Warning: This will delete all local usage metrics![/bold yellow]\n"
         )
-        console.print(
-            "[dim]This action:[/dim]"
-        )
+        console.print("[dim]This action:[/dim]")
         console.print("  • Clears local telemetry cache")
         console.print("  • Does NOT affect server-side metrics")
         console.print("  • Cannot be undone\n")
@@ -313,9 +297,7 @@ def reset(
         _reset_sync_client()
 
         console.print("[green]✓ Local metrics reset complete[/green]\n")
-        console.print(
-            "[dim]Note: Server-side metrics at RaaS Gateway are not affected.[/dim]\n"
-        )
+        console.print("[dim]Note: Server-side metrics at RaaS Gateway are not affected.[/dim]\n")
 
     except Exception as e:
         console.print(f"[bold red]✗ Reset failed: {str(e)}[/bold red]\n")
@@ -331,9 +313,7 @@ def _reset_sync_client() -> None:
 
 @app.command("kv-sync")
 def kv_sync(
-    force: bool = typer.Option(
-        False, "--force", "-f", help="Force refresh from KV"
-    ),
+    force: bool = typer.Option(False, "--force", "-f", help="Force refresh from KV"),
 ) -> None:
     """🔄 Sync rate limit state with KV store."""
     from src.core.kv_store_client import get_kv_client
@@ -378,15 +358,9 @@ def _display_rate_limit_state(state: Any) -> None:
 
 @app.command("encrypted")
 def sync_encrypted(
-    dry_run: bool = typer.Option(
-        False, "--dry-run", "-n", help="Calculate but don't upload"
-    ),
-    no_billing: bool = typer.Option(
-        False, "--no-billing", help="Don't push to Stripe/Polar"
-    ),
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show detailed metrics"
-    ),
+    dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Calculate but don't upload"),
+    no_billing: bool = typer.Option(False, "--no-billing", help="Don't push to Stripe/Polar"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed metrics"),
 ) -> None:
     """
     🔐 Synchronize with encrypted payload (Phase 5).
@@ -408,7 +382,7 @@ def sync_encrypted(
         console.print("[bold red]✗ License validation failed[/bold red]")
         console.print(f"[red]{error}[/red]\n")
         console.print("[yellow]Get a license key:[/yellow]")
-        console.print("  [cyan]https://raas.agencyos.network[/cyan]\n")
+        console.print("  [cyan]https://api.cashclaw.cc[/cyan]\n")
         raise SystemExit(1)
 
     console.print("[green]✓ License valid[/green]\n")
@@ -456,9 +430,7 @@ def sync_encrypted(
 
 @app.command("entitlement")
 def show_entitlement(
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show full entitlement details"
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show full entitlement details"),
 ) -> None:
     """
     📋 Show license entitlements from RaaS Gateway.

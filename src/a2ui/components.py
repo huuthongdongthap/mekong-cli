@@ -23,6 +23,7 @@ ComponentFactory = Callable[[Dict[str, Any], Dict[str, Any]], RenderableType]
 # Forward declaration (allows _dispatch to be called from within factories)
 # ---------------------------------------------------------------------------
 
+
 def _dispatch(component: Dict[str, Any], data: Dict[str, Any]) -> RenderableType:
     """Dispatch a component dict to its factory.
 
@@ -50,6 +51,7 @@ def _dispatch(component: Dict[str, Any], data: Dict[str, Any]) -> RenderableType
 # Component factories
 # ---------------------------------------------------------------------------
 
+
 def _render_text(component: Dict[str, Any], data: Dict[str, Any]) -> RenderableType:
     text_val = component.get("text", "")
     # A2UI spec: {"text": {"literalString": "..."}} or {"text": {"dataRef": "$data.x"}}
@@ -57,8 +59,11 @@ def _render_text(component: Dict[str, Any], data: Dict[str, Any]) -> RenderableT
         text_val = text_val.get("literalString", text_val.get("dataRef", str(text_val)))
     raw = _resolve_binding(text_val, data)
     style_map = {
-        "heading": "bold", "subheading": "bold dim",
-        "caption": "dim italic", "body": "", "label": "dim",
+        "heading": "bold",
+        "subheading": "bold dim",
+        "caption": "dim italic",
+        "body": "",
+        "label": "dim",
     }
     variant = component.get("variant", "body")
     color = component.get("color", "")
@@ -113,8 +118,10 @@ def _render_list(component: Dict[str, Any], data: Dict[str, Any]) -> RenderableT
 def _render_button(component: Dict[str, Any], data: Dict[str, Any]) -> RenderableType:
     label = str(_resolve_binding(component.get("label", "Button"), data))
     style_map = {
-        "primary": "bold cyan", "secondary": "bold white",
-        "danger": "bold red", "ghost": "dim",
+        "primary": "bold cyan",
+        "secondary": "bold white",
+        "danger": "bold red",
+        "ghost": "dim",
     }
     style = style_map.get(component.get("variant", "primary"), "bold cyan")
     return Text(f"▸ {label}", style=style)

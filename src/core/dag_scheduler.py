@@ -142,7 +142,8 @@ class DAGScheduler:
                         result = future.result()
                         passed = getattr(
                             getattr(result, "verification", None),
-                            "passed", False,
+                            "passed",
+                            False,
                         )
                         dag_result = DAGStepResult(
                             order=step.order,
@@ -152,7 +153,9 @@ class DAGScheduler:
                     except Exception as e:
                         logger.exception("Step %d failed: %s", step.order, e)
                         dag_result = DAGStepResult(
-                            order=step.order, success=False, error=str(e),
+                            order=step.order,
+                            success=False,
+                            error=str(e),
                         )
                         passed = False
 

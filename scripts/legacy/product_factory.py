@@ -20,9 +20,7 @@ SCRIPTS_DIR = Path(__file__).parent
 PROJECT_DIR = SCRIPTS_DIR.parent
 PRODUCTS_DIR = PROJECT_DIR / "products"
 TEMPLATES_DIR = (
-    PROJECT_DIR / "templates"
-    if (PROJECT_DIR / "templates").exists()
-    else PROJECT_DIR / "apps"
+    PROJECT_DIR / "templates" if (PROJECT_DIR / "templates").exists() else PROJECT_DIR / "apps"
 )
 
 # Product Definitions - Sellable assets in the codebase
@@ -36,9 +34,11 @@ PRODUCT_SPECS = {
     "auth-starter": {
         "name": "Auth Starter (Supabase)",
         "price": 2700,  # $27
-        "source": ["apps/auth-starter"]
-        if Path("apps/auth-starter").exists()
-        else ["packages/antigravity"],
+        "source": (
+            ["apps/auth-starter"]
+            if Path("apps/auth-starter").exists()
+            else ["packages/antigravity"]
+        ),
         "description": "Production-ready authentication with Supabase",
     },
     "ai-skills-pack": {
@@ -188,8 +188,7 @@ def cmd_build(product_key=None):
                 else:
                     for file in src_path.rglob("*"):
                         if file.is_file() and not any(
-                            p in str(file)
-                            for p in ["__pycache__", ".git", "node_modules", ".env"]
+                            p in str(file) for p in ["__pycache__", ".git", "node_modules", ".env"]
                         ):
                             arcname = str(file.relative_to(src_path.parent))
                             zf.write(file, arcname)

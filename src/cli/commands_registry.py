@@ -45,7 +45,9 @@ def register_all_commands(app: typer.Typer) -> None:
 
     # Register all subcommands
     app.add_typer(bmad_app, name="bmad", help="BMAD workflow management")
-    app.add_typer(binh_phap_app, name="binh-phap", help="Binh Pháp Strategy: Infinite loops & Standards")
+    app.add_typer(
+        binh_phap_app, name="binh-phap", help="Binh Pháp Strategy: Infinite loops & Standards"
+    )
     app.add_typer(core_app)  # Register core commands
     app.add_typer(license_app, name="license", help="RaaS License Management")
     app.add_typer(agi_app, name="agi", help="Tom Hum AGI daemon management")
@@ -58,13 +60,23 @@ def register_all_commands(app: typer.Typer) -> None:
     app.add_typer(deploy_app, name="deploy", help="Deploy applications to various platforms")
     app.add_typer(lint_app, name="lint", help="Static analysis and code quality checks")
     app.add_typer(docs_app, name="docs", help="Generate, serve, and manage documentation")
-    app.add_typer(monitor_app, name="monitor", help="Monitor system resources, performance, and application health")
+    app.add_typer(
+        monitor_app,
+        name="monitor",
+        help="Monitor system resources, performance, and application health",
+    )
     app.add_typer(security_app, name="security", help="Audit, scan, and secure applications")
     app.add_typer(ci_app, name="ci", help="CI/CD pipeline management")
     app.add_typer(env_app, name="env", help="Environment management")
     app.add_typer(test_advanced_app, name="test-advanced", help="Advanced testing strategies")
-    app.add_typer(usage_app, name="usage", help="Usage metering: track CLI command usage per license key")
-    app.add_typer(analytics_show_app, name="analytics", help="ROI analytics: time savings, cost analysis, ROI metrics")
+    app.add_typer(
+        usage_app, name="usage", help="Usage metering: track CLI command usage per license key"
+    )
+    app.add_typer(
+        analytics_show_app,
+        name="analytics",
+        help="ROI analytics: time savings, cost analysis, ROI metrics",
+    )
 
     # Swarm sub-commands
     swarm_app = typer.Typer(help="Swarm: multi-node orchestration")
@@ -84,14 +96,20 @@ def register_all_commands(app: typer.Typer) -> None:
 
     # Auth commands
     from src.commands.auth_commands import app as auth_app
+
     app.add_typer(auth_app, name="auth", help="Authentication: login, logout, status, verify")
 
     # OCOP commands
     from src.commands.ocop_commands import app as ocop_app
+
     app.add_typer(ocop_app, name="ocop", help="OCOP: AI-powered agricultural export tools")
 
     # RaaS Integration Commands
-    app.add_typer(sync_raas_app, name="sync-raas", help="RaaS Gateway synchronization: validate, register, track usage")
+    app.add_typer(
+        sync_raas_app,
+        name="sync-raas",
+        help="RaaS Gateway synchronization: validate, register, track usage",
+    )
 
     # Autonomous sub-commands
     autonomous_app = typer.Typer(help="Autonomous: AGI loop control")
@@ -99,10 +117,18 @@ def register_all_commands(app: typer.Typer) -> None:
 
     # Platform commands (mekong up/down/ps/logs)
     from src.cli.platform_commands import app as platform_app
+
     app.add_typer(platform_app, name="platform", help="Platform: start/stop/monitor services")
 
     # Also register as top-level aliases
-    from src.cli.platform_commands import platform_up, platform_down, platform_ps, platform_logs, platform_restart
+    from src.cli.platform_commands import (
+        platform_up,
+        platform_down,
+        platform_ps,
+        platform_logs,
+        platform_restart,
+    )
+
     app.command("up")(platform_up)
     app.command("down")(platform_down)
     app.command("ps")(platform_ps)
@@ -111,8 +137,12 @@ def register_all_commands(app: typer.Typer) -> None:
 
     # Schedule commands (HEARTBEAT)
     from src.cli.schedule_commands import app as heartbeat_app
-    app.add_typer(heartbeat_app, name="heartbeat", help="HEARTBEAT: schedule tasks from HEARTBEAT.md")
+
+    app.add_typer(
+        heartbeat_app, name="heartbeat", help="HEARTBEAT: schedule tasks from HEARTBEAT.md"
+    )
 
     # Daemon commands (Mission Control)
     from src.cli.daemon_commands import app as daemon_app
+
     app.add_typer(daemon_app, name="daemon", help="Daemon: monitor and manage daemon army")

@@ -1,6 +1,7 @@
 """
 Environment Management Commands Module
 """
+
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -46,7 +47,10 @@ def validate():
 
 
 @app.command()
-def diff(env1: str = typer.Argument(..., help="First environment"), env2: str = typer.Argument(..., help="Second environment")):
+def diff(
+    env1: str = typer.Argument(..., help="First environment"),
+    env2: str = typer.Argument(..., help="Second environment"),
+):
     """Compare differences between two environments"""
     console.print(Panel(f"Comparing {env1} and {env2}", title="Diff"))
     # Implementation will go here

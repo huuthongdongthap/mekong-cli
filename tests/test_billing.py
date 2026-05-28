@@ -8,6 +8,7 @@ Covers:
 - Pricing: RateCard.calculate_charge, Plan.credits_to_dollars
 - BillingResult: serialization, line item aggregation
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -25,12 +26,16 @@ import pytest
 # Ensure src is importable
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-_WEBHOOK_HANDLER_PATH = Path(__file__).parent.parent / "src" / "raas" / "nowpayments-webhook-handler.py"
+_WEBHOOK_HANDLER_PATH = (
+    Path(__file__).parent.parent / "src" / "raas" / "nowpayments-webhook-handler.py"
+)
 
 
 def _load_webhook_handler():
     """Load nowpayments-webhook-handler.py (hyphenated filename — can't use normal import)."""
-    spec = importlib.util.spec_from_file_location("nowpayments_webhook_handler", _WEBHOOK_HANDLER_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "nowpayments_webhook_handler", _WEBHOOK_HANDLER_PATH
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -39,6 +44,7 @@ def _load_webhook_handler():
 # ---------------------------------------------------------------------------
 # NOWPayments IPN signature verification
 # ---------------------------------------------------------------------------
+
 
 class TestVerifyIpnSignature:
     """Tests for HMAC-SHA512 IPN signature validation."""
@@ -93,6 +99,7 @@ class TestVerifyIpnSignature:
 # Tier extraction
 # ---------------------------------------------------------------------------
 
+
 class TestExtractTier:
     """Tests for _extract_tier from order metadata."""
 
@@ -126,6 +133,7 @@ class TestExtractTier:
 # handle_ipn: full IPN processing flow
 # ---------------------------------------------------------------------------
 
+
 class TestHandleIpn:
     """Integration tests for handle_ipn using an in-memory CreditAccountRepository."""
 
@@ -134,16 +142,18 @@ class TestHandleIpn:
 
     def _build_payload(self, status: str, tier: str = "pro", payment_id: str = "pay_001") -> str:
         order_id = f"ws_test-{tier}-monthly"
-        return json.dumps({
-            "payment_id": payment_id,
-            "payment_status": status,
-            "order_id": order_id,
-            "order_description": f"OpenClaw {tier} plan",
-            "pay_amount": "149.00",
-            "pay_currency": "usdttrc20",
-            "price_amount": 149,
-            "price_currency": "usd",
-        })
+        return json.dumps(
+            {
+                "payment_id": payment_id,
+                "payment_status": status,
+                "order_id": order_id,
+                "order_description": f"OpenClaw {tier} plan",
+                "pay_amount": "149.00",
+                "pay_currency": "usdttrc20",
+                "price_amount": 149,
+                "price_currency": "usd",
+            }
+        )
 
     def test_finished_payment_grants_credits(self, tmp_path):
         """Happy path: finished payment → credits granted to workspace."""
@@ -156,8 +166,10 @@ class TestHandleIpn:
 
         payload = self._build_payload("finished", "pro")
 
-        with patch.object(self.mod, "CreditAccountRepository", return_value=repo), \
-             patch.object(self.mod, "_log_payment"):
+        with (
+            patch.object(self.mod, "CreditAccountRepository", return_value=repo),
+            patch.object(self.mod, "_log_payment"),
+        ):
             result = self.mod.handle_ipn(payload, signature="")
 
         assert result["ok"] is True
@@ -177,8 +189,10 @@ class TestHandleIpn:
 
         payload = self._build_payload("confirmed", "starter")
 
-        with patch.object(self.mod, "CreditAccountRepository", return_value=repo), \
-             patch.object(self.mod, "_log_payment"):
+        with (
+            patch.object(self.mod, "CreditAccountRepository", return_value=repo),
+            patch.object(self.mod, "_log_payment"),
+        ):
             result = self.mod.handle_ipn(payload, signature="")
 
         assert result["ok"] is True
@@ -226,8 +240,10 @@ class TestHandleIpn:
         repo.create_account("ws_test")
         payload = self._build_payload("finished", "growth")
 
-        with patch.object(self.mod, "CreditAccountRepository", return_value=repo), \
-             patch.object(self.mod, "_log_payment"):
+        with (
+            patch.object(self.mod, "CreditAccountRepository", return_value=repo),
+            patch.object(self.mod, "_log_payment"),
+        ):
             result = self.mod.handle_ipn(payload, signature="")
 
         assert result["ok"] is True
@@ -235,6 +251,7 @@ class TestHandleIpn:
     def test_tier_credits_mapping(self, tmp_path):
         """Each tier maps to the correct credit amount."""
         from src.raas.credit_account_repository import CreditAccountRepository
+
         expected = {"starter": 200, "pro": 1000, "growth": 3000, "enterprise": 10000}
 
         for tier, expected_credits in expected.items():
@@ -243,8 +260,10 @@ class TestHandleIpn:
             repo.create_account("ws_test")
             payload = self._build_payload("finished", tier, payment_id=f"pay_{tier}")
 
-            with patch.object(self.mod, "CreditAccountRepository", return_value=repo), \
-                 patch.object(self.mod, "_log_payment"):
+            with (
+                patch.object(self.mod, "CreditAccountRepository", return_value=repo),
+                patch.object(self.mod, "_log_payment"),
+            ):
                 result = self.mod.handle_ipn(payload, signature="")
 
             assert result["credits"] == expected_credits, f"Wrong credits for tier={tier}"
@@ -263,8 +282,10 @@ class TestHandleIpn:
         }
         payload = json.dumps(payload_data)
 
-        with patch.object(self.mod, "CreditAccountRepository", return_value=repo), \
-             patch.object(self.mod, "_log_payment"):
+        with (
+            patch.object(self.mod, "CreditAccountRepository", return_value=repo),
+            patch.object(self.mod, "_log_payment"),
+        ):
             result = self.mod.handle_ipn(payload, signature="")
 
         assert result["workspace_id"] == "myworkspace"
@@ -283,8 +304,10 @@ class TestHandleIpn:
         }
         payload = json.dumps(payload_data)
 
-        with patch.object(self.mod, "CreditAccountRepository", return_value=repo), \
-             patch.object(self.mod, "_log_payment"):
+        with (
+            patch.object(self.mod, "CreditAccountRepository", return_value=repo),
+            patch.object(self.mod, "_log_payment"),
+        ):
             result = self.mod.handle_ipn(payload, signature="")
 
         assert result["workspace_id"] == "default"
@@ -294,12 +317,14 @@ class TestHandleIpn:
 # Checkout: tier validation guard rails
 # ---------------------------------------------------------------------------
 
+
 class TestCheckoutValidation:
     """Tests for nowpayments-checkout tier validation (no HTTP calls)."""
 
     def setup_method(self):
         # Import module using hyphenated filename via importlib
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
             "nowpayments_checkout",
             Path(__file__).parent.parent / "src" / "raas" / "nowpayments-checkout.py",
@@ -352,6 +377,7 @@ class TestCheckoutValidation:
 # Pricing engine: RateCard and Plan calculations
 # ---------------------------------------------------------------------------
 
+
 class TestRateCardCalculation:
     """Tests for RateCard.calculate_charge (no DB dependencies)."""
 
@@ -362,6 +388,7 @@ class TestRateCardCalculation:
         overage_rate: str | None = None,
     ):
         from src.raas.billing_engine import RateCard
+
         return RateCard(
             plan_tier="pro",
             event_type="api_call",
@@ -423,6 +450,7 @@ class TestPlanCreditsToDollars:
 
     def setup_method(self):
         from src.raas.pricing import get_plan, PlanTier
+
         self.get_plan = get_plan
         self.PlanTier = PlanTier
 
@@ -462,6 +490,7 @@ class TestPlanCreditsToDollars:
 # BillingResult serialization
 # ---------------------------------------------------------------------------
 
+
 class TestBillingResultSerialization:
     """Tests for BillingResult.to_dict() and LineItem.to_dict()."""
 
@@ -480,7 +509,15 @@ class TestBillingResultSerialization:
             timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc),
         )
         d = item.to_dict()
-        for key in ("event_type", "model_name", "quantity", "unit", "unit_price", "subtotal", "final_amount"):
+        for key in (
+            "event_type",
+            "model_name",
+            "quantity",
+            "unit",
+            "unit_price",
+            "subtotal",
+            "final_amount",
+        ):
             assert key in d
 
     def test_line_item_final_amount_computed_when_zero(self):
@@ -547,11 +584,13 @@ class TestBillingResultSerialization:
 # Idempotency: BatchRecord serialization
 # ---------------------------------------------------------------------------
 
+
 class TestBatchRecordSerialization:
     """Tests for BatchRecord/BatchResult data integrity (no DB)."""
 
     def test_batch_status_enum_values(self):
         from src.raas.billing_idempotency import BatchStatus
+
         assert BatchStatus.PENDING == "pending"
         assert BatchStatus.PROCESSING == "processing"
         assert BatchStatus.COMPLETED == "completed"
@@ -580,7 +619,9 @@ class TestBatchRecordSerialization:
         ts = datetime(2026, 4, 1, tzinfo=timezone.utc)
         events_a = [{"event_type": "api_call", "value": 100, "metric": "calls"}]
         events_b = [{"event_type": "api_call", "value": 200, "metric": "calls"}]
-        assert manager.generate_batch_id("lk", events_a, ts) != manager.generate_batch_id("lk", events_b, ts)
+        assert manager.generate_batch_id("lk", events_a, ts) != manager.generate_batch_id(
+            "lk", events_b, ts
+        )
 
     def test_batch_id_order_independent(self):
         """Event order must not affect batch_id (sorted before hashing)."""
@@ -622,32 +663,38 @@ class TestBatchRecordSerialization:
 # Plan catalog completeness
 # ---------------------------------------------------------------------------
 
+
 class TestPlanCatalog:
     """Tests for plan catalog integrity."""
 
     def test_all_tiers_have_non_negative_price(self):
         from src.raas.pricing import list_plans
+
         for plan in list_plans():
             assert plan.price_monthly >= 0
 
     def test_all_tiers_have_features(self):
         from src.raas.pricing import list_plans
+
         for plan in list_plans():
             assert len(plan.features) > 0, f"Plan {plan.tier} has no features"
 
     def test_plan_tiers_are_unique(self):
         from src.raas.pricing import list_plans
+
         tiers = [p.tier for p in list_plans()]
         assert len(tiers) == len(set(tiers))
 
     def test_projections_are_ordered(self):
         from src.raas.pricing import get_projections
+
         projections = get_projections()
         months = [p.month for p in projections]
         assert months == sorted(months)
 
     def test_projections_mrr_grows(self):
         from src.raas.pricing import get_projections
+
         projections = get_projections()
         mrrs = [p.mrr for p in projections]
         for i in range(1, len(mrrs)):

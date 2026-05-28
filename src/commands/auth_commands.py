@@ -23,20 +23,14 @@ app = typer.Typer(help="Authentication commands")
 @app.command("login")
 def login(
     license_key: str = typer.Option(
-        None,
-        "--key", "-k",
-        help="License key (raas-* or mk_* format). Prompts if not provided."
+        None, "--key", "-k", help="License key (raas-* or mk_* format). Prompts if not provided."
     ),
     email: str = typer.Option(
-        None,
-        "--email", "-e",
-        help="Email associated with license. Prompts if not provided."
+        None, "--email", "-e", help="Email associated with license. Prompts if not provided."
     ),
     non_interactive: bool = typer.Option(
-        False,
-        "--non-interactive",
-        help="Skip interactive prompts (for CI/CD)"
-    )
+        False, "--non-interactive", help="Skip interactive prompts (for CI/CD)"
+    ),
 ):
     """
     Login to Mekong CLI with RaaS license key.
@@ -57,10 +51,7 @@ def login(
         if non_interactive:
             console.print("[red]Error: --key required in non-interactive mode[/red]")
             raise typer.Exit(1)
-        license_key = Prompt.ask(
-            "Enter your license key",
-            password=True  # Hide input
-        )
+        license_key = Prompt.ask("Enter your license key", password=True)  # Hide input
 
     # Validate license key format
     if not license_key.startswith(("raas-", "raasjwt-", "mk_")):
@@ -148,9 +139,7 @@ def logout():
         if Confirm.ask("Are you sure you want to logout?", default=True):
             storage.delete_license()
             console.print("[green]✓ Logout successful![/green]\n")
-            console.print(
-                "[dim]You will need to login again to use premium features.[/dim]\n"
-            )
+            console.print("[dim]You will need to login again to use premium features.[/dim]\n")
         else:
             console.print("[dim]Logout cancelled.[/dim]\n")
 
@@ -173,9 +162,7 @@ def status():
 
     if not license_key:
         console.print("[yellow]Not logged in[/yellow]\n")
-        console.print(
-            "Run [cyan]mekong login[/cyan] to login with your license key.\n"
-        )
+        console.print("Run [cyan]mekong login[/cyan] to login with your license key.\n")
         raise typer.Exit(1)
 
     # Mask license key for display
@@ -193,7 +180,9 @@ def status():
         table.add_column("Label", style="dim")
         table.add_column("Value")
 
-        table.add_row("Status:", "[green]✓ Logged in[/green]" if result.valid else "[red]✗ Invalid[/red]")
+        table.add_row(
+            "Status:", "[green]✓ Logged in[/green]" if result.valid else "[red]✗ Invalid[/red]"
+        )
         table.add_row("License:", masked)
 
         if result.tier:
@@ -229,15 +218,11 @@ def status():
         table.add_row("Storage:", "Secure storage configured")
 
         console.print(table)
-        console.print(
-            "\n[dim]Tip: Connect to internet to verify license status.[/dim]\n"
-        )
+        console.print("\n[dim]Tip: Connect to internet to verify license status.[/dim]\n")
 
 
 @app.command()
-def verify(
-    license_key: str = typer.Argument(..., help="License key to verify")
-):
+def verify(license_key: str = typer.Argument(..., help="License key to verify")):
     """
     Verify a license key without storing it.
 

@@ -75,17 +75,17 @@ class TestPMFSurvey(unittest.TestCase):
         self.assertIn("WidgetApp", survey["questions"][0]["text"])
 
     def test_analyze_strong(self):
-        responses = [
-            {"q1": "Very disappointed", "q2": "developers"} for _ in range(5)
-        ] + [{"q1": "Not disappointed", "q2": ""} for _ in range(3)]
+        responses = [{"q1": "Very disappointed", "q2": "developers"} for _ in range(5)] + [
+            {"q1": "Not disappointed", "q2": ""} for _ in range(3)
+        ]
         result = analyze_pmf_responses(responses)
         self.assertEqual(result.level, "STRONG")
         self.assertGreaterEqual(result.very_disappointed_pct, 40)
 
     def test_analyze_weak(self):
-        responses = [
-            {"q1": "Very disappointed", "q2": "ops"} for _ in range(1)
-        ] + [{"q1": "Not disappointed", "q2": ""} for _ in range(8)]
+        responses = [{"q1": "Very disappointed", "q2": "ops"} for _ in range(1)] + [
+            {"q1": "Not disappointed", "q2": ""} for _ in range(8)
+        ]
         result = analyze_pmf_responses(responses)
         self.assertEqual(result.level, "WEAK")
 
@@ -158,9 +158,7 @@ class TestSaveFiles(unittest.TestCase):
 
     def test_save_analysis(self):
         with TemporaryDirectory() as tmpdir:
-            notes = [
-                InterviewNote("A", 8, "$50/mo", "Excel", "quote", True, "PROBLEM CONFIRMED")
-            ]
+            notes = [InterviewNote("A", 8, "$50/mo", "Excel", "quote", True, "PROBLEM CONFIRMED")]
             analysis = analyze_interviews(notes)
             path = save_analysis(tmpdir, analysis)
             self.assertTrue(Path(path).exists())

@@ -41,7 +41,7 @@ _tool_launch() {
     qwen)     echo "qwen";;
     opencode) echo "opencode";;
     aider)    echo "aider --yes-always";;
-    codex)    echo "codex --full-auto";;
+    codex)    echo "codex --ask-for-approval never --sandbox workspace-write";;
     amp)      echo "amp";;
     *)        echo "";;
   esac

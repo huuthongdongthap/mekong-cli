@@ -33,8 +33,18 @@ class TestShowUsage:
         # Mock gateway response
         mock_fetch.return_value = {
             "metrics": [
-                {"event_type": "cli:command", "input_tokens": 100, "output_tokens": 50, "duration_ms": 100},
-                {"event_type": "llm:call", "input_tokens": 200, "output_tokens": 100, "duration_ms": 200},
+                {
+                    "event_type": "cli:command",
+                    "input_tokens": 100,
+                    "output_tokens": 50,
+                    "duration_ms": 100,
+                },
+                {
+                    "event_type": "llm:call",
+                    "input_tokens": 200,
+                    "output_tokens": 100,
+                    "duration_ms": 200,
+                },
             ],
             "summary": {
                 "total_requests": 500,
@@ -179,8 +189,16 @@ class TestExportUsage:
                 "period": "current",
                 "total_events": 2,
                 "events": [
-                    {"event_id": "evt_001", "event_type": "cli:command", "timestamp": "2026-03-09T00:00:00Z"},
-                    {"event_id": "evt_002", "event_type": "llm:call", "timestamp": "2026-03-09T01:00:00Z"},
+                    {
+                        "event_id": "evt_001",
+                        "event_type": "cli:command",
+                        "timestamp": "2026-03-09T00:00:00Z",
+                    },
+                    {
+                        "event_id": "evt_002",
+                        "event_type": "llm:call",
+                        "timestamp": "2026-03-09T01:00:00Z",
+                    },
                 ],
             }
             result = runner.invoke(

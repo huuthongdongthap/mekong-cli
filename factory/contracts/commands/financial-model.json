@@ -4,16 +4,14 @@
   "layer": "founder",
   "chapter": "始計 — Initial Calculations",
   "display": {
-    "name_vi": "Financial Model",
     "name_en": "Financial Model",
     "icon": "",
-    "description_vi": "Execute Financial Model command",
-    "description_en": "Execute Financial Model command"
+    "description_en": "3-year financial model  revenue projections, expense plan, cash flow, scenario analysis"
   },
   "execution": {
     "agents": [
-      "planner",
-      "fullstack-developer"
+      "strategist",
+      "researcher"
     ],
     "hub": "founder-hub",
     "complexity": "standard",
@@ -31,9 +29,18 @@
         "type": "string",
         "description": "Natural language task description"
       },
-      "project": {
+      "context": {
         "type": "string",
-        "description": "Target project path"
+        "description": "Business context or background"
+      },
+      "urgency": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "description": "Priority level"
       }
     }
   },
@@ -41,16 +48,25 @@
     "type": "object",
     "properties": {
       "summary": {
-        "type": "string"
+        "type": "string",
+        "description": "Executive summary"
       },
-      "files_modified": {
+      "recommendations": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "credits_used": {
-        "type": "integer"
+      "next_steps": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
       }
     }
   },

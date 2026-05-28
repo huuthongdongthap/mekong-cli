@@ -113,9 +113,7 @@ class PermissionRegistry:
     }
 
     def __init__(self):
-        self._permissions: Dict[str, Optional[Permission]] = (
-            COMMAND_PERMISSIONS.copy()
-        )
+        self._permissions: Dict[str, Optional[Permission]] = COMMAND_PERMISSIONS.copy()
 
     def get_permission(self, command: str) -> Optional[Permission]:
         """Get required permission for command."""

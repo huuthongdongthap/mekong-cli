@@ -55,12 +55,10 @@ class AgentBase(ABC):
         """Warn at class-definition time if plan or execute are not overridden."""
         super().__init_subclass__(**kwargs)
         import warnings as _warnings
+
         # Only warn for concrete (non-abstract) classes missing the methods
         abstract_methods: frozenset = getattr(cls, "__abstractmethods__", frozenset())
-        unimplemented = [
-            m for m in ("plan", "execute")
-            if m in abstract_methods
-        ]
+        unimplemented = [m for m in ("plan", "execute") if m in abstract_methods]
         if unimplemented and getattr(cls, "__abstractmethods__", None) != frozenset(unimplemented):
             _warnings.warn(
                 f"{cls.__name__} does not implement: {unimplemented}. "
@@ -137,6 +135,7 @@ class AgentBase(ABC):
         for task in self.tasks:
             task.status = TaskStatus.RUNNING
             retries = 0
+            result = Result(task_id=task.id, success=False, output=None, error="max_retries=0")
 
             while retries < self.max_retries:
                 result = self.execute(task)

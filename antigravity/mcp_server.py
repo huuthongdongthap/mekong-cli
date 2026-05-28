@@ -210,12 +210,16 @@ class AntigravityMCPServer:
                     data={
                         "name": self.dna.name,
                         "tagline": self.dna.tagline,
-                        "tone": self.dna.tone.value
-                        if hasattr(self.dna.tone, "value")
-                        else str(self.dna.tone),
-                        "tier": self.dna.tier.value
-                        if hasattr(self.dna.tier, "value")
-                        else str(self.dna.tier),
+                        "tone": (
+                            self.dna.tone.value
+                            if hasattr(self.dna.tone, "value")
+                            else str(self.dna.tone)
+                        ),
+                        "tier": (
+                            self.dna.tier.value
+                            if hasattr(self.dna.tier, "value")
+                            else str(self.dna.tier)
+                        ),
                     },
                     message="Agency DNA retrieved",
                 )
@@ -311,9 +315,9 @@ class AntigravityMCPServer:
                         },
                     },
                     "approved": all_wins,
-                    "message": "✅ All three parties WIN!"
-                    if all_wins
-                    else "⚠️ Missing WIN specification",
+                    "message": (
+                        "✅ All three parties WIN!" if all_wins else "⚠️ Missing WIN specification"
+                    ),
                 },
                 message="WIN-WIN-WIN validation complete",
             )

@@ -109,9 +109,7 @@ class CascadeEngine:
             # Prefer suggest_commands from trigger config, fallback to layer commands
             suggest_cmds: list[str] = trigger_cfg.get("suggest_commands", [])
             if not suggest_cmds:
-                suggest_cmds = self._layers.get(target_layer, {}).get(
-                    "commands", []
-                )[:3]
+                suggest_cmds = self._layers.get(target_layer, {}).get("commands", [])[:3]
             if not suggest_cmds:
                 continue
 
@@ -127,9 +125,7 @@ class CascadeEngine:
                 )
 
         suggestions.sort(key=lambda s: s.confidence, reverse=True)
-        logger.debug(
-            "Layer %s → %d cascade suggestions", current_layer, len(suggestions)
-        )
+        logger.debug("Layer %s → %d cascade suggestions", current_layer, len(suggestions))
         return suggestions
 
     def build_lineage(self, session_id: str) -> dict:

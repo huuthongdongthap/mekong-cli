@@ -179,7 +179,8 @@ class ImprovementEngine:
 
         # Get failed missions
         failed = [
-            m for m in self.journal.get_missions(limit=1000)
+            m
+            for m in self.journal.get_missions(limit=1000)
             if m["status"] == "failed" and m.get("created_at", "") > cutoff
         ]
 
@@ -249,8 +250,11 @@ Recommended actions:
         # Count missions with tech debt indicators
         tech_debt_indicators = ["TODO", "FIXME", "hack", "temporary", "workaround"]
         tech_debt_count = sum(
-            1 for m in missions
-            if any(indicator in m.get("description", "").lower() for indicator in tech_debt_indicators)
+            1
+            for m in missions
+            if any(
+                indicator in m.get("description", "").lower() for indicator in tech_debt_indicators
+            )
         )
 
         if tech_debt_count >= 5:
@@ -285,23 +289,27 @@ Recommended actions:
 
         # Low success rate recommendation
         if summary["success_rate"] < 80:
-            recommendations.append(ImprovementRecommendation(
-                category="reliability",
-                description="Improve mission success rate",
-                impact="high",
-                effort="medium",
-                details={"current_success_rate": summary["success_rate"]},
-            ))
+            recommendations.append(
+                ImprovementRecommendation(
+                    category="reliability",
+                    description="Improve mission success rate",
+                    impact="high",
+                    effort="medium",
+                    details={"current_success_rate": summary["success_rate"]},
+                )
+            )
 
         # High duration recommendation
         if summary["avg_duration_ms"] > 300000:  # 5 minutes
-            recommendations.append(ImprovementRecommendation(
-                category="performance",
-                description="Reduce mission execution time",
-                impact="medium",
-                effort="high",
-                details={"avg_duration_ms": summary["avg_duration_ms"]},
-            ))
+            recommendations.append(
+                ImprovementRecommendation(
+                    category="performance",
+                    description="Reduce mission execution time",
+                    impact="medium",
+                    effort="high",
+                    details={"avg_duration_ms": summary["avg_duration_ms"]},
+                )
+            )
 
         self._recommendations = recommendations
         return recommendations

@@ -122,9 +122,7 @@ class ProtocolHandler:
             raise ValueError(msg)
         path = (parsed.netloc + parsed.path).strip("/")
         raw_params = parse_qs(parsed.query)
-        params: dict[str, Any] = {
-            k: (v[0] if len(v) == 1 else v) for k, v in raw_params.items()
-        }
+        params: dict[str, Any] = {k: (v[0] if len(v) == 1 else v) for k, v in raw_params.items()}
         return ProtocolRequest(scheme=scheme, path=path, params=params, raw_uri=uri)
 
     # ------------------------------------------------------------------

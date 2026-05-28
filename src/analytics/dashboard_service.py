@@ -21,6 +21,7 @@ from src.telemetry.rate_limit_metrics import RateLimitMetricsEmitter
 @dataclass
 class DashboardMetrics:
     """Dashboard metrics container."""
+
     api_calls: List[Dict[str, Any]] = field(default_factory=list)
     weekly_usage: List[Dict[str, Any]] = field(default_factory=list)
     monthly_usage: List[Dict[str, Any]] = field(default_factory=list)
@@ -107,8 +108,8 @@ class DashboardService:
             filter_start = start_date
             filter_end = end_date
         else:
-            filter_end = datetime.now().strftime('%Y-%m-%d')
-            filter_start = (datetime.now() - timedelta(days=range_days)).strftime('%Y-%m-%d')
+            filter_end = datetime.now().strftime("%Y-%m-%d")
+            filter_start = (datetime.now() - timedelta(days=range_days)).strftime("%Y-%m-%d")
 
         # Fetch all metrics in parallel
         daily_usage = await self._queries.get_daily_usage(filter_start, filter_end)
@@ -131,12 +132,12 @@ class DashboardService:
 
         # Build metrics
         metrics = DashboardMetrics(
-            api_calls=self._format_chart_data(daily_usage, 'daily'),
-            weekly_usage=self._format_chart_data(weekly_usage, 'weekly'),
-            monthly_usage=self._format_chart_data(monthly_usage, 'monthly'),
+            api_calls=self._format_chart_data(daily_usage, "daily"),
+            weekly_usage=self._format_chart_data(weekly_usage, "weekly"),
+            monthly_usage=self._format_chart_data(monthly_usage, "monthly"),
             active_licenses={
-                'total': len(active_licenses),
-                'licenses': active_licenses[:20],  # Top 20
+                "total": len(active_licenses),
+                "licenses": active_licenses[:20],  # Top 20
             },
             top_endpoints=top_endpoints,
             revenue=revenue,
@@ -158,15 +159,15 @@ class DashboardService:
     def _format_chart_data(
         self,
         data: List[Dict[str, Any]],
-        granularity: str = 'daily',
+        granularity: str = "daily",
     ) -> List[Dict[str, Any]]:
         """Format data for chart libraries."""
         formatted = []
         for row in data:
             point = {
-                'date': row.get('date', row.get('week_start', row.get('month', ''))),
-                'calls': int(row.get('calls', 0)),
-                'unique_licenses': int(row.get('unique_licenses', 0)),
+                "date": row.get("date", row.get("week_start", row.get("month", ""))),
+                "calls": int(row.get("calls", 0)),
+                "unique_licenses": int(row.get("unique_licenses", 0)),
             }
             formatted.append(point)
         return formatted
@@ -201,18 +202,20 @@ class DashboardService:
 
         # Filter by license_key if provided
         if license_key:
-            daily_data = [d for d in daily_data if d.get('key_id') == license_key]
+            daily_data = [d for d in daily_data if d.get("key_id") == license_key]
 
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(['date', 'api_calls', 'unique_licenses'])
+        writer.writerow(["date", "api_calls", "unique_licenses"])
 
         for row in daily_data:
-            writer.writerow([
-                row.get('date', ''),
-                row.get('calls', 0),
-                row.get('unique_licenses', 0),
-            ])
+            writer.writerow(
+                [
+                    row.get("date", ""),
+                    row.get("calls", 0),
+                    row.get("unique_licenses", 0),
+                ]
+            )
 
         return output.getvalue()
 
@@ -243,25 +246,25 @@ class DashboardService:
 
         # Filter by license_key if provided
         if license_key:
-            daily = [d for d in daily if d.get('key_id') == license_key]
-            active = [a for a in active if a.get('key_id') == license_key]
+            daily = [d for d in daily if d.get("key_id") == license_key]
+            active = [a for a in active if a.get("key_id") == license_key]
 
         export_data = {
-            'exported_at': datetime.now().isoformat(),
-            'date_range': {'start': start_date, 'end': end_date},
-            'filters': {
-                'license_key': license_key,
+            "exported_at": datetime.now().isoformat(),
+            "date_range": {"start": start_date, "end": end_date},
+            "filters": {
+                "license_key": license_key,
             },
-            'usage': {
-                'daily': self._format_chart_data(daily, 'daily'),
-                'weekly': self._format_chart_data(weekly, 'weekly'),
-                'monthly': self._format_chart_data(monthly, 'monthly'),
+            "usage": {
+                "daily": self._format_chart_data(daily, "daily"),
+                "weekly": self._format_chart_data(weekly, "weekly"),
+                "monthly": self._format_chart_data(monthly, "monthly"),
             },
-            'licenses': {
-                'active_count': len(active),
-                'tier_distribution': tiers,
+            "licenses": {
+                "active_count": len(active),
+                "tier_distribution": tiers,
             },
-            'revenue': revenue,
+            "revenue": revenue,
         }
 
         return json.dumps(export_data, indent=2)

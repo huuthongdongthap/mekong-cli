@@ -114,11 +114,16 @@ class TestDecisionLogger:
         try:
             logger = DecisionLogger(db_path)
             from src.polymarket.types import Prediction
+
             pred = Prediction(
-                market_id="m1", question="Test?",
-                predicted_probability=0.7, market_price=0.55,
-                edge=0.15, confidence=0.8,
-                model_used="test", ensemble_agreement=0.9,
+                market_id="m1",
+                question="Test?",
+                predicted_probability=0.7,
+                market_price=0.55,
+                edge=0.15,
+                confidence=0.8,
+                model_used="test",
+                ensemble_agreement=0.9,
             )
             logger.log_prediction(pred, is_paper=True)
             with sqlite3.connect(db_path) as conn:

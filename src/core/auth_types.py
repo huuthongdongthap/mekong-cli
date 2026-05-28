@@ -23,6 +23,10 @@ class TenantContext:
         license_key: Optional license key for mk_ API keys
         expires_at: License expiry timestamp
         features: List of enabled features
+        lang: Preferred language ("en" default, "vi" for VN users)
+        business_type: VN OPC business category (bakery/fashion/service/etc.)
+        city: VN city code (HCM/HN/DN) — informs market context
+        industry: Industry vertical for agent specialization
     """
 
     tenant_id: str
@@ -31,6 +35,15 @@ class TenantContext:
     license_key: Optional[str] = None
     expires_at: Optional[datetime] = None
     features: list[str] = field(default_factory=list)
+    lang: str = "en"
+    business_type: Optional[str] = None
+    city: Optional[str] = None
+    industry: Optional[str] = None
+
+    @property
+    def namespace(self) -> str:
+        """KV store namespace prefix for tenant isolation."""
+        return f"tenant_{self.tenant_id}"
 
 
 @dataclass
@@ -172,7 +185,9 @@ class SessionCache:
             role=data["role"],
             license_key=data.get("license_key"),
             features=data.get("features", []),
-            expires_at=datetime.fromisoformat(data["expires_at"]) if data.get("expires_at") else None,
+            expires_at=(
+                datetime.fromisoformat(data["expires_at"]) if data.get("expires_at") else None
+            ),
             cached_at=datetime.fromisoformat(data["cached_at"]),
             ttl_seconds=data.get("ttl_seconds", 300),
             refresh_token=data.get("refresh_token"),
@@ -180,7 +195,7 @@ class SessionCache:
 
 
 # Module constants
-DEFAULT_GATEWAY_URL = "https://raas.agencyos.network"
+DEFAULT_GATEWAY_URL = "https://api.cashclaw.cc"
 VERIFY_ENDPOINT = "/v1/verify"
 VALIDATION_ENDPOINT_V1 = "/v1/auth/validate"
 VALIDATION_ENDPOINT_V2 = "/v2/license/validate"

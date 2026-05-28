@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { z } from 'zod'
 import { payloadSizeLimit } from './raas/payload-limiter'
 import { createError } from './types/error'
+import { authRoutes } from './routes/auth'
 import { taskRoutes } from './routes/tasks'
 import { agentRoutes } from './routes/agents'
 import { billingRoutes } from './routes/billing'
@@ -51,6 +52,8 @@ export type Bindings = {
   LLM_BASE_URL?: string
   SERVICE_TOKEN?: string
   NOWPAYMENTS_WEBHOOK_SECRET?: string
+  POLAR_WEBHOOK_SECRET?: string
+  JWT_SECRET?: string
   ENVIRONMENT?: string
   DEFAULT_LLM_MODEL?: string
   FB_VERIFY_TOKEN?: string
@@ -91,8 +94,8 @@ app.onError((err, c) => {
 app.use('*', payloadSizeLimit())
 app.use('*', cors({
   origin: [
-    'https://agencyos.network',
-    'https://api.agencyos.network',
+    'https://www.mekongmind.com',
+    'https://api.cashclaw.cc',
     'http://localhost:4321',  // astro dev
     'http://localhost:3001',  // dashboard dev
   ],
@@ -114,10 +117,13 @@ initAlerts()
 app.get('/', (c) => c.json({
   service: 'mekong-engine',
   version: '3.2.0',
-  docs: 'https://agencyos.network/docs',
+  docs: 'https://www.mekongmind.com/docs',
   health: '/health',
   api: '/v1',
 }))
+
+// Lightweight liveness probe (no I/O) — preferred for CF/load balancer checks
+app.get('/healthz', (c) => c.json({ status: 'ok', version: '3.2.0' }))
 
 // Health check + auto-migrate tenant_settings
 app.get('/health', async (c) => {
@@ -244,6 +250,7 @@ app.get('/ai/test', async (c) => {
 })
 
 // RaaS routes — Phase 3-5
+app.route('/auth', authRoutes)
 app.route('/v1/tasks', taskRoutes)
 app.route('/v1/agents', agentRoutes)
 app.route('/v1/settings', settingsRoutes)

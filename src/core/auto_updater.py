@@ -56,7 +56,9 @@ class AutoUpdater:
 
     """
 
-    def __init__(self, current_version: str, repo_url: str, channel: UpdateChannel = UpdateChannel.STABLE) -> None:
+    def __init__(
+        self, current_version: str, repo_url: str, channel: UpdateChannel = UpdateChannel.STABLE
+    ) -> None:
         self.current_version = current_version
         self.repo_url = repo_url.rstrip("/")
         self.channel = channel

@@ -64,7 +64,9 @@ class AlertConfig:
 class AlertRouter:
     """Centralized alert routing with deduplication and throttling."""
 
-    def __init__(self, event_bus: EventBus | None = None, config: AlertConfig | None = None) -> None:
+    def __init__(
+        self, event_bus: EventBus | None = None, config: AlertConfig | None = None
+    ) -> None:
         """Initialize AlertRouter with event bus subscription."""
         self.event_bus = event_bus or get_event_bus()
         self.config = config or AlertConfig()
@@ -140,8 +142,7 @@ class AlertRouter:
         """Remove old alerts from dedup cache."""
         now = time.time()
         expired = [
-            h for h, ts in self._recent_alerts.items()
-            if now - ts > self.config.dedup_window
+            h for h, ts in self._recent_alerts.items() if now - ts > self.config.dedup_window
         ]
         for h in expired:
             del self._recent_alerts[h]
@@ -209,9 +210,7 @@ class AlertRouter:
     def get_stats(self) -> dict[str, Any]:
         """Get router statistics."""
         now = time.time()
-        recent_count = sum(
-            1 for ts, _ in self._alert_history if now - ts < 3600
-        )
+        recent_count = sum(1 for ts, _ in self._alert_history if now - ts < 3600)
         return {
             "dedup_cache_size": len(self._recent_alerts),
             "alerts_last_hour": recent_count,

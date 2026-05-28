@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FundingRate:
     """Funding rate snapshot from an exchange."""
+
     exchange: str
     symbol: str
     rate: float  # Annualized rate
@@ -35,6 +36,7 @@ class FundingRate:
 @dataclass
 class CarryTrade:
     """A delta-neutral carry trade opportunity."""
+
     long_exchange: str
     short_exchange: str
     symbol: str
@@ -53,6 +55,7 @@ class CarryTrade:
 @dataclass
 class ArbConfig:
     """Funding rate arbitrage configuration."""
+
     min_annualized_yield: float = 0.05  # 5% minimum
     max_position_usd: float = 1000.0
     risk_budget_pct: float = 0.20  # 20% of capital for arb
@@ -92,7 +95,7 @@ class FundingRateMonitor:
 
             # Sort by rate
             sorted_rates = sorted(rates, key=lambda r: r.rate)
-            lowest = sorted_rates[0]   # Most negative = best to go long
+            lowest = sorted_rates[0]  # Most negative = best to go long
             highest = sorted_rates[-1]  # Most positive = best to go short
 
             spread = highest.rate - lowest.rate
@@ -181,8 +184,11 @@ class FundingRateArbitrage:
         self.open_trades.append(trade)
         logger.info(
             "Arb opened: %s long@%s short@%s $%.2f yield=%.1f%%",
-            trade.symbol, trade.long_exchange, trade.short_exchange,
-            trade.size_usd, trade.annualized_yield * 100,
+            trade.symbol,
+            trade.long_exchange,
+            trade.short_exchange,
+            trade.size_usd,
+            trade.annualized_yield * 100,
         )
         return True
 

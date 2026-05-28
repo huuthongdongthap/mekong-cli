@@ -1,4 +1,5 @@
 """Tests for retention services — engagement, churn, nudges, streaks, health."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -25,6 +26,7 @@ def tracker(store: EngagementStore) -> EngagementTracker:
 
 # --- Engagement Tracker ---
 
+
 class TestEngagementTracker:
     def test_empty_user_score(self, tracker: EngagementTracker) -> None:
         score = tracker.get_engagement_score("nobody", days=30)
@@ -34,6 +36,7 @@ class TestEngagementTracker:
 
     def test_active_user_score(self, store: EngagementStore, tracker: EngagementTracker) -> None:
         from datetime import datetime, timezone
+
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         store.track_event("u1", "ws1", "login", today)
         store.track_event("u1", "ws1", "mission_run", today)
@@ -60,6 +63,7 @@ class TestEngagementTracker:
 
 # --- Churn Predictor ---
 
+
 class TestChurnPredictor:
     def test_inactive_user_high_risk(self, store: EngagementStore) -> None:
         churn = ChurnPredictor(store=store)
@@ -70,6 +74,7 @@ class TestChurnPredictor:
 
     def test_active_user_low_risk(self, store: EngagementStore) -> None:
         from datetime import datetime, timezone
+
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         for etype in ["login", "mission_run", "api_call", "command_used"]:
             store.track_event("active_user", "ws1", etype, today)
@@ -86,6 +91,7 @@ class TestChurnPredictor:
 
 
 # --- Nudge Engine ---
+
 
 class TestNudgeEngine:
     def test_inactive_user_gets_comeback_nudges(self, store: EngagementStore) -> None:
@@ -111,6 +117,7 @@ class TestNudgeEngine:
 
 # --- Streak Service ---
 
+
 class TestStreakService:
     def test_first_activity_starts_streak(self, store: EngagementStore) -> None:
         streak = StreakService(store=store)
@@ -133,6 +140,7 @@ class TestStreakService:
 
     def test_badges_earned(self, store: EngagementStore) -> None:
         from src.raas.engagement_store import StreakData
+
         store.upsert_streak(StreakData("u1", 35, 35, "2026-03-14", "2026-02-07", 0))
         streak = StreakService(store=store)
         info = streak.get_streak("u1")
@@ -141,6 +149,7 @@ class TestStreakService:
 
 
 # --- Workspace Health ---
+
 
 class TestWorkspaceHealth:
     def test_empty_workspace(self, store: EngagementStore) -> None:
@@ -151,6 +160,7 @@ class TestWorkspaceHealth:
 
     def test_active_workspace(self, store: EngagementStore) -> None:
         from datetime import datetime, timezone
+
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         for etype in ["login", "mission_run", "api_call"]:
             store.track_event("u1", "ws_active", etype, today)

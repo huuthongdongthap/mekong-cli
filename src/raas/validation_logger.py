@@ -30,6 +30,7 @@ class ValidationLog:
         user_agent: Client user agent (if available)
         metadata: Additional context
     """
+
     key_id: str
     result: str  # success, failed, offline_grace, revoked, expired
     command: str
@@ -48,7 +49,7 @@ class ValidationLogger:
     def __init__(
         self,
         repository: Optional[LicenseRepository] = None,
-        db: Optional[DatabaseConnection] = None
+        db: Optional[DatabaseConnection] = None,
     ) -> None:
         self._repo = repository or get_repository()
         self._db = db or get_database()
@@ -89,16 +90,13 @@ class ValidationLogger:
                 log.user_agent,
                 metadata_json,
                 datetime.now(timezone.utc),
-            )
+            ),
         )
 
         return dict(result) if result else {}
 
     async def get_validations_by_key(
-        self,
-        key_id: str,
-        days: int = 30,
-        limit: int = 100
+        self, key_id: str, days: int = 30, limit: int = 100
     ) -> list[Dict[str, Any]]:
         """
         Get validation history for a specific key.
@@ -126,11 +124,7 @@ class ValidationLogger:
         results = await self._db.fetch_all(query, (key_id, limit))
         return [dict(row) for row in results]
 
-    async def get_validation_stats(
-        self,
-        key_id: str,
-        days: int = 30
-    ) -> Dict[str, Any]:
+    async def get_validation_stats(self, key_id: str, days: int = 30) -> Dict[str, Any]:
         """
         Get validation statistics for analytics dashboard.
 
@@ -239,9 +233,7 @@ class ValidationLogger:
         }
 
     async def get_recent_validations(
-        self,
-        limit: int = 500,
-        hours: int = 24
+        self, limit: int = 500, hours: int = 24
     ) -> list[Dict[str, Any]]:
         """
         Get recent validations across all keys for admin dashboard.
@@ -264,10 +256,7 @@ class ValidationLogger:
         return [dict(row) for row in results]
 
     async def get_failed_validations(
-        self,
-        key_id: str,
-        days: int = 7,
-        limit: int = 50
+        self, key_id: str, days: int = 7, limit: int = 50
     ) -> list[Dict[str, Any]]:
         """
         Get failed validations for a specific key.

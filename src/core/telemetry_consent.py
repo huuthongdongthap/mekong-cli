@@ -27,6 +27,7 @@ console = Console()
 @dataclass
 class ConsentPreferences:
     """User telemetry consent preferences."""
+
     consent_given: bool = False
     consent_timestamp: str = ""
     anonymous_id: str = ""
@@ -79,8 +80,9 @@ class ConsentManager:
 
     def prompt_consent(self) -> ConsentPreferences:
         """Show interactive consent prompt."""
-        console.print(Panel(
-            """[bold cyan]📊 Help Improve Mekong CLI[/bold cyan]
+        console.print(
+            Panel(
+                """[bold cyan]📊 Help Improve Mekong CLI[/bold cyan]
 
 Would you like to send [green]anonymous usage data[/green] to help improve Mekong CLI?
 
@@ -101,9 +103,10 @@ Would you like to send [green]anonymous usage data[/green] to help improve Mekon
   mekong telemetry disable  # Opt-out
   mekong telemetry status   # Check status
 """,
-            title="🔒 Privacy-First Telemetry",
-            border_style="cyan",
-        ))
+                title="🔒 Privacy-First Telemetry",
+                border_style="cyan",
+            )
+        )
 
         consent = Confirm.ask(
             "\n[bold]Would you like to enable anonymous telemetry?[/bold]",

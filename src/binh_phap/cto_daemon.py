@@ -96,6 +96,7 @@ def _dispatch_command(command: str, llm_level: str) -> dict:
 def _display_status(dispatcher: object, cycle: int, last_result: dict | None) -> None:
     """Display current daemon status in Rich table."""
     from src.core.binh_phap_dispatcher import BinhPhapDispatcher
+
     assert isinstance(dispatcher, BinhPhapDispatcher)
 
     status = dispatcher.get_status()
@@ -111,7 +112,11 @@ def _display_status(dispatcher: object, cycle: int, last_result: dict | None) ->
     table.add_row("Time", datetime.now().strftime("%H:%M:%S"))
 
     if last_result:
-        result_str = "[green]OK[/green]" if last_result["success"] else f"[red]FAIL: {last_result['error'][:50]}[/red]"
+        result_str = (
+            "[green]OK[/green]"
+            if last_result["success"]
+            else f"[red]FAIL: {last_result['error'][:50]}[/red]"
+        )
         table.add_row("Last Result", result_str)
         table.add_row("Last Duration", f"{last_result['duration_ms']}ms")
 
@@ -148,13 +153,15 @@ def run_daemon(
     cycle = 0
     last_result: dict | None = None
 
-    console.print(Panel.fit(
-        "[bold]OpenClaw CTO Daemon[/bold]\n"
-        f"Mode: {'DRY RUN' if dry_run else 'LIVE'} | "
-        f"Cycles: {'infinite' if max_cycles == 0 else max_cycles} | "
-        f"Interval: {interval_seconds}s",
-        style="bold cyan",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold]OpenClaw CTO Daemon[/bold]\n"
+            f"Mode: {'DRY RUN' if dry_run else 'LIVE'} | "
+            f"Cycles: {'infinite' if max_cycles == 0 else max_cycles} | "
+            f"Interval: {interval_seconds}s",
+            style="bold cyan",
+        )
+    )
 
     while _running:
         cycle += 1
@@ -169,19 +176,23 @@ def run_daemon(
         action_type = action.get("action", "unknown")
 
         if action_type == "stop":
-            console.print(Panel(
-                f"[red]STOPPED:[/red] {action.get('reason', 'unknown')}\n"
-                f"Recommendation: {action.get('recommendation', '')}",
-                style="red",
-            ))
+            console.print(
+                Panel(
+                    f"[red]STOPPED:[/red] {action.get('reason', 'unknown')}\n"
+                    f"Recommendation: {action.get('recommendation', '')}",
+                    style="red",
+                )
+            )
             break
 
         if action_type == "pause":
-            console.print(Panel(
-                f"[yellow]PAUSED:[/yellow] Cycle {action.get('cycle', 0)}\n"
-                f"Lessons: {action.get('lessons', [])}",
-                style="yellow",
-            ))
+            console.print(
+                Panel(
+                    f"[yellow]PAUSED:[/yellow] Cycle {action.get('cycle', 0)}\n"
+                    f"Lessons: {action.get('lessons', [])}",
+                    style="yellow",
+                )
+            )
             time.sleep(interval_seconds * 3)
             continue
 
@@ -210,10 +221,14 @@ def run_daemon(
         elif action_type == "execute_parallel":
             cmds = action.get("commands", [])
             group = action.get("group", "")
-            console.print(f"\n[cyan]Parallel dispatch:[/cyan] {group} → {', '.join('/' + c for c in cmds)}")
+            console.print(
+                f"\n[cyan]Parallel dispatch:[/cyan] {group} → {', '.join('/' + c for c in cmds)}"
+            )
 
             if dry_run:
-                console.print(f"  [dim]DRY RUN — would execute {len(cmds)} commands in parallel[/dim]")
+                console.print(
+                    f"  [dim]DRY RUN — would execute {len(cmds)} commands in parallel[/dim]"
+                )
             else:
                 # Sequential for now (true parallel needs async)
                 for cmd in cmds:
@@ -224,21 +239,27 @@ def run_daemon(
         elif action_type == "execute_loop":
             cmds = action.get("commands", [])
             loop_cycle = action.get("cycle", 0)
-            console.print(f"\n[magenta]Diagonal cycle #{loop_cycle}:[/magenta] {' → '.join('/' + c for c in cmds)}")
+            console.print(
+                f"\n[magenta]Diagonal cycle #{loop_cycle}:[/magenta] {' → '.join('/' + c for c in cmds)}"
+            )
 
             if not dry_run:
                 for cmd in cmds:
                     if not _running:
                         break
                     result = _dispatch_command(cmd, "local_mlx")
-                    _log_to_jsonl({"action": "diagonal", "cycle": loop_cycle, "command": cmd, **result})
+                    _log_to_jsonl(
+                        {"action": "diagonal", "cycle": loop_cycle, "command": cmd, **result}
+                    )
 
         time.sleep(interval_seconds)
 
-    console.print(Panel.fit(
-        f"[bold]CTO Daemon stopped after {cycle} cycles[/bold]",
-        style="yellow",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold]CTO Daemon stopped after {cycle} cycles[/bold]",
+            style="yellow",
+        )
+    )
 
 
 def main() -> None:

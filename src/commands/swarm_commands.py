@@ -65,7 +65,9 @@ def swarm_list() -> None:
 @app.command(name="dispatch")
 def swarm_dispatch(
     goal: str = typer.Argument(..., help="Goal to dispatch to swarm"),
-    node: Optional[str] = typer.Option(None, "--node", "-n", help="Specific node (default: load balance)"),
+    node: Optional[str] = typer.Option(
+        None, "--node", "-n", help="Specific node (default: load balance)"
+    ),
 ) -> None:
     """Dispatch a goal to swarm nodes."""
     from src.core.swarm import SwarmDispatcher

@@ -23,8 +23,10 @@ class TestMemoryEntry(unittest.TestCase):
     def test_memory_entry_with_error(self):
         """Error summary is stored."""
         entry = MemoryEntry(
-            goal="build", status="failed",
-            error_summary="exit code 1", recipe_used="build-recipe",
+            goal="build",
+            status="failed",
+            error_summary="exit code 1",
+            recipe_used="build-recipe",
         )
         self.assertEqual(entry.error_summary, "exit code 1")
         self.assertEqual(entry.recipe_used, "build-recipe")

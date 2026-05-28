@@ -168,6 +168,7 @@ class SyncClient:
         except Exception as e:
             # Return empty summary on error
             import logging
+
             logging.debug(f"Usage summary error: {e}")
 
         return summary
@@ -210,9 +211,7 @@ class SyncClient:
 
                 # Track endpoint breakdown
                 endpoint = metric.get("endpoint", "unknown")
-                bucket["endpoints"][endpoint] = (
-                    bucket["endpoints"].get(endpoint, 0) + 1
-                )
+                bucket["endpoints"][endpoint] = bucket["endpoints"].get(endpoint, 0) + 1
 
                 # Track method breakdown
                 method = metric.get("method", "unknown")
@@ -593,12 +592,8 @@ class SyncClient:
         last_request = None
         if timestamps:
             try:
-                first_request = datetime.fromisoformat(
-                    min(timestamps).replace("Z", "+00:00")
-                )
-                last_request = datetime.fromisoformat(
-                    max(timestamps).replace("Z", "+00:00")
-                )
+                first_request = datetime.fromisoformat(min(timestamps).replace("Z", "+00:00"))
+                last_request = datetime.fromisoformat(max(timestamps).replace("Z", "+00:00"))
             except ValueError:
                 pass
 
@@ -612,7 +607,9 @@ class SyncClient:
             except ValueError:
                 pass
 
-        peak_hour = max(hour_buckets.keys(), key=lambda h: hour_buckets[h]) if hour_buckets else None
+        peak_hour = (
+            max(hour_buckets.keys(), key=lambda h: hour_buckets[h]) if hour_buckets else None
+        )
 
         return SchemaUsageSummary(
             total_requests=len(metrics),
@@ -678,13 +675,9 @@ class SyncClient:
 
         # Push to gateway for relay (async)
         if stripe_events:
-            asyncio.create_task(
-                self.webhook_bridge.push_to_gateway(stripe_events)
-            )
+            asyncio.create_task(self.webhook_bridge.push_to_gateway(stripe_events))
         if polar_events:
-            asyncio.create_task(
-                self.webhook_bridge.push_to_gateway(polar_events)
-            )
+            asyncio.create_task(self.webhook_bridge.push_to_gateway(polar_events))
 
     # =====================================================================
     # Phase 6: CLI Integration & Real-time Usage Metering
@@ -778,9 +771,7 @@ class SyncClient:
             self.gateway.post(
                 "/v1/analytics/push",
                 json=analytics,
-                headers={
-                    "Authorization": f"Bearer {license_key}"
-                },
+                headers={"Authorization": f"Bearer {license_key}"},
             )
 
             return {
@@ -797,6 +788,7 @@ class SyncClient:
         """Get CLI version for analytics."""
         try:
             from importlib.metadata import version
+
             return version("mekong-cli")
         except Exception:
             return "0.2.0-dev"
@@ -906,7 +898,9 @@ class SyncClient:
             )
             return {
                 "healthy": response.data.get("healthy", False),
-                "dashboard_url": response.data.get("dashboard_url", "https://mekongmind.com/analytics"),
+                "dashboard_url": response.data.get(
+                    "dashboard_url", "https://mekongmind.com/analytics"
+                ),
                 "last_push": response.data.get("last_push"),
                 "events_pushed": response.data.get("events_pushed", 0),
             }

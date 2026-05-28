@@ -48,9 +48,11 @@ class InvoiceSystem:
                     client_name=r.get("client_name", "Unknown"),
                     items=[],  # Lazy load or separate fetch
                     currency=Currency.USD,
-                    status=InvoiceStatus(r["status"])
-                    if r["status"] in InvoiceStatus._value2member_map_
-                    else InvoiceStatus.DRAFT,
+                    status=(
+                        InvoiceStatus(r["status"])
+                        if r["status"] in InvoiceStatus._value2member_map_
+                        else InvoiceStatus.DRAFT
+                    ),
                 )
                 self.invoices[inv.id] = inv
         except Exception as e:

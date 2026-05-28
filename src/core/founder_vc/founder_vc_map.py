@@ -67,76 +67,193 @@ class VCMapResult:
 
 VC_DATABASE: list[dict] = [
     # Global Tier 1 — Seed
-    {"name": "YC", "stages": ["pre-seed", "seed"], "check_range": "$125K-$500K",
-     "equity_pct": "7%", "ffs": 9, "focus": "All sectors",
-     "pros": "Best network, brand lifts valuation", "cons": "Competitive",
-     "url": "ycombinator.com/apply", "notable_portfolio": "Airbnb, Stripe, Coinbase"},
-    {"name": "Pioneer", "stages": ["pre-seed"], "check_range": "$8K-$50K",
-     "equity_pct": "1-2%", "ffs": 8, "focus": "Solo founders",
-     "pros": "Small equity, global", "cons": "Small check", "url": "pioneer.app"},
-    {"name": "Sequoia", "stages": ["seed", "a", "b", "c"], "check_range": "$1M-$100M+",
-     "equity_pct": "15-25%", "ffs": 7, "focus": "All sectors",
-     "pros": "Best brand, deep operator network", "cons": "High expectations",
-     "url": "sequoiacap.com"},
-    {"name": "a16z", "stages": ["seed", "a", "b", "c"], "check_range": "$500K-$100M+",
-     "equity_pct": "15-20%", "ffs": 7, "focus": "AI, crypto, bio, consumer",
-     "pros": "Deep media + network", "cons": "Big fund needs big outcomes",
-     "url": "a16z.com"},
-
+    {
+        "name": "YC",
+        "stages": ["pre-seed", "seed"],
+        "check_range": "$125K-$500K",
+        "equity_pct": "7%",
+        "ffs": 9,
+        "focus": "All sectors",
+        "pros": "Best network, brand lifts valuation",
+        "cons": "Competitive",
+        "url": "ycombinator.com/apply",
+        "notable_portfolio": "Airbnb, Stripe, Coinbase",
+    },
+    {
+        "name": "Pioneer",
+        "stages": ["pre-seed"],
+        "check_range": "$8K-$50K",
+        "equity_pct": "1-2%",
+        "ffs": 8,
+        "focus": "Solo founders",
+        "pros": "Small equity, global",
+        "cons": "Small check",
+        "url": "pioneer.app",
+    },
+    {
+        "name": "Sequoia",
+        "stages": ["seed", "a", "b", "c"],
+        "check_range": "$1M-$100M+",
+        "equity_pct": "15-25%",
+        "ffs": 7,
+        "focus": "All sectors",
+        "pros": "Best brand, deep operator network",
+        "cons": "High expectations",
+        "url": "sequoiacap.com",
+    },
+    {
+        "name": "a16z",
+        "stages": ["seed", "a", "b", "c"],
+        "check_range": "$500K-$100M+",
+        "equity_pct": "15-20%",
+        "ffs": 7,
+        "focus": "AI, crypto, bio, consumer",
+        "pros": "Deep media + network",
+        "cons": "Big fund needs big outcomes",
+        "url": "a16z.com",
+    },
     # SEA / Vietnam
-    {"name": "Do Ventures", "stages": ["seed", "a"], "check_range": "$500K-$5M",
-     "equity_pct": "10-20%", "ffs": 8, "focus": "Vietnam, SEA tech",
-     "region": "vietnam", "pros": "Vietnam deep network",
-     "notable_portfolio": "Timo, Dat Bike", "url": "doventures.vc"},
-    {"name": "Wavemaker Partners", "stages": ["seed", "a"], "check_range": "$500K-$5M",
-     "equity_pct": "10-20%", "ffs": 7, "region": "sea", "url": "wavemaker.vc"},
-    {"name": "Golden Gate Ventures", "stages": ["seed", "a", "b"],
-     "check_range": "$1M-$15M", "ffs": 7, "region": "sea", "url": "goldengate.vc"},
-    {"name": "500 SEA", "stages": ["pre-seed", "seed"], "check_range": "$150K-$500K",
-     "ffs": 8, "region": "sea", "pros": "Network access",
-     "url": "500.co/startups/sea"},
-    {"name": "Monk's Hill Ventures", "stages": ["seed", "a"],
-     "check_range": "$1M-$10M", "ffs": 8, "region": "sea", "url": "monkshill.com"},
-
+    {
+        "name": "Do Ventures",
+        "stages": ["seed", "a"],
+        "check_range": "$500K-$5M",
+        "equity_pct": "10-20%",
+        "ffs": 8,
+        "focus": "Vietnam, SEA tech",
+        "region": "vietnam",
+        "pros": "Vietnam deep network",
+        "notable_portfolio": "Timo, Dat Bike",
+        "url": "doventures.vc",
+    },
+    {
+        "name": "Wavemaker Partners",
+        "stages": ["seed", "a"],
+        "check_range": "$500K-$5M",
+        "equity_pct": "10-20%",
+        "ffs": 7,
+        "region": "sea",
+        "url": "wavemaker.vc",
+    },
+    {
+        "name": "Golden Gate Ventures",
+        "stages": ["seed", "a", "b"],
+        "check_range": "$1M-$15M",
+        "ffs": 7,
+        "region": "sea",
+        "url": "goldengate.vc",
+    },
+    {
+        "name": "500 SEA",
+        "stages": ["pre-seed", "seed"],
+        "check_range": "$150K-$500K",
+        "ffs": 8,
+        "region": "sea",
+        "pros": "Network access",
+        "url": "500.co/startups/sea",
+    },
+    {
+        "name": "Monk's Hill Ventures",
+        "stages": ["seed", "a"],
+        "check_range": "$1M-$10M",
+        "ffs": 8,
+        "region": "sea",
+        "url": "monkshill.com",
+    },
     # AI / Dev Tool Focused
-    {"name": "Gradient Ventures (Google)", "stages": ["seed", "a"],
-     "check_range": "$1M-$10M", "ffs": 7, "focus": "AI, developer tools",
-     "pros": "Google integration + credits", "url": "gradient.google"},
-    {"name": "Boldstart Ventures", "stages": ["seed"], "check_range": "$1M-$5M",
-     "ffs": 9, "focus": "Developer tools, infra",
-     "pros": "Deep enterprise + PLG expertise", "notable_portfolio": "Snyk, BigID"},
-    {"name": "Heavybit", "stages": ["seed", "a"], "check_range": "$500K-$5M",
-     "ffs": 9, "focus": "Developer tools exclusively",
-     "pros": "Community, program, networks", "url": "heavybit.com/apply"},
-
+    {
+        "name": "Gradient Ventures (Google)",
+        "stages": ["seed", "a"],
+        "check_range": "$1M-$10M",
+        "ffs": 7,
+        "focus": "AI, developer tools",
+        "pros": "Google integration + credits",
+        "url": "gradient.google",
+    },
+    {
+        "name": "Boldstart Ventures",
+        "stages": ["seed"],
+        "check_range": "$1M-$5M",
+        "ffs": 9,
+        "focus": "Developer tools, infra",
+        "pros": "Deep enterprise + PLG expertise",
+        "notable_portfolio": "Snyk, BigID",
+    },
+    {
+        "name": "Heavybit",
+        "stages": ["seed", "a"],
+        "check_range": "$500K-$5M",
+        "ffs": 9,
+        "focus": "Developer tools exclusively",
+        "pros": "Community, program, networks",
+        "url": "heavybit.com/apply",
+    },
     # Bootstrapped / Indie Friendly
-    {"name": "Tiny.vc", "stages": ["seed"], "check_range": "$250K-$2M",
-     "equity_pct": "5-10%", "ffs": 10, "focus": "Calm, profitable businesses",
-     "pros": "No board, no pressure", "url": "tiny.vc"},
-    {"name": "Calm Fund", "stages": ["seed"], "check_range": "$20K-$200K",
-     "equity_pct": "revenue share", "ffs": 10,
-     "focus": "Sustainable, founder-owned", "url": "calmfund.com"},
-    {"name": "Indie.vc", "stages": ["seed"], "check_range": "$100K-$1M",
-     "equity_pct": "revenue-based", "ffs": 10, "focus": "Revenue from day 1"},
-
+    {
+        "name": "Tiny.vc",
+        "stages": ["seed"],
+        "check_range": "$250K-$2M",
+        "equity_pct": "5-10%",
+        "ffs": 10,
+        "focus": "Calm, profitable businesses",
+        "pros": "No board, no pressure",
+        "url": "tiny.vc",
+    },
+    {
+        "name": "Calm Fund",
+        "stages": ["seed"],
+        "check_range": "$20K-$200K",
+        "equity_pct": "revenue share",
+        "ffs": 10,
+        "focus": "Sustainable, founder-owned",
+        "url": "calmfund.com",
+    },
+    {
+        "name": "Indie.vc",
+        "stages": ["seed"],
+        "check_range": "$100K-$1M",
+        "equity_pct": "revenue-based",
+        "ffs": 10,
+        "focus": "Revenue from day 1",
+    },
     # Series A/B
-    {"name": "Accel", "stages": ["a", "b"], "check_range": "$5M-$50M",
-     "ffs": 7, "notable_portfolio": "Atlassian, Slack, Dropbox"},
-    {"name": "Bessemer", "stages": ["a", "b", "c"], "check_range": "$5M-$100M",
-     "ffs": 7, "notable_portfolio": "LinkedIn, Shopify"},
-    {"name": "Index Ventures", "stages": ["a", "b", "c"],
-     "check_range": "$5M-$100M", "ffs": 8,
-     "notable_portfolio": "Adyen, Figma, Notion"},
-
+    {
+        "name": "Accel",
+        "stages": ["a", "b"],
+        "check_range": "$5M-$50M",
+        "ffs": 7,
+        "notable_portfolio": "Atlassian, Slack, Dropbox",
+    },
+    {
+        "name": "Bessemer",
+        "stages": ["a", "b", "c"],
+        "check_range": "$5M-$100M",
+        "ffs": 7,
+        "notable_portfolio": "LinkedIn, Shopify",
+    },
+    {
+        "name": "Index Ventures",
+        "stages": ["a", "b", "c"],
+        "check_range": "$5M-$100M",
+        "ffs": 8,
+        "notable_portfolio": "Adyen, Figma, Notion",
+    },
     # Late Stage / Pre-IPO
-    {"name": "Tiger Global", "stages": ["c", "d", "pre-ipo"],
-     "check_range": "$50M-$500M", "ffs": 5,
-     "pros": "Fast, no board involvement", "cons": "Pure financial, no value-add"},
-    {"name": "SoftBank Vision Fund", "stages": ["c", "d", "pre-ipo"],
-     "check_range": "$100M-$5B", "ffs": 3,
-     "cons": "Read WeWork case study before taking"},
-    {"name": "Coatue", "stages": ["b", "c", "d", "pre-ipo"],
-     "check_range": "$20M-$500M", "ffs": 6},
+    {
+        "name": "Tiger Global",
+        "stages": ["c", "d", "pre-ipo"],
+        "check_range": "$50M-$500M",
+        "ffs": 5,
+        "pros": "Fast, no board involvement",
+        "cons": "Pure financial, no value-add",
+    },
+    {
+        "name": "SoftBank Vision Fund",
+        "stages": ["c", "d", "pre-ipo"],
+        "check_range": "$100M-$5B",
+        "ffs": 3,
+        "cons": "Read WeWork case study before taking",
+    },
+    {"name": "Coatue", "stages": ["b", "c", "d", "pre-ipo"], "check_range": "$20M-$500M", "ffs": 6},
 ]
 
 
@@ -249,16 +366,22 @@ def save_vc_map(output_dir: str, result: VCMapResult) -> list[str]:
 
     # Matched investors
     path = base / "matched-investors.json"
-    path.write_text(json.dumps(
-        [asdict(f) for f in result.matched_funds], indent=2,
-    ))
+    path.write_text(
+        json.dumps(
+            [asdict(f) for f in result.matched_funds],
+            indent=2,
+        )
+    )
     saved.append(str(path))
 
     # Outreach intel
     intel_path = base / "outreach-intel.json"
-    intel_path.write_text(json.dumps(
-        [asdict(o) for o in result.outreach_intel], indent=2,
-    ))
+    intel_path.write_text(
+        json.dumps(
+            [asdict(o) for o in result.outreach_intel],
+            indent=2,
+        )
+    )
     saved.append(str(intel_path))
 
     return saved

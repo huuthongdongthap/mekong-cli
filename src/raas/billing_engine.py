@@ -279,20 +279,16 @@ class BillingEngine:
             )
 
             if not rate_card:
-                logger.warning(
-                    f"No rate card for {event_type}/{model_name}, skipping"
-                )
+                logger.warning(f"No rate card for {event_type}/{model_name}, skipping")
                 continue
 
             # Calculate total quantity for this event type
-            total_quantity = sum(
-                Decimal(str(e.value)) for e in events
-            )
+            total_quantity = sum(Decimal(str(e.value)) for e in events)
 
             # Get remaining included quantity
             cache_key = f"{rate_card.plan_tier}:{event_type}:{model_name or '*'}"
-            remaining_included = (
-                rate_card.included_quantity - included_used.get(cache_key, Decimal(0))
+            remaining_included = rate_card.included_quantity - included_used.get(
+                cache_key, Decimal(0)
             )
 
             # Calculate charge
@@ -302,9 +298,8 @@ class BillingEngine:
             )
 
             # Update included usage tracking
-            included_used[cache_key] = (
-                included_used.get(cache_key, Decimal(0))
-                + min(total_quantity, remaining_included)
+            included_used[cache_key] = included_used.get(cache_key, Decimal(0)) + min(
+                total_quantity, remaining_included
             )
 
             # Create line item
@@ -403,7 +398,11 @@ class BillingEngine:
                 category=e.get("category", "usage"),
                 metric=e["metric"],
                 value=e["value"],
-                timestamp=e["timestamp"].timestamp() if isinstance(e["timestamp"], datetime) else e["timestamp"],
+                timestamp=(
+                    e["timestamp"].timestamp()
+                    if isinstance(e["timestamp"], datetime)
+                    else e["timestamp"]
+                ),
                 metadata=e.get("metadata", {}),
             )
             for e in events

@@ -19,10 +19,10 @@ from src.security.command_sanitizer import (
     get_sanitizer as get_sec_sanitizer,
 )
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CORE SANITIZER TESTS  (src/core/command_sanitizer.py)
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestCoreSanitizerDangerousCommands:
     """Block dangerous / destructive commands."""
@@ -252,12 +252,14 @@ class TestCoreSanitizerSingleton:
     def test_get_sanitizer_returns_instance(self):
         # Reset singleton
         import src.core.command_sanitizer as mod
+
         mod._sanitizer = None
         s = get_core_sanitizer()
         assert isinstance(s, CoreSanitizer)
 
     def test_get_sanitizer_reuses_instance(self):
         import src.core.command_sanitizer as mod
+
         mod._sanitizer = None
         s1 = get_core_sanitizer()
         s2 = get_core_sanitizer()
@@ -267,6 +269,7 @@ class TestCoreSanitizerSingleton:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SECURITY SANITIZER TESTS  (src/security/command_sanitizer.py)
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class TestSecSanitizerDangerousPatterns:
     """Block patterns using the security-layer sanitizer."""
@@ -447,16 +450,19 @@ class TestSecSanitizerModuleFunctions:
     def test_is_safe_command_true(self):
         # Reset singleton to ensure fresh state
         import src.security.command_sanitizer as mod
+
         mod._default_sanitizer = None
         assert is_safe_command("ls -la")
 
     def test_is_safe_command_false(self):
         import src.security.command_sanitizer as mod
+
         mod._default_sanitizer = None
         assert not is_safe_command("rm -rf /")
 
     def test_get_sanitizer_returns_instance(self):
         import src.security.command_sanitizer as mod
+
         mod._default_sanitizer = None
         s = get_sec_sanitizer()
         assert isinstance(s, SecSanitizer)

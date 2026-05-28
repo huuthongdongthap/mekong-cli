@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ManagedOrder:
     """An order tracked by the order manager."""
+
     order_id: str
     market_id: str
     side: OrderSide
@@ -82,8 +83,11 @@ class OrderManager:
         self._persist_order(order)
         logger.info(
             "Tracking order %s: %s %s $%.2f status=%s",
-            order.order_id, order.direction.value,
-            order.market_id[:8], order.size_usd, order.status.value,
+            order.order_id,
+            order.direction.value,
+            order.market_id[:8],
+            order.size_usd,
+            order.status.value,
         )
         return order
 

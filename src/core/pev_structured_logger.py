@@ -105,9 +105,7 @@ class PEVStructuredLogger:
             **kwargs,
         )
 
-    def plan_completed(
-        self, step_count: int, duration_ms: float, **kwargs: Any
-    ) -> PEVLogEntry:
+    def plan_completed(self, step_count: int, duration_ms: float, **kwargs: Any) -> PEVLogEntry:
         """Log planning phase completion."""
         return self._log(
             logging.INFO,
@@ -164,9 +162,7 @@ class PEVStructuredLogger:
             **kwargs,
         )
 
-    def step_failed(
-        self, step_order: int, error: str, **kwargs: Any
-    ) -> PEVLogEntry:
+    def step_failed(self, step_order: int, error: str, **kwargs: Any) -> PEVLogEntry:
         """Log step failure."""
         self._step_timers.pop(step_order, None)
         return self._log(
@@ -179,9 +175,7 @@ class PEVStructuredLogger:
             **kwargs,
         )
 
-    def step_retried(
-        self, step_order: int, attempt: int, **kwargs: Any
-    ) -> PEVLogEntry:
+    def step_retried(self, step_order: int, attempt: int, **kwargs: Any) -> PEVLogEntry:
         """Log step retry attempt."""
         return self._log(
             logging.WARNING,
@@ -217,9 +211,7 @@ class PEVStructuredLogger:
             **kwargs,
         )
 
-    def verify_failed(
-        self, step_order: int, reason: str, **kwargs: Any
-    ) -> PEVLogEntry:
+    def verify_failed(self, step_order: int, reason: str, **kwargs: Any) -> PEVLogEntry:
         """Log verification failure."""
         return self._log(
             logging.WARNING,
@@ -272,9 +264,7 @@ class PEVStructuredLogger:
 
     # --- Pipeline operations ---
 
-    def pipeline_started(
-        self, pipeline_id: str, stage_count: int, **kwargs: Any
-    ) -> PEVLogEntry:
+    def pipeline_started(self, pipeline_id: str, stage_count: int, **kwargs: Any) -> PEVLogEntry:
         """Log pipeline start."""
         self.set_pipeline_id(pipeline_id)
         return self._log(

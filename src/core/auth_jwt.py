@@ -48,6 +48,7 @@ def decode_jwt(token: str) -> Optional[dict[str, Any]]:
 
     except Exception as e:
         import logging
+
         logger = logging.getLogger(__name__)
         logger.debug("JWT decode failed: %s", e)
         return None
@@ -92,11 +93,7 @@ def extract_tenant_from_jwt(payload: dict[str, Any]) -> TenantContext:
         or "unknown"
     )
 
-    tier = (
-        payload.get("role")
-        or (payload.get("app_metadata") or {}).get("role")
-        or "free"
-    )
+    tier = payload.get("role") or (payload.get("app_metadata") or {}).get("role") or "free"
 
     exp = payload.get("exp")
 

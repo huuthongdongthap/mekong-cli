@@ -28,36 +28,108 @@ class TaskProfile:
 # Domain signal keywords
 DOMAIN_SIGNALS: dict[str, list[str]] = {
     "code": [
-        "code", "implement", "fix", "deploy", "bug", "api", "function",
-        "class", "test", "refactor", "build", "script", "database",
+        "code",
+        "implement",
+        "fix",
+        "deploy",
+        "bug",
+        "api",
+        "function",
+        "class",
+        "test",
+        "refactor",
+        "build",
+        "script",
+        "database",
     ],
     "creative": [
-        "write", "content", "blog", "email", "copy", "post", "announce",
-        "marketing", "social", "newsletter", "landing", "write",
+        "write",
+        "content",
+        "blog",
+        "email",
+        "copy",
+        "post",
+        "announce",
+        "marketing",
+        "social",
+        "newsletter",
+        "landing",
+        "write",
     ],
     "ops": [
-        "monitor", "check", "status", "health", "backup", "cron",
-        "alert", "restart", "log", "metrics", "uptime",
+        "monitor",
+        "check",
+        "status",
+        "health",
+        "backup",
+        "cron",
+        "alert",
+        "restart",
+        "log",
+        "metrics",
+        "uptime",
     ],
     "analysis": [
-        "report", "analyze", "chart", "revenue", "usage", "trend",
-        "summary", "dashboard", "insight", "data", "stats",
+        "report",
+        "analyze",
+        "chart",
+        "revenue",
+        "usage",
+        "trend",
+        "summary",
+        "dashboard",
+        "insight",
+        "data",
+        "stats",
     ],
     "sales": [
-        "upsell", "churn", "follow-up", "lead", "convert", "offer",
-        "trial", "upgrade", "retention", "email sequence",
+        "upsell",
+        "churn",
+        "follow-up",
+        "lead",
+        "convert",
+        "offer",
+        "trial",
+        "upgrade",
+        "retention",
+        "email sequence",
     ],
     "support": [
-        "ticket", "user report", "error message", "help", "faq",
-        "refund", "complaint", "confused", "error",
+        "ticket",
+        "user report",
+        "error message",
+        "help",
+        "faq",
+        "refund",
+        "complaint",
+        "confused",
+        "error",
     ],
     "finance": [
-        "revenue", "profit", "expense", "invoice", "budget", "cashflow",
-        "margin", "pricing", "financial", "cost", "roi", "funding",
+        "revenue",
+        "profit",
+        "expense",
+        "invoice",
+        "budget",
+        "cashflow",
+        "margin",
+        "pricing",
+        "financial",
+        "cost",
+        "roi",
+        "funding",
     ],
     "editorial": [
-        "edit", "proofread", "review content", "documentation", "changelog",
-        "readme", "tutorial", "guide", "style guide", "grammar",
+        "edit",
+        "proofread",
+        "review content",
+        "documentation",
+        "changelog",
+        "readme",
+        "tutorial",
+        "guide",
+        "style guide",
+        "grammar",
     ],
 }
 
@@ -74,10 +146,18 @@ DOMAIN_TO_AGENT: dict[str, str] = {
 
 SENSITIVITY_KEYWORDS = {
     "sensitive": [
-        "password", "secret", "key", "token", "private", "confidential",
+        "password",
+        "secret",
+        "key",
+        "token",
+        "private",
+        "confidential",
     ],
     "internal": [
-        "customer", "user data", "tenant", "billing",
+        "customer",
+        "user data",
+        "tenant",
+        "billing",
     ],
 }
 
@@ -95,11 +175,12 @@ def _count_signals(goal_lower: str, keywords: list[str]) -> int:
     return sum(1 for kw in keywords if kw in goal_lower)
 
 
-def _detect_domain(goal_lower: str) -> Literal["code", "creative", "ops", "analysis", "sales", "support"]:
+def _detect_domain(
+    goal_lower: str,
+) -> Literal["code", "creative", "ops", "analysis", "sales", "support"]:
     """Step 1: Detect domain from goal keywords."""
     scores = {
-        domain: _count_signals(goal_lower, keywords)
-        for domain, keywords in DOMAIN_SIGNALS.items()
+        domain: _count_signals(goal_lower, keywords) for domain, keywords in DOMAIN_SIGNALS.items()
     }
     best = max(scores, key=scores.get)  # type: ignore[arg-type]
     if scores[best] == 0:
@@ -107,12 +188,23 @@ def _detect_domain(goal_lower: str) -> Literal["code", "creative", "ops", "analy
     return best
 
 
-def _assign_agent(goal_lower: str, domain: str) -> Literal["cto", "cmo", "coo", "cfo", "cs", "sales", "editor", "data"]:
+def _assign_agent(
+    goal_lower: str, domain: str
+) -> Literal["cto", "cmo", "coo", "cfo", "cs", "sales", "editor", "data"]:
     """Step 2: Assign agent role with override rules."""
     agent = DOMAIN_TO_AGENT.get(domain, "cto")
 
     # Override: finance-specific keywords → cfo
-    finance_words = {"revenue", "profit", "expense", "invoice", "budget", "cashflow", "financial", "pricing"}
+    finance_words = {
+        "revenue",
+        "profit",
+        "expense",
+        "invoice",
+        "budget",
+        "cashflow",
+        "financial",
+        "pricing",
+    }
     if finance_words & set(goal_lower.split()):
         return "cfo"
 

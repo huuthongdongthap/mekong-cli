@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.agents.lead_hunter import LeadHunter
 
+
 class TestLeadHunter(unittest.TestCase):
     def setUp(self):
         self.agent = LeadHunter()
@@ -32,6 +33,7 @@ class TestLeadHunter(unittest.TestCase):
         email_result = results[2]
         self.assertTrue(email_result.success)
         self.assertIn("ceo@test-startup.com", email_result.output["email"])
+
 
 if __name__ == "__main__":
     unittest.main()

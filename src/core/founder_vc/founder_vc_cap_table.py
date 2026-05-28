@@ -117,22 +117,28 @@ def create_cap_table(
     total_founder_shares = sum(s for _, s in founders)
 
     for name, shares in founders:
-        shareholders.append(Shareholder(
-            name=name, shares=shares, share_type="common",
-            round_name="founding",
-        ))
+        shareholders.append(
+            Shareholder(
+                name=name,
+                shares=shares,
+                share_type="common",
+                round_name="founding",
+            )
+        )
 
     # Option pool as % of total (including pool itself)
     if option_pool_pct >= 100:
         raise ValueError("option_pool_pct must be less than 100")
     if option_pool_pct > 0:
-        pool_shares = int(
-            total_founder_shares * option_pool_pct / (100 - option_pool_pct)
+        pool_shares = int(total_founder_shares * option_pool_pct / (100 - option_pool_pct))
+        shareholders.append(
+            Shareholder(
+                name="Option Pool",
+                shares=pool_shares,
+                share_type="option_pool",
+                round_name="founding",
+            )
         )
-        shareholders.append(Shareholder(
-            name="Option Pool", shares=pool_shares,
-            share_type="option_pool", round_name="founding",
-        ))
 
     cap = CapTable(company_name=company_name, shareholders=shareholders)
     cap.recalculate_total()
@@ -153,11 +159,13 @@ def model_round(
     # Snapshot before
     before = []
     for h in cap_table.shareholders:
-        before.append({
-            "name": h.name,
-            "shares": h.shares,
-            "pct": round(cap_table.ownership_pct(h), 2),
-        })
+        before.append(
+            {
+                "name": h.name,
+                "shares": h.shares,
+                "pct": round(cap_table.ownership_pct(h), 2),
+            }
+        )
 
     # Effective pre-money (option pool shuffle)
     post_money = pre_money_valuation + investment_amount
@@ -167,21 +175,25 @@ def model_round(
         effective_pre = pre_money_valuation
 
     # Price per share
-    price_per_share = pre_money_valuation / cap_table.total_shares if cap_table.total_shares > 0 else 1.0
+    price_per_share = (
+        pre_money_valuation / cap_table.total_shares if cap_table.total_shares > 0 else 1.0
+    )
 
     # New investor shares
     new_investor_shares = int(investment_amount / price_per_share) if price_per_share > 0 else 0
 
     # Add investor
-    cap_table.shareholders.append(Shareholder(
-        name=f"{round_name} Investor",
-        shares=new_investor_shares,
-        share_type="preferred",
-        round_name=round_name,
-        investment_amount=investment_amount,
-        liquidation_pref_multiple=liquidation_pref,
-        participating=participating,
-    ))
+    cap_table.shareholders.append(
+        Shareholder(
+            name=f"{round_name} Investor",
+            shares=new_investor_shares,
+            share_type="preferred",
+            round_name=round_name,
+            investment_amount=investment_amount,
+            liquidation_pref_multiple=liquidation_pref,
+            participating=participating,
+        )
+    )
 
     # Expand option pool if needed
     if option_pool_pct > 0:
@@ -193,24 +205,32 @@ def model_round(
         if pool:
             pool.shares += additional
         else:
-            cap_table.shareholders.append(Shareholder(
-                name="Option Pool", shares=target_pool_shares,
-                share_type="option_pool", round_name=round_name,
-            ))
+            cap_table.shareholders.append(
+                Shareholder(
+                    name="Option Pool",
+                    shares=target_pool_shares,
+                    share_type="option_pool",
+                    round_name=round_name,
+                )
+            )
 
     cap_table.recalculate_total()
 
     # Investor ownership
-    investor_pct = (new_investor_shares / cap_table.total_shares * 100) if cap_table.total_shares > 0 else 0
+    investor_pct = (
+        (new_investor_shares / cap_table.total_shares * 100) if cap_table.total_shares > 0 else 0
+    )
 
     # Snapshot after
     after = []
     for h in cap_table.shareholders:
-        after.append({
-            "name": h.name,
-            "shares": h.shares,
-            "pct": round(cap_table.ownership_pct(h), 2),
-        })
+        after.append(
+            {
+                "name": h.name,
+                "shares": h.shares,
+                "pct": round(cap_table.ownership_pct(h), 2),
+            }
+        )
 
     return RoundModel(
         round_name=round_name,
@@ -235,12 +255,18 @@ def convert_safes(
 ) -> list[dict]:
     """Convert SAFEs/notes at a priced round. Returns conversion details."""
     conversions = []
-    price_per_share = priced_round_pre_money / cap_table.total_shares if cap_table.total_shares > 0 else 1.0
+    price_per_share = (
+        priced_round_pre_money / cap_table.total_shares if cap_table.total_shares > 0 else 1.0
+    )
 
     for safe in safes:
         # Determine conversion price
         if safe.valuation_cap > 0:
-            cap_price = safe.valuation_cap / cap_table.total_shares if cap_table.total_shares > 0 else price_per_share
+            cap_price = (
+                safe.valuation_cap / cap_table.total_shares
+                if cap_table.total_shares > 0
+                else price_per_share
+            )
         else:
             cap_price = price_per_share
 
@@ -250,28 +276,34 @@ def convert_safes(
             discount_price = price_per_share
 
         # Use lower price (better for SAFE holder)
-        conversion_price = min(cap_price, discount_price) if safe.valuation_cap > 0 else discount_price
+        conversion_price = (
+            min(cap_price, discount_price) if safe.valuation_cap > 0 else discount_price
+        )
         if conversion_price <= 0:
             conversion_price = price_per_share
 
         new_shares = int(safe.amount / conversion_price)
         ownership_pct = (new_shares / (cap_table.total_shares + new_shares)) * 100
 
-        cap_table.shareholders.append(Shareholder(
-            name=safe.investor_name,
-            shares=new_shares,
-            share_type="preferred",
-            round_name="SAFE conversion",
-            investment_amount=safe.amount,
-        ))
+        cap_table.shareholders.append(
+            Shareholder(
+                name=safe.investor_name,
+                shares=new_shares,
+                share_type="preferred",
+                round_name="SAFE conversion",
+                investment_amount=safe.amount,
+            )
+        )
 
-        conversions.append({
-            "investor": safe.investor_name,
-            "amount": safe.amount,
-            "conversion_price": round(conversion_price, 4),
-            "shares": new_shares,
-            "ownership_pct": round(ownership_pct, 2),
-        })
+        conversions.append(
+            {
+                "investor": safe.investor_name,
+                "amount": safe.amount,
+                "conversion_price": round(conversion_price, 4),
+                "shares": new_shares,
+                "ownership_pct": round(ownership_pct, 2),
+            }
+        )
 
     cap_table.recalculate_total()
     return conversions
@@ -310,8 +342,7 @@ def calculate_exit_waterfall(
         remaining = max(0, exit_value - total_pref)
 
     # Step 3: Common shareholders split remainder
-    common = [h for h in cap_table.shareholders
-              if h.share_type in ("common", "option_pool")]
+    common = [h for h in cap_table.shareholders if h.share_type in ("common", "option_pool")]
     common_total = sum(h.shares for h in common)
 
     for h in preferred:
@@ -332,20 +363,24 @@ def calculate_exit_waterfall(
 
     # Build entries
     for name, payout in pref_payouts.items():
-        entries.append(WaterfallEntry(
-            holder_name=name,
-            payout=round(payout, 2),
-            pct_of_exit=round((payout / exit_value * 100) if exit_value > 0 else 0, 2),
-            share_type="preferred",
-        ))
+        entries.append(
+            WaterfallEntry(
+                holder_name=name,
+                payout=round(payout, 2),
+                pct_of_exit=round((payout / exit_value * 100) if exit_value > 0 else 0, 2),
+                share_type="preferred",
+            )
+        )
 
     for name, payout in common_payouts.items():
-        entries.append(WaterfallEntry(
-            holder_name=name,
-            payout=round(payout, 2),
-            pct_of_exit=round((payout / exit_value * 100) if exit_value > 0 else 0, 2),
-            share_type="common",
-        ))
+        entries.append(
+            WaterfallEntry(
+                holder_name=name,
+                payout=round(payout, 2),
+                pct_of_exit=round((payout / exit_value * 100) if exit_value > 0 else 0, 2),
+                share_type="common",
+            )
+        )
 
     return ExitWaterfall(
         exit_value=exit_value,

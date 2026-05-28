@@ -22,9 +22,14 @@ class LiteLLMProvider:
         self.api_key = api_key
         self.client = httpx.Client(timeout=120.0)
 
-    def chat(self, messages: list[dict], model: str = "default",
-             max_tokens: int = 4096, temperature: float = 0.3,
-             team_id: Optional[str] = None) -> dict:
+    def chat(
+        self,
+        messages: list[dict],
+        model: str = "default",
+        max_tokens: int = 4096,
+        temperature: float = 0.3,
+        team_id: Optional[str] = None,
+    ) -> dict:
         """Send chat completion through LiteLLM proxy."""
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -68,12 +73,20 @@ class LiteLLMProvider:
         try:
             resp = self.client.post(
                 "http://localhost:11434/v1/chat/completions",
-                json={"model": "qwen2.5-coder:7b", "messages": messages,
-                      "max_tokens": max_tokens, "temperature": temperature},
+                json={
+                    "model": "qwen2.5-coder:7b",
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                },
             )
             data = resp.json()
-            return {"content": data["choices"][0]["message"]["content"],
-                    "usage": data.get("usage", {}), "model": "ollama/qwen2.5-coder:7b", "cost": 0}
+            return {
+                "content": data["choices"][0]["message"]["content"],
+                "usage": data.get("usage", {}),
+                "model": "ollama/qwen2.5-coder:7b",
+                "cost": 0,
+            }
         except Exception:
             return {"content": "LLM unavailable", "usage": {}, "model": "none", "cost": 0}
 
@@ -85,13 +98,21 @@ class LiteLLMProvider:
         try:
             resp = self.client.post(
                 "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-                json={"model": "qwen3-coder-plus", "messages": messages,
-                      "max_tokens": max_tokens, "temperature": temperature},
+                json={
+                    "model": "qwen3-coder-plus",
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                },
                 headers={"Authorization": f"Bearer {api_key}"},
             )
             data = resp.json()
-            return {"content": data["choices"][0]["message"]["content"],
-                    "usage": data.get("usage", {}), "model": "qwen3-coder-plus", "cost": 0}
+            return {
+                "content": data["choices"][0]["message"]["content"],
+                "usage": data.get("usage", {}),
+                "model": "qwen3-coder-plus",
+                "cost": 0,
+            }
         except Exception:
             return self._fallback_local(messages, max_tokens, temperature)
 

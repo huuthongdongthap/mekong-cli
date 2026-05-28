@@ -41,6 +41,7 @@ TIER_MAP: dict[str, str] = {
 
 # ── Cron matching ──────────────────────────────────────────────────────────────
 
+
 def _field_matches(field: str, value: int) -> bool:
     """Return True if cron field string matches integer value."""
     if field == "*":
@@ -85,6 +86,7 @@ def is_due(schedule: str, now: datetime | None = None) -> bool:
 
 # ── Logging helper ─────────────────────────────────────────────────────────────
 
+
 def _log_result(name: str, output: str, error: str | None) -> None:
     """Append run result to .mekong/logs/pipeline-{name}.log."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -96,6 +98,7 @@ def _log_result(name: str, output: str, error: str | None) -> None:
 
 
 # ── Core runner ────────────────────────────────────────────────────────────────
+
 
 def run_due_pipelines(now: datetime | None = None) -> list[dict]:
     """
@@ -148,7 +151,9 @@ def run_due_pipelines(now: datetime | None = None) -> list[dict]:
             logger.error(f"[PipelineExec] Pipeline {name} failed: {exc}")
 
         _log_result(name, output, error)
-        results.append({"name": name, "ran": True, "success": success, "output": output, "error": error})
+        results.append(
+            {"name": name, "ran": True, "success": success, "output": output, "error": error}
+        )
         logger.info(f"[PipelineExec] {name} → {'OK' if success else 'FAIL'}")
 
     return results

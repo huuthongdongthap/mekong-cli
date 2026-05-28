@@ -115,7 +115,9 @@ class LLMClient:
         self.timeout = timeout
 
         # Keep legacy attrs for backward compat (some callers read them directly)
-        self.proxy_url = proxy_url or os.getenv("ANTIGRAVITY_PROXY_URL", "") or os.getenv("LLM_BASE_URL", "")
+        self.proxy_url = (
+            proxy_url or os.getenv("ANTIGRAVITY_PROXY_URL", "") or os.getenv("LLM_BASE_URL", "")
+        )
         self.api_key = api_key or os.getenv("OPENAI_API_KEY", "")
         self.gemini_key = gemini_key or os.getenv("GEMINI_API_KEY", "")
 
@@ -233,23 +235,40 @@ class LLMClient:
 
         # Routers (multi-model, recommended)
         _router_providers = [
-            ("OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "anthropic/claude-sonnet-4", "openrouter"),
-            ("AGENTROUTER_API_KEY", "https://agentrouter.org/v1", "claude-sonnet-4-6-20250514", "agentrouter"),
+            (
+                "OPENROUTER_API_KEY",
+                "https://openrouter.ai/api/v1",
+                "anthropic/claude-sonnet-4",
+                "openrouter",
+            ),
+            (
+                "AGENTROUTER_API_KEY",
+                "https://agentrouter.org/v1",
+                "claude-sonnet-4-6-20250514",
+                "agentrouter",
+            ),
         ]
         for env_key, url, default_model, name in _router_providers:
             key = os.getenv(env_key, "")
             if key:
                 built.append(
                     OpenAICompatibleProvider(
-                        base_url=url, api_key=key,
-                        model=default_model, provider_name=name,
+                        base_url=url,
+                        api_key=key,
+                        model=default_model,
+                        provider_name=name,
                         timeout=self.timeout,
                     ),
                 )
 
         # Direct providers (Chinese + US)
         _direct_providers = [
-            ("DASHSCOPE_API_KEY", "https://dashscope.aliyuncs.com/compatible-mode/v1", "qwen3-coder-plus", "qwen"),
+            (
+                "DASHSCOPE_API_KEY",
+                "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                "qwen3-coder-plus",
+                "qwen",
+            ),
             ("DEEPSEEK_API_KEY", "https://api.deepseek.com", "deepseek-chat", "deepseek"),
         ]
         for env_key, url, default_model, name in _direct_providers:
@@ -257,8 +276,10 @@ class LLMClient:
             if key:
                 built.append(
                     OpenAICompatibleProvider(
-                        base_url=url, api_key=key,
-                        model=default_model, provider_name=name,
+                        base_url=url,
+                        api_key=key,
+                        model=default_model,
+                        provider_name=name,
                         timeout=self.timeout,
                     ),
                 )
@@ -266,7 +287,11 @@ class LLMClient:
         # Anthropic (skip if ANTHROPIC_BASE_URL points to local proxy)
         anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
         anthropic_base = os.getenv("ANTHROPIC_BASE_URL", "")
-        if anthropic_key and "localhost" not in anthropic_base and "127.0.0.1" not in anthropic_base:
+        if (
+            anthropic_key
+            and "localhost" not in anthropic_base
+            and "127.0.0.1" not in anthropic_base
+        ):
             built.append(
                 OpenAICompatibleProvider(
                     base_url="https://api.anthropic.com/v1",
@@ -321,8 +346,23 @@ class LLMClient:
                 ),
             )
 
+        # VN Hub — Qwen3-8B local (MLX, port 11434)
+        vn_base_url = os.getenv("VN_LLM_BASE_URL", "http://localhost:11434/v1")
+        vn_model = os.getenv("VN_LLM_MODEL", "qwen3-8b")
+        self._vn_provider = OpenAICompatibleProvider(
+            base_url=vn_base_url,
+            api_key="mlx",
+            model=vn_model,
+            provider_name="vn-local-mlx",
+            timeout=self.timeout,
+        )
+
         built.append(OfflineProvider())
         return built
+
+    def get_vn_provider(self) -> "OpenAICompatibleProvider":
+        """Return the Vietnamese LLM provider (Qwen3-8B local MLX)."""
+        return self._vn_provider
 
     _local_llm_cache: bool | None = None
 
@@ -332,9 +372,7 @@ class LLMClient:
             return LLMClient._local_llm_cache
         for port in (11434, 11435):
             try:
-                resp = requests.get(
-                    f"http://127.0.0.1:{port}/v1/models", timeout=1
-                )
+                resp = requests.get(f"http://127.0.0.1:{port}/v1/models", timeout=1)
                 if resp.status_code == 200:
                     LLMClient._local_llm_cache = True
                     return True
@@ -398,10 +436,7 @@ class LLMClient:
     @property
     def is_available(self) -> bool:
         """True if any non-offline provider is configured."""
-        return any(
-            p.is_available() and p.name != "offline"
-            for p in self.providers
-        )
+        return any(p.is_available() and p.name != "offline" for p in self.providers)
 
     def chat(
         self,
@@ -419,8 +454,10 @@ class LLMClient:
 
         # Pre-request hooks
         hook_ctx = HookContext(
-            messages=messages, model=use_model,
-            temperature=temperature, max_tokens=max_tokens,
+            messages=messages,
+            model=use_model,
+            temperature=temperature,
+            max_tokens=max_tokens,
             start_time=call_start,
         )
         if self.hooks:
@@ -436,8 +473,10 @@ class LLMClient:
             if cached:
                 logger.debug("[LLM] Cache hit for model=%s", use_model)
                 return LLMResponse(
-                    content=cached.content, model=cached.model,
-                    usage=cached.usage, raw={"cache": True},
+                    content=cached.content,
+                    model=cached.model,
+                    usage=cached.usage,
+                    raw={"cache": True},
                 )
 
         # Provider failover with circuit breaker
@@ -468,8 +507,11 @@ class LLMClient:
                 # Cache successful response
                 if self.cache and not json_mode and result.content:
                     self.cache.put(
-                        messages, result.content, result.model,
-                        temperature, result.usage,
+                        messages,
+                        result.content,
+                        result.model,
+                        temperature,
+                        result.usage,
                     )
 
                 # Post-request hooks
@@ -512,7 +554,10 @@ class LLMClient:
     def generate_json(self, prompt: str, **kwargs: Any) -> dict[str, Any]:
         """Generate and parse JSON response."""
         messages = [
-            {"role": "system", "content": "You are a helpful assistant. Always respond with valid JSON."},
+            {
+                "role": "system",
+                "content": "You are a helpful assistant. Always respond with valid JSON.",
+            },
             {"role": "user", "content": prompt},
         ]
         response = self.chat(messages, json_mode=True, **kwargs)
@@ -521,7 +566,9 @@ class LLMClient:
             return dict(json.loads(response.content))
         except json.JSONDecodeError:
             json_match = re.search(
-                r"```(?:json)?\s*\n(.*?)\n```", response.content, re.DOTALL,
+                r"```(?:json)?\s*\n(.*?)\n```",
+                response.content,
+                re.DOTALL,
             )
             if json_match:
                 try:
@@ -541,23 +588,28 @@ class LLMClient:
             return [OfflineProvider()]
 
         healthy = [
-            p for p in available
-            if p.name == "offline"
-            or self._provider_health.get(p.name, ProviderHealth()).is_healthy
+            p
+            for p in available
+            if p.name == "offline" or self._provider_health.get(p.name, ProviderHealth()).is_healthy
         ]
         return healthy if healthy else available  # All unhealthy — try all
 
     def _request_hash(self, messages: list[dict[str, str]], model: str, temperature: float) -> str:
         """Generate hash for request deduplication."""
-        content = json.dumps({
-            "messages": messages,
-            "model": model,
-            "temperature": temperature,
-        }, sort_keys=True)
+        content = json.dumps(
+            {
+                "messages": messages,
+                "model": model,
+                "temperature": temperature,
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(content.encode()).hexdigest()[:16]
 
     def _offline_response(
-        self, messages: list[dict[str, str]], error: str = "",
+        self,
+        messages: list[dict[str, str]],
+        error: str = "",
     ) -> LLMResponse:
         """Generate offline placeholder response."""
         user_msg = "unknown"

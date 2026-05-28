@@ -243,7 +243,14 @@ class CompletionCertificate:
         table.add_row("License Tier", self.license_tier.upper())
         table.add_row("Total Usage", f"{self.total_billed_usage_units:,} units")
         table.add_row("Gateway", f"{self.gateway_version} @ {self.gateway_issuer}")
-        table.add_row("Status", "[green]OPERATIONAL[/green]" if self.all_phases_operational else "[yellow]INCOMPLETE[/yellow]")
+        table.add_row(
+            "Status",
+            (
+                "[green]OPERATIONAL[/green]"
+                if self.all_phases_operational
+                else "[yellow]INCOMPLETE[/yellow]"
+            ),
+        )
 
         console.print(table)
 

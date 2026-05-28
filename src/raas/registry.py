@@ -1,4 +1,5 @@
 """Recipe Registry for RaaS — publish, search, and clone public recipes."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -133,9 +134,17 @@ class RecipeRegistry:
                     "INSERT INTO recipe_entries "
                     "(id, name, description, category, content, author_tenant_id, "
                     " is_public, clone_count, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
-                    (entry.id, entry.name, entry.description, entry.category,
-                     entry.content, entry.author_tenant_id,
-                     int(entry.is_public), entry.clone_count, entry.created_at),
+                    (
+                        entry.id,
+                        entry.name,
+                        entry.description,
+                        entry.category,
+                        entry.content,
+                        entry.author_tenant_id,
+                        int(entry.is_public),
+                        entry.clone_count,
+                        entry.created_at,
+                    ),
                 )
                 conn.commit()
         except sqlite3.Error as exc:
@@ -207,9 +216,17 @@ class RecipeRegistry:
                     "INSERT INTO recipe_entries "
                     "(id, name, description, category, content, author_tenant_id, "
                     " is_public, clone_count, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
-                    (cloned.id, cloned.name, cloned.description, cloned.category,
-                     cloned.content, cloned.author_tenant_id,
-                     int(cloned.is_public), cloned.clone_count, cloned.created_at),
+                    (
+                        cloned.id,
+                        cloned.name,
+                        cloned.description,
+                        cloned.category,
+                        cloned.content,
+                        cloned.author_tenant_id,
+                        int(cloned.is_public),
+                        cloned.clone_count,
+                        cloned.created_at,
+                    ),
                 )
                 conn.execute(
                     "UPDATE recipe_entries SET clone_count = clone_count + 1 WHERE id = ?",

@@ -346,9 +346,7 @@ class PerformanceBenchmark:
         if main_avg < 200:
             print(f"\n{GREEN}✓ Target met:{RESET} Main CLI --help < 200ms ({main_avg:.1f}ms)")
         else:
-            print(
-                f"\n{RED}✗ Target missed:{RESET} Main CLI --help > 200ms ({main_avg:.1f}ms)"
-            )
+            print(f"\n{RED}✗ Target missed:{RESET} Main CLI --help > 200ms ({main_avg:.1f}ms)")
 
     def export_json(self, filepath: str):
         """Export results to JSON file."""

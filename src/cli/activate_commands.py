@@ -64,9 +64,7 @@ def activate(
     # Validate key format
     key = key.strip()
     if not key.startswith("mk_"):
-        console.print(
-            "[yellow]⚠️[/yellow] License key should start with 'mk_'\n"
-        )
+        console.print("[yellow]⚠️[/yellow] License key should start with 'mk_'\n")
 
     # Activate
     client = RaaSAuthClient()
@@ -119,7 +117,7 @@ def activate(
             console.print("[yellow]⚠️ Dashboard sync queued (will retry)[/yellow]\n")
 
         # Show dashboard link
-        dashboard_url = f"https://agencyos.network/dashboard/{result.tenant.tenant_id}"
+        dashboard_url = f"https://www.mekongmind.com/dashboard/{result.tenant.tenant_id}"
         console.print(
             Panel(
                 f"Gateway: {client.gateway_url}\n"
@@ -133,7 +131,7 @@ def activate(
         console.print(
             f"\n[dim]Next steps:[/dim]\n"
             f"  • View dashboard: [bold]{dashboard_url}[/bold]\n"
-            f"  • Run commands: [bold]mekong cook \"your goal\"[/bold]\n"
+            f'  • Run commands: [bold]mekong cook "your goal"[/bold]\n'
             f"  • Check status: [bold]mekong auth status[/bold]\n"
         )
     else:

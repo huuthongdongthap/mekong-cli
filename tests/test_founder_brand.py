@@ -46,9 +46,12 @@ class TestNameGeneration(unittest.TestCase):
 class TestPositioning(unittest.TestCase):
     def test_build_basic(self):
         pos = build_positioning(
-            "solo founders", "need automation",
-            "operating system", "80% automated",
-            "project management tools", "runs entire company",
+            "solo founders",
+            "need automation",
+            "operating system",
+            "80% automated",
+            "project management tools",
+            "runs entire company",
         )
         self.assertEqual(pos.target_customer, "solo founders")
 

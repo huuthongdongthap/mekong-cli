@@ -64,6 +64,7 @@ class HeartbeatScheduler:
         config_path = self.mekong_dir / "heartbeat-config.json"
         if config_path.exists():
             import json
+
             data = json.loads(config_path.read_text())
             self.config.enabled = data.get("enabled", True)
             self.config.check_interval = data.get("check_interval", 60)
@@ -208,15 +209,17 @@ class HeartbeatScheduler:
                 desc = task_match.group(1).strip().rstrip("*").strip()
                 cmd = task_match.group(2)
 
-                tasks.append(ScheduledTask(
-                    description=desc,
-                    command=cmd,
-                    interval_minutes=current_interval,
-                    cron_hour=current_hour,
-                    cron_weekday=current_weekday,
-                    workspace=workspace,
-                    tier=1 if cmd else 2,
-                ))
+                tasks.append(
+                    ScheduledTask(
+                        description=desc,
+                        command=cmd,
+                        interval_minutes=current_interval,
+                        cron_hour=current_hour,
+                        cron_weekday=current_weekday,
+                        workspace=workspace,
+                        tier=1 if cmd else 2,
+                    )
+                )
 
         return tasks
 
@@ -248,19 +251,29 @@ class HeartbeatScheduler:
         task.last_run = datetime.now()
 
         if task.tier == 1 and task.command:
-            # Tier 1: Direct command execution (shell=True needed for pipes/&&)
-            # Commands come from local .mekong/loops/*.json (trusted local config)
+            # SECURITY NOTE: shell=True is intentional here.
+            # Tier 1 commands originate exclusively from local .mekong/loops/*.json
+            # files controlled by the machine owner. They legitimately use shell
+            # features (pipes `|`, `&&` chaining). No user-supplied or network-
+            # derived strings reach this path. If that invariant ever changes,
+            # migrate to multi-step subprocess.PIPE chaining and remove shell=True.
             try:
                 result = subprocess.run(
-                    task.command, shell=True, capture_output=True, text=True,
-                    timeout=300, cwd=str(self.root),
+                    task.command,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    cwd=str(self.root),
                     env={**os.environ, "PYTHONPATH": str(self.root)},
                 )
                 if result.returncode == 0:
                     logger.info(f"[{task.workspace}] ✅ {task.description}")
                     return True
                 else:
-                    logger.warning(f"[{task.workspace}] ⚠️ {task.description}: exit {result.returncode}")
+                    logger.warning(
+                        f"[{task.workspace}] ⚠️ {task.description}: exit {result.returncode}"
+                    )
                     if self.config.alert_on_failure:
                         self._alert(task, result.stderr[:200])
                     return False
@@ -270,9 +283,10 @@ class HeartbeatScheduler:
         else:
             # Tier 2: LLM agent loop — call local LLM with tool use
             from .agent_loop import run_agent_sync
+
             # Determine model tier from loop config (default: fast)
             model_tier = "fast"
-            if hasattr(task, '_model_tier'):
+            if hasattr(task, "_model_tier"):
                 model_tier = task._model_tier  # type: ignore[attr-defined]
             logger.info(f"[{task.workspace}] Tier 2 → agent_loop (tier={model_tier})")
             try:
@@ -314,7 +328,9 @@ class HeartbeatScheduler:
         if loop_tasks:
             logger.info(f"Loaded {len(loop_tasks)} autonomous ops loops")
 
-        logger.info(f"Total: {len(self.tasks)} scheduled tasks across {len(set(t.workspace for t in self.tasks))} workspaces")
+        logger.info(
+            f"Total: {len(self.tasks)} scheduled tasks across {len(set(t.workspace for t in self.tasks))} workspaces"
+        )
 
         while True:
             now = datetime.now()
@@ -324,9 +340,11 @@ class HeartbeatScheduler:
                 logger.info(f"{len(due_tasks)} tasks due at {now.strftime('%H:%M')}")
                 # Limit concurrent execution
                 semaphore = asyncio.Semaphore(self.config.max_concurrent)
+
                 async def run_with_limit(task):
                     async with semaphore:
                         await self.execute_task(task)
+
                 await asyncio.gather(*[run_with_limit(t) for t in due_tasks])
 
             await asyncio.sleep(self.config.check_interval)
@@ -342,7 +360,9 @@ async def main():
         for ws_name, hb_path in scheduler.discover_heartbeats():
             ws_tasks = scheduler.parse_heartbeat(ws_name, hb_path)
             for t in ws_tasks:
-                logger.info(f"  [{ws_name}] {t.description} (every {t.interval_minutes}m, tier {t.tier})")
+                logger.info(
+                    f"  [{ws_name}] {t.description} (every {t.interval_minutes}m, tier {t.tier})"
+                )
 
         loop_tasks = scheduler.discover_loops()
         for t in loop_tasks:

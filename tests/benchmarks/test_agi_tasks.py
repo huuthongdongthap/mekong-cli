@@ -30,7 +30,14 @@ logger = logging.getLogger(__name__)
 # These are integration tests that call mekong cook via subprocess
 _has_llm = any(
     os.getenv(k)
-    for k in ("LLM_API_KEY", "OPENROUTER_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY")
+    for k in (
+        "LLM_API_KEY",
+        "OPENROUTER_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "GOOGLE_API_KEY",
+        "GEMINI_API_KEY",
+    )
 )
 # Also require explicit opt-in via RUN_BENCHMARKS=1
 _run_benchmarks = os.getenv("RUN_BENCHMARKS") == "1"
@@ -239,7 +246,7 @@ def run_single_benchmark(task: BenchmarkTask, max_retries: int = 2) -> Benchmark
             if not success:
                 retry_count += 1
                 logger.warning(f"Task {task.name} failed: {output[:200]}")
-                time.sleep(2 ** retry_count)  # Exponential backoff
+                time.sleep(2**retry_count)  # Exponential backoff
                 continue
 
             # Validate files created
@@ -250,7 +257,7 @@ def run_single_benchmark(task: BenchmarkTask, max_retries: int = 2) -> Benchmark
                 logger.warning(
                     f"Task {task.name}: expected {task.expected_files}, got {found_files}"
                 )
-                time.sleep(2 ** retry_count)
+                time.sleep(2**retry_count)
                 continue
 
             # Validate tests pass (if expected)
@@ -260,7 +267,7 @@ def run_single_benchmark(task: BenchmarkTask, max_retries: int = 2) -> Benchmark
                 if not tests_valid:
                     retry_count += 1
                     logger.warning(f"Task {task.name}: tests failed")
-                    time.sleep(2 ** retry_count)
+                    time.sleep(2**retry_count)
                     continue
 
             # Success

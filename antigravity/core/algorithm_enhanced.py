@@ -712,9 +712,11 @@ class MaxLevelAntigravityAlgorithm:
                     "variants": config.variants,
                     "traffic_split": config.traffic_split,
                     "duration_days": (time.time() - config.start_time) / (24 * 3600),
-                    "status": "active"
-                    if not config.end_time or time.time() < config.end_time
-                    else "completed",
+                    "status": (
+                        "active"
+                        if not config.end_time or time.time() < config.end_time
+                        else "completed"
+                    ),
                 }
                 for test_id, config in self.ab_tests.items()
             },

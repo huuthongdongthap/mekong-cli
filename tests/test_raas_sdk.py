@@ -1,4 +1,5 @@
 """Unit tests for Mekong RaaS SDK — /v1/ API client."""
+
 from __future__ import annotations
 
 import pytest
@@ -18,7 +19,6 @@ from src.raas.sdk import (
     _parse_task,
     _raise_for_status,
 )
-
 
 # ---------------------------------------------------------------------------
 # Dataclass construction
@@ -52,8 +52,13 @@ class TestDataclasses:
     def test_task_with_steps(self):
         step = StepDetail(order=0, title="build", passed=True, exit_code=0, summary="ok")
         t = Task(
-            task_id="t3", status="success", goal="build", tenant_id="ten1",
-            total_steps=1, completed_steps=1, steps=[step],
+            task_id="t3",
+            status="success",
+            goal="build",
+            tenant_id="ten1",
+            total_steps=1,
+            completed_steps=1,
+            steps=[step],
         )
         assert len(t.steps) == 1
         assert t.steps[0].title == "build"
@@ -109,10 +114,16 @@ class TestParseHelpers:
 
     def test_parse_task_full(self):
         raw = {
-            "task_id": "t2", "status": "success", "goal": "deploy",
-            "tenant_id": "ten", "total_steps": 2, "completed_steps": 2,
-            "failed_steps": 0, "success_rate": 1.0,
-            "errors": [], "warnings": ["slow"],
+            "task_id": "t2",
+            "status": "success",
+            "goal": "deploy",
+            "tenant_id": "ten",
+            "total_steps": 2,
+            "completed_steps": 2,
+            "failed_steps": 0,
+            "success_rate": 1.0,
+            "errors": [],
+            "warnings": ["slow"],
             "steps": [
                 {"order": 0, "title": "a", "passed": True, "exit_code": 0, "summary": "ok"},
                 {"order": 1, "title": "b", "passed": True, "exit_code": 0, "summary": "ok"},
@@ -195,7 +206,9 @@ class TestMekongClientMethods:
         resp = MagicMock()
         resp.is_success = True
         resp.json.return_value = {"task_id": "t1", "status": "pending", "tenant_id": "ten"}
-        mock_client_cls.return_value.__enter__ = MagicMock(return_value=MagicMock(request=MagicMock(return_value=resp)))
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(request=MagicMock(return_value=resp))
+        )
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         c = self._make_client()
@@ -208,10 +221,15 @@ class TestMekongClientMethods:
         resp = MagicMock()
         resp.is_success = True
         resp.json.return_value = {
-            "task_id": "t2", "status": "success", "goal": "build",
-            "tenant_id": "ten", "steps": [],
+            "task_id": "t2",
+            "status": "success",
+            "goal": "build",
+            "tenant_id": "ten",
+            "steps": [],
         }
-        mock_client_cls.return_value.__enter__ = MagicMock(return_value=MagicMock(request=MagicMock(return_value=resp)))
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(request=MagicMock(return_value=resp))
+        )
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         c = self._make_client()
@@ -227,7 +245,9 @@ class TestMekongClientMethods:
             {"name": "git", "description": "Git ops"},
             {"name": "shell", "description": "Shell runner"},
         ]
-        mock_client_cls.return_value.__enter__ = MagicMock(return_value=MagicMock(request=MagicMock(return_value=resp)))
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(request=MagicMock(return_value=resp))
+        )
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         c = self._make_client()
@@ -239,8 +259,15 @@ class TestMekongClientMethods:
     def test_run_agent(self, mock_client_cls):
         resp = MagicMock()
         resp.is_success = True
-        resp.json.return_value = {"agent": "git", "status": "success", "output": "done", "errors": []}
-        mock_client_cls.return_value.__enter__ = MagicMock(return_value=MagicMock(request=MagicMock(return_value=resp)))
+        resp.json.return_value = {
+            "agent": "git",
+            "status": "success",
+            "output": "done",
+            "errors": [],
+        }
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(request=MagicMock(return_value=resp))
+        )
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         c = self._make_client()
@@ -254,7 +281,9 @@ class TestMekongClientMethods:
         resp.is_success = False
         resp.status_code = 401
         resp.json.return_value = {"detail": "unauthorized"}
-        mock_client_cls.return_value.__enter__ = MagicMock(return_value=MagicMock(request=MagicMock(return_value=resp)))
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(request=MagicMock(return_value=resp))
+        )
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         c = self._make_client()

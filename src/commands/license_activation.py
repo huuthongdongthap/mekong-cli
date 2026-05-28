@@ -83,9 +83,7 @@ def activate_license(
 
     # Validate format
     if not license_key.startswith("mk_"):
-        console.print(
-            "[yellow]⚠ Warning:[/yellow] License key should start with 'mk_'\n"
-        )
+        console.print("[yellow]⚠ Warning:[/yellow] License key should start with 'mk_'\n")
 
     # Step 1: Validate with RaaS Gateway
     console.print("[dim]Step 1/3: Validating with RaaS Gateway...[/dim]")
@@ -95,8 +93,7 @@ def activate_license(
     if not result.valid:
         console.print(f"[bold red]✗ Validation failed: {result.error}[/bold red]\n")
         console.print(
-            "[dim]Get a license key from:[/dim]\n"
-            "  [cyan]https://raas.agencyos.network[/cyan]\n"
+            "[dim]Get a license key from:[/dim]\n" "  [cyan]https://api.cashclaw.cc[/cyan]\n"
         )
         raise SystemExit(1)
 
@@ -110,9 +107,13 @@ def activate_license(
         license_key=license_key,
         tenant_id=result.tenant_id,
         tier=result.tier,
-        features=result.features if hasattr(result, 'features') else [],
-        rate_limit=result.rate_limit if hasattr(result, 'rate_limit') else 60,
-        expires_at=result.expires_at.isoformat() if hasattr(result, 'expires_at') and result.expires_at else None,
+        features=result.features if hasattr(result, "features") else [],
+        rate_limit=result.rate_limit if hasattr(result, "rate_limit") else 60,
+        expires_at=(
+            result.expires_at.isoformat()
+            if hasattr(result, "expires_at") and result.expires_at
+            else None
+        ),
     )
 
     if not license_manager.save_license(license_data):
@@ -178,6 +179,7 @@ def license_status(
 
     if json_output:
         import json
+
         print(json.dumps(license_data.to_dict(), indent=2, default=str))
         return
 
@@ -304,7 +306,7 @@ def _display_license_summary(license_data, verbose: bool = False) -> None:
     if verbose:
         if license_data.features:
             console.print(f"\n[dim]Features: {', '.join(license_data.features)}[/dim]")
-        console.print("[dim]Gateway: https://raas.agencyos.network[/dim]\n")
+        console.print("[dim]Gateway: https://api.cashclaw.cc[/dim]\n")
 
 
 # Export for registration in main.py

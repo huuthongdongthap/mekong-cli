@@ -37,10 +37,10 @@ from src.core.telemetry_hooks import (
     emit_error_event,
 )
 
-
 # =============================================================================
 # Machine Fingerprint Tests
 # =============================================================================
+
 
 class TestMachineFingerprint:
     """Test MachineFingerprint dataclass."""
@@ -123,9 +123,9 @@ class TestFingerprintGenerator:
         gen = FingerprintGenerator()
         assert gen.platform in ("Darwin", "Linux", "Windows")
 
-    @patch('platform.system')
-    @patch('platform.version')
-    @patch('platform.machine')
+    @patch("platform.system")
+    @patch("platform.version")
+    @patch("platform.machine")
     def test_generate(self, mock_machine, mock_version, mock_system):
         """Test generate fingerprint."""
         mock_system.return_value = "TestOS"
@@ -154,6 +154,7 @@ class TestFingerprintGenerator:
 # =============================================================================
 # JWT Refresh Client Tests
 # =============================================================================
+
 
 class TestTokenCache:
     """Test TokenCache dataclass."""
@@ -221,8 +222,8 @@ class TestJwtRefreshClient:
         assert client is not None
 
     @patch.dict(os.environ, {"MK_API_KEY": "mk_test_key"})
-    @patch.object(JwtRefreshClient, '_get_auth_headers', return_value={})
-    @patch.object(JwtRefreshClient, '_cache_tokens')
+    @patch.object(JwtRefreshClient, "_get_auth_headers", return_value={})
+    @patch.object(JwtRefreshClient, "_cache_tokens")
     def test_activate_success(self, mock_cache, mock_headers):
         """Test successful activation."""
         mock_cache.return_value = RefreshResult(
@@ -231,14 +232,14 @@ class TestJwtRefreshClient:
             refresh_token="refresh_token",
         )
 
-        with patch('src.core.gateway_client.GatewayClient.post') as mock_post:
+        with patch("src.core.gateway_client.GatewayClient.post") as mock_post:
             mock_post.return_value = MagicMock(
                 status_code=200,
                 data={
                     "access_token": "access_token",
                     "refresh_token": "refresh_token",
                     "expires_in": 3600,
-                }
+                },
             )
 
             client = JwtRefreshClient()
@@ -247,7 +248,7 @@ class TestJwtRefreshClient:
             assert result.status == RefreshStatus.SUCCESS
             assert result.access_token == "access_token"
 
-    @patch.object(JwtRefreshClient, '_get_api_key', return_value=None)
+    @patch.object(JwtRefreshClient, "_get_api_key", return_value=None)
     def test_activate_no_api_key(self, mock_get_key):
         """Test activation without API key."""
         client = JwtRefreshClient()
@@ -256,8 +257,8 @@ class TestJwtRefreshClient:
         assert result.status == RefreshStatus.FAILED
         assert "No API key" in result.error
 
-    @patch.object(JwtRefreshClient, '_get_auth_headers', return_value={})
-    @patch.object(JwtRefreshClient, 'activate')
+    @patch.object(JwtRefreshClient, "_get_auth_headers", return_value={})
+    @patch.object(JwtRefreshClient, "activate")
     def test_refresh_no_refresh_token(self, mock_activate, mock_headers):
         """Test refresh when no refresh token - should activate."""
         mock_activate.return_value = RefreshResult(
@@ -300,6 +301,7 @@ class TestJwtRefreshClient:
 # =============================================================================
 # Telemetry Hooks Tests
 # =============================================================================
+
 
 class TestTelemetryEvent:
     """Test TelemetryEvent dataclass."""
@@ -370,7 +372,7 @@ class TestTelemetryHooks:
         result = hooks.emit_event(event_type="cli:command")
         assert result is None
 
-    @patch.object(TelemetryHooks, '_send_event', return_value=True)
+    @patch.object(TelemetryHooks, "_send_event", return_value=True)
     def test_emit_event_success(self, mock_send):
         """Test successful event emission."""
         hooks = TelemetryHooks()
@@ -430,21 +432,21 @@ class TestGlobalTelemetryFunctions:
         # Will be None due to opt-out
         assert result is None
 
-    @patch.object(TelemetryHooks, 'is_opted_out', return_value=False)
-    @patch.object(TelemetryHooks, 'emit_event', return_value="event-id")
+    @patch.object(TelemetryHooks, "is_opted_out", return_value=False)
+    @patch.object(TelemetryHooks, "emit_event", return_value="event-id")
     def test_emit_telemetry_event_success(self, mock_emit, mock_opted_out):
         """Test emit_telemetry_event success."""
         result = emit_telemetry_event(event_type="test")
         assert result == "event-id"
 
-    @patch.object(TelemetryHooks, 'command_hook')
+    @patch.object(TelemetryHooks, "command_hook")
     def test_emit_command_event(self, mock_command):
         """Test emit_command_event function."""
         mock_command.return_value = "cmd-event-id"
         result = emit_command_event(command_name="test", status=EventStatus.SUCCESS)
         assert result == "cmd-event-id"
 
-    @patch.object(TelemetryHooks, 'error_hook')
+    @patch.object(TelemetryHooks, "error_hook")
     def test_emit_error_event(self, mock_error):
         """Test emit_error_event function."""
         mock_error.return_value = "error-event-id"

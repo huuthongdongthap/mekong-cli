@@ -157,6 +157,7 @@ def rate_limit(
         >>> async def write_data(request: Request):
         ...     pass
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs) -> Response:
@@ -195,9 +196,7 @@ def rate_limit(
                     # Override headers with custom limit
                     headers["X-RateLimit-Limit"] = str(req_limit)
                 except ValueError as e:
-                    raise ValueError(
-                        f"Invalid rate_limit decorator config: {e}"
-                    )
+                    raise ValueError(f"Invalid rate_limit decorator config: {e}")
             else:
                 # Default to API_DEFAULT preset
                 allowed, headers = await limiter.check_limit(
@@ -229,6 +228,7 @@ def rate_limit(
             return response
 
         return wrapper
+
     return decorator
 
 

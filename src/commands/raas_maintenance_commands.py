@@ -1,7 +1,7 @@
 """
 RaaS Maintenance CLI Command - Phase 6
 
-Interfaces with RaaS Gateway at raas.agencyos.network to perform maintenance operations.
+Interfaces with RaaS Gateway at api.cashclaw.cc to perform maintenance operations.
 
 Commands:
     mekong raas-maintenance cache-clear       - Clear cached rate limits and entitlements
@@ -84,7 +84,9 @@ def cache_clear(
     if not session.authenticated:
         api_key = os.getenv("RAAS_LICENSE_KEY")
         if not api_key:
-            result["error"] = "Not authenticated. Set RAAS_LICENSE_KEY or run 'mekong raas-auth login'"
+            result["error"] = (
+                "Not authenticated. Set RAAS_LICENSE_KEY or run 'mekong raas-auth login'"
+            )
             _output_result(result, json_output)
             return
 
@@ -217,7 +219,7 @@ def health_check(
     result = {
         "command": "health",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "gateway_url": "https://raas.agencyos.network",
+        "gateway_url": "https://api.cashclaw.cc",
         "success": False,
         "status": "unknown",
         "checks": {},
@@ -325,7 +327,7 @@ def deep_health_check(
     🔍 Deep health check of entire RaaS infrastructure.
 
     Performs comprehensive diagnostic check:
-    1. Validate connectivity to RaaS Gateway (raas.agencyos.network)
+    1. Validate connectivity to RaaS Gateway (api.cashclaw.cc)
     2. Verify JWT + mk_ API key authentication
     3. Check license key status via License Management
     4. Confirm Stripe/Polar webhook delivery
@@ -345,7 +347,7 @@ def deep_health_check(
     result = {
         "command": "deep-check",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "gateway_url": "https://raas.agencyos.network",
+        "gateway_url": "https://api.cashclaw.cc",
         "success": False,
         "exit_code": 0,
         "checks": {
@@ -432,7 +434,9 @@ def deep_health_check(
             }
         else:
             result["checks"]["license_status"]["status"] = "fail"
-            result["checks"]["license_status"]["error"] = entitlements.get("error", "Invalid license")
+            result["checks"]["license_status"]["error"] = entitlements.get(
+                "error", "Invalid license"
+            )
             all_passed = False
     except Exception as e:
         result["checks"]["license_status"]["status"] = "fail"
@@ -489,7 +493,9 @@ def deep_health_check(
             }
         else:
             result["checks"]["analytics_pipeline"]["status"] = "warn"
-            result["checks"]["analytics_pipeline"]["error"] = analytics_status.get("error", "Analytics not configured")
+            result["checks"]["analytics_pipeline"]["error"] = analytics_status.get(
+                "error", "Analytics not configured"
+            )
     except Exception as e:
         result["checks"]["analytics_pipeline"]["status"] = "fail"
         result["checks"]["analytics_pipeline"]["error"] = str(e)
@@ -513,10 +519,12 @@ def deep_health_check(
     # Collect all errors
     for check_name, check_data in result["checks"].items():
         if check_data.get("error"):
-            result["errors"].append({
-                "check": check_name,
-                "error": check_data["error"],
-            })
+            result["errors"].append(
+                {
+                    "check": check_name,
+                    "error": check_data["error"],
+                }
+            )
 
     # Output
     output_text = json.dumps(result, indent=2, default=str)
@@ -542,18 +550,22 @@ def _output_result(result: dict, as_json: bool) -> None:
         print(json.dumps(result, indent=2, default=str))
     else:
         if result.get("success"):
-            console.print(Panel(
-                f"[green]✓ {result.get('message', 'Success')}[/green]\n"
-                f"[dim]Command: {result.get('command')}[/dim]",
-                title="✅ Success",
-                border_style="green",
-            ))
+            console.print(
+                Panel(
+                    f"[green]✓ {result.get('message', 'Success')}[/green]\n"
+                    f"[dim]Command: {result.get('command')}[/dim]",
+                    title="✅ Success",
+                    border_style="green",
+                )
+            )
         else:
-            console.print(Panel(
-                f"[red]✗ {result.get('error', 'Failed')}[/red]",
-                title="❌ Error",
-                border_style="red",
-            ))
+            console.print(
+                Panel(
+                    f"[red]✗ {result.get('error', 'Failed')}[/red]",
+                    title="❌ Error",
+                    border_style="red",
+                )
+            )
 
 
 def _display_health_table(health_status: dict, verbose: bool) -> None:
@@ -561,7 +573,9 @@ def _display_health_table(health_status: dict, verbose: bool) -> None:
     status = health_status.get("status", "unknown")
     status_color = "green" if status == "healthy" else "yellow" if status == "degraded" else "red"
 
-    console.print(f"\n[bold {status_color}]RaaS Gateway Health: {status.upper()}[/{status_color}]\n")
+    console.print(
+        f"\n[bold {status_color}]RaaS Gateway Health: {status.upper()}[/{status_color}]\n"
+    )
 
     table = Table(show_header=True, header_style="bold cyan")
     table.add_column("Check", style="dim")
@@ -617,7 +631,9 @@ def _display_status_table(result: dict) -> None:
         console.print("\n[bold]Rate Limit Circuit Breakers:[/bold]")
         for gateway, info in rate_limits.items():
             state = info.get("state", "unknown")
-            state_color = {"closed": "green", "half-open": "yellow", "open": "red"}.get(state, "white")
+            state_color = {"closed": "green", "half-open": "yellow", "open": "red"}.get(
+                state, "white"
+            )
             console.print(f"  {gateway}: [{state_color}]{state}[/{state_color}]")
 
     console.print()
@@ -630,14 +646,16 @@ def _display_deep_check_summary(result: dict) -> None:
     # Overall status
     status_color = "green" if result["success"] else "red"
     status_icon = "✅" if result["success"] else "❌"
-    console.print(Panel(
-        f"[bold {status_color}]{status_icon} Overall Health: {result['summary']['health_score']}[/bold {status_color}]\n"
-        f"Passed: [green]{result['summary']['passed']}[/green] | "
-        f"Failed: [red]{result['summary']['failed']}[/red] | "
-        f"Warnings: [yellow]{result['summary']['warned']}[/yellow]",
-        title="Deep Check Summary",
-        border_style=status_color,
-    ))
+    console.print(
+        Panel(
+            f"[bold {status_color}]{status_icon} Overall Health: {result['summary']['health_score']}[/bold {status_color}]\n"
+            f"Passed: [green]{result['summary']['passed']}[/green] | "
+            f"Failed: [red]{result['summary']['failed']}[/red] | "
+            f"Warnings: [yellow]{result['summary']['warned']}[/yellow]",
+            title="Deep Check Summary",
+            border_style=status_color,
+        )
+    )
     console.print()
 
     # Detailed checks table
@@ -656,7 +674,9 @@ def _display_deep_check_summary(result: dict) -> None:
     for check_name, check_data in result["checks"].items():
         status = check_data.get("status", "unknown")
         icon = check_icons.get(status, "❓")
-        status_color = {"pass": "green", "fail": "red", "warn": "yellow", "pending": "dim"}.get(status, "white")
+        status_color = {"pass": "green", "fail": "red", "warn": "yellow", "pending": "dim"}.get(
+            status, "white"
+        )
 
         details = []
         if check_data.get("details"):
@@ -693,6 +713,7 @@ def _clear_rate_limit_cache(self) -> bool:
     """Clear rate limit cache."""
     try:
         from src.core.kv_store_client import get_kv_client
+
         kv_client = get_kv_client()
         kv_client.clear_rate_limit_state()
         return True
@@ -737,7 +758,7 @@ def _reset_rate_limit(self, org_id: str, force: bool = False) -> dict:
 
 # Add methods to SyncClient class
 
-if not hasattr(SyncClient, '_clear_rate_limit_cache'):
+if not hasattr(SyncClient, "_clear_rate_limit_cache"):
     SyncClient._clear_rate_limit_cache = _clear_rate_limit_cache
     SyncClient._clear_entitlements_cache = _clear_entitlements_cache
     SyncClient._reset_rate_limit = _reset_rate_limit

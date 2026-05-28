@@ -45,18 +45,48 @@ class CrashReport:
 
 # Maps exception type name → (severity, recovery suggestion)
 _ERROR_PATTERNS: dict[str, tuple] = {
-    "KeyboardInterrupt": (CrashSeverity.LOW, "User interrupted. Safe to restart with the same command."),
-    "FileNotFoundError": (CrashSeverity.MEDIUM, "Required file missing. Check paths and re-run `mekong init`."),
-    "PermissionError": (CrashSeverity.MEDIUM, "Insufficient permissions. Check file ownership or run with elevated privileges."),
-    "ValueError": (CrashSeverity.MEDIUM, "Invalid input. Review arguments and configuration values."),
-    "KeyError": (CrashSeverity.MEDIUM, "Missing key in data structure. Check config or recipe file format."),
-    "ConnectionError": (CrashSeverity.HIGH, "Network failed. Verify internet access and LLM_BASE_URL configuration."),
-    "TimeoutError": (CrashSeverity.HIGH, "Operation timed out. Check network stability and increase timeout limits."),
-    "MemoryError": (CrashSeverity.CRITICAL, "Out of memory. Free system resources or reduce batch size."),
-    "RecursionError": (CrashSeverity.CRITICAL, "Infinite recursion. Check for circular dependencies in recipe definitions."),
+    "KeyboardInterrupt": (
+        CrashSeverity.LOW,
+        "User interrupted. Safe to restart with the same command.",
+    ),
+    "FileNotFoundError": (
+        CrashSeverity.MEDIUM,
+        "Required file missing. Check paths and re-run `mekong init`.",
+    ),
+    "PermissionError": (
+        CrashSeverity.MEDIUM,
+        "Insufficient permissions. Check file ownership or run with elevated privileges.",
+    ),
+    "ValueError": (
+        CrashSeverity.MEDIUM,
+        "Invalid input. Review arguments and configuration values.",
+    ),
+    "KeyError": (
+        CrashSeverity.MEDIUM,
+        "Missing key in data structure. Check config or recipe file format.",
+    ),
+    "ConnectionError": (
+        CrashSeverity.HIGH,
+        "Network failed. Verify internet access and LLM_BASE_URL configuration.",
+    ),
+    "TimeoutError": (
+        CrashSeverity.HIGH,
+        "Operation timed out. Check network stability and increase timeout limits.",
+    ),
+    "MemoryError": (
+        CrashSeverity.CRITICAL,
+        "Out of memory. Free system resources or reduce batch size.",
+    ),
+    "RecursionError": (
+        CrashSeverity.CRITICAL,
+        "Infinite recursion. Check for circular dependencies in recipe definitions.",
+    ),
 }
 
-_DEFAULT = (CrashSeverity.CRITICAL, "Unknown error. Check .mekong/crashes/ and open a GitHub issue.")
+_DEFAULT = (
+    CrashSeverity.CRITICAL,
+    "Unknown error. Check .mekong/crashes/ and open a GitHub issue.",
+)
 
 
 def _system_info() -> dict[str, str]:
@@ -111,7 +141,9 @@ class CrashReporter:
         crash_dir = Path(directory)
         if not crash_dir.exists():
             return []
-        files = sorted(crash_dir.glob("crash-*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        files = sorted(
+            crash_dir.glob("crash-*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+        )
         return files[:limit]
 
     def suggest_recovery(self, report: CrashReport) -> str:

@@ -47,8 +47,10 @@ class QualityReviewResult:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "score": self.score, "issues": self.issues,
-            "suggestions": self.suggestions, "passed": self.passed,
+            "score": self.score,
+            "issues": self.issues,
+            "suggestions": self.suggestions,
+            "passed": self.passed,
         }
 
 
@@ -63,7 +65,7 @@ def _parse_status(output: str) -> tuple[str, str]:
     if not match:
         return "DONE", ""  # Default to DONE if no status tag (backward compat)
     status = match.group(1)
-    content_after = output[match.end():].strip()
+    content_after = output[match.end() :].strip()
     return status, content_after
 
 

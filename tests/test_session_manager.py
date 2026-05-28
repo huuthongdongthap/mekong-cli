@@ -3,6 +3,7 @@
 Tests JWT token creation/validation, session management, cookie helpers,
 expiry handling, and encoding/decoding logic.
 """
+
 from __future__ import annotations
 
 import os
@@ -28,7 +29,7 @@ class TestJWTClaimsCreation:
 
     def test_claim_contains_required_fields(self):
         """JWT claims should contain sub, email, role, type, iat, exp, jti."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             claims = manager._create_jwt_claims(
@@ -48,7 +49,7 @@ class TestJWTClaimsCreation:
 
     def test_access_token_has_correct_expiration(self):
         """Access token should expire in 30 minutes by default."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             claims = manager._create_jwt_claims(
@@ -65,7 +66,7 @@ class TestJWTClaimsCreation:
 
     def test_refresh_token_has_correct_expiration(self):
         """Refresh token should expire in 7 days by default."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             claims = manager._create_jwt_claims(
@@ -82,7 +83,7 @@ class TestJWTClaimsCreation:
 
     def test_claim_contains_unique_jti(self):
         """Each claim should have a unique JWT ID."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             claims1 = manager._create_jwt_claims(
@@ -107,8 +108,8 @@ class TestAccessTokenCreation:
 
     def test_create_access_token_returns_valid_jwt(self):
         """Access token should be a valid JWT string."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 # Create a mock user
@@ -124,8 +125,8 @@ class TestAccessTokenCreation:
 
     def test_create_access_token_contains_correct_payload(self):
         """Token payload should contain user info and role."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -136,7 +137,8 @@ class TestAccessTokenCreation:
 
                 # Decode and verify payload
                 import jwt
-                payload = jwt.decode(token, 'test-secret', algorithms=['HS256'])
+
+                payload = jwt.decode(token, "test-secret", algorithms=["HS256"])
 
                 assert payload["sub"] == str(TEST_USER_ID)
                 assert payload["email"] == TEST_USER_EMAIL
@@ -145,8 +147,8 @@ class TestAccessTokenCreation:
 
     def test_create_access_token_with_default_role(self):
         """Should use 'member' as default role when not specified."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -156,7 +158,8 @@ class TestAccessTokenCreation:
                 token = manager.create_access_token(user)
 
                 import jwt
-                payload = jwt.decode(token, 'test-secret', algorithms=['HS256'])
+
+                payload = jwt.decode(token, "test-secret", algorithms=["HS256"])
 
                 assert payload["role"] == "member"
 
@@ -166,8 +169,8 @@ class TestRefreshTokenCreation:
 
     def test_create_refresh_token_returns_valid_jwt(self):
         """Refresh token should be a valid JWT string."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -181,8 +184,8 @@ class TestRefreshTokenCreation:
 
     def test_create_refresh_token_has_refresh_type(self):
         """Refresh token payload should have type='refresh'."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -192,7 +195,8 @@ class TestRefreshTokenCreation:
                 token = manager.create_refresh_token(user)
 
                 import jwt
-                payload = jwt.decode(token, 'test-secret', algorithms=['HS256'])
+
+                payload = jwt.decode(token, "test-secret", algorithms=["HS256"])
 
                 assert payload["type"] == "refresh"
 
@@ -202,8 +206,8 @@ class TestTokenDecoding:
 
     def test_decode_valid_token_returns_true_and_payload(self):
         """Valid token should return (True, payload, None)."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -221,12 +225,13 @@ class TestTokenDecoding:
 
     def test_decode_expired_token_returns_false(self):
         """Expired token should return (False, None, error)."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 # Create an expired token manually
                 import jwt
+
                 expired_payload = {
                     "sub": str(TEST_USER_ID),
                     "email": TEST_USER_EMAIL,
@@ -236,11 +241,7 @@ class TestTokenDecoding:
                     "exp": datetime.now(timezone.utc) - timedelta(hours=1),
                     "jti": "expired-jti",
                 }
-                expired_token = jwt.encode(
-                    expired_payload,
-                    'test-secret',
-                    algorithm='HS256'
-                )
+                expired_token = jwt.encode(expired_payload, "test-secret", algorithm="HS256")
 
                 is_valid, payload, error = manager.decode_token(expired_token)
 
@@ -254,7 +255,9 @@ class TestTokenDecoding:
         manager = SessionManager()
 
         # Use an invalid token directly
-        is_valid, payload, error = manager.decode_token("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.invalid_signature")
+        is_valid, payload, error = manager.decode_token(
+            "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.invalid_signature"
+        )
 
         assert is_valid is False
         assert payload is None
@@ -275,6 +278,7 @@ class TestTokenDecoding:
 
         # Create token with other fields but no sub
         import time
+
         payload = {
             "email": TEST_USER_EMAIL,
             "role": "member",
@@ -296,7 +300,7 @@ class TestCreateSession:
 
     def test_create_session_calls_user_repo(self):
         """Should call user repository to create session."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             # Mock user
@@ -313,6 +317,7 @@ class TestCreateSession:
 
             # Create session
             import asyncio
+
             result = asyncio.run(manager.create_session(user, role="admin"))
 
             # Verify result structure
@@ -330,8 +335,8 @@ class TestValidateSession:
 
     def test_validate_valid_session_returns_user(self):
         """Valid session token should return user."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -346,6 +351,7 @@ class TestValidateSession:
                 manager._user_repo = mock_repo
 
                 import asyncio
+
                 result = asyncio.run(manager.validate_session(token))
 
                 assert result == user
@@ -356,6 +362,7 @@ class TestValidateSession:
         manager = SessionManager()
 
         import asyncio
+
         result = asyncio.run(manager.validate_session("invalid.token.here"))
 
         assert result is None
@@ -365,8 +372,10 @@ class TestValidateSession:
         manager = SessionManager()
 
         import asyncio
+
         # Create a real expired token
         import jwt
+
         expired_payload = {
             "sub": str(TEST_USER_ID),
             "email": TEST_USER_EMAIL,
@@ -376,7 +385,7 @@ class TestValidateSession:
             "exp": datetime.now(timezone.utc) - timedelta(hours=1),
             "jti": "expired",
         }
-        expired_token = jwt.encode(expired_payload, 'test-secret', algorithm='HS256')
+        expired_token = jwt.encode(expired_payload, "test-secret", algorithm="HS256")
 
         result = asyncio.run(manager.validate_session(expired_token))
 
@@ -384,8 +393,8 @@ class TestValidateSession:
 
     def test_validate_missing_user_returns_none(self):
         """Token for non-existent user should return None."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -400,6 +409,7 @@ class TestValidateSession:
                 manager._user_repo = mock_repo
 
                 import asyncio
+
                 result = asyncio.run(manager.validate_session(token))
 
                 assert result is None
@@ -420,6 +430,7 @@ class TestRevokeSession:
         manager._user_repo = mock_repo
 
         import asyncio
+
         result = asyncio.run(manager.revoke_session(session_id))
 
         assert result is True
@@ -437,6 +448,7 @@ class TestRevokeSession:
         manager._user_repo = mock_repo
 
         import asyncio
+
         result = asyncio.run(manager.revoke_session(session_id))
 
         assert result is False
@@ -457,6 +469,7 @@ class TestRevokeAllSessions:
         manager._user_repo = mock_repo
 
         import asyncio
+
         result = asyncio.run(manager.revoke_all_user_sessions(user_id))
 
         assert result == 3
@@ -468,8 +481,8 @@ class TestRefreshSession:
 
     def test_refresh_valid_refresh_token_returns_new_tokens(self):
         """Valid refresh token should return new access and refresh tokens."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 # Create a refresh token
@@ -486,6 +499,7 @@ class TestRefreshSession:
                 manager._user_repo = mock_repo
 
                 import asyncio
+
                 result = asyncio.run(manager.refresh_session(refresh_token))
 
                 assert result is not None
@@ -496,8 +510,8 @@ class TestRefreshSession:
 
     def test_refresh_access_token_returns_none(self):
         """Access token should not be refreshable."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -508,6 +522,7 @@ class TestRefreshSession:
                 access_token = manager.create_access_token(user)
 
                 import asyncio
+
                 result = asyncio.run(manager.refresh_session(access_token))
 
                 assert result is None
@@ -517,6 +532,7 @@ class TestRefreshSession:
         manager = SessionManager()
 
         import jwt
+
         expired_payload = {
             "sub": str(TEST_USER_ID),
             "email": TEST_USER_EMAIL,
@@ -525,9 +541,10 @@ class TestRefreshSession:
             "exp": datetime.now(timezone.utc) - timedelta(days=3),
             "jti": "expired-refresh",
         }
-        expired_token = jwt.encode(expired_payload, 'test-secret', algorithm='HS256')
+        expired_token = jwt.encode(expired_payload, "test-secret", algorithm="HS256")
 
         import asyncio
+
         result = asyncio.run(manager.refresh_session(expired_token))
 
         assert result is None
@@ -558,7 +575,7 @@ class TestCookieHelpers:
 
     def test_create_session_cookie_secure_in_production(self):
         """Cookie should be secure in production environment."""
-        with patch.dict('os.environ', {'AUTH_ENVIRONMENT': 'production'}):
+        with patch.dict("os.environ", {"AUTH_ENVIRONMENT": "production"}):
             manager = SessionManager()
 
             cookie_params = manager.create_session_cookie("token")
@@ -611,12 +628,14 @@ class TestCookieHelpers:
 
         # Build cookie header for the session_token cookie
         cookie_header = b"session_token=test-token-123"
-        request = Request(scope={
-            "type": "http",
-            "method": "GET",
-            "path": "/",
-            "headers": [(b"cookie", cookie_header)],
-        })
+        request = Request(
+            scope={
+                "type": "http",
+                "method": "GET",
+                "path": "/",
+                "headers": [(b"cookie", cookie_header)],
+            }
+        )
 
         token = manager.get_session_cookie(request)
 
@@ -628,12 +647,14 @@ class TestCookieHelpers:
 
         manager = SessionManager()
 
-        request = Request(scope={
-            "type": "http",
-            "method": "GET",
-            "path": "/",
-            "headers": [],
-        })
+        request = Request(
+            scope={
+                "type": "http",
+                "method": "GET",
+                "path": "/",
+                "headers": [],
+            }
+        )
 
         token = manager.get_session_cookie(request)
 
@@ -700,8 +721,8 @@ class TestSecurity:
 
     def test_token_signature_algorithm_is_hs256(self):
         """Default algorithm should be HS256 for HMAC."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -714,7 +735,7 @@ class TestSecurity:
                 import json
 
                 # Get the header from the token
-                header_b64 = token.split('.')[0]
+                header_b64 = token.split(".")[0]
                 header_json = base64url_decode(header_b64)
                 header = json.loads(header_json)
 
@@ -724,10 +745,11 @@ class TestSecurity:
 def base64url_decode(data: str) -> bytes:
     """Decode base64url encoded data."""
     import base64
+
     # Add padding if necessary
     padding = 4 - len(data) % 4
     if padding != 4:
-        data += '=' * padding
+        data += "=" * padding
     return base64.urlsafe_b64decode(data)
 
 
@@ -745,22 +767,26 @@ class TestEnvironmentVariables:
 
             # The JWT_SECRET is set at module import time
             import src.auth.session_manager as session_module
-            assert hasattr(session_module, 'JWT_SECRET')
+
+            assert hasattr(session_module, "JWT_SECRET")
 
     def test_cookie_name_is_configurable(self):
         """Should use configurable cookie name."""
         import src.auth.session_manager as session_module
+
         assert session_module.COOKIE_NAME == "session_token"
 
     def test_cookie_secure_flag(self):
         """Should configure secure flag based on environment."""
         import src.auth.session_manager as session_module
+
         # Default is not secure (dev mode)
         assert session_module.COOKIE_SECURE is False
 
     def test_cookie_httponly_flag(self):
         """Should always set httponly for security."""
         import src.auth.session_manager as session_module
+
         assert session_module.COOKIE_HTTPONLY is True
 
 
@@ -769,8 +795,8 @@ class TestTokenIntegrity:
 
     def test_token_cannot_be_modified(self):
         """Token signature should prevent modification."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
-            with patch('src.auth.session_manager.JWT_ALGORITHM', 'HS256'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
+            with patch("src.auth.session_manager.JWT_ALGORITHM", "HS256"):
                 manager = SessionManager()
 
                 user = MagicMock()
@@ -780,24 +806,25 @@ class TestTokenIntegrity:
                 token = manager.create_access_token(user)
 
                 # Try to tamper with the token
-                parts = token.split('.')
+                parts = token.split(".")
                 payload_b64 = parts[1]
 
                 # Decode payload
                 import base64
                 import json
+
                 padding = 4 - len(payload_b64) % 4
                 if padding != 4:
-                    payload_b64 += '=' * padding
+                    payload_b64 += "=" * padding
                 payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
                 # Modify payload
                 payload["role"] = "owner"
 
                 # Re-encode
-                new_payload_b64 = base64.urlsafe_b64encode(
-                    json.dumps(payload).encode()
-                ).rstrip(b'=').decode()
+                new_payload_b64 = (
+                    base64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b"=").decode()
+                )
 
                 tampered_token = f"{parts[0]}.{new_payload_b64}.{parts[2]}"
 
@@ -813,7 +840,7 @@ class TestTokenExpiryHandling:
 
     def test_token_exactly_at_expiration(self):
         """Token at exactly expiration time should be invalid."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             import jwt
@@ -830,7 +857,7 @@ class TestTokenExpiryHandling:
                 "exp": now,
                 "jti": "expiring",
             }
-            expiring_token = jwt.encode(expiring_payload, 'test-secret', algorithm='HS256')
+            expiring_token = jwt.encode(expiring_payload, "test-secret", algorithm="HS256")
 
             is_valid, payload, error = manager.decode_token(expiring_token)
 
@@ -839,7 +866,7 @@ class TestTokenExpiryHandling:
 
     def test_token_just_before_expiration(self):
         """Token just before expiration should be valid."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             import jwt
@@ -856,7 +883,7 @@ class TestTokenExpiryHandling:
                 "exp": now + timedelta(seconds=1),
                 "jti": "not-yet-expired",
             }
-            expiring_token = jwt.encode(expiring_payload, 'test-secret', algorithm='HS256')
+            expiring_token = jwt.encode(expiring_payload, "test-secret", algorithm="HS256")
 
             is_valid, payload, error = manager.decode_token(expiring_token)
 
@@ -869,7 +896,7 @@ class TestRoleClaims:
 
     def test_different_roles_in_claims(self):
         """Should support all role values."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             rol = "owner"
@@ -880,13 +907,14 @@ class TestRoleClaims:
             token = manager.create_access_token(user, role=rol)
 
             import jwt
-            payload = jwt.decode(token, 'test-secret', algorithms=['HS256'])
+
+            payload = jwt.decode(token, "test-secret", algorithms=["HS256"])
 
             assert payload["role"] == rol
 
     def test_role_no_spoofing(self):
         """Role in token cannot be arbitrarily set."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             import jwt
 
             user = MagicMock()
@@ -898,7 +926,7 @@ class TestRoleClaims:
             token = manager.create_access_token(user, role="member")
 
             # Decode to verify
-            payload = jwt.decode(token, 'test-secret', algorithms=['HS256'])
+            payload = jwt.decode(token, "test-secret", algorithms=["HS256"])
             assert payload["role"] == "member"
 
 
@@ -907,7 +935,7 @@ class TestJtiUniqueness:
 
     def test_jti_is_unique_per_token(self):
         """Each token should have a unique jti."""
-        with patch('src.auth.session_manager.JWT_SECRET', 'test-secret'):
+        with patch("src.auth.session_manager.JWT_SECRET", "test-secret"):
             manager = SessionManager()
 
             user = MagicMock()
@@ -918,7 +946,8 @@ class TestJtiUniqueness:
             for _ in range(10):
                 token = manager.create_access_token(user)
                 import jwt
-                payload = jwt.decode(token, 'test-secret', algorithms=['HS256'])
+
+                payload = jwt.decode(token, "test-secret", algorithms=["HS256"])
                 jti_list.append(payload["jti"])
 
             # All jti values should be unique

@@ -1,4 +1,5 @@
 """Tests for CreditRateLimiter — sliding window fair-use rate limiting."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -12,7 +13,6 @@ from src.raas.credit_rate_limiter import (
     CreditRateLimiter,
     RateLimitStatus,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -2,6 +2,7 @@
 
 Verifies atomicity under concurrent access without overdraft or ID collisions.
 """
+
 from __future__ import annotations
 
 import threading
@@ -12,7 +13,6 @@ import pytest
 from src.raas.credits import CreditStore
 from src.raas.mission_models import MissionComplexity
 from src.raas.mission_store import MissionStore
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

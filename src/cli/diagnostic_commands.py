@@ -53,7 +53,7 @@ def check_gateway(
 
     Examples:
         mekong diagnostic gateway
-        mekong diagnostic gateway -u https://raas.agencyos.network
+        mekong diagnostic gateway -u https://api.cashclaw.cc
         mekong diagnostic gateway -t 5
     """
     import requests
@@ -62,7 +62,7 @@ def check_gateway(
     console.print("[bold cyan]🌐 RaaS Gateway Connectivity Test[/bold cyan]\n")
 
     # Resolve gateway URL
-    gateway_url = url or GATEWAY_URLS[0] or "https://raas.agencyos.network"
+    gateway_url = url or GATEWAY_URLS[0] or "https://api.cashclaw.cc"
 
     console.print(f"Testing: [cyan]{gateway_url}[/cyan]\n")
 
@@ -159,7 +159,8 @@ def check_gateway(
     # Show rate limit headers if available
     headers = results["response_headers"].get("headers", {})
     rate_limit_headers = {
-        k: v for k, v in headers.items()
+        k: v
+        for k, v in headers.items()
         if k.lower().startswith("x-ratelimit") or k.lower() == "retry-after"
     }
 
@@ -221,7 +222,7 @@ def check_auth(
     Examples:
         mekong diagnostic auth
         mekong diagnostic auth -t mk_abc123
-        mekong diagnostic auth -g https://raas.agencyos.network
+        mekong diagnostic auth -g https://api.cashclaw.cc
     """
     from src.core.raas_auth import RaaSAuthClient
 
@@ -236,6 +237,7 @@ def check_auth(
             token = session.token
         else:
             import os
+
             token = os.getenv("RAAS_LICENSE_KEY")
 
     if not token:
@@ -244,7 +246,9 @@ def check_auth(
         return
 
     # Test validation
-    console.print(f"Testing token: [cyan]{token[:8]}...{token[-4:] if len(token) > 4 else ''}[/cyan]\n")
+    console.print(
+        f"Testing token: [cyan]{token[:8]}...{token[-4:] if len(token) > 4 else ''}[/cyan]\n"
+    )
 
     start_time = time.time()
     result = client.validate_credentials(token)
@@ -331,7 +335,7 @@ def check_rate_limit(
 
     console.print("[bold cyan]🚦 Rate Limit Enforcement Test[/bold cyan]\n")
 
-    url = gateway_url or GATEWAY_URLS[0] or "https://raas.agencyos.network"
+    url = gateway_url or GATEWAY_URLS[0] or "https://api.cashclaw.cc"
     test_endpoint = f"{url}/health"
 
     console.print(f"Testing: [cyan]{test_endpoint}[/cyan]")
@@ -345,6 +349,7 @@ def check_rate_limit(
         headers["Authorization"] = f"Bearer {session.token}"
     else:
         import os
+
         token = os.getenv("RAAS_LICENSE_KEY")
         if token:
             headers["Authorization"] = f"Bearer {token}"
@@ -377,12 +382,14 @@ def check_rate_limit(
             }
 
         except Exception as e:
-            results.append({
-                "request": i + 1,
-                "status": "ERROR",
-                "time_ms": None,
-                "error": str(e),
-            })
+            results.append(
+                {
+                    "request": i + 1,
+                    "status": "ERROR",
+                    "time_ms": None,
+                    "error": str(e),
+                }
+            )
 
     # Display results
     table = Table(title="Rate Limit Test Results", show_header=True, header_style="bold cyan")
@@ -395,10 +402,13 @@ def check_rate_limit(
     for result in results:
         status = str(result["status"])
         status_display = (
-            f"[green]{status}[/green]" if status == "200" else
-            f"[yellow]{status}[/yellow]" if status == "429" else
-            f"[red]{status}[/red]" if status == "ERROR" else
-            status
+            f"[green]{status}[/green]"
+            if status == "200"
+            else (
+                f"[yellow]{status}[/yellow]"
+                if status == "429"
+                else f"[red]{status}[/red]" if status == "ERROR" else status
+            )
         )
 
         table.add_row(

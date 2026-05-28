@@ -24,9 +24,7 @@ def schedule_list() -> None:
 
     if not jobs:
         console.print("[yellow]No scheduled jobs.[/yellow]")
-        console.print(
-            "[dim]Use: mekong schedule add <name> <goal> [--type interval|daily][/dim]"
-        )
+        console.print("[dim]Use: mekong schedule add <name> <goal> [--type interval|daily][/dim]")
         return
 
     table = Table(title=f"Scheduled Jobs ({len(jobs)})")
@@ -99,6 +97,7 @@ def schedule_remove(
 def heartbeat_list() -> None:
     """List all scheduled tasks from HEARTBEAT.md."""
     from src.daemon.heartbeat_scheduler import HeartbeatScheduler
+
     scheduler = HeartbeatScheduler()
 
     table = Table(title="📋 Scheduled Tasks")
@@ -111,7 +110,11 @@ def heartbeat_list() -> None:
     for ws_name, hb_path in scheduler.discover_heartbeats():
         tasks = scheduler.parse_heartbeat(ws_name, hb_path)
         for t in tasks:
-            interval = f"{t.interval_minutes}m" if t.interval_minutes < 1440 else f"{t.interval_minutes // 1440}d"
+            interval = (
+                f"{t.interval_minutes}m"
+                if t.interval_minutes < 1440
+                else f"{t.interval_minutes // 1440}d"
+            )
             table.add_row(ws_name, t.description, interval, t.command or "(LLM)", f"T{t.tier}")
 
     console.print(table)
@@ -122,6 +125,7 @@ def heartbeat_test(task_name: str = typer.Argument(..., help="Task description t
     """Test-run a scheduled task immediately."""
     import asyncio
     from src.daemon.heartbeat_scheduler import HeartbeatScheduler
+
     scheduler = HeartbeatScheduler()
 
     for ws_name, hb_path in scheduler.discover_heartbeats():
@@ -130,7 +134,9 @@ def heartbeat_test(task_name: str = typer.Argument(..., help="Task description t
             if task_name.lower() in t.description.lower():
                 console.print(f"[cyan]Testing: {t.description}[/cyan]")
                 result = asyncio.run(scheduler.execute_task(t))
-                console.print(f"[{'green' if result else 'red'}]Result: {'OK' if result else 'FAILED'}[/{'green' if result else 'red'}]")
+                console.print(
+                    f"[{'green' if result else 'red'}]Result: {'OK' if result else 'FAILED'}[/{'green' if result else 'red'}]"
+                )
                 return
 
     console.print(f"[red]Task not found: {task_name}[/red]")

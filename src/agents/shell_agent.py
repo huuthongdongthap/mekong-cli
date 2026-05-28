@@ -11,22 +11,36 @@ from typing import List
 from ..core.agent_base import AgentBase, Task, Result
 
 # Commands that are never allowed for safety
-BLOCKED_COMMANDS = frozenset([
-    "rm -rf /", "rm -rf /*", "mkfs", "dd if=",
-    ":(){ :|:& };:", "chmod -R 777 /",
-    "shutdown", "reboot", "halt", "poweroff",
-    "> /dev/sda", "mv / ", "wget -O- | sh",
-    "curl | sh", "curl | bash",
-])
+BLOCKED_COMMANDS = frozenset(
+    [
+        "rm -rf /",
+        "rm -rf /*",
+        "mkfs",
+        "dd if=",
+        ":(){ :|:& };:",
+        "chmod -R 777 /",
+        "shutdown",
+        "reboot",
+        "halt",
+        "poweroff",
+        "> /dev/sda",
+        "mv / ",
+        "wget -O- | sh",
+        "curl | sh",
+        "curl | bash",
+    ]
+)
 
 # Patterns that indicate dangerous operations
-BLOCKED_PATTERNS = frozenset([
-    "rm -rf /",
-    "/dev/sd",
-    "/dev/disk",
-    "mkfs.",
-    "format c:",
-])
+BLOCKED_PATTERNS = frozenset(
+    [
+        "rm -rf /",
+        "/dev/sd",
+        "/dev/disk",
+        "mkfs.",
+        "format c:",
+    ]
+)
 
 
 class ShellAgent(AgentBase):
@@ -60,9 +74,7 @@ class ShellAgent(AgentBase):
         args = parts[1] if len(parts) > 1 else ""
 
         if command == "env":
-            return [
-                Task(id="shell_env", description="Show environment", input={})
-            ]
+            return [Task(id="shell_env", description="Show environment", input={})]
 
         if command == "run":
             cmd_str = args
@@ -86,7 +98,9 @@ class ShellAgent(AgentBase):
         cmd_str = task.input.get("command", "")
         if not cmd_str:
             return Result(
-                task_id=task.id, success=False, output=None,
+                task_id=task.id,
+                success=False,
+                output=None,
                 error="Empty command",
             )
 
@@ -94,7 +108,9 @@ class ShellAgent(AgentBase):
         violation = self._check_safety(cmd_str)
         if violation:
             return Result(
-                task_id=task.id, success=False, output=None,
+                task_id=task.id,
+                success=False,
+                output=None,
                 error=f"Blocked: {violation}",
             )
 
@@ -121,12 +137,17 @@ class ShellAgent(AgentBase):
 
         except subprocess.TimeoutExpired:
             return Result(
-                task_id=task.id, success=False, output=None,
+                task_id=task.id,
+                success=False,
+                output=None,
                 error=f"Timed out after {self.timeout}s",
             )
         except Exception as e:
             return Result(
-                task_id=task.id, success=False, output=None, error=str(e),
+                task_id=task.id,
+                success=False,
+                output=None,
+                error=str(e),
             )
 
     def _check_safety(self, cmd: str) -> str:
@@ -148,6 +169,7 @@ class ShellAgent(AgentBase):
     def _run_env(self) -> Result:
         """Show basic environment info."""
         import platform
+
         info = {
             "os": platform.system(),
             "arch": platform.machine(),

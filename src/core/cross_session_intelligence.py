@@ -41,13 +41,18 @@ class CrossSessionStateManager:
         self.memory = get_memory_facade()
         self.memory.connect()
 
-        logger.debug("CrossSessionStateManager initialized for %s, using %s storage",
-                     user_id, self.memory.get_provider_status()["active_provider"])
+        logger.debug(
+            "CrossSessionStateManager initialized for %s, using %s storage",
+            user_id,
+            self.memory.get_provider_status()["active_provider"],
+        )
 
         # Initialize local storage as backup for YAML fallback
         self.local_storage_path = Path.home() / ".mekong" / "cross_session_profiles"
         self.local_storage_path.mkdir(parents=True, exist_ok=True)
-        self.local_profile_file = self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        self.local_profile_file = (
+            self.local_storage_path / f"{self.user_id.replace(':', '_').replace('/', '_')}.json"
+        )
 
         # Load or create user profile
         self.profile = self._load_or_create_profile()
@@ -77,7 +82,10 @@ class CrossSessionStateManager:
         if not profile_data:
             local_profiles = self._load_from_local_storage()
             for local_profile in local_profiles:
-                if local_profile.get("type") == "user_profile" and local_profile.get("user_id") == self.user_id:
+                if (
+                    local_profile.get("type") == "user_profile"
+                    and local_profile.get("user_id") == self.user_id
+                ):
                     profile_data = local_profile
                     break
 
@@ -104,7 +112,9 @@ class CrossSessionStateManager:
             # Check if this is an update to existing profile data
             updated_existing = False
             for i, item in enumerate(all_data):
-                if item.get("type") == "user_profile" and item.get("user_id") == data.get("user_id"):
+                if item.get("type") == "user_profile" and item.get("user_id") == data.get(
+                    "user_id"
+                ):
                     all_data[i] = data
                     updated_existing = True
                     break
@@ -114,8 +124,11 @@ class CrossSessionStateManager:
 
             # Keep only the most recent profile data to avoid growing too large
             if len(all_data) > 10:  # Keep only recent items
-                all_data = [item for item in all_data if item.get("type") != "user_profile"] + \
-                          [item for item in all_data if item.get("type") == "user_profile"][-1:]  # Last profile
+                all_data = [item for item in all_data if item.get("type") != "user_profile"] + [
+                    item for item in all_data if item.get("type") == "user_profile"
+                ][
+                    -1:
+                ]  # Last profile
 
             with open(self.local_profile_file, "w", encoding="utf-8") as f:
                 json.dump(all_data, f, ensure_ascii=False, indent=2)
@@ -481,34 +494,40 @@ class CrossSessionStateManager:
         # Search preferences
         prefs = self.get_user_preferences()
         if query.lower() in str(prefs).lower():
-            results.append({
-                "type": "preferences",
-                "data": prefs,
-                "relevance": "high",
-            })
+            results.append(
+                {
+                    "type": "preferences",
+                    "data": prefs,
+                    "relevance": "high",
+                }
+            )
 
         # Search interaction history
         interactions = self.get_interaction_history(limit=10)
         for interaction in interactions:
             if query.lower() in interaction.get("content", "").lower():
-                results.append({
-                    "type": "interaction",
-                    "data": interaction,
-                    "relevance": "medium",
-                })
+                results.append(
+                    {
+                        "type": "interaction",
+                        "data": interaction,
+                        "relevance": "medium",
+                    }
+                )
 
         # Search knowledge base
         knowledge = self.get_knowledge_base()
         for category, items in knowledge.items():
             for key, value in items.items():
                 if query.lower() in f"{key} {value}".lower():
-                    results.append({
-                        "type": "knowledge",
-                        "category": category,
-                        "key": key,
-                        "data": value,
-                        "relevance": "high",
-                    })
+                    results.append(
+                        {
+                            "type": "knowledge",
+                            "category": category,
+                            "key": key,
+                            "data": value,
+                            "relevance": "high",
+                        }
+                    )
 
         return results
 
@@ -519,7 +538,9 @@ class CrossSessionStateManager:
             "user_id": self.profile.user_id,
             "created_at": self.profile.created_at.isoformat(),
             "preferences": self.profile.preferences,
-            "interaction_history": self.profile.interaction_history[-50:],  # Keep last 50 interactions
+            "interaction_history": self.profile.interaction_history[
+                -50:
+            ],  # Keep last 50 interactions
             "knowledge_base": self.profile.knowledge_base,
             "session_history": self.profile.session_history[-20:],  # Keep last 20 sessions
         }

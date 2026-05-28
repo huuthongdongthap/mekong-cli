@@ -138,12 +138,11 @@ class AGILoop:
     def _calculate_cooldown(self) -> int:
         """Adaptive cooldown: faster on success streak, slower on failure."""
         if self.consecutive_failures == 0:
-            streak = len([d for d in self._history.get("details", [])[-5:]
-                         if d.get("success")])
+            streak = len([d for d in self._history.get("details", [])[-5:] if d.get("success")])
             if streak >= 3:
                 return int(max(30, self.cooldown // 2))
             return int(self.cooldown)
-        return int(min(self.cooldown * (2 ** self.consecutive_failures), 600))
+        return int(min(self.cooldown * (2**self.consecutive_failures), 600))
 
     def get_status(self) -> dict[str, Any]:
         """Return AGI loop metrics for Telegram and monitoring."""
@@ -222,11 +221,15 @@ class AGILoop:
                     self.completed_improvements.append(imp_id)
                     self.last_success_time = time.time()
                     self._history["completed"] = self.completed_improvements
-                    self._history["details"].append({
-                        "id": imp_id, "title": improvement.get("title", ""),
-                        "category": improvement.get("category", ""),
-                        "timestamp": time.time(), "success": True,
-                    })
+                    self._history["details"].append(
+                        {
+                            "id": imp_id,
+                            "title": improvement.get("title", ""),
+                            "category": improvement.get("category", ""),
+                            "timestamp": time.time(),
+                            "success": True,
+                        }
+                    )
                 else:
                     self.consecutive_failures += 1
                     bl = self._history.setdefault("blacklist", {})
@@ -260,7 +263,8 @@ class AGILoop:
             mem = get_memory_client()
             if mem.is_available:
                 ctx = mem.query_memory(
-                    "mekong-cli codebase improvements needed", depth=2,
+                    "mekong-cli codebase improvements needed",
+                    depth=2,
                 )
                 if ctx:
                     memory_context = ctx
@@ -269,8 +273,7 @@ class AGILoop:
 
         # Build prompt
         completed_str = (
-            "\n".join(f"- {imp}" for imp in self.completed_improvements[-20:])
-            or "None yet"
+            "\n".join(f"- {imp}" for imp in self.completed_improvements[-20:]) or "None yet"
         )
         focus_str = "\n".join(f"- {area}" for area in IMPROVEMENT_AREAS)
 
@@ -342,9 +345,7 @@ class AGILoop:
 
             # Wait for completion
             wait_start = time.time()
-            while (
-                session.status.value == "running" and (time.time() - wait_start) < 310
-            ):
+            while session.status.value == "running" and (time.time() - wait_start) < 310:
                 await asyncio.sleep(5)
 
             if session.status.value == "completed":

@@ -62,9 +62,7 @@ class PayPalAgent:
 
         import base64
 
-        auth = base64.b64encode(
-            f"{self.client_id}:{self.client_secret}".encode()
-        ).decode()
+        auth = base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
 
         response = requests.post(
             f"{self.base_url}/v1/oauth2/token",
@@ -175,9 +173,7 @@ class PayPalAgent:
                 "payment_term": {"term_type": "DUE_ON_RECEIPT"},
             },
             "invoicer": {
-                "email_address": os.environ.get(
-                    "PAYPAL_MERCHANT_EMAIL", "merchant@example.com"
-                ),
+                "email_address": os.environ.get("PAYPAL_MERCHANT_EMAIL", "merchant@example.com"),
             },
             "primary_recipients": [
                 {
@@ -217,9 +213,7 @@ class PayPalAgent:
         print("=" * 60)
 
         if plan_id:
-            result = self._api_call(
-                "GET", f"/v1/billing/subscriptions?plan_id={plan_id}"
-            )
+            result = self._api_call("GET", f"/v1/billing/subscriptions?plan_id={plan_id}")
             if result:
                 for sub in result.get("subscriptions", []):
                     print(f"  📋 {sub.get('id')} - {sub.get('status')}")

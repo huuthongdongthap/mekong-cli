@@ -8,7 +8,6 @@ Tests cover:
 - Span context management
 """
 
-
 from src.core.tracing import (
     TraceContext,
     generate_trace_id,
@@ -167,6 +166,7 @@ class TestTraceFunctions:
         """Test get_current_trace_id when no trace active."""
         # Ensure no trace is active
         from src.core.tracing import _trace_context
+
         _trace_context.set(None)
 
         assert get_current_trace_id() is None
@@ -201,6 +201,7 @@ class TestTraceMiddleware:
     def test_middleware_without_trace(self):
         """Test that middleware works without active trace."""
         from src.core.tracing import _trace_context
+
         _trace_context.set(None)
 
         @trace_middleware
@@ -249,6 +250,7 @@ class TestTraceIntegration:
 
         # Simulate context switch
         from src.core.tracing import _trace_context
+
         _trace_context.set(None)
 
         trace2 = start_trace(command="test2")

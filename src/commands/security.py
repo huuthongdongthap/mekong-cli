@@ -17,9 +17,15 @@ console = Console()
 @app.command()
 def scan(
     path: str = typer.Argument(".", help="Path to scan"),
-    tool: str = typer.Option("auto", "--tool", "-t", help="Tool to use: bandit, semgrep, safety, auto"),
-    format_output: str = typer.Option("table", "--format", "-f", help="Output format: table, json, sarif"),
-    severity: str = typer.Option("all", "--severity", "-s", help="Severity level: low, medium, high, critical, all"),
+    tool: str = typer.Option(
+        "auto", "--tool", "-t", help="Tool to use: bandit, semgrep, safety, auto"
+    ),
+    format_output: str = typer.Option(
+        "table", "--format", "-f", help="Output format: table, json, sarif"
+    ),
+    severity: str = typer.Option(
+        "all", "--severity", "-s", help="Severity level: low, medium, high, critical, all"
+    ),
     exclude: Optional[str] = typer.Option(None, "--exclude", "-e", help="Exclude patterns"),
 ) -> None:
     """Scan project for security vulnerabilities."""
@@ -51,11 +57,11 @@ def scan(
             "results": scan_results,
             "summary": {
                 "total": len(scan_results),
-                "critical": len([r for r in scan_results if r.get('severity') == 'CRITICAL']),
-                "high": len([r for r in scan_results if r.get('severity') == 'HIGH']),
-                "medium": len([r for r in scan_results if r.get('severity') == 'MEDIUM']),
-                "low": len([r for r in scan_results if r.get('severity') == 'LOW']),
-            }
+                "critical": len([r for r in scan_results if r.get("severity") == "CRITICAL"]),
+                "high": len([r for r in scan_results if r.get("severity") == "HIGH"]),
+                "medium": len([r for r in scan_results if r.get("severity") == "MEDIUM"]),
+                "low": len([r for r in scan_results if r.get("severity") == "LOW"]),
+            },
         }
         console.print_json(data=output_json)
     else:
@@ -63,17 +69,33 @@ def scan(
         display_scan_results(scan_results)
 
 
+def clean_json_output(stdout: str) -> str:
+    """Extract valid JSON substring from stdout if there's any prefix (like progress bar)"""
+    first_dict = stdout.find("{")
+    first_list = stdout.find("[")
+    if first_dict == -1 and first_list == -1:
+        return stdout
+    if first_dict == -1:
+        start_idx = first_list
+    elif first_list == -1:
+        start_idx = first_dict
+    else:
+        start_idx = min(first_dict, first_list)
+    return stdout[start_idx:]
+
+
 def scan_with_bandit(path: str, severity: str) -> List[Dict[str, Union[str, int]]]:
     """Scan with Bandit (Python security scanner)"""
     try:
-        result = subprocess.run([
-            sys.executable, "-m", "bandit",
-            "-r", path,
-            "-f", "json"
-        ], capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            [sys.executable, "-m", "bandit", "-r", path, "-x", ".venv,node_modules,build,dist", "-f", "json"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
         if result.returncode == 0 or result.returncode == 1:  # 1 means issues found
-            data = json.loads(result.stdout)
+            data = json.loads(clean_json_output(result.stdout))
             issues = data.get("results", [])
 
             bandit_results = []
@@ -82,15 +104,17 @@ def scan_with_bandit(path: str, severity: str) -> List[Dict[str, Union[str, int]
                 issue_severity = sev_map.get(issue.get("issue_severity", "").upper(), "MEDIUM")
 
                 if severity == "all" or issue_severity.lower() == severity.lower():
-                    bandit_results.append({
-                        "tool": "Bandit",
-                        "file": issue.get("filename", ""),
-                        "line": issue.get("line_number", 0),
-                        "severity": issue_severity,
-                        "code": issue.get("test_id", ""),
-                        "message": issue.get("issue_text", ""),
-                        "confidence": issue.get("issue_confidence", ""),
-                    })
+                    bandit_results.append(
+                        {
+                            "tool": "Bandit",
+                            "file": issue.get("filename", ""),
+                            "line": issue.get("line_number", 0),
+                            "severity": issue_severity,
+                            "code": issue.get("test_id", ""),
+                            "message": issue.get("issue_text", ""),
+                            "confidence": issue.get("issue_confidence", ""),
+                        }
+                    )
 
             return bandit_results
         else:
@@ -109,9 +133,10 @@ def scan_with_safety(path: str) -> List[Dict[str, Union[str, int]]]:
     """Scan dependencies with Safety (dependency vulnerability scanner)."""
     try:
         # First, try to generate a requirements.txt if none exists
-        req_files = list(Path(path).glob("**/requirements*.txt")) + \
-                   list(Path(path).glob("**/Pipfile")) + \
-                   list(Path(path).glob("**/pyproject.toml"))
+        req_files = []
+        for p in [Path(path) / "requirements.txt", Path(path) / "pyproject.toml", Path(path) / "Pipfile"]:
+            if p.exists():
+                req_files.append(p)
 
         if not req_files:
             console.print("[yellow]⚠️  No dependency files found, skipping Safety scan[/yellow]")
@@ -120,27 +145,41 @@ def scan_with_safety(path: str) -> List[Dict[str, Union[str, int]]]:
         # Use the first found requirements file
         req_file = str(req_files[0])
 
-        result = subprocess.run([
-            sys.executable, "-m", "safety", "check",
-            "-r", req_file,
-            "--format", "json"
-        ], capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            [sys.executable, "-m", "safety", "check", "-r", req_file, "--format", "json"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
         if result.returncode == 0 or result.returncode == 1:  # 1 means vulnerabilities found
             try:
-                issues = json.loads(result.stdout)
+                issues = json.loads(clean_json_output(result.stdout))
                 safety_results = []
 
                 for issue in issues:
-                    safety_results.append({
-                        "tool": "Safety",
-                        "file": req_file,
-                        "line": 0,
-                        "severity": issue.get("analyzed_version", {}).get("vulnerabilities", [{}])[0].get("cvssv3", {}).get("base_severity", "HIGH") if issue.get("analyzed_version", {}).get("vulnerabilities") else "MEDIUM",
-                        "code": issue.get("name", ""),
-                        "message": issue.get("vulnerabilities", [{}])[0].get("description", "") if issue.get("vulnerabilities") else "",
-                        "confidence": "HIGH",
-                    })
+                    safety_results.append(
+                        {
+                            "tool": "Safety",
+                            "file": req_file,
+                            "line": 0,
+                            "severity": (
+                                issue.get("analyzed_version", {})
+                                .get("vulnerabilities", [{}])[0]
+                                .get("cvssv3", {})
+                                .get("base_severity", "HIGH")
+                                if issue.get("analyzed_version", {}).get("vulnerabilities")
+                                else "MEDIUM"
+                            ),
+                            "code": issue.get("name", ""),
+                            "message": (
+                                issue.get("vulnerabilities", [{}])[0].get("description", "")
+                                if issue.get("vulnerabilities")
+                                else ""
+                            ),
+                            "confidence": "HIGH",
+                        }
+                    )
 
                 return safety_results
             except json.JSONDecodeError:
@@ -158,29 +197,32 @@ def scan_with_safety(path: str) -> List[Dict[str, Union[str, int]]]:
 def scan_with_semgrep(path: str, severity: str) -> List[Dict[str, Union[str, int]]]:
     """Scan with Semgrep (static analysis tool)."""
     try:
-        result = subprocess.run([
-            "semgrep", "--config=auto",
-            "--json",
-            path
-        ], capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            ["semgrep", "--config=auto", "--json", path],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
         if result.returncode == 0 or result.returncode == 1:  # 1 means findings found
-            data = json.loads(result.stdout)
+            data = json.loads(clean_json_output(result.stdout))
             issues = data.get("results", [])
 
             semgrep_results = []
             for issue in issues:
                 sev = issue.get("extra", {}).get("severity", "MEDIUM").upper()
                 if severity == "all" or sev.lower() == severity.lower():
-                    semgrep_results.append({
-                        "tool": "Semgrep",
-                        "file": issue.get("path", ""),
-                        "line": issue.get("start", {}).get("line", 0),
-                        "severity": sev,
-                        "code": issue.get("check_id", ""),
-                        "message": issue.get("extra", {}).get("message", ""),
-                        "confidence": issue.get("extra", {}).get("confidence", "MEDIUM"),
-                    })
+                    semgrep_results.append(
+                        {
+                            "tool": "Semgrep",
+                            "file": issue.get("path", ""),
+                            "line": issue.get("start", {}).get("line", 0),
+                            "severity": sev,
+                            "code": issue.get("check_id", ""),
+                            "message": issue.get("extra", {}).get("message", ""),
+                            "confidence": issue.get("extra", {}).get("confidence", "MEDIUM"),
+                        }
+                    )
 
             return semgrep_results
         else:
@@ -204,10 +246,10 @@ def display_scan_results(results: List[Dict[str, Union[str, int]]]) -> None:  # 
     console.print(f"[bold]📊 Found {len(results)} security issues:[/bold]")
 
     # Group by severity
-    critical_issues = [r for r in results if r['severity'] == 'CRITICAL']
-    high_issues = [r for r in results if r['severity'] == 'HIGH']
-    medium_issues = [r for r in results if r['severity'] == 'MEDIUM']
-    low_issues = [r for r in results if r['severity'] == 'LOW']
+    critical_issues = [r for r in results if r["severity"] == "CRITICAL"]
+    high_issues = [r for r in results if r["severity"] == "HIGH"]
+    medium_issues = [r for r in results if r["severity"] == "MEDIUM"]
+    low_issues = [r for r in results if r["severity"] == "LOW"]
 
     # Show summary
     summary_table = Table(title="Security Issues Summary")
@@ -234,21 +276,21 @@ def display_scan_results(results: List[Dict[str, Union[str, int]]]) -> None:  # 
 
     # Sort by severity (critical, high, medium, low)
     severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
-    sorted_results = sorted(results, key=lambda x: severity_order.get(x['severity'], 4))  # type: ignore[arg-type]
+    sorted_results = sorted(results, key=lambda x: severity_order.get(x["severity"], 4))  # type: ignore[arg-type]
 
     for result in sorted_results:  # type: ignore[assignment]
         severity_style = {
             "CRITICAL": "red bold",
             "HIGH": "red",
             "MEDIUM": "yellow",
-            "LOW": "blue"
-        }.get(result['severity'], "white")
+            "LOW": "blue",
+        }.get(result["severity"], "white")
 
         results_table.add_row(
-            str(result['tool']),  # type: ignore[arg-type]
+            str(result["tool"]),  # type: ignore[arg-type]
             f"[{severity_style}]{result['severity']}[/{severity_style}]",
             f"{result['file']}:{result['line']}",
-            result['message'][:60] + "..." if len(result['message']) > 60 else result['message']
+            result["message"][:60] + "..." if len(result["message"]) > 60 else result["message"],
         )
 
     console.print(results_table)
@@ -257,8 +299,12 @@ def display_scan_results(results: List[Dict[str, Union[str, int]]]) -> None:  # 
 @app.command()
 def scan_secrets(
     path: str = typer.Argument(".", help="Path to scan for secrets"),
-    include_filenames: bool = typer.Option(False, "--include-filenames", help="Include filenames in output"),
-    entropy_threshold: float = typer.Option(4.5, "--entropy", help="Entropy threshold for detection"),
+    include_filenames: bool = typer.Option(
+        False, "--include-filenames", help="Include filenames in output"
+    ),
+    entropy_threshold: float = typer.Option(
+        4.5, "--entropy", help="Entropy threshold for detection"
+    ),
 ):
     """Scan for hardcoded secrets and credentials"""
 
@@ -271,24 +317,41 @@ def scan_secrets(
         r'["\'](?:password|passwd|pwd|secret|token|key|api_key|api-key)["\'][\s:]=[\s\'"]*[^\'"\s]{8,}',
         r'(?:api_key|secret_key|aws_access|aws_secret|client_secret|private_key)[\s:]=[\s\'"]*[^\'"\s]{8,}',
         r'https?://[^\s\'"]*:[^\s\'"@]*@[^\s\'"]*',  # URLs with credentials
-        r'BEGIN (?:RSA |EC |DSA |PGP |SSH )?(?:PRIVATE|PUBLIC) KEY',
+        r"BEGIN (?:RSA |EC |DSA |PGP |SSH )?(?:PRIVATE|PUBLIC) KEY",
     ]
 
     import re
 
     for file_path in Path(path).rglob("*"):
-        if file_path.is_file() and file_path.suffix.lower() in ['.py', '.js', '.ts', '.json', '.yml', '.yaml', '.env', '.txt']:
+        if any(part in ['.venv', 'venv', 'node_modules', 'build', 'dist', '.git', '.gemini'] for part in file_path.parts):
+            continue
+        if file_path.is_file() and file_path.suffix.lower() in [
+            ".py",
+            ".js",
+            ".ts",
+            ".json",
+            ".yml",
+            ".yaml",
+            ".env",
+            ".txt",
+        ]:
             try:
-                file_content = file_path.read_text(encoding='utf-8')
+                file_content = file_path.read_text(encoding="utf-8")
                 for pattern in secret_patterns:
                     matches = re.finditer(pattern, file_content, re.IGNORECASE)
                     for match in matches:
-                        secrets_found.append({
-                            "file": str(file_path),
-                            "line_num": file_content[:match.start()].count('\n') + 1,
-                            "match": match.group()[:50] + "..." if len(match.group()) > 50 else match.group(),
-                            "pattern": pattern
-                        })
+                        secrets_found.append(
+                            {
+                                "file": str(file_path),
+                                "line_num": file_content[: match.start()].count("\n") + 1,
+                                "match": (
+                                    match.group()[:50] + "..."
+                                    if len(match.group()) > 50
+                                    else match.group()
+                                ),
+                                "pattern": pattern,
+                            }
+                        )
             except UnicodeDecodeError:
                 # Skip binary files
                 continue
@@ -307,12 +370,14 @@ def scan_secrets(
             secrets_table.add_row(
                 secret["file"] if include_filenames else Path(secret["file"]).name,
                 str(secret["line_num"]),
-                secret["match"]
+                secret["match"],
             )
 
         console.print(secrets_table)
 
-        console.print("\n[yellow]⚠️  IMPORTANT: Rotate these credentials and DO NOT commit them to version control![/yellow]")
+        console.print(
+            "\n[yellow]⚠️  IMPORTANT: Rotate these credentials and DO NOT commit them to version control![/yellow]"
+        )
     else:
         console.print("[green]✅ No obvious secrets found![/green]")
 
@@ -332,39 +397,54 @@ def audit_config() -> None:
         + list(Path(".").glob("**/appsettings.json"))
         + list(Path(".").glob("**/application.properties"))
         + list(Path(".").glob("**/.env*"))
-        + list(Path(".").glob("**/docker-compose*.yml"))
-        + list(Path(".").glob("**/docker-compose*.yaml"))
     )
+    
+    config_files = [
+        f for f in config_files 
+        if not any(part in ['.venv', 'venv', 'node_modules', 'build', 'dist', '.git', '.gemini'] for part in f.parts)
+    ]
 
     for config_file in config_files:
         content = config_file.read_text()
 
         # Check for DEBUG=True in Django settings
         if config_file.suffix == ".py" and "DEBUG = True" in content:
-            findings.append({
-                "file": str(config_file),
-                "issue": "DEBUG mode enabled in production",
-                "severity": "HIGH",
-                "recommendation": "Set DEBUG = False for production"
-            })
+            findings.append(
+                {
+                    "file": str(config_file),
+                    "issue": "DEBUG mode enabled in production",
+                    "severity": "HIGH",
+                    "recommendation": "Set DEBUG = False for production",
+                }
+            )
 
         # Check for SECRET_KEY with default/weak values
-        if "SECRET_KEY =" in content and ("changeme" in content or "your-secret-key" in content or "dev-key" in content):
-            findings.append({
-                "file": str(config_file),
-                "issue": "Weak or default SECRET_KEY detected",
-                "severity": "HIGH",
-                "recommendation": "Use a strong, randomly generated secret key"
-            })
+        if "SECRET_KEY =" in content and (
+            "changeme" in content or "your-secret-key" in content or "dev-key" in content
+        ):
+            findings.append(
+                {
+                    "file": str(config_file),
+                    "issue": "Weak or default SECRET_KEY detected",
+                    "severity": "HIGH",
+                    "recommendation": "Use a strong, randomly generated secret key",
+                }
+            )
 
         # Check for exposed credentials in compose files
-        if "docker-compose" in config_file.name and ("password:" in content or "secret:" in content) and "${" not in content:
-            findings.append({
-                "file": str(config_file),
-                "issue": "Credentials exposed in Docker Compose file",
-                "severity": "HIGH",
-                "recommendation": "Use environment variables or Docker secrets"
-            })
+        if (
+            "docker-compose" in config_file.name
+            and ("password:" in content or "secret:" in content)
+            and "${" not in content
+        ):
+            findings.append(
+                {
+                    "file": str(config_file),
+                    "issue": "Credentials exposed in Docker Compose file",
+                    "severity": "HIGH",
+                    "recommendation": "Use environment variables or Docker secrets",
+                }
+            )
 
     if findings:
         console.print(f"[red]❌ Found {len(findings)} security misconfigurations![/red]")
@@ -383,7 +463,7 @@ def audit_config() -> None:
                 Path(finding["file"]).name,
                 f"[{severity_color}]{finding['severity']}[/{severity_color}]",
                 finding["issue"],
-                finding["recommendation"]
+                finding["recommendation"],
             )
 
         console.print(config_table)
@@ -392,7 +472,11 @@ def audit_config() -> None:
 
 
 @app.command()
-def generate_report(output_file: str = typer.Option("security-report.json", "--output", "-o", help="Output file for report")):
+def generate_report(
+    output_file: str = typer.Option(
+        "security-report.json", "--output", "-o", help="Output file for report"
+    )
+):
     """Generate comprehensive security report"""
 
     console.print(f"[bold]📜 Generating security report: {output_file}...[/bold]")
@@ -401,30 +485,31 @@ def generate_report(output_file: str = typer.Option("security-report.json", "--o
         "generated_at": datetime.now().isoformat(),
         "project_root": str(Path(".").absolute()),
         "report_type": "Security Assessment",
-        "sections": {}
+        "sections": {},
     }
 
     # Add dependency audit
     try:
         # Try to get pip freeze output for dependency list
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "freeze"],
-            capture_output=True, text=True, check=True
+            [sys.executable, "-m", "pip", "freeze"], capture_output=True, text=True, check=True
         )
-        report_data["sections"]["dependencies"] = result.stdout.split('\n')
+        report_data["sections"]["dependencies"] = result.stdout.split("\n")
     except Exception:
         report_data["sections"]["dependencies"] = ["Could not retrieve dependency list"]
 
     # Add file permissions info
     perms_info = []
-    for file_path in Path(".").glob("**/*.py"):
+    for file_path in Path("src").glob("**/*.py"):
         if file_path.is_file():
             stat = file_path.stat()
-            perms_info.append({
-                "file": str(file_path),
-                "size": stat.st_size,
-                "permissions": oct(stat.st_mode)[-3:]
-            })
+            perms_info.append(
+                {
+                    "file": str(file_path),
+                    "size": stat.st_size,
+                    "permissions": oct(stat.st_mode)[-3:],
+                }
+            )
 
     report_data["sections"]["file_permissions"] = perms_info[:20]  # Limit to first 20 files
 
@@ -432,15 +517,14 @@ def generate_report(output_file: str = typer.Option("security-report.json", "--o
     if Path(".git").exists():
         try:
             result = subprocess.run(
-                ["git", "remote", "-v"],
-                capture_output=True, text=True, check=True
+                ["git", "remote", "-v"], capture_output=True, text=True, check=True
             )
             report_data["sections"]["git_remotes"] = result.stdout
         except Exception:
             report_data["sections"]["git_remotes"] = "Could not retrieve git remotes"
 
     # Write report
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(report_data, f, indent=2)
 
     console.print(f"[green]✅ Security report generated: {output_file}[/green]")
@@ -453,16 +537,56 @@ def harden() -> None:
     console.print("[bold]🔒 Security Hardening Recommendations:[/bold]")
 
     recommendations = [
-        ("Update Dependencies", "Regularly update all dependencies to patch known vulnerabilities", "pip install --upgrade --upgrade-strategy eager"),
-        ("Enable Two-Factor Authentication", "Add 2FA to all accounts and services", "Configure with your authentication provider"),
-        ("Use Environment Variables", "Store sensitive data in environment variables, not code", "export SECRET_KEY='...'"),
-        ("Implement Input Validation", "Validate all user inputs to prevent injection attacks", "Use validation libraries like Joi or express-validator"),
-        ("Configure HTTPS", "Enforce HTTPS encryption for all connections", "Set up SSL/TLS certificates"),
-        ("Enable Rate Limiting", "Protect against abuse and brute-force attacks", "Implement rate limiting middleware"),
-        ("Minimize Attack Surface", "Disable unused services and close unnecessary ports", "Audit running services regularly"),
-        ("Secure Session Management", "Implement secure session handling", "Use secure cookies with HttpOnly flag"),
-        ("Log Security Events", "Maintain audit trails of security-relevant events", "Set up centralized logging"),
-        ("Regular Security Testing", "Perform ongoing security assessments", "Schedule automated scans")
+        (
+            "Update Dependencies",
+            "Regularly update all dependencies to patch known vulnerabilities",
+            "pip install --upgrade --upgrade-strategy eager",
+        ),
+        (
+            "Enable Two-Factor Authentication",
+            "Add 2FA to all accounts and services",
+            "Configure with your authentication provider",
+        ),
+        (
+            "Use Environment Variables",
+            "Store sensitive data in environment variables, not code",
+            "export SECRET_KEY='...'",
+        ),
+        (
+            "Implement Input Validation",
+            "Validate all user inputs to prevent injection attacks",
+            "Use validation libraries like Joi or express-validator",
+        ),
+        (
+            "Configure HTTPS",
+            "Enforce HTTPS encryption for all connections",
+            "Set up SSL/TLS certificates",
+        ),
+        (
+            "Enable Rate Limiting",
+            "Protect against abuse and brute-force attacks",
+            "Implement rate limiting middleware",
+        ),
+        (
+            "Minimize Attack Surface",
+            "Disable unused services and close unnecessary ports",
+            "Audit running services regularly",
+        ),
+        (
+            "Secure Session Management",
+            "Implement secure session handling",
+            "Use secure cookies with HttpOnly flag",
+        ),
+        (
+            "Log Security Events",
+            "Maintain audit trails of security-relevant events",
+            "Set up centralized logging",
+        ),
+        (
+            "Regular Security Testing",
+            "Perform ongoing security assessments",
+            "Schedule automated scans",
+        ),
     ]
 
     rec_table = Table(title="Hardening Recommendations")

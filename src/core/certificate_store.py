@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 class CertificateStoreError(Exception):
     """Base exception for certificate store operations."""
+
     pass
 
 
@@ -120,11 +121,7 @@ class CertificateStore:
     ROTATION_WARNING_DAYS = 7  # Warn when within 7 days of expiry
     DEFAULT_VALIDITY_DAYS = 30  # New certificates valid for 30 days
 
-    def __init__(
-        self,
-        certificate_dir: Optional[str] = None,
-        use_secure_storage: bool = True
-    ):
+    def __init__(self, certificate_dir: Optional[str] = None, use_secure_storage: bool = True):
         """
         Initialize certificate store.
 
@@ -390,18 +387,16 @@ class CertificateStore:
                 valid_from=self._metadata.valid_from,
                 valid_until=self._metadata.valid_until,
                 serial_number=cert_data.get("serial_number", 0),
-                signature=bytes.fromhex(cert_data["signature"]) if cert_data.get("signature") else None,
+                signature=(
+                    bytes.fromhex(cert_data["signature"]) if cert_data.get("signature") else None
+                ),
             )
 
         except Exception as e:
             logger.debug("Failed to load certificate: %s", e)
             return None
 
-    def save_certificate(
-        self,
-        cert: DeviceCertificate,
-        rotation_reason: str = "manual"
-    ) -> None:
+    def save_certificate(self, cert: DeviceCertificate, rotation_reason: str = "manual") -> None:
         """
         Save certificate to storage.
 
@@ -452,19 +447,18 @@ class CertificateStore:
 
         # Record rotation
         if is_rotation:
-            self._save_rotation_record({
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "reason": rotation_reason,
-                "old_certificate_id": old_cert_id,
-                "new_certificate_id": cert.certificate_id,
-                "new_valid_until": cert.valid_until.isoformat(),
-            })
+            self._save_rotation_record(
+                {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "reason": rotation_reason,
+                    "old_certificate_id": old_cert_id,
+                    "new_certificate_id": cert.certificate_id,
+                    "new_valid_until": cert.valid_until.isoformat(),
+                }
+            )
 
     def generate_and_save(
-        self,
-        device_fingerprint: Optional[str] = None,
-        valid_days: int = 30,
-        auto_sign: bool = True
+        self, device_fingerprint: Optional[str] = None, valid_days: int = 30, auto_sign: bool = True
     ) -> DeviceCertificate:
         """
         Generate new certificate and save to storage.
@@ -479,8 +473,7 @@ class CertificateStore:
         """
         # Generate new certificate
         cert = DeviceCertificate.generate(
-            device_fingerprint=device_fingerprint,
-            valid_days=valid_days
+            device_fingerprint=device_fingerprint, valid_days=valid_days
         )
 
         # Sign certificate
@@ -494,10 +487,7 @@ class CertificateStore:
 
         return cert
 
-    def rotate_certificate(
-        self,
-        valid_days: Optional[int] = None
-    ) -> Optional[DeviceCertificate]:
+    def rotate_certificate(self, valid_days: Optional[int] = None) -> Optional[DeviceCertificate]:
         """
         Rotate certificate before expiry.
 
@@ -591,8 +581,7 @@ _certificate_store: Optional[CertificateStore] = None
 
 
 def get_certificate_store(
-    certificate_dir: Optional[str] = None,
-    use_secure_storage: bool = True
+    certificate_dir: Optional[str] = None, use_secure_storage: bool = True
 ) -> CertificateStore:
     """
     Get or create certificate store singleton.
@@ -607,7 +596,6 @@ def get_certificate_store(
     global _certificate_store
     if _certificate_store is None:
         _certificate_store = CertificateStore(
-            certificate_dir=certificate_dir,
-            use_secure_storage=use_secure_storage
+            certificate_dir=certificate_dir, use_secure_storage=use_secure_storage
         )
     return _certificate_store

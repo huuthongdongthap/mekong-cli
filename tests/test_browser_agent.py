@@ -15,9 +15,20 @@ def _has_network():
     """Check if network is available."""
     try:
         result = subprocess.run(
-            ["curl", "-sL", "-o", "/dev/null", "-w", "%{http_code}",
-             "--max-time", "5", "https://httpbin.org/status/200"],
-            capture_output=True, text=True, timeout=10,
+            [
+                "curl",
+                "-sL",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                "--max-time",
+                "5",
+                "https://httpbin.org/status/200",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         return result.stdout.strip() == "200"
     except Exception:

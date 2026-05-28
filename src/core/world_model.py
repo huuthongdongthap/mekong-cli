@@ -50,9 +50,14 @@ class WorldDiff:
     @property
     def has_changes(self) -> bool:
         return bool(
-            self.files_added or self.files_removed or self.files_modified
-            or self.git_changed or self.new_processes or self.stopped_processes
-            or self.new_ports or self.closed_ports
+            self.files_added
+            or self.files_removed
+            or self.files_modified
+            or self.git_changed
+            or self.new_processes
+            or self.stopped_processes
+            or self.new_ports
+            or self.closed_ports
         )
 
     def summary(self) -> str:
@@ -148,10 +153,19 @@ class WorldModel:
             if any(pat in k.upper() for pat in _EXCLUDE_PATTERNS):
                 continue
             # Only include non-sensitive env vars
-            if any(pat in k.upper() for pat in [
-                "API", "URL", "PORT", "HOST",
-                "DATABASE", "REDIS", "MEKONG", "LLM",
-            ]):
+            if any(
+                pat in k.upper()
+                for pat in [
+                    "API",
+                    "URL",
+                    "PORT",
+                    "HOST",
+                    "DATABASE",
+                    "REDIS",
+                    "MEKONG",
+                    "LLM",
+                ]
+            ):
                 state.env_vars[k] = v
 
         # Store snapshot
@@ -183,8 +197,7 @@ class WorldModel:
             files_added=sorted(after_files - before_files),
             files_removed=sorted(before_files - after_files),
             git_changed=(
-                before.git_branch != after.git_branch
-                or before.git_status != after.git_status
+                before.git_branch != after.git_branch or before.git_status != after.git_status
             ),
             duration_ms=(after.timestamp - before.timestamp) * 1000,
         )
@@ -195,20 +208,10 @@ class WorldModel:
         result.files_modified = sorted(after_dirty - before_dirty)
 
         # Process changes
-        before_pids = {
-            p.get("pid", ""): p for p in before.running_processes
-        }
-        after_pids = {
-            p.get("pid", ""): p for p in after.running_processes
-        }
-        result.new_processes = [
-            p for pid, p in after_pids.items()
-            if pid not in before_pids
-        ]
-        result.stopped_processes = [
-            p for pid, p in before_pids.items()
-            if pid not in after_pids
-        ]
+        before_pids = {p.get("pid", ""): p for p in before.running_processes}
+        after_pids = {p.get("pid", ""): p for p in after.running_processes}
+        result.new_processes = [p for pid, p in after_pids.items() if pid not in before_pids]
+        result.stopped_processes = [p for pid, p in before_pids.items() if pid not in after_pids]
 
         # Port changes
         before_ports = set(before.open_ports)
@@ -219,7 +222,8 @@ class WorldModel:
         return result
 
     def predict_side_effects(
-        self, plan_description: str,
+        self,
+        plan_description: str,
     ) -> SideEffectPrediction:
         """
         Predict side effects of a planned action.
@@ -305,9 +309,7 @@ class WorldModel:
             f"Git branch: {state.git_branch or 'N/A'}",
         ]
         if state.git_dirty_files:
-            lines.append(
-                f"Dirty files: {', '.join(state.git_dirty_files[:5])}"
-            )
+            lines.append(f"Dirty files: {', '.join(state.git_dirty_files[:5])}")
         if state.open_ports:
             lines.append(f"Open ports: {state.open_ports}")
         if state.running_processes:
@@ -321,9 +323,17 @@ class WorldModel:
     def _get_file_tree(self, max_depth: int = 3) -> List[str]:
         """Get file listing (excluding noise directories)."""
         exclusions = {
-            ".git", "node_modules", "__pycache__", ".venv",
-            "venv", ".tox", ".mypy_cache", ".pytest_cache",
-            "dist", "build", ".egg-info",
+            ".git",
+            "node_modules",
+            "__pycache__",
+            ".venv",
+            "venv",
+            ".tox",
+            ".mypy_cache",
+            ".pytest_cache",
+            "dist",
+            "build",
+            ".egg-info",
         }
         files: List[str] = []
         root = Path(self.working_dir)
@@ -347,8 +357,15 @@ class WorldModel:
     def _get_relevant_processes(self) -> List[Dict[str, str]]:
         """Get running processes relevant to development."""
         keywords = [
-            "python", "node", "uvicorn", "gunicorn", "npm",
-            "docker", "redis", "postgres", "mekong",
+            "python",
+            "node",
+            "uvicorn",
+            "gunicorn",
+            "npm",
+            "docker",
+            "redis",
+            "postgres",
+            "mekong",
         ]
         processes: List[Dict[str, str]] = []
         try:
@@ -360,12 +377,14 @@ class WorldModel:
                 if len(parts) >= 11:
                     cmd = parts[10].lower()
                     if any(kw in cmd for kw in keywords):
-                        processes.append({
-                            "pid": parts[1],
-                            "name": parts[10][:80],
-                            "cpu": parts[2],
-                            "mem": parts[3],
-                        })
+                        processes.append(
+                            {
+                                "pid": parts[1],
+                                "name": parts[10][:80],
+                                "cpu": parts[2],
+                                "mem": parts[3],
+                            }
+                        )
         except Exception:
             pass
         return processes[:20]
@@ -394,9 +413,13 @@ class WorldModel:
         """Run a shell command and return stdout."""
         try:
             import shlex
+
             result = subprocess.run(
-                shlex.split(cmd), capture_output=True, text=True,
-                timeout=5, cwd=self.working_dir,
+                shlex.split(cmd),
+                capture_output=True,
+                text=True,
+                timeout=5,
+                cwd=self.working_dir,
             )
             return result.stdout.strip()
         except (subprocess.TimeoutExpired, Exception):

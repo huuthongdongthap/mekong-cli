@@ -1,11 +1,12 @@
 # MEKONG RAAS — GLOBAL CONTEXT LOADER
 Auto-load mỗi khi OpenCode CLI khởi động. Source of truth: `~/mekong-cli/`
 
-## COMMAND SYSTEM (17 core + 336 total)
+## COMMAND SYSTEM (17 core + 505 total)
 Commands có sẵn qua slash `/` hoặc Task tool. 
-- **opencode.json** → 17 core commands registered in opencode DB
-- **.claude/commands/** → 336 .md command definitions (full catalog)
-- **.opencode/commands/** → 336 OpenCode native versions
+- **opencode.json** → 505 commands registered (404 flat + 101 namespaced: git:commit, ci:run-ci, trading:ceo...)
+- **.claude/commands/** → 404 top-level + 101 subdir = 505 total .md definitions
+- **.opencode/commands/** → 870 OpenCode native versions (404 top-level + 466 subdir/namespace)
+- **Subdirs:** `ci/` `code/` `context/` `docs/` `finance/` `git/` `legal/` `mekong/` `raas/` `sdlc/` `tasks/` `trading/` `utils/`
 
 **Core Commands:**
 ```
@@ -28,25 +29,37 @@ Commands có sẵn qua slash `/` hoặc Task tool.
 /prime             — Quick prime — load essential project context in 5 seconds
 ```
 
-Full catalog: `ls ~/mekong-cli/.claude/commands/` (336 files, auto-updates via git)
+Full catalog: `ls ~/mekong-cli/.claude/commands/` (505 files, auto-updates via git)
 
 ## ARCHITECTURE
 ```
-~/.claude/                      # Claude Code Config (symlinked to repo)
-  commands/mekong/              → ~/mekong-cli/.claude/commands/ (336 slash commands)
-  skills/                       # Skills modules (loaded via skill tool)
-  agents/                       # Agent definitions
+~/.config/opencode/             # OpenCode Global Config (deep-linked to mekong-cli)
+  opencode.json                 # model, agents (10), skills, MCP, instructions
+  commands/       → ~/mekong-cli/.opencode/commands/  (870 commands, SYMLINK)
+  AGENTS.md                     # Global execution protocol
+
+~/.claude/                      # Claude Code User Config (deep-linked to mekong-cli)
+  commands/       → ~/mekong-cli/.claude/commands/   (505 slash commands, SYMLINK)
+  skills/mekong/  → ~/mekong-cli/.claude/skills/     (573 skills, SYMLINK)
+  agents/mekong/  → ~/mekong-cli/.claude/agents/     (9 agents, SYMLINK)
+  settings.json                 # hooks + MCP + permissions (mekong-wired)
+  settings.local.json           # Skill(*) full permission override
+
+~/CLAUDE.md       → ~/mekong-cli/GLOBAL_CONTEXT.md   (SYMLINK — this file)
 
 ~/mekong-cli/                   # Mekong CLI Root (git repo)
-  GLOBAL_CONTEXT.md             # ← THIS FILE (source of truth, symlinked from ~/CLAUDE.md)
-  opencode.json                 # OpenCode command definitions (17 core commands)
-  CLAUDE.md                     # Execution Protocol
-  .claude/                      # Claude Code config in repo
-    commands/                   # 336 command definitions
-    skills/                     # Skill modules
-    agents/                     # Agent definitions
+  GLOBAL_CONTEXT.md             # ← THIS FILE (source of truth)
+  CLAUDE.md                     # Execution Protocol (full OpenClaw constitution)
+  opencode.json                 # OpenCode: 505 commands (404 flat + 101 namespaced)
+  .claude/                      # Claude Code project config
+    commands/                   # 505 command definitions (404 + 101 subdir)
+    skills/                     # 573 skill modules
+    agents/                     # 9 agent definitions
+    hooks/                      # 12 lifecycle hooks (session/tool/stop/compact)
+    settings.json               # Project-level permissions + hooks
+    statusline.sh               # Custom statusline
   .opencode/                    # OpenCode native config
-    commands/                   # 336 OpenCode command definitions
+    commands/                   # 416 OpenCode command definitions
   FnB-Container-Caffe/          # F&B Project
   algo-trader/                  # Algo Trading
   antigravity/                  # IDE

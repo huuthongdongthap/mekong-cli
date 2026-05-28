@@ -165,6 +165,7 @@ class CCSpawner:
         # Inject agent identity if specified (Water Protocol 水)
         if session.agent_role:
             from src.core.agent_dispatcher import load_agent_prompt
+
             system_prompt = load_agent_prompt(session.agent_role)
             # Prepend identity to goal
             enriched_goal = (
@@ -237,7 +238,10 @@ class CCSpawner:
                 elif "<status>DONE_WITH_CONCERNS</status>" in _output:
                     # Still completed but log concerns
                     import re as _re
-                    _match = _re.search(r"<status>DONE_WITH_CONCERNS</status>\s*(.*)", _output, _re.DOTALL)
+
+                    _match = _re.search(
+                        r"<status>DONE_WITH_CONCERNS</status>\s*(.*)", _output, _re.DOTALL
+                    )
                     if _match:
                         session.error = f"concerns: {_match.group(1)[:200]}"
             else:
@@ -246,9 +250,7 @@ class CCSpawner:
 
         except FileNotFoundError:
             session.status = SessionStatus.FAILED
-            session.error = (
-                "claude CLI not found. Install: npm i -g @anthropic-ai/claude-code"
-            )
+            session.error = "claude CLI not found. Install: npm i -g @anthropic-ai/claude-code"
         except Exception as e:
             session.status = SessionStatus.FAILED
             session.error = str(e)
@@ -264,8 +266,7 @@ class CCSpawner:
         to_remove = [
             sid
             for sid, s in self._sessions.items()
-            if s.status
-            in (SessionStatus.COMPLETED, SessionStatus.FAILED, SessionStatus.TIMEOUT)
+            if s.status in (SessionStatus.COMPLETED, SessionStatus.FAILED, SessionStatus.TIMEOUT)
         ]
         for sid in to_remove:
             del self._sessions[sid]

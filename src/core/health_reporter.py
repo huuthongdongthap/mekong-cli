@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class HealthMetrics:
     """Health metrics snapshot."""
+
     cli_version: str
     os_type: str
     os_version: str
@@ -59,6 +60,7 @@ class HealthMetrics:
 @dataclass
 class HealthReport:
     """Report to send to gateway."""
+
     metrics: HealthMetrics
     timestamp: str
     report_type: str = "health_metrics"
@@ -85,9 +87,7 @@ class HealthReporter:
     ):
         self.consent_manager = consent_manager or get_consent_manager()
         self.auth_client = auth_client or RaaSAuthClient()
-        self.gateway_url = gateway_url or os.getenv(
-            "RAAS_GATEWAY_URL", "https://raas.agencyos.network"
-        )
+        self.gateway_url = gateway_url or os.getenv("RAAS_GATEWAY_URL", "https://api.cashclaw.cc")
         self.metrics_path = Path(self.METRICS_FILE).expanduser()
         self._metrics: Optional[HealthMetrics] = None
         self._last_report = 0.0
@@ -150,6 +150,7 @@ class HealthReporter:
     def _get_session_id(self) -> str:
         """Generate session ID."""
         import uuid
+
         return str(uuid.uuid4())[:8]
 
     def record_command(
@@ -186,8 +187,8 @@ class HealthReporter:
         # Update average duration
         total = metrics.commands_executed
         metrics.avg_command_duration_ms = (
-            (metrics.avg_command_duration_ms * (total - 1) + duration_ms) / total
-        )
+            metrics.avg_command_duration_ms * (total - 1) + duration_ms
+        ) / total
 
         self._save_metrics(metrics)
 

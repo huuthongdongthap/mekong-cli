@@ -38,7 +38,7 @@ def generate_secrets():
 @setup_app.command("license-activate")
 def activate_license(
     email: str = typer.Argument(..., help="Email address to associate with the license"),
-    tier: str = typer.Option("pro", help="License tier (starter, pro, enterprise)")
+    tier: str = typer.Option("pro", help="License tier (starter, pro, enterprise)"),
 ):
     """
     Activate UItra (PRO tier) license for email.
@@ -51,11 +51,13 @@ def activate_license(
     try:
         # Validate tier
         if tier.lower() not in LicenseTier.all_tiers():
-             console.print(f"[red]❌ Invalid tier: {tier}. Must be one of {LicenseTier.all_tiers()}[/red]")
-             return
+            console.print(
+                f"[red]❌ Invalid tier: {tier}. Must be one of {LicenseTier.all_tiers()}[/red]"
+            )
+            return
 
         result = validator.activate_by_email(email, tier=tier.lower())
-        
+
         console.print("\n" + "=" * 50)
         console.print("🏯  AGENCY OS: LICENSE ACTIVATED")
         console.print("=" * 50)

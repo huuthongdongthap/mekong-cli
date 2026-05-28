@@ -1,4 +1,5 @@
 """Allow running: python3 -m src.daemon.heartbeat_scheduler"""
+
 import os
 
 import sentry_sdk

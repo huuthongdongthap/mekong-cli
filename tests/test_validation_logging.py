@@ -147,6 +147,7 @@ class TestValidationLogger:
     @pytest.mark.asyncio
     async def test_get_validation_stats(self, logger, mock_db):
         """Should calculate validation statistics."""
+
         # Helper to create async side effect
         async def fetch_one_side_effect(query, *args):
             # Return different values based on query content
@@ -215,13 +216,16 @@ class TestValidationLogger:
 class TestValidationLogResult:
     """Test validation result types."""
 
-    @pytest.mark.parametrize("result", [
-        "success",
-        "failed",
-        "offline_grace",
-        "revoked",
-        "expired",
-    ])
+    @pytest.mark.parametrize(
+        "result",
+        [
+            "success",
+            "failed",
+            "offline_grace",
+            "revoked",
+            "expired",
+        ],
+    )
     def test_result_types(self, result):
         """Should accept all result types."""
         log = ValidationLog(
@@ -231,16 +235,19 @@ class TestValidationLogResult:
         )
         assert log.result == result
 
-    @pytest.mark.parametrize("error_type", [
-        None,
-        "invalid_format",
-        "network_error",
-        "quota_exceeded",
-        "rate_limit",
-        "revoked",
-        "expired",
-        "grace_period_expired",
-    ])
+    @pytest.mark.parametrize(
+        "error_type",
+        [
+            None,
+            "invalid_format",
+            "network_error",
+            "quota_exceeded",
+            "rate_limit",
+            "revoked",
+            "expired",
+            "grace_period_expired",
+        ],
+    )
     def test_error_types(self, error_type):
         """Should accept all error types."""
         log = ValidationLog(
@@ -261,6 +268,7 @@ class TestGlobalLogger:
         # Force re-import by setting to None
         import importlib
         import src.raas.validation_logger as module
+
         importlib.reload(module)
 
         logger = module.get_logger()

@@ -31,6 +31,7 @@ class EventSource(Enum):
 @dataclass
 class Event:
     """An event that triggers a reaction."""
+
     type: str
     source: EventSource
     data: dict = field(default_factory=dict)
@@ -40,6 +41,7 @@ class Event:
 @dataclass
 class Reaction:
     """A reaction to an event — maps event → chapter → commands."""
+
     event_type: str
     chapter: int
     commands: list[str]
@@ -98,7 +100,6 @@ REACTIONS: list[Reaction] = [
         escalation=EscalationLevel.APPROVE,
         description="Security alert → Chapter 13 (intel) → audit and fix",
     ),
-
     # ── Polar/Revenue Events ──
     Reaction(
         event_type="subscription.created",
@@ -128,7 +129,6 @@ REACTIONS: list[Reaction] = [
         escalation=EscalationLevel.AUTONOMOUS,
         description="Credits low → Chapter 5 → send usage report",
     ),
-
     # ── Metrics Events ──
     Reaction(
         event_type="mrr.dropped",
@@ -152,7 +152,6 @@ REACTIONS: list[Reaction] = [
         escalation=EscalationLevel.APPROVE,
         description="Churn spike → Chapter 6 (void) → find product gaps",
     ),
-
     # ── Health Events ──
     Reaction(
         event_type="health.degraded",
@@ -168,7 +167,6 @@ REACTIONS: list[Reaction] = [
         escalation=EscalationLevel.APPROVE,
         description="Service down → Chapter 7 (maneuver) → incident response",
     ),
-
     # ── Cron Events (scheduled) ──
     Reaction(
         event_type="cron.daily",
@@ -236,25 +234,29 @@ class ReactionEngine:
             needs_approval = reaction.escalation.value >= EscalationLevel.APPROVE.value
             llm = self.topology.get_llm_provider(reaction.commands[0])
 
-            actions.append({
-                "event": event.type,
-                "chapter": reaction.chapter,
-                "commands": reaction.commands,
-                "escalation": reaction.escalation.name,
-                "needs_approval": needs_approval,
-                "llm": llm,
-                "description": reaction.description,
-            })
+            actions.append(
+                {
+                    "event": event.type,
+                    "chapter": reaction.chapter,
+                    "commands": reaction.commands,
+                    "escalation": reaction.escalation.name,
+                    "needs_approval": needs_approval,
+                    "llm": llm,
+                    "description": reaction.description,
+                }
+            )
 
         if not actions:
-            actions.append({
-                "event": event.type,
-                "chapter": 0,
-                "commands": [],
-                "escalation": "NONE",
-                "needs_approval": False,
-                "description": f"No reaction defined for event: {event.type}",
-            })
+            actions.append(
+                {
+                    "event": event.type,
+                    "chapter": 0,
+                    "commands": [],
+                    "escalation": "NONE",
+                    "needs_approval": False,
+                    "description": f"No reaction defined for event: {event.type}",
+                }
+            )
 
         return actions
 

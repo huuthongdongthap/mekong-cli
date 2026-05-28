@@ -3,6 +3,7 @@
 Tests customer lookup, subscription status, tier-to-role mapping,
 webhook handling, signature verification, and role synchronization.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -12,10 +13,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Mock stripe module if not available
+# Mock stripe module if not available — save original so we can restore it
+# after this test module finishes. Without restoration, tests that run AFTER
+# this file and patch 'stripe.Customer' or 'stripe.Subscription' would fail
+# because the real stripe package is a namespace package (not a plain module).
 import sys
+
+_original_stripe = sys.modules.get("stripe")
 mock_stripe = MagicMock()
-sys.modules['stripe'] = mock_stripe
+sys.modules["stripe"] = mock_stripe
 
 from src.auth.stripe_integration import (  # noqa: E402
     StripeService,
@@ -24,6 +30,27 @@ from src.auth.stripe_integration import (  # noqa: E402
     get_tier_to_role_mapping,
 )
 from src.auth.rbac import Role  # noqa: E402
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _patch_stripe_in_integration_module():
+    """Patch the stripe reference inside src.auth.stripe_integration for this module.
+
+    test_auth_routes.py imports src.auth.stripe_integration at collection time
+    (before this file's sys.modules patch runs), so stripe_integration.stripe
+    holds a reference to the REAL stripe. We must also patch that reference so
+    stripe.Customer / stripe.Subscription lookups in these tests use the mock.
+    """
+    import src.auth.stripe_integration as _si_mod
+
+    original_stripe_in_si = _si_mod.stripe
+    _si_mod.stripe = mock_stripe
+    yield
+    _si_mod.stripe = original_stripe_in_si
+    if _original_stripe is not None:
+        sys.modules["stripe"] = _original_stripe
+    elif "stripe" in sys.modules:
+        del sys.modules["stripe"]
 
 
 class TestStripeCustomerDataclass:
@@ -40,18 +67,10 @@ class TestStripeCustomerDataclass:
                     {
                         "id": "sub_123",
                         "status": "active",
-                        "items": {
-                            "data": [
-                                {
-                                    "price": {
-                                        "id": "price_pro_123"
-                                    }
-                                }
-                            ]
-                        }
+                        "items": {"data": [{"price": {"id": "price_pro_123"}}]},
                     }
                 ]
-            }
+            },
         }
 
         customer = StripeCustomer.from_dict(data)
@@ -82,14 +101,8 @@ class TestStripeCustomerDataclass:
             "id": "cus_123abc",
             "email": "customer@example.com",
             "subscriptions": {
-                "data": [
-                    {
-                        "id": "sub_123",
-                        "status": "active",
-                        "items": {"data": []}
-                    }
-                ]
-            }
+                "data": [{"id": "sub_123", "status": "active", "items": {"data": []}}]
+            },
         }
 
         customer = StripeCustomer.from_dict(data)
@@ -123,14 +136,16 @@ class TestTierToRoleMapping:
 
     def test_custom_mapping_via_env(self):
         """Should parse custom mapping from environment."""
-        custom_mapping = json.dumps({
-            "price_premium": "owner",
-            "price_pro": "admin",
-            "price_basic": "member",
-            "price_free": "viewer",
-        })
+        custom_mapping = json.dumps(
+            {
+                "price_premium": "owner",
+                "price_pro": "admin",
+                "price_basic": "member",
+                "price_free": "viewer",
+            }
+        )
 
-        with patch.dict('os.environ', {'STRIPE_PRICE_IDS': custom_mapping}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_PRICE_IDS": custom_mapping}, clear=True):
             mapping = get_tier_to_role_mapping()
 
             assert mapping["price_premium"] == Role.OWNER
@@ -140,7 +155,7 @@ class TestTierToRoleMapping:
 
     def test_invalid_env_mapping_falls_back_to_default(self):
         """Should fall back to defaults on JSON parse error."""
-        with patch.dict('os.environ', {'STRIPE_PRICE_IDS': 'invalid json'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_PRICE_IDS": "invalid json"}, clear=True):
             mapping = get_tier_to_role_mapping()
 
             assert isinstance(mapping, dict)
@@ -151,25 +166,25 @@ class TestStripeServiceInit:
 
     def test_service_creates_stripe_client(self):
         """Should initialize Stripe client when API key configured."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key-123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key-123"}, clear=True):
             service = StripeService()
 
-            assert service.api_key == 'test-key-123'
+            assert service.api_key == "test-key-123"
             assert service.webhook_secret is not None or True
 
     def test_service_sets_stripe_api_key(self):
         """Should set Stripe API key."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'sk_test_abc123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_abc123"}, clear=True):
             service = StripeService()
 
-            assert service.api_key == 'sk_test_abc123'
+            assert service.api_key == "sk_test_abc123"
 
     def test_service_has_webhook_secret(self):
         """Should have webhook secret for signature verification."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': 'whsec_123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": "whsec_123"}, clear=True):
             service = StripeService()
 
-            assert service.webhook_secret == 'whsec_123'
+            assert service.webhook_secret == "whsec_123"
 
 
 class TestGetCustomerByEmail:
@@ -178,7 +193,7 @@ class TestGetCustomerByEmail:
     @pytest.mark.asyncio
     async def test_get_customer_by_email_finds_customer(self):
         """Should return StripeCustomer when found."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             # Mock with proper data class
@@ -195,7 +210,7 @@ class TestGetCustomerByEmail:
             mock_response = MagicMock()
             mock_response.list = AsyncMock(return_value=mock_customers)
 
-            with patch('src.auth.stripe_integration.stripe.Customer', mock_response):
+            with patch("src.auth.stripe_integration.stripe.Customer", mock_response):
                 customer = await service.get_customer_by_email("found@example.com")
 
                 assert customer is not None
@@ -205,7 +220,7 @@ class TestGetCustomerByEmail:
     @pytest.mark.asyncio
     async def test_get_customer_by_email_not_found(self):
         """Should return None when customer not found."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_customers = MagicMock()
@@ -214,7 +229,7 @@ class TestGetCustomerByEmail:
             mock_response = MagicMock()
             mock_response.list = AsyncMock(return_value=mock_customers)
 
-            with patch('stripe.Customer', mock_response):
+            with patch("stripe.Customer", mock_response):
                 customer = await service.get_customer_by_email("notfound@example.com")
 
                 assert customer is None
@@ -222,13 +237,13 @@ class TestGetCustomerByEmail:
     @pytest.mark.asyncio
     async def test_get_customer_by_email_handles_stripe_error(self):
         """Should return None on Stripe API error."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_response = MagicMock()
             mock_response.list.side_effect = Exception("Stripe API Error")
 
-            with patch('stripe.Customer', mock_response):
+            with patch("stripe.Customer", mock_response):
                 customer = await service.get_customer_by_email("test@example.com")
 
                 assert customer is None
@@ -240,7 +255,7 @@ class TestGetSubscriptionStatus:
     @pytest.mark.asyncio
     async def test_get_subscription_status_active(self):
         """Should return active subscription details."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_subscription = MagicMock()
@@ -266,7 +281,7 @@ class TestGetSubscriptionStatus:
             mock_response = MagicMock()
             mock_response.list = AsyncMock(return_value=mock_subscriptions)
 
-            with patch('src.auth.stripe_integration.stripe.Subscription', mock_response):
+            with patch("src.auth.stripe_integration.stripe.Subscription", mock_response):
                 status = await service.get_subscription_status("cus_123")
 
                 assert status is not None
@@ -277,7 +292,7 @@ class TestGetSubscriptionStatus:
     @pytest.mark.asyncio
     async def test_get_subscription_status_no_subscription(self):
         """Should return None when no active subscription."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_subscriptions = MagicMock()
@@ -286,7 +301,7 @@ class TestGetSubscriptionStatus:
             mock_response = MagicMock()
             mock_response.list = AsyncMock(return_value=mock_subscriptions)
 
-            with patch('stripe.Subscription', mock_response):
+            with patch("stripe.Subscription", mock_response):
                 status = await service.get_subscription_status("cus_no_sub")
 
                 assert status is None
@@ -297,7 +312,7 @@ class TestMapTierToRole:
 
     def test_map_tier_to_role_exact_match(self):
         """Should match exact price ID."""
-        with patch.dict('os.environ', {'STRIPE_PRICE_IDS': '{}'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_PRICE_IDS": "{}"}, clear=True):
             service = StripeService()
 
             role = service.map_tier_to_role("price_enterprise")
@@ -306,7 +321,7 @@ class TestMapTierToRole:
 
     def test_map_tier_to_role_pattern_match(self):
         """Should match by pattern when exact ID not found."""
-        with patch.dict('os.environ', {'STRIPE_PRICE_IDS': '{}'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_PRICE_IDS": "{}"}, clear=True):
             service = StripeService()
 
             role = service.map_tier_to_role("price_123_pro")
@@ -315,7 +330,7 @@ class TestMapTierToRole:
 
     def test_map_tier_to_role_not_found_returns_none(self):
         """Should return None when tier not mapped."""
-        with patch.dict('os.environ', {'STRIPE_PRICE_IDS': '{}'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_PRICE_IDS": "{}"}, clear=True):
             service = StripeService()
 
             role = service.map_tier_to_role("price_unknown_xyz")
@@ -329,7 +344,7 @@ class TestSyncUserRole:
     @pytest.mark.asyncio
     async def test_sync_user_role_updates_role(self):
         """Should update user role based on subscription tier."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -340,14 +355,14 @@ class TestSyncUserRole:
             mock_user_repo.find_by_id = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 mock_customer = StripeCustomer(
                     id="cus_123",
                     email="user@example.com",
                     subscription_tier="price_pro",
                 )
 
-                with patch.object(service, 'get_customer_by_email', return_value=mock_customer):
+                with patch.object(service, "get_customer_by_email", return_value=mock_customer):
                     result = await service.sync_user_role("user-123")
 
                     assert result is True
@@ -356,7 +371,7 @@ class TestSyncUserRole:
     @pytest.mark.asyncio
     async def test_sync_user_role_finds_by_email(self):
         """Should find user by email when customer has same email."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -367,22 +382,24 @@ class TestSyncUserRole:
             mock_user_repo.find_by_id = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 mock_customer = StripeCustomer(
                     id="cus_email_match",
                     email="customer@stripe.com",
                     subscription_tier="price_pro",
                 )
 
-                with patch.object(service, 'get_customer_by_email', return_value=mock_customer):
-                    result = await service.sync_user_role("user-456", customer_email="customer@stripe.com")
+                with patch.object(service, "get_customer_by_email", return_value=mock_customer):
+                    result = await service.sync_user_role(
+                        "user-456", customer_email="customer@stripe.com"
+                    )
 
                     assert result is True
 
     @pytest.mark.asyncio
     async def test_sync_user_role_no_customer_falls_back_to_viewer(self):
         """Should set role to VIEWER when no Stripe customer found."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -393,8 +410,8 @@ class TestSyncUserRole:
             mock_user_repo.find_by_id = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
-                with patch.object(service, 'get_customer_by_email', return_value=None):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
+                with patch.object(service, "get_customer_by_email", return_value=None):
                     result = await service.sync_user_role("user-789")
 
                     assert result is True
@@ -404,13 +421,13 @@ class TestSyncUserRole:
     @pytest.mark.asyncio
     async def test_sync_user_role_handles_user_not_found(self):
         """Should return False when user not found in database."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user_repo = MagicMock()
             mock_user_repo.find_by_id = AsyncMock(return_value=None)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 result = await service.sync_user_role("nonexistent-user")
 
                 assert result is False
@@ -421,7 +438,7 @@ class TestVerifyWebhookSignature:
 
     def test_verify_webhook_signature_valid(self):
         """Should verify valid signature."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': 'whsec_test123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": "whsec_test123"}, clear=True):
             service = StripeService()
 
             payload = json.dumps({"type": "test.event"}).encode()
@@ -429,8 +446,8 @@ class TestVerifyWebhookSignature:
 
             signed_payload = f"{timestamp}.{payload.decode()}"
             expected_sig = hmac.new(
-                'whsec_test123'.encode('utf-8'),
-                signed_payload.encode('utf-8'),
+                "whsec_test123".encode("utf-8"),
+                signed_payload.encode("utf-8"),
                 hashlib.sha256,
             ).hexdigest()
 
@@ -442,7 +459,7 @@ class TestVerifyWebhookSignature:
 
     def test_verify_webhook_signature_invalid(self):
         """Should reject invalid signature."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': 'whsec_test123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": "whsec_test123"}, clear=True):
             service = StripeService()
 
             payload = b'{"type": "test.event"}'
@@ -454,7 +471,7 @@ class TestVerifyWebhookSignature:
 
     def test_verify_webhook_signature_no_secret(self):
         """Should return False when webhook secret not configured."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': ''}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": ""}, clear=True):
             service = StripeService()
 
             payload = b'{"type": "test.event"}'
@@ -466,7 +483,7 @@ class TestVerifyWebhookSignature:
 
     def test_verify_webhook_signature_missing_timestamp(self):
         """Should return False when timestamp is missing."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': 'whsec_test123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": "whsec_test123"}, clear=True):
             service = StripeService()
 
             payload = b'{"type": "test.event"}'
@@ -483,7 +500,7 @@ class TestHandleStripeWebhook:
     @pytest.mark.asyncio
     async def test_handle_subscription_created(self):
         """Should handle customer.subscription.created event."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -499,24 +516,17 @@ class TestHandleStripeWebhook:
             mock_user_repo.find_by_email = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 event_data = {
                     "object": {
                         "customer": "cus_created",
-                        "items": {
-                            "data": [
-                                {
-                                    "price": {"id": "price_pro"}
-                                }
-                            ]
-                        }
+                        "items": {"data": [{"price": {"id": "price_pro"}}]},
                     }
                 }
 
-                with patch.object(service, '_get_customer_by_id', return_value=mock_customer):
+                with patch.object(service, "_get_customer_by_id", return_value=mock_customer):
                     result = await service.handle_stripe_webhook(
-                        StripeEventType.SUBSCRIPTION_CREATED.value,
-                        event_data
+                        StripeEventType.SUBSCRIPTION_CREATED.value, event_data
                     )
 
                     assert result["success"] is True
@@ -525,27 +535,22 @@ class TestHandleStripeWebhook:
     @pytest.mark.asyncio
     async def test_handle_subscription_created_customer_not_found(self):
         """Should return error when customer not found."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user_repo = MagicMock()
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 event_data = {
                     "object": {
                         "customer": "cus_unknown",
-                        "items": {
-                            "data": [
-                                {"price": {"id": "price_pro"}}
-                            ]
-                        }
+                        "items": {"data": [{"price": {"id": "price_pro"}}]},
                     }
                 }
 
-                with patch.object(service, '_get_customer_by_id', return_value=None):
+                with patch.object(service, "_get_customer_by_id", return_value=None):
                     result = await service.handle_stripe_webhook(
-                        StripeEventType.SUBSCRIPTION_CREATED.value,
-                        event_data
+                        StripeEventType.SUBSCRIPTION_CREATED.value, event_data
                     )
 
                     assert result["success"] is False
@@ -554,7 +559,7 @@ class TestHandleStripeWebhook:
     @pytest.mark.asyncio
     async def test_handle_subscription_updated(self):
         """Should handle customer.subscription.updated event."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -570,20 +575,17 @@ class TestHandleStripeWebhook:
             mock_user_repo.find_by_email = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 event_data = {
                     "object": {
                         "customer": "cus_updated",
-                        "items": {
-                            "data": [{"price": {"id": "price_enterprise"}}]
-                        }
+                        "items": {"data": [{"price": {"id": "price_enterprise"}}]},
                     }
                 }
 
-                with patch.object(service, '_get_customer_by_id', return_value=mock_customer):
+                with patch.object(service, "_get_customer_by_id", return_value=mock_customer):
                     result = await service.handle_stripe_webhook(
-                        StripeEventType.SUBSCRIPTION_UPDATED.value,
-                        event_data
+                        StripeEventType.SUBSCRIPTION_UPDATED.value, event_data
                     )
 
                     assert result["success"] is True
@@ -591,7 +593,7 @@ class TestHandleStripeWebhook:
     @pytest.mark.asyncio
     async def test_handle_subscription_deleted(self):
         """Should handle customer.subscription.deleted event."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -607,17 +609,16 @@ class TestHandleStripeWebhook:
             mock_user_repo.find_by_email = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 event_data = {
                     "object": {
                         "customer": "cus_deleted",
                     }
                 }
 
-                with patch.object(service, '_get_customer_by_id', return_value=mock_customer):
+                with patch.object(service, "_get_customer_by_id", return_value=mock_customer):
                     result = await service.handle_stripe_webhook(
-                        StripeEventType.SUBSCRIPTION_DELETED.value,
-                        event_data
+                        StripeEventType.SUBSCRIPTION_DELETED.value, event_data
                     )
 
                     assert result["success"] is True
@@ -627,7 +628,7 @@ class TestHandleStripeWebhook:
     @pytest.mark.asyncio
     async def test_handle_customer_deleted(self):
         """Should handle customer.deleted event."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
             mock_user = MagicMock()
@@ -638,7 +639,7 @@ class TestHandleStripeWebhook:
             mock_user_repo.find_by_email = AsyncMock(return_value=mock_user)
             mock_user_repo.update_user_role = AsyncMock(return_value=mock_user)
 
-            with patch('src.auth.stripe_integration.UserRepository', return_value=mock_user_repo):
+            with patch("src.auth.stripe_integration.UserRepository", return_value=mock_user_repo):
                 event_data = {
                     "object": {
                         "email": "customer@example.com",
@@ -646,8 +647,7 @@ class TestHandleStripeWebhook:
                 }
 
                 result = await service.handle_stripe_webhook(
-                    StripeEventType.CUSTOMER_DELETED.value,
-                    event_data
+                    StripeEventType.CUSTOMER_DELETED.value, event_data
                 )
 
                 assert result["success"] is True
@@ -655,13 +655,10 @@ class TestHandleStripeWebhook:
     @pytest.mark.asyncio
     async def test_handle_unknown_event_type(self):
         """Should return success for unknown event types."""
-        with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'test-key'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "test-key"}, clear=True):
             service = StripeService()
 
-            result = await service.handle_stripe_webhook(
-                "unknown.event.type",
-                {}
-            )
+            result = await service.handle_stripe_webhook("unknown.event.type", {})
 
             assert result["success"] is True
             assert "handled" in result["message"].lower()
@@ -672,15 +669,15 @@ class TestSignatureVerificationEdgeCases:
 
     def test_signature_with_extra_parts(self):
         """Should handle signature with additional parts."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': 'whsec_test123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": "whsec_test123"}, clear=True):
             service = StripeService()
 
             payload = b'{"type": "test.event"}'
             timestamp = "1234567890"
             signed_payload = f"{timestamp}.{payload.decode()}"
             expected_sig = hmac.new(
-                'whsec_test123'.encode('utf-8'),
-                signed_payload.encode('utf-8'),
+                "whsec_test123".encode("utf-8"),
+                signed_payload.encode("utf-8"),
                 hashlib.sha256,
             ).hexdigest()
 
@@ -692,15 +689,15 @@ class TestSignatureVerificationEdgeCases:
 
     def test_signature_with_empty_payload(self):
         """Should handle empty payload."""
-        with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': 'whsec_test123'}, clear=True):
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": "whsec_test123"}, clear=True):
             service = StripeService()
 
-            payload = b''
+            payload = b""
             timestamp = "1234567890"
             signed_payload = f"{timestamp}."
             expected_sig = hmac.new(
-                'whsec_test123'.encode('utf-8'),
-                signed_payload.encode('utf-8'),
+                "whsec_test123".encode("utf-8"),
+                signed_payload.encode("utf-8"),
                 hashlib.sha256,
             ).hexdigest()
 

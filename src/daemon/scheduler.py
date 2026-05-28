@@ -59,7 +59,9 @@ class DaemonScheduler:
         signal.signal(signal.SIGTERM, self._handle_signal)
         signal.signal(signal.SIGINT, self._handle_signal)
 
-        logger.info("Daemon started — watching %s (poll: %ds)", self._watch_dir, self._poll_interval)
+        logger.info(
+            "Daemon started — watching %s (poll: %ds)", self._watch_dir, self._poll_interval
+        )
 
         while self._running:
             missions = self.watcher.scan_once()
@@ -92,14 +94,18 @@ class DaemonScheduler:
             return
 
         classification = self.classifier.classify(content)
-        logger.info("Classified: %s → %s (timeout: %ds)", name, classification.level, classification.timeout)
+        logger.info(
+            "Classified: %s → %s (timeout: %ds)", name, classification.level, classification.timeout
+        )
 
         result = self.executor.run_shell(content, timeout=classification.timeout)
 
         if result.success and self.gate.check():
             self.journal.record_mission(
-                mission=name, complexity=classification.level,
-                success=True, duration=result.duration,
+                mission=name,
+                complexity=classification.level,
+                success=True,
+                duration=result.duration,
             )
             self.watcher.archive(mission_path)
             logger.info("Mission completed: %s (%.1fs)", name, result.duration)
@@ -111,8 +117,11 @@ class DaemonScheduler:
                 reason = result.error or "Max retries exceeded"
                 self.dlq.move_to_dlq(mission_path, reason)
                 self.journal.record_mission(
-                    mission=name, complexity=classification.level,
-                    success=False, duration=result.duration, error=reason,
+                    mission=name,
+                    complexity=classification.level,
+                    success=False,
+                    duration=result.duration,
+                    error=reason,
                 )
                 del self._retry_counts[name]
                 logger.warning("Mission failed → DLQ: %s (%s)", name, reason)

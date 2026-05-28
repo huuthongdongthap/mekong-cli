@@ -113,6 +113,7 @@ class TestComponentCheckRegistry:
 
     def test_register_component_check(self) -> None:
         """Test registering a component check."""
+
         def check_fn() -> ComponentStatus:
             return ComponentStatus(status="healthy")
 
@@ -122,6 +123,7 @@ class TestComponentCheckRegistry:
 
     def test_unregister_component_check(self) -> None:
         """Test unregistering a component check."""
+
         def check_fn() -> ComponentStatus:
             return ComponentStatus(status="healthy")
 
@@ -220,7 +222,9 @@ class TestCrashDetector:
         assert "crash-" in crash.crash_id
 
     def test_record_crash_persists_to_disk(
-        self, detector: CrashDetector, tmp_path: Path,
+        self,
+        detector: CrashDetector,
+        tmp_path: Path,
     ) -> None:
         """Test crash is persisted to disk."""
         crash = detector.record_crash(

@@ -64,12 +64,14 @@ def telemetry_status():
     status = manager.get_status()
 
     if status["status"] == "not_set":
-        console.print(Panel(
-            "[yellow]📊 Telemetry consent not set[/yellow]\n\n"
-            "Run [bold]mekong telemetry enable[/bold] to opt-in\n"
-            "Run [bold]mekong telemetry disable[/bold] to opt-out",
-            title="Telemetry Status",
-        ))
+        console.print(
+            Panel(
+                "[yellow]📊 Telemetry consent not set[/yellow]\n\n"
+                "Run [bold]mekong telemetry enable[/bold] to opt-in\n"
+                "Run [bold]mekong telemetry disable[/bold] to opt-out",
+                title="Telemetry Status",
+            )
+        )
         return
 
     table = Table(title="📊 Telemetry Status")

@@ -5,6 +5,7 @@ Executes recipes parsed from Markdown files.
 Returns ExecutionResult for orchestrator integration.
 """
 
+import shlex
 import subprocess
 import time
 from rich.console import Console
@@ -115,9 +116,7 @@ class RecipeExecutor:
         headers = step.params.get("headers", {}) if step.params else {}
 
         if not url:
-            self.console.print(
-                "[yellow]⚠️  No URL specified — skipping API step[/yellow]"
-            )
+            self.console.print("[yellow]⚠️  No URL specified — skipping API step[/yellow]")
             return ExecutionResult(
                 exit_code=0,
                 stdout="[SKIPPED] No URL",
@@ -130,9 +129,7 @@ class RecipeExecutor:
         try:
             response = req.request(method, url, json=body, headers=headers, timeout=30)
             status_color = "green" if response.ok else "red"
-            self.console.print(
-                f"[{status_color}]Status: {response.status_code}[/{status_color}]"
-            )
+            self.console.print(f"[{status_color}]Status: {response.status_code}[/{status_color}]")
 
             preview = response.text[:1000] if response.text else ""
             if preview:
@@ -240,9 +237,7 @@ class RecipeExecutor:
                 output = f"HTTP {result.status_code} ({result.duration_ms:.0f}ms)"
             elif browse_action == "links":
                 result = agent.get_links(url)
-                output = f"Found {len(result.links)} links:\n" + "\n".join(
-                    result.links[:10]
-                )
+                output = f"Found {len(result.links)} links:\n" + "\n".join(result.links[:10])
             else:  # analyze
                 result = agent.analyze_page(url)
                 output = (
@@ -321,8 +316,12 @@ class RecipeExecutor:
             self.console.print(f"[dim]Running:[/dim] {command}")
 
             try:
+                # shell=False: split string into list to prevent command injection.
+                # CommandSanitizer already vetted `command`, but shell=True still
+                # allows metachar injection (;, &&, $()) on unsanitised sub-parts.
+                cmd_args = shlex.split(command) if isinstance(command, str) else command
                 process = subprocess.run(
-                    command, shell=True, check=True, text=True, capture_output=True
+                    cmd_args, shell=False, check=True, text=True, capture_output=True
                 )
 
                 if process.stdout:
@@ -364,9 +363,7 @@ class RecipeExecutor:
                     )
                     continue
 
-                self.console.print(
-                    f"[bold red]Error executing step {step.order}[/bold red]"
-                )
+                self.console.print(f"[bold red]Error executing step {step.order}[/bold red]")
                 if e.stdout:
                     self.console.print(
                         Panel(

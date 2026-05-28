@@ -161,9 +161,7 @@ def check_today():
     followups = load_followups()
     today = datetime.now().strftime("%Y-%m-%d")
 
-    due_today = [
-        f for f in followups if f["due_date"] == today and f["status"] == "pending"
-    ]
+    due_today = [f for f in followups if f["due_date"] == today and f["status"] == "pending"]
 
     print(f"\n{BOLD}📬 FOLLOW-UPS DUE TODAY ({today}){RESET}")
     print("=" * 50)

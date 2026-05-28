@@ -59,9 +59,7 @@ class PeekabooQuotaManager:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
 
-    def capture_quota_panel(
-        self, app_name: str = "Antigravity"
-    ) -> Optional[Dict[str, Any]]:
+    def capture_quota_panel(self, app_name: str = "Antigravity") -> Optional[Dict[str, Any]]:
         """
         Capture Antigravity quota panel using Peekaboo see command.
 
@@ -94,9 +92,7 @@ class PeekabooQuotaManager:
                 with open(snapshot_file, "w") as f:
                     json.dump(data, f, indent=2)
 
-                print(
-                    f"✅ Captured snapshot: {data.get('data', {}).get('snapshot_id', 'unknown')}"
-                )
+                print(f"✅ Captured snapshot: {data.get('data', {}).get('snapshot_id', 'unknown')}")
                 return data
             else:
                 print(f"❌ Capture failed: {result.stderr}")
@@ -257,15 +253,11 @@ def main():
 
     # Wakeup
     wakeup_parser = subparsers.add_parser("wakeup", help="Wake up a model")
-    wakeup_parser.add_argument(
-        "--model", default="Claude Sonnet", help="Model to wake up"
-    )
+    wakeup_parser.add_argument("--model", default="Claude Sonnet", help="Model to wake up")
 
     # Auto
     auto_parser = subparsers.add_parser("auto", help="Full automation flow")
-    auto_parser.add_argument(
-        "--threshold", type=int, default=30, help="Quota threshold"
-    )
+    auto_parser.add_argument("--threshold", type=int, default=30, help="Quota threshold")
 
     # Check
     subparsers.add_parser("check", help="Check Peekaboo installation")
@@ -278,9 +270,7 @@ def main():
             print("✅ Peekaboo is installed!")
             subprocess.run(["peekaboo", "--version"])
         else:
-            print(
-                "❌ Peekaboo not found. Install with: brew install steipete/tap/peekaboo"
-            )
+            print("❌ Peekaboo not found. Install with: brew install steipete/tap/peekaboo")
             sys.exit(1)
 
     elif args.command == "capture":

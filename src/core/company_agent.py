@@ -46,14 +46,16 @@ def list_agents(base_dir: str | Path = ".") -> list[dict]:
         last_active = _last_active(memory, role)
         model = ROLE_DEFAULTS.get(role, {}).get("model", "unknown")
 
-        result.append({
-            "role": role,
-            "status": "paused" if paused else ("active" if exists else "unconfigured"),
-            "model": model,
-            "tasks": task_count,
-            "last_active": last_active,
-            "prompt_exists": exists,
-        })
+        result.append(
+            {
+                "role": role,
+                "status": "paused" if paused else ("active" if exists else "unconfigured"),
+                "model": model,
+                "tasks": task_count,
+                "last_active": last_active,
+                "prompt_exists": exists,
+            }
+        )
 
     return result
 
@@ -117,9 +119,7 @@ def train_agent(role: str, knowledge: str, base_dir: str | Path = ".") -> dict:
     return {"role": role, "lines_added": len(lines), "date": now}
 
 
-def handoff(
-    from_role: str, to_role: str, context: str, base_dir: str | Path = "."
-) -> dict:
+def handoff(from_role: str, to_role: str, context: str, base_dir: str | Path = ".") -> dict:
     """Record agent-to-agent handoff in memory."""
     for role in (from_role, to_role):
         if role not in AGENT_ROLES:
@@ -205,9 +205,7 @@ def _save_memory(base: Path, memory: list[dict]) -> None:
     """Save memory entries to memory.json."""
     memory_file = base / ".mekong" / "memory.json"
     memory_file.parent.mkdir(parents=True, exist_ok=True)
-    memory_file.write_text(
-        json.dumps(memory, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    memory_file.write_text(json.dumps(memory, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def _last_active(memory: list[dict], role: str) -> str:

@@ -73,9 +73,7 @@ class SubsystemHealth:
             "avg_latency_ms": round(self.avg_latency_ms, 2),
             "error_count": self.error_count,
             "success_rate": round(self.success_rate, 4),
-            "last_activated": (
-                self.last_activated.isoformat() if self.last_activated else None
-            ),
+            "last_activated": (self.last_activated.isoformat() if self.last_activated else None),
         }
 
 

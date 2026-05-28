@@ -213,9 +213,7 @@ def cmd_auto():
     now = datetime.now().strftime("%H:%M")
 
     ready = [
-        q
-        for q in queue
-        if q["status"] == "queued" and q["date"] <= today and q["time"] <= now
+        q for q in queue if q["status"] == "queued" and q["date"] <= today and q["time"] <= now
     ]
 
     if not ready:

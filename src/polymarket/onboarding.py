@@ -18,6 +18,7 @@ try:
     from rich.console import Console
     from rich.panel import Panel
     from rich.prompt import Prompt
+
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
@@ -62,13 +63,15 @@ class OnboardingWizard:
     def _print_welcome(self) -> None:
         """Print welcome banner."""
         if self.console:
-            self.console.print(Panel(
-                "[bold]Welcome to CashClaw[/bold]\n\n"
-                "AI-powered prediction market trading signals.\n"
-                "This wizard will get you trading in 2 minutes.",
-                title="CashClaw Setup",
-                border_style="green",
-            ))
+            self.console.print(
+                Panel(
+                    "[bold]Welcome to CashClaw[/bold]\n\n"
+                    "AI-powered prediction market trading signals.\n"
+                    "This wizard will get you trading in 2 minutes.",
+                    title="CashClaw Setup",
+                    border_style="green",
+                )
+            )
         else:
             print("=== CashClaw Setup ===")
             print("AI-powered prediction market trading signals.")
@@ -114,6 +117,7 @@ class OnboardingWizard:
         """Initialize paper trading."""
         try:
             from src.polymarket.trading_pipeline import PipelineConfig, TradingPipeline
+
             config = PipelineConfig(
                 initial_capital=200.0,
                 paper_trading=True,
@@ -127,15 +131,17 @@ class OnboardingWizard:
     def _print_success(self) -> None:
         """Print success message."""
         if self.console:
-            self.console.print(Panel(
-                "[bold green]Setup complete![/bold green]\n\n"
-                "Next steps:\n"
-                "  1. Run [bold]cashclaw paper[/bold] to start paper trading\n"
-                "  2. Check signals at [bold]cashclaw.io/dashboard[/bold]\n"
-                "  3. Monitor via Telegram (optional)",
-                title="Ready",
-                border_style="green",
-            ))
+            self.console.print(
+                Panel(
+                    "[bold green]Setup complete![/bold green]\n\n"
+                    "Next steps:\n"
+                    "  1. Run [bold]cashclaw paper[/bold] to start paper trading\n"
+                    "  2. Check signals at [bold]cashclaw.io/dashboard[/bold]\n"
+                    "  3. Monitor via Telegram (optional)",
+                    title="Ready",
+                    border_style="green",
+                )
+            )
         else:
             print("\n=== Setup Complete ===")
             print("Run 'cashclaw paper' to start paper trading")

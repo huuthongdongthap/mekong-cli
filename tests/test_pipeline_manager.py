@@ -20,10 +20,10 @@ from src.core.pipeline_manager import (
     PipelineStatus,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def success_executor(goal: str):
     """Executor that always succeeds."""
@@ -37,16 +37,19 @@ def failing_executor(goal: str):
 
 def selective_executor(fail_goals: set[str]):
     """Returns an executor that fails only for specified goals."""
+
     def executor(goal: str):
         if goal in fail_goals:
             raise RuntimeError(f"Failed: {goal}")
         return {"goal": goal, "status": "ok"}
+
     return executor
 
 
 # ---------------------------------------------------------------------------
 # Pipeline Creation
 # ---------------------------------------------------------------------------
+
 
 class TestPipelineCreation:
     def test_create_empty_pipeline(self):
@@ -93,6 +96,7 @@ class TestPipelineCreation:
 # Pipeline Execution — Success
 # ---------------------------------------------------------------------------
 
+
 class TestPipelineExecutionSuccess:
     def test_all_stages_succeed(self):
         pm = PipelineManager()
@@ -129,6 +133,7 @@ class TestPipelineExecutionSuccess:
 # ---------------------------------------------------------------------------
 # Pipeline Execution — Failure
 # ---------------------------------------------------------------------------
+
 
 class TestPipelineExecutionFailure:
     def test_stop_on_failure_default(self):
@@ -174,6 +179,7 @@ class TestPipelineExecutionFailure:
 # Dependencies
 # ---------------------------------------------------------------------------
 
+
 class TestPipelineDependencies:
     def test_stage_skipped_when_dep_failed(self):
         pm = PipelineManager(stop_on_failure=False)
@@ -195,6 +201,7 @@ class TestPipelineDependencies:
 # ---------------------------------------------------------------------------
 # Cancellation
 # ---------------------------------------------------------------------------
+
 
 class TestPipelineCancellation:
     def test_cancel_pending_pipeline(self):
@@ -218,6 +225,7 @@ class TestPipelineCancellation:
 # ---------------------------------------------------------------------------
 # Result Aggregation
 # ---------------------------------------------------------------------------
+
 
 class TestResultAggregation:
     def test_aggregate_success(self):
@@ -249,6 +257,7 @@ class TestResultAggregation:
 # Listing & Lookup
 # ---------------------------------------------------------------------------
 
+
 class TestPipelineListing:
     def test_list_empty(self):
         pm = PipelineManager()
@@ -274,6 +283,7 @@ class TestPipelineListing:
 # PipelineStage
 # ---------------------------------------------------------------------------
 
+
 class TestPipelineStage:
     def test_duration_zero_when_not_started(self):
         stage = PipelineStage(id="s1", goal="test", order=1)
@@ -291,6 +301,7 @@ class TestPipelineStage:
 # ---------------------------------------------------------------------------
 # Progress Tracker Integration
 # ---------------------------------------------------------------------------
+
 
 class TestPipelineProgressTracking:
     def test_tracker_receives_events(self):

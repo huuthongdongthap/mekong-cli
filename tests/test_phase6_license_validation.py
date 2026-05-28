@@ -130,7 +130,7 @@ class TestFreeTierTracking:
             command="init",
             command_cost=1,
             email="test@example.com",
-            session_id="session-abc"
+            session_id="session-abc",
         )
 
         assert result is True
@@ -165,17 +165,11 @@ class TestFreeTierTracking:
 
         # Track multiple commands in same session
         tracker.track_command(
-            key_id="test-key-789",
-            command="init",
-            command_cost=1,
-            session_id="shared-session"
+            key_id="test-key-789", command="init", command_cost=1, session_id="shared-session"
         )
 
         tracker.track_command(
-            key_id="test-key-789",
-            command="list",
-            command_cost=1,
-            session_id="shared-session"
+            key_id="test-key-789", command="list", command_cost=1, session_id="shared-session"
         )
 
         # Verify session stats
@@ -228,11 +222,7 @@ class TestDailyQuotaReset:
     def test_cache_quota_and_retrieve(self, clean_quota_cache):
         """Test caching and retrieving quota state."""
         cache_quota(
-            key_id="cache-test-key",
-            daily_used=5,
-            daily_limit=100,
-            tier="pro",
-            status="active"
+            key_id="cache-test-key", daily_used=5, daily_limit=100, tier="pro", status="active"
         )
 
         cached = get_cached_quota("cache-test-key")
@@ -246,12 +236,7 @@ class TestDailyQuotaReset:
     def test_cache_expiration(self, clean_quota_cache):
         """Test cache entries expire correctly."""
         # With default 5 minute TTL, entries should exist briefly
-        cache_quota(
-            key_id="expire-test-key",
-            daily_used=0,
-            daily_limit=10,
-            tier="trial"
-        )
+        cache_quota(key_id="expire-test-key", daily_used=0, daily_limit=10, tier="trial")
 
         cached = get_cached_quota("expire-test-key")
         assert cached is not None
@@ -261,12 +246,7 @@ class TestDailyQuotaReset:
 
     def test_cache_invalidates_correctly(self, clean_quota_cache):
         """Test cache invalidation works."""
-        cache_quota(
-            key_id="invalidate-test-key",
-            daily_used=10,
-            daily_limit=50,
-            tier="enterprise"
-        )
+        cache_quota(key_id="invalidate-test-key", daily_used=10, daily_limit=50, tier="enterprise")
 
         # Verify exists
         cached = get_cached_quota("invalidate-test-key")
@@ -283,35 +263,20 @@ class TestDailyQuotaReset:
 
     def test_cache_usage_percentage(self, clean_quota_cache):
         """Test usage percentage calculation."""
-        cache_quota(
-            key_id="percent-key",
-            daily_used=80,
-            daily_limit=100,
-            tier="pro"
-        )
+        cache_quota(key_id="percent-key", daily_used=80, daily_limit=100, tier="pro")
 
         cached = get_cached_quota("percent-key")
         assert cached is not None
         assert cached.usage_percentage() == 80.0
 
         # Test 90%
-        cache_quota(
-            key_id="percent-key-90",
-            daily_used=90,
-            daily_limit=100,
-            tier="pro"
-        )
+        cache_quota(key_id="percent-key-90", daily_used=90, daily_limit=100, tier="pro")
         cached90 = get_cached_quota("percent-key-90")
         assert cached90.usage_percentage() == 90.0
 
     def test_cache_unlimited_tier(self, clean_quota_cache):
         """Test unlimited tier (daily_limit = -1)."""
-        cache_quota(
-            key_id="unlimited-key",
-            daily_used=999999,
-            daily_limit=-1,
-            tier="enterprise"
-        )
+        cache_quota(key_id="unlimited-key", daily_used=999999, daily_limit=-1, tier="enterprise")
 
         cached = get_cached_quota("unlimited-key")
         assert cached is not None

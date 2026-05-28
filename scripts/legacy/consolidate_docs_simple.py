@@ -6,18 +6,19 @@ Documentation Consolidation - Simple Version
 import shutil
 from pathlib import Path
 
+
 def consolidate_docs():
     """Consolidate documentation systems"""
     project_root = Path("/Users/macbookprom1/mekong-cli")
     docs_dir = project_root / "docs"
     claude_dir = project_root / ".claude"
-    
+
     print("🔄 Consolidating documentation...")
-    
+
     # Create standards directory
     standards_dir = docs_dir / "standards"
     standards_dir.mkdir(exist_ok=True)
-    
+
     # Copy Claude rules
     claude_rules = claude_dir / "rules"
     if claude_rules.exists():
@@ -25,18 +26,18 @@ def consolidate_docs():
             dest = standards_dir / f"claude-{rule_file.name}"
             shutil.copy2(rule_file, dest)
             print(f"✓ Copied {rule_file.name}")
-    
+
     # Create workflows directory
     workflows_dir = docs_dir / "workflows"
     workflows_dir.mkdir(exist_ok=True)
-    
+
     # Copy Claude workflows
     claude_workflows = claude_dir / "workflows"
     if claude_workflows.exists():
         for workflow_file in claude_workflows.glob("*.md"):
             shutil.copy2(workflow_file, workflows_dir)
             print(f"✓ Copied {workflow_file.name}")
-    
+
     # Create integrated standards
     integrated_content = """# Integrated Development Standards
 
@@ -78,11 +79,11 @@ This document consolidates .claude and VIBE development standards.
 
 🏯 Victory comes from preparation
 """
-    
+
     integrated_path = standards_dir / "integrated-standards.md"
     integrated_path.write_text(integrated_content)
     print("✓ Created integrated standards")
-    
+
     # Create documentation index
     index_content = """# AgencyOS Documentation Index
 
@@ -119,13 +120,14 @@ This document consolidates .claude and VIBE development standards.
 
 *Documentation managed by unified documentation manager*
 """
-    
+
     index_path = docs_dir / "README.md"
     index_path.write_text(index_content)
     print("✓ Created documentation index")
-    
+
     print("✅ Documentation consolidation complete!")
     return True
+
 
 if __name__ == "__main__":
     consolidate_docs()

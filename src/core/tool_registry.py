@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 class ToolType(str, Enum):
     """Tool source types."""
 
-    BUILTIN = "builtin"       # Hardcoded Python functions
-    CLI = "cli"               # Discovered from CLI --help
-    API = "api"               # Generated from OpenAPI spec
-    MCP = "mcp"               # Connected via MCP protocol
-    CUSTOM = "custom"         # User-defined
+    BUILTIN = "builtin"  # Hardcoded Python functions
+    CLI = "cli"  # Discovered from CLI --help
+    API = "api"  # Generated from OpenAPI spec
+    MCP = "mcp"  # Connected via MCP protocol
+    CUSTOM = "custom"  # User-defined
 
 
 @dataclass
@@ -52,14 +52,15 @@ class Tool:
     tool_type: ToolType = ToolType.BUILTIN
     parameters: List[ToolParameter] = field(default_factory=list)
     command_template: str = ""  # For CLI tools: "git {subcommand} {args}"
-    endpoint: str = ""          # For API tools: "POST /api/v1/deploy"
+    endpoint: str = ""  # For API tools: "POST /api/v1/deploy"
     tags: List[str] = field(default_factory=list)
     success_count: int = 0
     failure_count: int = 0
     avg_duration_ms: float = 0.0
     last_used: float = 0.0
     _handler: Optional[Callable[..., Any]] = field(
-        default=None, repr=False,
+        default=None,
+        repr=False,
     )
 
     @property
@@ -137,11 +138,14 @@ class ToolRegistry:
         self._persist()
 
         bus = get_event_bus()
-        bus.emit(EventType.AUTONOMOUS_CYCLE, {
-            "event": "tool_registered",
-            "name": name,
-            "type": tool_type.value,
-        })
+        bus.emit(
+            EventType.AUTONOMOUS_CYCLE,
+            {
+                "event": "tool_registered",
+                "name": name,
+                "type": tool_type.value,
+            },
+        )
 
         return tool
 
@@ -233,22 +237,22 @@ class ToolRegistry:
             elif tool.command_template:
                 # Shell command — use shlex.split to avoid shell injection
                 import shlex
-                cmd = tool.command_template.format(**{
-                    k: shlex.quote(str(v)) for k, v in params.items()
-                })
+
+                cmd = tool.command_template.format(
+                    **{k: shlex.quote(str(v)) for k, v in params.items()}
+                )
 
                 # Security: route shell:run through CommandSanitizer to prevent
                 # injection via the generic shell execution builtin.
                 if name == "shell:run":
                     try:
                         from .command_sanitizer import CommandSanitizer
+
                         _san = CommandSanitizer(strict_mode=True)
                         san_result = _san.sanitize(cmd)
                         if not san_result.is_safe:
                             blocked = "; ".join(san_result.violations)
-                            raise RuntimeError(
-                                f"shell:run blocked by CommandSanitizer: {blocked}"
-                            )
+                            raise RuntimeError(f"shell:run blocked by CommandSanitizer: {blocked}")
                         cmd = san_result.sanitized_command
                     except ImportError:
                         raise RuntimeError(
@@ -257,7 +261,9 @@ class ToolRegistry:
                         )
 
                 proc = subprocess.run(
-                    shlex.split(cmd), capture_output=True, text=True,
+                    shlex.split(cmd),
+                    capture_output=True,
+                    text=True,
                     timeout=30,
                 )
                 output = proc.stdout or proc.stderr
@@ -307,9 +313,12 @@ class ToolRegistry:
 
         try:
             import shlex
+
             result = subprocess.run(
                 shlex.split(f"{command} --help"),
-                capture_output=True, text=True, timeout=10,
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
             help_text = result.stdout or result.stderr
         except Exception:
@@ -329,9 +338,12 @@ class ToolRegistry:
                     tool_type=ToolType.CLI,
                     command_template=f"{command} {subcmd} {{args}}",
                     tags=[command, "cli", "auto-discovered"],
-                    parameters=[ToolParameter(
-                        name="args", description="Additional arguments",
-                    )],
+                    parameters=[
+                        ToolParameter(
+                            name="args",
+                            description="Additional arguments",
+                        )
+                    ],
                 )
                 discovered.append(tool)
 
@@ -370,12 +382,14 @@ class ToolRegistry:
                 # Extract parameters
                 params = []
                 for param in details.get("parameters", []):
-                    params.append(ToolParameter(
-                        name=param.get("name", ""),
-                        description=param.get("description", ""),
-                        type=param.get("schema", {}).get("type", "string"),
-                        required=param.get("required", False),
-                    ))
+                    params.append(
+                        ToolParameter(
+                            name=param.get("name", ""),
+                            description=param.get("description", ""),
+                            type=param.get("schema", {}).get("type", "string"),
+                            required=param.get("required", False),
+                        )
+                    )
 
                 tool_name = f"api:{operation_id}"
                 tool = self.register(
@@ -407,9 +421,7 @@ class ToolRegistry:
             t = tool.tool_type.value
             type_counts[t] = type_counts.get(t, 0) + 1
 
-        total_executions = sum(
-            t.success_count + t.failure_count for t in self._tools.values()
-        )
+        total_executions = sum(t.success_count + t.failure_count for t in self._tools.values())
         total_success = sum(t.success_count for t in self._tools.values())
 
         return {
@@ -457,7 +469,8 @@ class ToolRegistry:
                 )
 
     def _parse_help_subcommands(
-        self, help_text: str,
+        self,
+        help_text: str,
     ) -> List[tuple]:
         """Parse subcommands from --help output."""
         subcommands: List[tuple] = []
@@ -477,9 +490,7 @@ class ToolRegistry:
         if total <= 1:
             tool.avg_duration_ms = duration
         else:
-            tool.avg_duration_ms = (
-                tool.avg_duration_ms * (total - 1) + duration
-            ) / total
+            tool.avg_duration_ms = (tool.avg_duration_ms * (total - 1) + duration) / total
 
     def _persist(self) -> None:
         """Save registry to YAML."""
@@ -517,10 +528,7 @@ class ToolRegistry:
                     tool_type = ToolType(info.get("tool_type", "custom"))
                 except ValueError:
                     tool_type = ToolType.CUSTOM
-                params = [
-                    ToolParameter(**p)
-                    for p in info.get("parameters", [])
-                ]
+                params = [ToolParameter(**p) for p in info.get("parameters", [])]
                 self._tools[name] = Tool(
                     name=name,
                     description=info.get("description", ""),
