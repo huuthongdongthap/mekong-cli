@@ -158,3 +158,20 @@ def test_registry_fallback_dispatches_goal_alias_from_main():
     assert result.returncode == 0
     assert result.stdout.strip() == "mekong goals deep config"
     assert "No such command" not in result.stderr
+
+
+def test_native_slash_command_normalization_from_main():
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "src.main",
+            "/cook",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 2
+    assert "Missing argument 'GOAL'" in result.stderr

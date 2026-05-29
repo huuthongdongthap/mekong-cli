@@ -130,6 +130,10 @@ def _maybe_dispatch_registry_command(argv: list[str]) -> bool:
 def entrypoint() -> None:
     """Console-script entrypoint with registry fallback dispatch."""
     if not _maybe_dispatch_registry_command(sys.argv[1:]):
+        if len(sys.argv) > 1 and sys.argv[1].startswith("/"):
+            normalized = _normalize_command(sys.argv[1])
+            if normalized in REGISTERED_COMMANDS:
+                sys.argv[1] = normalized
         app()
 
 
