@@ -293,15 +293,28 @@ class SandboxedUpdater:
         return True
 
     def extract(self, file_path: str) -> str:
-        """Extract downloaded archive."""
+        """Extract downloaded archive securely validating paths to prevent directory traversal."""
         print("Extracting update...")
+
+        def is_safe_path(base_dir: str, path: str) -> bool:
+            base_dir = os.path.abspath(base_dir)
+            path = os.path.abspath(path)
+            return os.path.commonpath([base_dir, path]) == base_dir
 
         if file_path.endswith(".tar.gz"):
             with tarfile.open(file_path, "r:gz") as tar:
+                for member in tar.getmembers():
+                    target_path = os.path.join(self.temp_dir, member.name)
+                    if not is_safe_path(self.temp_dir, target_path):
+                        raise ValueError(f"Security error: Attempted path traversal in tar file: {member.name}")
                 tar.extractall(self.temp_dir)
                 extract_dir = self.temp_dir
         elif file_path.endswith(".zip"):
             with zipfile.ZipFile(file_path, "r") as zip_ref:
+                for member in zip_ref.namelist():
+                    target_path = os.path.join(self.temp_dir, member)
+                    if not is_safe_path(self.temp_dir, target_path):
+                        raise ValueError(f"Security error: Attempted path traversal in zip file: {member}")
                 zip_ref.extractall(self.temp_dir)
                 extract_dir = self.temp_dir
         else:

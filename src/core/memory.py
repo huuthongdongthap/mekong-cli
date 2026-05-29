@@ -318,6 +318,7 @@ class MemoryStore:
             )
             entry_id = hashlib.md5(
                 f"{entry.goal}:{entry.timestamp}".encode(),
+                usedforsecurity=False,
             ).hexdigest()
 
             mem_type = MemoryType.EPISODIC

@@ -747,9 +747,9 @@ class RecipeOrchestrator:
             try:
                 import subprocess
 
+                cmd_args = rollback_cmd.split()
                 proc = subprocess.run(
-                    rollback_cmd,
-                    shell=True,
+                    cmd_args,
                     capture_output=True,
                     text=True,
                     timeout=30,
@@ -889,7 +889,7 @@ class RecipeOrchestrator:
                 import hashlib
 
                 vec = VectorMemoryStore.text_to_hash_vector(goal)
-                goal_id = hashlib.md5(goal.encode()).hexdigest()[:12]
+                goal_id = hashlib.md5(goal.encode(), usedforsecurity=False).hexdigest()[:12]
                 self._vector_memory.get_or_create_collection("goal_history")
                 self._vector_memory.upsert(
                     collection="goal_history",
