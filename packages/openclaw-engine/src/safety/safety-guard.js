@@ -153,7 +153,7 @@ async function checkSafety(content) {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY || 'sk-sp-afce4429a10e41bb901d6012d7f525c8'}`,
+				Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}`,
 			},
 			body: JSON.stringify(payload),
 			signal: AbortSignal.timeout(5000),

@@ -323,7 +323,7 @@ class LLMClient:
         # Local LLM — MLX preferred, Ollama fallback
         local_url = os.getenv("LOCAL_LLM_URL", "")
         ollama_url = os.getenv("OLLAMA_BASE_URL", "")
-        local_model = os.getenv("LOCAL_LLM_MODEL", "") or os.getenv("OLLAMA_MODEL", "llama3.2")
+        local_model = os.getenv("LOCAL_LLM_MODEL", "") or os.getenv("OLLAMA_MODEL", "qwen3.6:35b-a3b")
 
         if local_url:
             built.append(

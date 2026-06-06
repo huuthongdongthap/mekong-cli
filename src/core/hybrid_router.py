@@ -26,8 +26,14 @@ from src.core.command_loader import find_best_command, build_system_prompt
 from src.core.context_flow import ContextFlow
 from src.core.subagent_reviewer import SubagentReviewer
 from src.core.llm_client import get_client
+from src.core.namespace_router import NamespaceRouter, NamespaceResult
+from src.core.conversation_compressor import ConversationCompressor
 
 logger = logging.getLogger(__name__)
+
+# ── Phase 2 singletons (module-level) ──────────────────────────
+_compressor = ConversationCompressor(max_tokens=8000, keep_recent=4)
+_namespace_router = NamespaceRouter()
 
 
 @dataclass
@@ -242,6 +248,19 @@ async def route_and_execute(
         )
         logger.info("Stage 4+5 — Agent '%s' prompt loaded, messages built", profile.agent_role)
 
+
+    # ── Phase 2: compress conversation before sending to LLM ──────
+    try:
+        messages, comp = _compressor.compress(messages)
+        if comp.compressed:
+            logger.info(
+                "[Phase2] compressed %d->%d tokens (%d->%d msgs)",
+                comp.original_tokens, comp.compressed_tokens,
+                comp.turns_summarized + comp.turns_kept,
+                len(messages),
+            )
+    except Exception as e:
+        logger.debug("[Phase2] compression skipped: %s", e)
         try:
             exec_result = await execute_with_fallback(
                 model_config=model_config,
@@ -285,6 +304,20 @@ async def route_and_execute(
     except Exception as e:
         logger.debug("Stage 7 — Review skipped: %s", e)
 
+
+    # ── STAGE 7.5: DYNAMIC CONTEXT ROUTING (Phase 2) ─────────────
+    try:
+        ns_result = _namespace_router.detect(
+            goal, command_name=matched_command.id if matched_command else None
+        )
+        logger.info(
+            "[Phase2] namespace=%s conf=%.2f skills=%d/%d",
+            ns_result.namespace, ns_result.confidence,
+            len(_namespace_router.filter_skills(ns_result)),
+            ns_result.skill_count_total,
+        )
+    except Exception as e:
+        logger.debug("[Phase2] namespace detection skipped: %s", e)
     # ── STAGE 8: MCU CONFIRM ──────────────────────────────────
     confirm_result = gate.confirm(lock_id)
     if not confirm_result.success:

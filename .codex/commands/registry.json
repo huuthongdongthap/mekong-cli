@@ -1,10 +1,10 @@
 {
   "schema_version": "mekong.codex.commands.v1",
-  "generated_at": "2026-05-28T03:06:06.544475+00:00",
+  "generated_at": "2026-06-06T04:32:05.127227+00:00",
   "generated_by": "tools/sync_codex_commands.py",
   "source_dir": ".claude/commands",
   "registry_path": ".codex/commands/registry.json",
-  "total": 505,
+  "total": 506,
   "commands": [
     {
       "id": "4-project",
@@ -4330,6 +4330,20 @@
       ],
       "invocation": "mekong ops-health $ARGUMENTS",
       "content_sha256": "b8e8fc9f340e34bf80f3387c0f493af30de3068b2b4d04eb2f90589effeb3587"
+    },
+    {
+      "id": "ops-ram-cool",
+      "slash": "/ops-ram-cool",
+      "aliases": [],
+      "source_path": ".claude/commands/ops-ram-cool.md",
+      "codex_path": ".codex/commands/ops-ram-cool.md",
+      "description": "RAM cleanup + machine cooldown \u2014 purge memory, kill orphan processes, flush caches, reduce swap. 1 step, ~10s.",
+      "argument_hint": "[--dry-run] [--aggressive]",
+      "allowed_tools": [
+        "Bash"
+      ],
+      "invocation": "mekong ops-ram-cool $ARGUMENTS",
+      "content_sha256": "d00cbdca777d0fa0ae34efd63aab3740f2c2e48834cc1e1c1673674130b56143"
     },
     {
       "id": "ops-security-audit",
