@@ -6,12 +6,11 @@ Run with: python -m pytest tests/test_mcp_server.py -v
 """
 
 import os
+import re
 import sys
 import asyncio
-import subprocess
-import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -168,6 +167,19 @@ argument-hint: "<args>"
         finally:
             os.chmod(cmd_file, 0o644)
 
+    def test_parse_command_name_validation(self, tmp_path):
+        """Test that unsafe command names are rejected by pattern."""
+        # This tests the SAFE_NAME_PATTERN validation in load_all_commands
+        # Safe names should pass
+        safe_names = ['plan', 'git-commit', 'test.mcp', 'my_command', 'abc123']
+        for name in safe_names:
+            assert re.match(r'^[a-zA-Z0-9._-]+$', name) is not None
+
+        # Unsafe names should fail
+        unsafe_names = ['../etc/passwd', 'test;rm -rf', 'name with spaces', '']
+        for name in unsafe_names:
+            assert re.match(r'^[a-zA-Z0-9._-]+$', name) is None
+
 
 # ==================== load_all_commands Tests ====================
 
@@ -283,6 +295,16 @@ class TestListTools:
             assert timeout_prop['minimum'] == 30
             assert timeout_prop['maximum'] == 1800
 
+    def test_verbose_parameter_in_schema(self, temp_commands_dir, monkeypatch):
+        """Test verbose parameter is present in schema."""
+        monkeypatch.setenv('HERMES_HOME', str(temp_commands_dir.parent.parent))
+        tools = asyncio.run(list_tools())
+        for tool in tools:
+            verbose_prop = tool.inputSchema['properties']['verbose']
+            assert verbose_prop['type'] == 'boolean'
+            assert verbose_prop['default'] is False
+            assert 'Include stderr' in verbose_prop['description']
+
 
 # ==================== call_tool Tests ====================
 
@@ -335,7 +357,7 @@ class TestCallTool:
             mock_result.returncode = 0
             mock_run.return_value = mock_result
 
-            results = await call_tool('mekong_plan', {
+            _ = await call_tool('mekong_plan', {
                 'arguments': 'test',
                 'mode': 'fast'
             })
@@ -355,7 +377,7 @@ class TestCallTool:
             mock_result.returncode = 0
             mock_run.return_value = mock_result
 
-            results = await call_tool('mekong_plan', {
+            _ = await call_tool('mekong_plan', {
                 'arguments': 'test',
                 'mode': 'standard'
             })
@@ -374,7 +396,7 @@ class TestCallTool:
             mock_result.returncode = 0
             mock_run.return_value = mock_result
 
-            results = await call_tool('mekong_git.commit', {'arguments': 'msg'})
+            _ = await call_tool('mekong_git.commit', {'arguments': 'msg'})
 
             call_args = mock_run.call_args[0][0]
             # Namespaced commands become: mekong <subdir> <cmd>
@@ -382,7 +404,7 @@ class TestCallTool:
 
     @pytest.mark.asyncio
     async def test_stderr_on_success_ignored(self, temp_commands_dir, monkeypatch):
-        """Test stderr is ignored on success unless non-empty."""
+        """Test stderr is hidden by default on success even if non-empty."""
         monkeypatch.setenv('HERMES_HOME', str(temp_commands_dir.parent.parent))
         with patch('subprocess.run') as mock_run:
             mock_result = MagicMock()
@@ -392,7 +414,23 @@ class TestCallTool:
             mock_run.return_value = mock_result
 
             results = await call_tool('mekong_plan', {'arguments': 'test'})
-            # Should include warning
+            # Should NOT include warnings by default
+            assert 'Warnings' not in results[0].text
+            assert 'something' not in results[0].text
+
+    @pytest.mark.asyncio
+    async def test_stderr_on_success_with_verbose(self, temp_commands_dir, monkeypatch):
+        """Test stderr is shown on success when verbose=True."""
+        monkeypatch.setenv('HERMES_HOME', str(temp_commands_dir.parent.parent))
+        with patch('subprocess.run') as mock_run:
+            mock_result = MagicMock()
+            mock_result.stdout = "output"
+            mock_result.stderr = "warning: something"
+            mock_result.returncode = 0
+            mock_run.return_value = mock_result
+
+            results = await call_tool('mekong_plan', {'arguments': 'test', 'verbose': True})
+            # Should include warning when verbose
             assert 'Warnings' in results[0].text
             assert 'something' in results[0].text
 

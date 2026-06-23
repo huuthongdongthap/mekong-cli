@@ -22,6 +22,9 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+# Safe command name pattern: alphanumeric with dots, underscores, hyphens only
+SAFE_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9._-]+$')
+
 try:
     from mcp.server import Server
     from mcp.types import Tool, TextContent
@@ -126,14 +129,26 @@ def load_all_commands() -> None:
     for md_file in md_files:
         meta = parse_command_metadata(md_file)
         if meta:
+            # Validate command name is safe for MCP tool name
+            name = meta['name']
+            if not SAFE_NAME_PATTERN.match(name):
+                # Skip invalid command names
+                continue
             COMMAND_REGISTRY[meta['name']] = meta
 
     # Load namespaced commands from subdirectories
     for subdir in commands_dir.iterdir():
         if subdir.is_dir():
+            # Validate subdirectory name
+            if not SAFE_NAME_PATTERN.match(subdir.name):
+                continue
             for md_file in subdir.glob("*.md"):
                 meta = parse_command_metadata(md_file)
                 if meta:
+                    # Validate command name
+                    name = meta['name']
+                    if not SAFE_NAME_PATTERN.match(name):
+                        continue
                     # Namespaced name: subdir_name.command_name
                     ns_name = f"{subdir.name}.{meta['name']}"
                     meta['name'] = ns_name
@@ -169,6 +184,11 @@ async def list_tools() -> List[Tool]:
                     "minimum": 30,
                     "maximum": 1800,
                     "description": "Timeout in seconds (30-1800)"
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "Include stderr output in response (default: false for clean output)"
                 }
             },
             "required": ["arguments"]
@@ -210,6 +230,7 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
     mode = arguments.get('mode', 'standard')
     cmd_args = arguments.get('arguments', '')
     timeout = arguments.get('timeout', 300)
+    verbose = arguments.get('verbose', False)
 
     # Construct full command
     # Check if namespaced
@@ -260,15 +281,14 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
         output_parts.append(result.stdout)
 
     if result.stderr:
-        # Only show stderr if command failed
+        # Show stderr if command failed OR if verbose mode is enabled
         if result.returncode != 0:
             output_parts.append("\n❌ Error output:\n")
             output_parts.append(result.stderr)
-        else:
-            # Non-fatal warnings might be in stderr
-            if result.stderr.strip():
-                output_parts.append("\n⚠️  Warnings:\n")
-                output_parts.append(result.stderr)
+        elif verbose and result.stderr.strip():
+            # Only show warnings in verbose mode
+            output_parts.append("\n⚠️  Warnings:\n")
+            output_parts.append(result.stderr)
 
     if result.returncode != 0:
         output_parts.append(f"\n🔢 Exit code: {result.returncode}")

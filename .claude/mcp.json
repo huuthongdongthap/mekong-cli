@@ -12,6 +12,14 @@
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "mekong-commands": {
+      "command": "python",
+      "args": ["-m", "mekong.mcp_server"],
+      "env": {
+        "HERMES_HOME": "~/.hermes",
+        "MEKONG_HOME": "~/mekong-cli"
+      }
     }
   }
 }
