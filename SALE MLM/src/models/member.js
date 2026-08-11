@@ -16,6 +16,17 @@ const { encrypt, decrypt, isEncrypted } = require('../utils/encryption');
  */
 const ROLES = ['Member', 'PSN Leader', 'Core Leader', 'Admin'];
 
+// In-memory store for members (shared with API)
+const memberStore = [];
+
+function getStore() {
+  return memberStore;
+}
+
+function initStore() {
+  memberStore.push(...Member.createSeededMembers());
+}
+
 class Member {
   constructor(data = {}) {
     this.id = data.id || crypto.randomUUID();
@@ -166,7 +177,8 @@ class Member {
         email: 'psn@droppii.vn',
         phone: '+84903456789',
         role: 'PSN Leader',
-        tier: 2
+        tier: 2,
+        psnId: 'psn-001'
       }),
       new Member({
         id: 'member-001',
@@ -174,7 +186,8 @@ class Member {
         email: 'member@droppii.vn',
         phone: '+84904567890',
         role: 'Member',
-        tier: 1
+        tier: 1,
+        psnId: 'psn-001'
       })
     ];
 
@@ -184,5 +197,7 @@ class Member {
 
 module.exports = {
   Member,
-  ROLES
+  ROLES,
+  getStore,
+  initStore
 };

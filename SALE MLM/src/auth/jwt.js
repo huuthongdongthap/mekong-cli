@@ -5,7 +5,10 @@ const crypto = require('crypto');
  * Simple HMAC-based signing without external dependencies
  */
 
-const JWT_SECRET = process.env.JWT_SECRET || 'hive-warfare-default-secret-change-in-prod';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required — refusing to start with insecure default');
+}
 
 /**
  * Base64 URL encode

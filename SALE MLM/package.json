@@ -12,7 +12,8 @@
     "test:habits": "node test/habits.test.js",
     "test:members": "node test/members.test.js",
     "test:auth": "node test/auth.test.js",
-    "test:legacy": "node test/auth.test.js && node test/members.test.js && node test/habits.test.js"
+    "test:legacy": "node test/auth.test.js && node test/members.test.js && node test/habits.test.js",
+    "lint": "echo \"No lint script configured\" && exit 0"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "jest": "^30.3.0",
+    "playwright": "^1.61.1",
     "supertest": "^7.2.2"
   }
 }
