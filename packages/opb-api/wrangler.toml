@@ -1,0 +1,23 @@
+name = "mekong-opb-api"
+main = "src/index.ts"
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-04-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mekong-opb"
+database_id = "337f9ab9-b587-4a52-ac1c-5aaaaeb98a7b"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "2d660644c64d42c4b7b06efc8057ecb8"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "mekong-opb-assets"
+
+[ai]
+binding = "AI"
+
+[vars]
+ENVIRONMENT = "production"

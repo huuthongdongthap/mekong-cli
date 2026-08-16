@@ -1,0 +1,21 @@
+{
+  "name": "mekong-opb-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply mekong-opb",
+    "db:seed": "wrangler d1 execute mekong-opb --file=seed.sql"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.8.0",
+    "hono": "^4.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240519.0",
+    "typescript": "^5.4.0",
+    "wrangler": "^3.80.0"
+  }
+}

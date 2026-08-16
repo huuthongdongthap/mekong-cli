@@ -1,3 +1,3 @@
 
-export { Budget-bar } from "./budget-bar";
-export { Revenue-chart } from "./revenue-chart";
+export { BudgetBar } from "./budget-bar";
+export { RevenueChart } from "./revenue-chart";

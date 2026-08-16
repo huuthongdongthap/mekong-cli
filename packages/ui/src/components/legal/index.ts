@@ -1,3 +1,3 @@
 
-export { Compliance-status } from "./compliance-status";
-export { Contract-card } from "./contract-card";
+export { ComplianceStatus } from "./compliance-status";
+export { ContractCard } from "./contract-card";

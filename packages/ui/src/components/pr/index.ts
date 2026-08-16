@@ -1,3 +1,3 @@
 
-export { Press-card } from "./press-card";
-export { Sentiment-bar } from "./sentiment-bar";
+export { PressCard } from "./press-card";
+export { SentimentBar } from "./sentiment-bar";
