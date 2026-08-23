@@ -1,28 +1,818 @@
-// =============================================================================
-// LinkEduVN Platform — Prisma 5.x Schema
-// Vietnam B2B2C Training Ecosystem (CTĐT per QĐ788/2020, NĐ61/2024, TT02/2024)
-// =============================================================================
-// Encoding: utf8mb4 (full Vietnamese / emoji support)
-// UUID: all PKs use uuid-ossp except auto-increment surrogates
-// Soft delete: deleted_at TIMESTAMPTZ with @@map and @@id
-// Monetary: all amounts stored as INT (VND integer, no float)
-// CCCD: national_id must be encrypted AES-256-GCM at application layer before persist
-// =============================================================================
-
 generator client {
+  provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
-  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  extensions = [pg_trgm]
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm, uuid_ossp(map: "uuid-ossp", schema: "public")]
 }
 
-// =============================================================================
-// Enums
-// =============================================================================
+model Province {
+  code        String       @id @db.VarChar(2)
+  name        String       @db.VarChar(100)
+  nameEn      String?      @db.VarChar(100)
+  region      VnRegion
+  districts   District[]
+  enterprises Enterprise[]
+  learners    Learner[]
+  schools     School[]
+
+  @@map("provinces")
+}
+
+model District {
+  id           Int          @default(autoincrement())
+  provinceCode String       @db.VarChar(2)
+  name         String       @db.VarChar(100)
+  type         DistrictType
+  province     Province     @relation(fields: [provinceCode], references: [code], onDelete: Cascade)
+  enterprises  Enterprise[]
+  learners     Learner[]
+  schools      School[]
+
+  @@id([provinceCode, id])
+  @@map("districts")
+}
+
+model User {
+  id                     String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                  String?                 @unique @db.VarChar(255)
+  phone                  String?                 @unique @db.VarChar(20)
+  passwordHash           String                  @db.VarChar(255)
+  emailVerified          Boolean                 @default(false)
+  phoneVerified          Boolean                 @default(false)
+  role                   UserRole
+  schoolId               String?                 @db.Uuid
+  enterpriseId           Int?
+  firstName              String                  @db.VarChar(100)
+  lastName               String                  @db.VarChar(100)
+  avatarUrl              String?
+  lastLoginAt            DateTime?
+  createdAt              DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                @updatedAt @db.Timestamptz(6)
+  deletedAt              DateTime?               @db.Timestamptz(6)
+  auditLogEntries        AuditLog[]              @relation("AuditLogActor")
+  documentsUploaded      Document[]              @relation("DocumentUploadedBy")
+  enrollmentsApproved    Enrollment[]            @relation("EnrollmentApprovedBy")
+  enrollmentsEnrolled    Enrollment[]            @relation("EnrollmentEnrolledBy")
+  evaluationsMade        Evaluation[]            @relation("EvaluationMadeBy")
+  certificatesIssued     InternshipCertificate[] @relation("CertificateIssuedBy")
+  certificatesRevoked    InternshipCertificate[] @relation("CertificateRevokedBy")
+  invoicesIssued         Invoice[]               @relation("InvoiceIssuedBy")
+  learner                Learner?
+  moasApproved           Moa[]                   @relation("MoaApprovedBy")
+  moasCreated            Moa[]                   @relation("MoaCreatedBy")
+  practiceRecordsCreated PracticeRecord[]        @relation("PracticeRecordCreatedBy")
+  programsApproved       Program[]               @relation("ProgramApprovedBy")
+  programsCreated        Program[]               @relation("ProgramCreatedBy")
+  enterprise             Enterprise?             @relation(fields: [enterpriseId], references: [id])
+  school                 School?                 @relation(fields: [schoolId], references: [id])
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([schoolId, role])
+  @@index([enterpriseId, role])
+  @@map("users")
+}
+
+model School {
+  id                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code               String          @unique @db.VarChar(20)
+  name               String          @db.VarChar(255)
+  nameEn             String?         @db.VarChar(255)
+  schoolType         SchoolType
+  address            String?         @db.VarChar(500)
+  provinceCode       String?         @db.VarChar(2)
+  districtId         Int?
+  phone              String?         @db.VarChar(20)
+  email              String?         @db.VarChar(255)
+  directorName       String?         @db.VarChar(200)
+  taxCode            String?         @unique @db.VarChar(20)
+  qlgdnnCode         String?         @db.VarChar(50)
+  verificationStatus SchoolStatus    @default(pending)
+  verificationDocs   Json?
+  status             SchoolStatus    @default(active)
+  metadata           Json?
+  createdAt          DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @db.Timestamptz(6)
+  deletedAt          DateTime?       @db.Timestamptz(6)
+  invoices           Invoice[]
+  learners           Learner[]
+  moas               Moa[]
+  programs           Program[]
+  contacts           SchoolContact[]
+  district           District?       @relation(fields: [provinceCode, districtId], references: [provinceCode, id])
+  province           Province?       @relation(fields: [provinceCode], references: [code])
+  users              User[]
+
+  @@index([provinceCode])
+  @@index([status])
+  @@index([code])
+  @@map("schools")
+}
+
+model SchoolContact {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  schoolId  String   @db.Uuid
+  name      String   @db.VarChar(200)
+  position  String?  @db.VarChar(100)
+  phone     String?  @db.VarChar(20)
+  email     String?  @db.VarChar(255)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@map("school_contacts")
+}
+
+model Enterprise {
+  id                     Int                     @id @default(autoincrement())
+  name                   String                  @db.VarChar(255)
+  nameEn                 String?                 @db.VarChar(255)
+  taxCode                String                  @unique @db.VarChar(20)
+  industry               EnterpriseIndustry
+  address                String?                 @db.VarChar(500)
+  provinceCode           String?                 @db.VarChar(2)
+  districtId             Int?
+  phone                  String?                 @db.VarChar(20)
+  email                  String?                 @db.VarChar(255)
+  website                String?                 @db.VarChar(255)
+  contactName            String?                 @db.VarChar(200)
+  contactPosition        String?                 @db.VarChar(100)
+  contactPhone           String?                 @db.VarChar(20)
+  contactEmail           String?                 @db.VarChar(255)
+  employeeCount          Int?
+  description            String?
+  logoUrl                String?
+  coverImageUrl          String?
+  status                 EnterpriseStatus        @default(pending)
+  metadata               Json?
+  createdAt              DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                @updatedAt @db.Timestamptz(6)
+  deletedAt              DateTime?               @db.Timestamptz(6)
+  contacts               EnterpriseContact[]
+  district               District?               @relation(fields: [provinceCode, districtId], references: [provinceCode, id])
+  province               Province?               @relation(fields: [provinceCode], references: [code])
+  internshipCertificates InternshipCertificate[]
+  invoices               Invoice[]
+  moas                   Moa[]
+  placements             Placement[]
+  practiceRecords        PracticeRecord[]
+  programs               Program[]
+  users                  User[]
+
+  @@index([industry])
+  @@index([provinceCode])
+  @@index([status])
+  @@map("enterprises")
+}
+
+model EnterpriseContact {
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  enterpriseId Int
+  name         String     @db.VarChar(200)
+  position     String?    @db.VarChar(100)
+  department   String?    @db.VarChar(100)
+  phone        String?    @db.VarChar(20)
+  email        String?    @db.VarChar(255)
+  isPrimary    Boolean    @default(false)
+  createdAt    DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @db.Timestamptz(6)
+  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+
+  @@index([enterpriseId])
+  @@map("enterprise_contacts")
+}
+
+model Moa {
+  id            Int        @id @default(autoincrement())
+  code          String     @unique @db.VarChar(30)
+  schoolId      String     @db.Uuid
+  enterpriseId  Int
+  title         String     @db.VarChar(255)
+  scope         String?
+  content       String?
+  terms         Json?
+  signedDate    DateTime?  @db.Date
+  expiresDate   DateTime?  @db.Date
+  signedDocUrl  String?
+  signedDocHash String?    @db.VarChar(64)
+  status        MoaStatus  @default(draft)
+  createdById   String     @db.Uuid
+  approvedById  String?    @db.Uuid
+  approvedAt    DateTime?  @db.Timestamptz(6)
+  createdAt     DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime   @updatedAt @db.Timestamptz(6)
+  deletedAt     DateTime?  @db.Timestamptz(6)
+  approvedBy    User?      @relation("MoaApprovedBy", fields: [approvedById], references: [id])
+  createdBy     User       @relation("MoaCreatedBy", fields: [createdById], references: [id])
+  enterprise    Enterprise @relation(fields: [enterpriseId], references: [id])
+  school        School     @relation(fields: [schoolId], references: [id])
+  programs      Program[]
+
+  @@index([schoolId, status])
+  @@index([enterpriseId, status])
+  @@index([status])
+  @@map("moa")
+}
+
+model Program {
+  id                     Int                     @id @default(autoincrement())
+  code                   String                  @unique @db.VarChar(30)
+  schoolId               String                  @db.Uuid
+  enterpriseId           Int
+  moaId                  Int?
+  name                   String                  @db.VarChar(255)
+  nameEn                 String?                 @db.VarChar(255)
+  programType            ProgramType
+  field                  ProgramField
+  qualificationLevel     QualificationLevel
+  durationMonths         Int?
+  maxLearners            Int?
+  enrolledCount          Int                     @default(0)
+  startDate              DateTime?               @db.Date
+  endDate                DateTime?               @db.Date
+  applicationDeadline    DateTime?               @db.Date
+  tuitionFeeVnd          Int?
+  description            String?
+  requirements           Json?
+  curriculum             Json?
+  moetRegistrationNo     String?                 @db.VarChar(50)
+  status                 ProgramStatus           @default(draft)
+  createdById            String                  @db.Uuid
+  approvedById           String?                 @db.Uuid
+  approvedAt             DateTime?               @db.Timestamptz(6)
+  createdAt              DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                @updatedAt @db.Timestamptz(6)
+  deletedAt              DateTime?               @db.Timestamptz(6)
+  enrollments            Enrollment[]
+  internshipCertificates InternshipCertificate[]
+  placements             Placement[]             @relation("PlacementProgram")
+  approvedBy             User?                   @relation("ProgramApprovedBy", fields: [approvedById], references: [id])
+  createdBy              User                    @relation("ProgramCreatedBy", fields: [createdById], references: [id])
+  enterprise             Enterprise              @relation(fields: [enterpriseId], references: [id])
+  moa                    Moa?                    @relation(fields: [moaId], references: [id])
+  school                 School                  @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId, status])
+  @@index([enterpriseId, status])
+  @@index([field])
+  @@index([status])
+  @@map("programs")
+}
+
+model Learner {
+  id                     String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId                 String?                 @unique @db.Uuid
+  schoolId               String                  @db.Uuid
+  schoolCode             String?                 @db.VarChar(20)
+  nationalId             String                  @unique
+  fullName               String                  @db.VarChar(200)
+  birthDate              DateTime?               @db.Date
+  gender                 LearnerGender
+  address                String?                 @db.VarChar(500)
+  provinceCode           String?                 @db.VarChar(2)
+  districtId             Int?
+  phone                  String?
+  email                  String?
+  schoolMajor            String?                 @db.VarChar(100)
+  graduationYear         Int?
+  gpa                    Float?
+  skills                 String[]
+  certifications         Json?
+  resumeUrl              String?
+  coverLetterUrl         String?
+  emergencyContact       Json?
+  status                 LearnerStatus           @default(active)
+  createdAt              DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                @updatedAt @db.Timestamptz(6)
+  deletedAt              DateTime?               @db.Timestamptz(6)
+  educations             Education[]             @relation("LearnerEducations")
+  enrollments            Enrollment[]
+  evaluations            Evaluation[]
+  internshipCertificates InternshipCertificate[] @relation("LearnerInternshipCertificates")
+  profile                LearnerProfile?
+  district               District?               @relation(fields: [provinceCode, districtId], references: [provinceCode, id])
+  province               Province?               @relation(fields: [provinceCode], references: [code])
+  school                 School                  @relation(fields: [schoolId], references: [id])
+  user                   User?                   @relation(fields: [userId], references: [id])
+  placements             Placement[]
+  practiceRecords        PracticeRecord[]
+  workExperiences        WorkExperience[]        @relation("LearnerWorkExperiences")
+
+  @@index([schoolId, status])
+  @@index([provinceCode])
+  @@index([status])
+  @@map("learners")
+}
+
+model Enrollment {
+  id                    String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  enrollmentNo          String                 @unique @db.VarChar(30)
+  programId             Int
+  learnerId             String                 @db.Uuid
+  enrolledById          String?                @db.Uuid
+  enrollmentType        EnrollmentType
+  examScore             Float?
+  examDate              DateTime?              @db.Date
+  examNotes             Json?
+  enrolledAt            DateTime               @default(now()) @db.Timestamptz(6)
+  practiceStart         DateTime?              @db.Date
+  practiceEnd           DateTime?              @db.Date
+  evaluationScore       Float?
+  evaluationRubric      Json?
+  status                EnrollmentStatus       @default(pending)
+  approvedById          String?                @db.Uuid
+  approvedAt            DateTime?              @db.Timestamptz(6)
+  rejectionReason       String?
+  approvedBy            User?                  @relation("EnrollmentApprovedBy", fields: [approvedById], references: [id])
+  enrolledBy            User?                  @relation("EnrollmentEnrolledBy", fields: [enrolledById], references: [id])
+  learner               Learner                @relation(fields: [learnerId], references: [id])
+  program               Program                @relation(fields: [programId], references: [id])
+  evaluations           Evaluation[]
+  internshipCertificate InternshipCertificate? @relation("EnrollmentInternshipCertificate")
+  placements            Placement[]
+  practiceRecords       PracticeRecord[]
+
+  @@unique([programId, learnerId])
+  @@index([programId, status])
+  @@index([learnerId, status])
+  @@index([status])
+  @@map("enrollments")
+}
+
+model PracticeRecord {
+  id                     String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  enrollmentId           String     @db.Uuid
+  learnerId              String     @db.Uuid
+  enterpriseId           Int
+  practiceDate           DateTime   @db.Date
+  activities             String
+  hoursWorked            Float
+  supervisorName         String     @db.VarChar(200)
+  supervisorSignatureUrl String?
+  skillsDemonstrated     String[]
+  feedback               String?
+  rating                 Int?
+  createdById            String     @db.Uuid
+  createdAt              DateTime   @default(now()) @db.Timestamptz(6)
+  createdBy              User       @relation("PracticeRecordCreatedBy", fields: [createdById], references: [id])
+  enrollment             Enrollment @relation(fields: [enrollmentId], references: [id])
+  enterprise             Enterprise @relation(fields: [enterpriseId], references: [id])
+  learner                Learner    @relation(fields: [learnerId], references: [id])
+
+  @@index([enrollmentId, practiceDate])
+  @@index([learnerId, practiceDate])
+  @@map("practice_records")
+}
+
+model Evaluation {
+  id             Int            @id @default(autoincrement())
+  enrollmentId   String         @db.Uuid
+  learnerId      String         @db.Uuid
+  evaluatorId    String         @db.Uuid
+  evaluationType EvaluationType
+  rubric         Json?
+  totalScore     Float?
+  maxScore       Float?
+  percentage     Float?
+  feedback       String?
+  strengths      String[]
+  improvements   String[]
+  evidenceDocUrl String?
+  evaluatedAt    DateTime?      @default(now()) @db.Timestamptz(6)
+  enrollment     Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  evaluator      User           @relation("EvaluationMadeBy", fields: [evaluatorId], references: [id])
+  learner        Learner        @relation(fields: [learnerId], references: [id])
+
+  @@index([enrollmentId, evaluationType])
+  @@map("evaluations")
+}
+
+model Placement {
+  id                     Int             @id @default(autoincrement())
+  enrollmentId           String          @db.Uuid
+  learnerId              String          @db.Uuid
+  programId              Int
+  enterpriseId           Int
+  positionApplied        String?         @db.VarChar(200)
+  positionOffered        String?         @db.VarChar(200)
+  employmentType         EmploymentType?
+  salaryMinVnd           Int?
+  salaryMaxVnd           Int?
+  acceptedAt             DateTime?       @db.Date
+  startDate              DateTime?       @db.Date
+  endDate                DateTime?       @db.Date
+  tracking3mStatus       String?         @db.VarChar(50)
+  tracking3mDate         DateTime?       @db.Date
+  tracking3mNotes        String?
+  tracking6mStatus       String?         @db.VarChar(50)
+  tracking6mDate         DateTime?       @db.Date
+  tracking6mNotes        String?
+  learnerSatisfaction    Int?
+  enterpriseSatisfaction Int?
+  learnerFeedback        String?
+  enterpriseFeedback     String?
+  isCurrentJob           Boolean         @default(false)
+  endedAt                DateTime?       @db.Date
+  status                 PlacementStatus @default(in_progress)
+  createdAt              DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime        @updatedAt @db.Timestamptz(6)
+  enrollment             Enrollment      @relation(fields: [enrollmentId], references: [id])
+  enterprise             Enterprise      @relation(fields: [enterpriseId], references: [id])
+  learner                Learner         @relation(fields: [learnerId], references: [id])
+  program                Program         @relation("PlacementProgram", fields: [programId], references: [id])
+
+  @@index([enterpriseId, status])
+  @@index([learnerId, status])
+  @@index([programId])
+  @@map("placements")
+}
+
+model Invoice {
+  id                  Int                  @id @default(autoincrement())
+  invoiceNumber       String               @unique @db.VarChar(30)
+  schoolId            String?              @db.Uuid
+  enterpriseId        Int?
+  amountVnd           Int
+  taxAmountVnd        Int                  @default(0)
+  totalVnd            Int
+  issueDate           DateTime             @db.Date
+  dueDate             DateTime             @db.Date
+  paidDate            DateTime?            @db.Date
+  status              InvoiceStatus        @default(draft)
+  paymentMethod       PaymentMethod?
+  paymentReference    String?              @db.VarChar(100)
+  invoiceItems        Json?
+  relatedEntityType   String?              @db.VarChar(50)
+  relatedEntityId     String?
+  issuedById          String               @db.Uuid
+  createdAt           DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime             @updatedAt @db.Timestamptz(6)
+  deletedAt           DateTime?            @db.Timestamptz(6)
+  billingSchedules    BillingSchedule[]
+  enterprise          Enterprise?          @relation(fields: [enterpriseId], references: [id])
+  issuedBy            User                 @relation("InvoiceIssuedBy", fields: [issuedById], references: [id])
+  school              School?              @relation(fields: [schoolId], references: [id])
+  paymentTransactions PaymentTransaction[]
+
+  @@index([schoolId, status])
+  @@index([enterpriseId, status])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model AuditLog {
+  id         Int         @id @default(autoincrement())
+  actorId    String      @db.Uuid
+  actorRole  UserRole
+  action     AuditAction
+  entityType String      @db.VarChar(50)
+  entityId   String
+  changes    Json?
+  ipAddress  String?     @db.VarChar(45)
+  userAgent  String?
+  requestId  String      @db.Uuid
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+  actor      User        @relation("AuditLogActor", fields: [actorId], references: [id])
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+model Document {
+  id               String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entityType       String       @db.VarChar(50)
+  entityId         String
+  documentType     DocumentType
+  filename         String       @db.VarChar(255)
+  originalFilename String       @db.VarChar(255)
+  fileSize         Int
+  mimeType         String       @db.VarChar(100)
+  r2Bucket         String       @db.VarChar(100)
+  r2Key            String       @db.VarChar(500)
+  r2Url            String?      @db.VarChar(500)
+  uploadedById     String       @db.Uuid
+  uploadedAt       DateTime     @default(now()) @db.Timestamptz(6)
+  sha256Hash       String       @db.VarChar(64)
+  metadata         Json?
+  uploadedBy       User         @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([uploadedById])
+  @@map("documents")
+}
+
+model LearnerProfile {
+  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  learnerId       String            @unique @db.Uuid
+  bio             String?
+  skills          String[]
+  languages       Json?
+  careerObjective String?
+  portfolioUrl    String?           @db.VarChar(500)
+  linkedinUrl     String?           @db.VarChar(500)
+  githubUrl       String?           @db.VarChar(500)
+  websiteUrl      String?           @db.VarChar(500)
+  visibility      ProfileVisibility @default(private)
+  cvTemplate      String?           @default("default")
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime          @updatedAt @db.Timestamptz(6)
+  educations      Education[]
+  learner         Learner           @relation(fields: [learnerId], references: [id], onDelete: Cascade)
+  workExperiences WorkExperience[]
+
+  @@index([learnerId])
+  @@map("learner_profiles")
+}
+
+model WorkExperience {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  learnerProfileId String         @db.Uuid
+  learnerId        String         @db.Uuid
+  companyName      String         @db.VarChar(255)
+  position         String         @db.VarChar(255)
+  location         String?        @db.VarChar(255)
+  startDate        DateTime       @db.Date
+  endDate          DateTime?      @db.Date
+  isCurrent        Boolean        @default(false)
+  description      String?
+  skills           String[]
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  learner          Learner        @relation("LearnerWorkExperiences", fields: [learnerId], references: [id])
+  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+
+  @@index([learnerProfileId])
+  @@index([learnerId])
+  @@map("work_experiences")
+}
+
+model Education {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  learnerProfileId String         @db.Uuid
+  learnerId        String         @db.Uuid
+  institution      String         @db.VarChar(255)
+  degree           String         @db.VarChar(255)
+  fieldOfStudy     String?        @db.VarChar(255)
+  location         String?        @db.VarChar(255)
+  startDate        DateTime       @db.Date
+  endDate          DateTime?      @db.Date
+  isCurrent        Boolean        @default(false)
+  gpa              String?        @db.VarChar(20)
+  description      String?
+  achievements     String[]
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  learner          Learner        @relation("LearnerEducations", fields: [learnerId], references: [id])
+  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+
+  @@index([learnerProfileId])
+  @@index([learnerId])
+  @@map("educations")
+}
+
+model InternshipCertificate {
+  id                String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  learnerId         String            @db.Uuid
+  enrollmentId      String            @unique @db.Uuid
+  enterpriseId      Int
+  programId         Int
+  certificateNumber String            @unique @db.VarChar(50)
+  issueDate         DateTime          @db.Date
+  startDate         DateTime          @db.Date
+  endDate           DateTime          @db.Date
+  totalHours        Int
+  position          String            @db.VarChar(255)
+  department        String?           @db.VarChar(255)
+  supervisorName    String            @db.VarChar(255)
+  supervisorTitle   String?           @db.VarChar(255)
+  evaluationScore   Int?
+  evaluationComment String?
+  skillsAcquired    String[]
+  achievements      String[]
+  certificateUrl    String?           @db.VarChar(500)
+  qrCodeUrl         String?           @db.VarChar(500)
+  status            CertificateStatus @default(draft)
+  issuedById        String            @db.Uuid
+  createdAt         DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @db.Timestamptz(6)
+  revokedAt         DateTime?         @db.Timestamptz(6)
+  revokedById       String?           @db.Uuid
+  enrollment        Enrollment        @relation("EnrollmentInternshipCertificate", fields: [enrollmentId], references: [id])
+  enterprise        Enterprise        @relation(fields: [enterpriseId], references: [id])
+  issuedBy          User              @relation("CertificateIssuedBy", fields: [issuedById], references: [id])
+  learner           Learner           @relation("LearnerInternshipCertificates", fields: [learnerId], references: [id], onDelete: Cascade)
+  program           Program           @relation(fields: [programId], references: [id])
+  revokedBy         User?             @relation("CertificateRevokedBy", fields: [revokedById], references: [id])
+
+  @@index([learnerId])
+  @@index([enterpriseId])
+  @@index([enrollmentId])
+  @@index([certificateNumber])
+  @@index([status])
+  @@map("internship_certificates")
+}
+
+model CertificateTemplate {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String   @unique @db.VarChar(100)
+  description  String?
+  htmlTemplate String
+  cssStyles    String?
+  isDefault    Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("certificate_templates")
+}
+
+model PricingTier {
+  id            String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String           @unique @db.VarChar(50)
+  segment       Segment
+  tierLevel     PricingTierLevel
+  basePriceVnd  Int
+  setupFeeVnd   Int?
+  features      Json
+  limits        Json
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime         @updatedAt @db.Timestamptz(6)
+  quotes        PriceQuote[]
+  pricingRules  PricingRule[]
+  subscriptions Subscription[]
+
+  @@index([segment, isActive])
+  @@map("pricing_tiers")
+}
+
+model PricingRule {
+  id        String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tierId    String      @db.Uuid
+  ruleType  RuleType
+  config    Json
+  startDate DateTime?   @db.Timestamptz(6)
+  endDate   DateTime?   @db.Timestamptz(6)
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime    @updatedAt @db.Timestamptz(6)
+  tier      PricingTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@map("pricing_rules")
+}
+
+model PriceQuote {
+  id            String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entityId      String
+  entityType    Segment
+  appliedRules  Json
+  finalPriceVnd Int
+  currency      String      @default("VND")
+  validUntil    DateTime    @db.Timestamptz(6)
+  status        QuoteStatus @default(DRAFT)
+  createdAt     DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @db.Timestamptz(6)
+  tierId        String      @db.Uuid
+  tier          PricingTier @relation(fields: [tierId], references: [id])
+
+  @@index([entityId, entityType])
+  @@map("price_quotes")
+}
+
+model PaymentGateway {
+  id           String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String               @unique @db.VarChar(50)
+  type         GatewayType
+  config       Json
+  isActive     Boolean              @default(true)
+  isTestMode   Boolean              @default(true)
+  createdAt    DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(6)
+  transactions PaymentTransaction[]
+
+  @@map("payment_gateways")
+}
+
+model PaymentTransaction {
+  id           String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  invoiceId    Int?
+  amountVnd    Int
+  currency     String            @default("VND")
+  status       TransactionStatus @default(PENDING)
+  gatewayRef   String?           @db.VarChar(100)
+  responseData Json?
+  errorMessage String?
+  createdAt    DateTime          @default(now()) @db.Timestamptz(6)
+  completedAt  DateTime?         @db.Timestamptz(6)
+  gatewayId    String            @db.Uuid
+  gateway      PaymentGateway    @relation(fields: [gatewayId], references: [id])
+  invoice      Invoice?          @relation(fields: [invoiceId], references: [id])
+
+  @@index([gatewayId, status])
+  @@index([invoiceId])
+  @@map("payment_transactions")
+}
+
+model Subscription {
+  id                 String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entityId           String
+  entityType         Segment
+  status             SubStatus         @default(ACTIVE)
+  billingCycle       BillingCycle      @default(MONTHLY)
+  currentPeriodStart DateTime          @db.Timestamptz(6)
+  currentPeriodEnd   DateTime          @db.Timestamptz(6)
+  cancelAtPeriodEnd  Boolean           @default(false)
+  cancelledAt        DateTime?         @db.Timestamptz(6)
+  trialEnd           DateTime?         @db.Timestamptz(6)
+  metadata           Json?
+  createdAt          DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime          @updatedAt @db.Timestamptz(6)
+  tierId             String            @db.Uuid
+  billingSchedules   BillingSchedule[]
+  tier               PricingTier       @relation(fields: [tierId], references: [id])
+
+  @@index([entityId, entityType, status])
+  @@map("subscriptions")
+}
+
+model BillingSchedule {
+  id             String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  invoiceId      Int?
+  amountVnd      Int
+  status         ScheduleStatus @default(PENDING)
+  scheduledAt    DateTime       @db.Timestamptz(6)
+  generatedAt    DateTime?      @db.Timestamptz(6)
+  metadata       Json?
+  createdAt      DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime       @updatedAt @db.Timestamptz(6)
+  subscriptionId String         @db.Uuid
+  invoice        Invoice?       @relation(fields: [invoiceId], references: [id])
+  subscription   Subscription   @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, status])
+  @@index([scheduledAt])
+  @@map("billing_schedules")
+}
+
+model LegalEntity {
+  id                 String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String              @db.VarChar(200)
+  type               EntityType
+  taxCode            String              @unique @db.VarChar(20)
+  vatRate            Float
+  address            String
+  isDefault          Boolean             @default(false)
+  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @db.Timestamptz(6)
+  vatClassifications VATClassification[]
+
+  @@map("legal_entities")
+}
+
+model VATClassification {
+  id            String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  productCode   String      @unique @db.VarChar(50)
+  description   String
+  vatRate       Float
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @db.Timestamptz(6)
+  legalEntityId String      @db.Uuid
+  legalEntity   LegalEntity @relation(fields: [legalEntityId], references: [id])
+
+  @@map("vat_classifications")
+}
+
+model UnitEconomicsDaily {
+  id                      String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  date                    DateTime @unique @db.Date
+  schoolCac               Float
+  schoolLtv               Float
+  schoolPaybackMonths     Float
+  schoolNrr               Float
+  schoolGrossMargin       Float
+  schoolLtvCacRatio       Float
+  enterpriseCac           Float
+  enterpriseLtv           Float
+  enterprisePaybackMonths Float
+  enterpriseNrr           Float
+  enterpriseGrossMargin   Float
+  enterpriseLtvCacRatio   Float
+  createdAt               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("unit_economics_daily")
+}
 
 enum UserRole {
   super_admin
@@ -34,10 +824,10 @@ enum UserRole {
 }
 
 enum SchoolType {
-  nghe_nghiep           // Trung cấp nghề
-  cao_dang              // Cao đẳng
-  dai_hoc               // Đại học
-  giao_duc_thuong_xuyen // Giáo dục thường xuyên
+  nghe_nghiep
+  cao_dang
+  dai_hoc
+  giao_duc_thuong_xuyen
 }
 
 enum SchoolStatus {
@@ -76,11 +866,11 @@ enum VnRegion {
 }
 
 enum DistrictType {
-  thanh_pho // Thành phố
-  quan      // Quận
-  huyen     // Huyện
-  thi_xa    // Thị xã
-  xa        // Xã
+  thanh_pho
+  quan
+  huyen
+  thi_xa
+  xa
 }
 
 enum MoaStatus {
@@ -94,10 +884,10 @@ enum MoaStatus {
 }
 
 enum ProgramType {
-  thuc_tap          // Thực tập đơn
-  thuc_tap_chung    // Thực tập chung (quy mô lớn)
-  viec_lam          // Đảm bảo việc làm
-  du_hoc            // Du học nghề
+  thuc_tap
+  thuc_tap_chung
+  viec_lam
+  du_hoc
 }
 
 enum ProgramField {
@@ -137,9 +927,9 @@ enum ProgramStatus {
 }
 
 enum LearnerGender {
-  nam    // Nam
-  nu     // Nữ
-  khac   // Khác / Không tiết lộ
+  nam
+  nu
+  khac
 }
 
 enum LearnerStatus {
@@ -150,9 +940,9 @@ enum LearnerStatus {
 }
 
 enum EnrollmentType {
-  self_apply           // Tự ứng tuyển
-  staff_created        // Tạo bởi nhân viên trường
-  enterprise_nominated // Doanh nghiệp đề xuất
+  self_apply
+  staff_created
+  enterprise_nominated
 }
 
 enum EnrollmentStatus {
@@ -226,732 +1016,6 @@ enum DocumentType {
   other
 }
 
-// =============================================================================
-// Geographic lookup (system data — seeded, immutable in production)
-// =============================================================================
-
-model Province {
-  code        String    @db.VarChar(2)   // e.g. "01" … "63"
-  name        String    @db.VarChar(100)
-  nameEn      String?   @db.VarChar(100)
-  region      VnRegion
-  districts   District[]
-  schools     School[]
-  enterprises Enterprise[]
-  learners    Learner[]
-
-  @@id([code])
-  @@map("provinces")
-}
-
-model District {
-  id            Int          @default(autoincrement())
-  provinceCode  String       @db.VarChar(2)
-  province      Province     @relation(fields: [provinceCode], references: [code], onDelete: Cascade)
-  name          String       @db.VarChar(100)
-  type          DistrictType
-  schools       School[]
-  enterprises   Enterprise[]
-  learners      Learner[]
-
-  @@id([provinceCode, id])
-  @@map("districts")
-}
-
-// =============================================================================
-// Users — auth foundation for ALL roles
-// =============================================================================
-
-model User {
-  id              String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  email           String?    @unique @db.VarChar(255)
-  phone           String?    @unique @db.VarChar(20)
-  passwordHash    String     @db.VarChar(255)
-  emailVerified   Boolean    @default(false)
-  phoneVerified   Boolean    @default(false)
-  role            UserRole
-  schoolId        String?    @db.Uuid
-  enterpriseId    Int?
-  firstName       String     @db.VarChar(100)
-  lastName        String     @db.VarChar(100)
-  avatarUrl       String?
-  lastLoginAt     DateTime?
-  createdAt       DateTime   @default(now()) @db.Timestamptz
-  updatedAt       DateTime   @updatedAt @db.Timestamptz
-  deletedAt       DateTime?  @db.Timestamptz
-
-  school        School?         @relation(fields: [schoolId], references: [id])
-  enterprise    Enterprise?     @relation(fields: [enterpriseId], references: [id])
-  learner       Learner?
-
-  // Audit - this user as actor
-  auditLogEntries         AuditLog[]       @relation("AuditLogActor")
-  // This user as MOU creator
-  moasCreated            Moa[]       @relation("MoaCreatedBy")
-  // This user as MOU approver
-  moasApproved           Moa[]       @relation("MoaApprovedBy")
-  // This user as Program creator
-  programsCreated        Program[]       @relation("ProgramCreatedBy")
-  // This user as Program approver
-  programsApproved       Program[]       @relation("ProgramApprovedBy")
-  // This user enrolling learners
-  enrollmentsEnrolled    Enrollment[]       @relation("EnrollmentEnrolledBy")
-  // This user as enrollment approver
-  enrollmentsApproved    Enrollment[]       @relation("EnrollmentApprovedBy")
-  // Practice records signed by this user (enterprise supervisor)
-  practiceRecordsCreated PracticeRecord[]       @relation("PracticeRecordCreatedBy")
-  // Evaluations performed by this user
-  evaluationsMade        Evaluation[]       @relation("EvaluationMadeBy")
-  // Invoices issued by this user
-  invoicesIssued         Invoice[]       @relation("InvoiceIssuedBy")
-  // Documents uploaded by this user
-  documentsUploaded      Document[]       @relation("DocumentUploadedBy")
-  // Certificates issued by this user
-  certificatesIssued     InternshipCertificate[] @relation("CertificateIssuedBy")
-  // Certificates revoked by this user
-  certificatesRevoked    InternshipCertificate[] @relation("CertificateRevokedBy")
-
-  // RBAC indexes
-  @@index([email])
-  @@index([phone])
-  @@index([role])
-  @@index([schoolId, role])
-  @@index([enterpriseId, role])
-  @@map("users")
-}
-
-// =============================================================================
-// Schools — Vocational / College / University
-// =============================================================================
-
-model School {
-  id               String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code             String          @unique @db.VarChar(20)     // QLGDNN code
-  name             String          @db.VarChar(255)
-  nameEn           String?         @db.VarChar(255)
-  schoolType       SchoolType
-  address          String?         @db.VarChar(500)
-  provinceCode     String?         @db.VarChar(2)
-  districtId       Int?
-  province         Province?       @relation(fields: [provinceCode], references: [code])
-  district         District?       @relation(fields: [provinceCode, districtId], references: [provinceCode, id])
-  phone            String?         @db.VarChar(20)
-  email            String?         @db.VarChar(255)
-  directorName     String?         @db.VarChar(200)
-  taxCode          String?         @unique @db.VarChar(20)  // MST
-  qlgdnnCode       String?         @db.VarChar(50)          // QLGDNN registration
-  verificationStatus SchoolStatus  @default(pending)
-  verificationDocs Json?                              // Uploaded doc metadata
-  status           SchoolStatus    @default(active)
-  metadata         Json?                               // Freeform extra fields
-  createdAt        DateTime        @default(now()) @db.Timestamptz
-  updatedAt        DateTime        @updatedAt @db.Timestamptz
-  deletedAt        DateTime?       @db.Timestamptz
-
-  contacts     SchoolContact[]
-  users        User[]
-  programs     Program[]
-  learners     Learner[]
-  moas         Moa[]
-  invoices     Invoice[]
-
-  @@index([provinceCode])
-  @@index([status])
-  @@index([code])
-  @@map("schools")
-}
-
-model SchoolContact {
-  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  schoolId    String   @db.Uuid
-  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  name        String   @db.VarChar(200)
-  position    String?  @db.VarChar(100)
-  phone       String?  @db.VarChar(20)
-  email       String?  @db.VarChar(255)
-  isPrimary   Boolean  @default(false)
-  createdAt   DateTime @default(now()) @db.Timestamptz
-  updatedAt   DateTime @updatedAt @db.Timestamptz
-
-  @@index([schoolId])
-  @@map("school_contacts")
-}
-
-// =============================================================================
-// Enterprises — Partner employers
-// =============================================================================
-
-model Enterprise {
-  id              Int               @id @default(autoincrement())
-  name            String            @db.VarChar(255)
-  nameEn          String?           @db.VarChar(255)
-  taxCode         String            @unique @db.VarChar(20)  // MST
-  industry        EnterpriseIndustry
-  address         String?           @db.VarChar(500)
-  provinceCode    String?           @db.VarChar(2)
-  districtId      Int?
-  province        Province?         @relation(fields: [provinceCode], references: [code])
-  district        District?         @relation(fields: [provinceCode, districtId], references: [provinceCode, id])
-  phone           String?           @db.VarChar(20)
-  email           String?           @db.VarChar(255)
-  website         String?           @db.VarChar(255)
-  contactName     String?           @db.VarChar(200)
-  contactPosition String?           @db.VarChar(100)
-  contactPhone    String?           @db.VarChar(20)
-  contactEmail    String?           @db.VarChar(255)
-  employeeCount   Int?
-  description     String?           @db.Text
-  logoUrl         String?
-  coverImageUrl   String?
-  status          EnterpriseStatus  @default(pending)
-  metadata        Json?
-  createdAt       DateTime          @default(now()) @db.Timestamptz
-  updatedAt       DateTime          @updatedAt @db.Timestamptz
-  deletedAt       DateTime?         @db.Timestamptz
-
-  contacts       EnterpriseContact[]
-  users          User[]
-  programs       Program[]
-  placements     Placement[]
-  moas           Moa[]
-  practiceRecords PracticeRecord[]
-  internshipCertificates InternshipCertificate[]
-  invoices       Invoice[]
-
-  @@index([industry])
-  @@index([provinceCode])
-  @@index([status])
-  @@map("enterprises")
-}
-
-model EnterpriseContact {
-  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  enterpriseId  Int
-  enterprise    Enterprise @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
-  name          String    @db.VarChar(200)
-  position      String?   @db.VarChar(100)
-  department    String?   @db.VarChar(100)
-  phone         String?   @db.VarChar(20)
-  email         String?   @db.VarChar(255)
-  isPrimary     Boolean   @default(false)
-  createdAt     DateTime  @default(now()) @db.Timestamptz
-  updatedAt     DateTime  @updatedAt @db.Timestamptz
-
-  @@index([enterpriseId])
-  @@map("enterprise_contacts")
-}
-
-// =============================================================================
-// MOA — Memoandum of Agreement
-// =============================================================================
-
-model Moa {
-  id              Int       @id @default(autoincrement())
-  code            String    @unique @db.VarChar(30)   // MOU/YYYY/NNN
-  schoolId        String    @db.Uuid
-  enterpriseId    Int
-  school          School    @relation(fields: [schoolId], references: [id])
-  enterprise      Enterprise @relation(fields: [enterpriseId], references: [id])
-  title           String    @db.VarChar(255)
-  scope           String?   @db.Text
-  content         String?   @db.Text
-  terms           Json?                             // Structured terms
-  signedDate      DateTime? @db.Date
-  expiresDate     DateTime? @db.Date
-  signedDocUrl    String?                          // R2 URL
-  signedDocHash   String?   @db.VarChar(64)          // SHA256 hex
-  status          MoaStatus @default(draft)
-  createdById     String    @db.Uuid
-  createdBy       User      @relation("MoaCreatedBy", fields: [createdById], references: [id])
-  approvedById    String?   @db.Uuid
-  approvedBy      User?     @relation("MoaApprovedBy", fields: [approvedById], references: [id])
-  approvedAt      DateTime? @db.Timestamptz
-  createdAt       DateTime  @default(now()) @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @db.Timestamptz
-  deletedAt       DateTime? @db.Timestamptz
-
-  programs  Program[]
-
-  @@index([schoolId, status])
-  @@index([enterpriseId, status])
-  @@index([status])
-  @@map("moa")
-}
-
-// =============================================================================
-// Programs (CTĐT) — Training linkage programs
-// =============================================================================
-
-model Program {
-  id                    Int            @id @default(autoincrement())
-  code                  String         @unique @db.VarChar(30) // CTDT/YYYY/NNN
-  schoolId              String         @db.Uuid
-  enterpriseId          Int
-  moaId                 Int?
-  moa                   Moa?           @relation(fields: [moaId], references: [id])
-  school                School         @relation(fields: [schoolId], references: [id])
-  enterprise            Enterprise     @relation(fields: [enterpriseId], references: [id])
-  name                  String         @db.VarChar(255)
-  nameEn                String?        @db.VarChar(255)
-  programType           ProgramType
-  field                 ProgramField
-  qualificationLevel    QualificationLevel
-  durationMonths        Int?
-  maxLearners           Int?
-  enrolledCount         Int            @default(0)
-  startDate             DateTime?      @db.Date
-  endDate               DateTime?      @db.Date
-  applicationDeadline   DateTime?      @db.Date
-  tuitionFeeVnd         Int?                                // stored as VND integer
-  description           String?        @db.Text
-  requirements          Json?                              // structured eligibility rules
-  curriculum            Json?                              // structured curriculum data
-  moetRegistrationNo    String?        @db.VarChar(50)     // NĐ61/2024 reg no
-  status                ProgramStatus  @default(draft)
-  createdById           String         @db.Uuid
-  createdBy             User           @relation("ProgramCreatedBy", fields: [createdById], references: [id])
-  approvedById          String?        @db.Uuid
-  approvedBy            User?          @relation("ProgramApprovedBy", fields: [approvedById], references: [id])
-  approvedAt            DateTime?      @db.Timestamptz
-  createdAt             DateTime       @default(now()) @db.Timestamptz
-  updatedAt             DateTime       @updatedAt @db.Timestamptz
-  deletedAt             DateTime?      @db.Timestamptz
-
-  enrollments  Enrollment[]
-  placements   Placement[] @relation("PlacementProgram")
-  internshipCertificates InternshipCertificate[]
-
-  @@index([schoolId, status])
-  @@index([enterpriseId, status])
-  @@index([field])
-  @@index([status])
-  @@map("programs")
-}
-
-// =============================================================================
-// Learners — Students
-// =============================================================================
-
-model Learner {
-  id             String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  userId         String?             @unique @db.Uuid              // 1:1 with User
-  user           User?               @relation(fields: [userId], references: [id])
-  schoolId       String              @db.Uuid
-  school         School              @relation(fields: [schoolId], references: [id])
-  schoolCode     String?             @db.VarChar(20)                // legacy school code
-
-  // Application-level encryption required (AES-256-GCM) before persist
-  nationalId     String              @unique
-  fullName       String              @db.VarChar(200)
-  birthDate      DateTime?           @db.Date
-  gender         LearnerGender
-  address        String?             @db.VarChar(500)
-  provinceCode   String?             @db.VarChar(2)
-  province       Province?           @relation(fields: [provinceCode], references: [code])
-  districtId     Int?
-  district       District?           @relation(fields: [provinceCode, districtId], references: [provinceCode, id])
-  phone          String?
-  email          String?
-
-  schoolMajor    String?             @db.VarChar(100)
-  graduationYear Int?
-  gpa            Float?
-
-  // Flexible structured data
-  skills         String[]                              // TEXT[]
-  certifications Json?                              // [{name: String, issuer: String, date: DateTime, credentialId: String}]
-  resumeUrl      String?
-  coverLetterUrl String?
-  emergencyContact Json?                              // {name, phone, relationship}
-
-  status         LearnerStatus       @default(active)
-  createdAt      DateTime            @default(now()) @db.Timestamptz
-  updatedAt      DateTime            @updatedAt @db.Timestamptz
-  deletedAt      DateTime?           @db.Timestamptz
-
-  enrollments    Enrollment[]
-  practiceRecords PracticeRecord[]
-  evaluations    Evaluation[]
-  placements     Placement[]
-  profile        LearnerProfile?
-  workExperiences WorkExperience[]    @relation("LearnerWorkExperiences")
-  educations     Education[]         @relation("LearnerEducations")
-  internshipCertificates InternshipCertificate[] @relation("LearnerInternshipCertificates")
-
-  @@index([schoolId, status])
-  @@index([provinceCode])
-  @@index([status])
-  @@map("learners")
-}
-
-// =============================================================================
-// Enrollments — Learner ↔ Program junction with lifecycle
-// =============================================================================
-
-model Enrollment {
-  id                 String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  enrollmentNo       String           @unique @db.VarChar(30) // ENR/YYYY/NNN (auto-generated)
-  programId          Int
-  learnerId          String           @db.Uuid
-  enrolledById       String?          @db.Uuid
-  enrollmentType     EnrollmentType
-
-  // Exam / admission
-  examScore          Float?
-  examDate           DateTime?        @db.Date
-  examNotes          Json?
-
-  // Practice period
-  enrolledAt         DateTime         @default(now()) @db.Timestamptz
-  practiceStart      DateTime?        @db.Date
-  practiceEnd        DateTime?        @db.Date
-
-  // Assessment
-  evaluationScore    Float?
-  evaluationRubric   Json?
-
-  status             EnrollmentStatus @default(pending)
-  approvedById       String?          @db.Uuid
-  approvedAt         DateTime?        @db.Timestamptz
-  rejectionReason    String?          @db.Text
-
-  program  Program  @relation(fields: [programId], references: [id])
-  learner  Learner  @relation(fields: [learnerId], references: [id])
-  enrolledBy       User?    @relation("EnrollmentEnrolledBy", fields: [enrolledById], references: [id])
-  approvedBy       User?    @relation("EnrollmentApprovedBy", fields: [approvedById], references: [id])
-
-  practiceRecords  PracticeRecord[]
-  evaluations      Evaluation[]
-  placements       Placement[]
-  internshipCertificate InternshipCertificate? @relation("EnrollmentInternshipCertificate")
-
-  @@unique([programId, learnerId])
-  @@index([programId, status])
-  @@index([learnerId, status])
-  @@index([status])
-  @@map("enrollments")
-}
-
-// =============================================================================
-// Practice Records (Sổ thực hành) — per TT 47/2021
-// =============================================================================
-
-model PracticeRecord {
-  id                  String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  enrollmentId        String        @db.Uuid
-  learnerId           String        @db.Uuid
-  enterpriseId        Int
-  practiceDate        DateTime      @db.Date
-  activities          String        @db.Text
-  hoursWorked         Float
-  supervisorName      String        @db.VarChar(200)
-  supervisorSignatureUrl String?
-  skillsDemonstrated  String[]                              // TEXT[]
-  feedback            String?       @db.Text
-  rating              Int?                               // 1-5
-  createdById         String        @db.Uuid
-  createdAt           DateTime      @default(now()) @db.Timestamptz
-
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id])
-  learner     Learner    @relation(fields: [learnerId], references: [id])
-  enterprise  Enterprise @relation(fields: [enterpriseId], references: [id])
-  createdBy   User       @relation("PracticeRecordCreatedBy", fields: [createdById], references: [id])
-
-  @@index([enrollmentId, practiceDate])
-  @@index([learnerId, practiceDate])
-  @@map("practice_records")
-}
-
-// =============================================================================
-// Evaluations — Rubric-based assessments
-// =============================================================================
-
-model Evaluation {
-  id             Int           @id @default(autoincrement())
-  enrollmentId   String        @db.Uuid
-  learnerId      String        @db.Uuid
-  evaluatorId    String        @db.Uuid
-  evaluationType EvaluationType
-  rubric         Json?                              // Structured scoring criteria
-  totalScore     Float?
-  maxScore       Float?
-  percentage     Float?
-  feedback       String?       @db.Text
-  strengths      String[]                              // TEXT[]
-  improvements   String[]                              // TEXT[]
-  evidenceDocUrl String?                            // R2 URL
-  evaluatedAt    DateTime?     @default(now()) @db.Timestamptz
-
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  evaluator   User       @relation("EvaluationMadeBy", fields: [evaluatorId], references: [id])
-  learner     Learner    @relation(fields: [learnerId], references: [id])
-
-  @@index([enrollmentId, evaluationType])
-  @@map("evaluations")
-}
-
-// =============================================================================
-// Placements — Job placement tracking (post-graduation)
-// =============================================================================
-
-model Placement {
-  id                   Int             @id @default(autoincrement())
-  enrollmentId         String          @db.Uuid
-  learnerId            String          @db.Uuid
-  programId            Int
-  enterpriseId         Int
-  positionApplied      String?         @db.VarChar(200)
-  positionOffered      String?         @db.VarChar(200)
-  employmentType       EmploymentType?
-  salaryMinVnd         Int?                                 // VND integer
-  salaryMaxVnd         Int?                                 // VND integer
-  acceptedAt           DateTime?       @db.Date
-  startDate            DateTime?       @db.Date
-  endDate              DateTime?       @db.Date
-
-  // 3-month tracking
-  tracking3mStatus     String?         @db.VarChar(50)
-  tracking3mDate       DateTime?       @db.Date
-  tracking3mNotes      String?         @db.Text
-
-  // 6-month tracking
-  tracking6mStatus     String?         @db.VarChar(50)
-  tracking6mDate       DateTime?       @db.Date
-  tracking6mNotes      String?         @db.Text
-
-  learnerSatisfaction  Int?                            // 1-5
-  enterpriseSatisfaction Int?                          // 1-5
-  learnerFeedback      String?         @db.Text
-  enterpriseFeedback   String?         @db.Text
-  isCurrentJob          Boolean         @default(false)
-  endedAt               DateTime?       @db.Date
-  status                PlacementStatus @default(in_progress)
-  createdAt             DateTime        @default(now()) @db.Timestamptz
-  updatedAt             DateTime        @updatedAt @db.Timestamptz
-
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id])
-  learner     Learner    @relation(fields: [learnerId], references: [id])
-  program     Program    @relation("PlacementProgram", fields: [programId], references: [id])
-  enterprise  Enterprise @relation(fields: [enterpriseId], references: [id])
-
-  @@index([enterpriseId, status])
-  @@index([learnerId, status])
-  @@index([programId])
-  @@map("placements")
-}
-
-// =============================================================================
-// Invoices — Financial invoices
-// =============================================================================
-
-model Invoice {
-  id                Int           @id @default(autoincrement())
-  invoiceNumber     String        @unique @db.VarChar(30) // INV/YYYY/NNN
-  schoolId          String?       @db.Uuid               // Exactly one FK required
-  school            School?       @relation(fields: [schoolId], references: [id])
-  enterpriseId      Int?                                // Exactly one FK required
-  enterprise        Enterprise?   @relation(fields: [enterpriseId], references: [id])
-  amountVnd         Int                              // Subtotal (VND integer)
-  taxAmountVnd      Int           @default(0)          // VAT amount
-  totalVnd          Int                              // amountVnd + taxAmountVnd
-  issueDate         DateTime      @db.Date
-  dueDate           DateTime      @db.Date
-  paidDate          DateTime?     @db.Date
-  status            InvoiceStatus @default(draft)
-  paymentMethod     PaymentMethod?
-  paymentReference  String?      @db.VarChar(100)
-  invoiceItems      Json?                              // Line items array
-  relatedEntityType String?      @db.VarChar(50)
-  relatedEntityId   String?
-  issuedById        String       @db.Uuid
-  issuedBy          User         @relation("InvoiceIssuedBy", fields: [issuedById], references: [id])
-  paymentTransactions PaymentTransaction[]
-  billingSchedules    BillingSchedule[]
-  createdAt         DateTime     @default(now()) @db.Timestamptz
-  updatedAt         DateTime     @updatedAt @db.Timestamptz
-  deletedAt         DateTime?    @db.Timestamptz
-
-  @@index([schoolId, status])
-  @@index([enterpriseId, status])
-  @@index([status])
-  @@index([dueDate])
-  @@map("invoices")
-}
-
-// =============================================================================
-// Audit Logs — Immutable trail (INSERT-only)
-// =============================================================================
-
-model AuditLog {
-  id         Int        @id @default(autoincrement())
-  actorId    String     @db.Uuid
-  actorRole  UserRole
-  action     AuditAction
-  entityType String     @db.VarChar(50)
-  entityId   String
-  changes    Json?                             // { before: {...}, after: {...} }
-  ipAddress  String?    @db.VarChar(45)
-  userAgent  String?
-  requestId  String     @db.Uuid                // Correlates with HTTP request
-  createdAt  DateTime   @default(now()) @db.Timestamptz // NEVER updated/deleted
-
-  actor     User      @relation("AuditLogActor", fields: [actorId], references: [id])
-
-  @@index([entityType, entityId, createdAt])
-  @@index([actorId])
-  @@index([createdAt])
-  @@index([action])
-  @@map("audit_logs")
-}
-
-// =============================================================================
-// Documents — File attachments (R2-backed storage)
-// =============================================================================
-
-model Document {
-  id               String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  entityType       String       @db.VarChar(50)
-  entityId         String
-  documentType     DocumentType
-  filename         String       @db.VarChar(255)
-  originalFilename String       @db.VarChar(255)
-  fileSize         Int                                         // bytes
-  mimeType         String       @db.VarChar(100)
-  r2Bucket         String       @db.VarChar(100)
-  r2Key            String       @db.VarChar(500)
-  r2Url            String?      @db.VarChar(500)
-  uploadedById     String       @db.Uuid
-  uploadedAt       DateTime     @default(now()) @db.Timestamptz
-  sha256Hash       String       @db.VarChar(64)
-  metadata         Json?
-
-  uploadedBy User @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
-
-  @@index([entityType, entityId])
-  @@index([uploadedById])
-  @@map("documents")
-}
-
-// =============================================================================
-// Learner Profile — Online CV
-// =============================================================================
-
-model LearnerProfile {
-  id              String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  learnerId       String           @unique @db.Uuid
-  learner         Learner          @relation(fields: [learnerId], references: [id], onDelete: Cascade)
-  bio             String?          @db.Text
-  skills          String[]
-  languages       Json?
-  careerObjective String?          @db.Text
-  portfolioUrl    String?          @db.VarChar(500)
-  linkedinUrl     String?          @db.VarChar(500)
-  githubUrl       String?          @db.VarChar(500)
-  websiteUrl      String?          @db.VarChar(500)
-  visibility      ProfileVisibility @default(private)
-  cvTemplate      String?          @default("default")
-  createdAt       DateTime         @default(now()) @db.Timestamptz
-  updatedAt       DateTime         @updatedAt @db.Timestamptz
-
-  workExperiences WorkExperience[]
-  educations      Education[]
-
-  @@index([learnerId])
-  @@map("learner_profiles")
-}
-
-model WorkExperience {
-  id               String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  learnerProfileId String        @db.Uuid
-  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
-  learnerId        String        @db.Uuid
-  learner          Learner       @relation("LearnerWorkExperiences", fields: [learnerId], references: [id])
-  companyName      String        @db.VarChar(255)
-  position         String        @db.VarChar(255)
-  location         String?       @db.VarChar(255)
-  startDate        DateTime      @db.Date
-  endDate          DateTime?     @db.Date
-  isCurrent        Boolean       @default(false)
-  description      String?       @db.Text
-  skills           String[]
-  createdAt        DateTime      @default(now()) @db.Timestamptz
-  updatedAt        DateTime      @updatedAt @db.Timestamptz
-
-  @@index([learnerProfileId])
-  @@index([learnerId])
-  @@map("work_experiences")
-}
-
-model Education {
-  id               String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  learnerProfileId String        @db.Uuid
-  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
-  learnerId        String        @db.Uuid
-  learner          Learner       @relation("LearnerEducations", fields: [learnerId], references: [id])
-  institution      String        @db.VarChar(255)
-  degree           String        @db.VarChar(255)
-  fieldOfStudy     String?       @db.VarChar(255)
-  location         String?       @db.VarChar(255)
-  startDate        DateTime      @db.Date
-  endDate          DateTime?     @db.Date
-  isCurrent        Boolean       @default(false)
-  gpa              String?       @db.VarChar(20)
-  description      String?       @db.Text
-  achievements     String[]
-  createdAt        DateTime      @default(now()) @db.Timestamptz
-  updatedAt        DateTime      @updatedAt @db.Timestamptz
-
-  @@index([learnerProfileId])
-  @@index([learnerId])
-  @@map("educations")
-}
-
-// =============================================================================
-// Internship Certificates
-// =============================================================================
-
-model InternshipCertificate {
-  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  learnerId         String   @db.Uuid
-  learner           Learner  @relation("LearnerInternshipCertificates", fields: [learnerId], references: [id], onDelete: Cascade)
-  enrollmentId      String   @unique @db.Uuid
-  enrollment        Enrollment @relation("EnrollmentInternshipCertificate", fields: [enrollmentId], references: [id])
-  enterpriseId      Int
-  enterprise        Enterprise @relation(fields: [enterpriseId], references: [id])
-  programId         Int
-  program           Program  @relation(fields: [programId], references: [id])
-  certificateNumber String   @unique @db.VarChar(50)
-  issueDate         DateTime @db.Date
-  startDate         DateTime @db.Date
-  endDate           DateTime @db.Date
-  totalHours        Int
-  position          String   @db.VarChar(255)
-  department        String?  @db.VarChar(255)
-  supervisorName    String   @db.VarChar(255)
-  supervisorTitle   String?  @db.VarChar(255)
-  evaluationScore   Int?
-  evaluationComment String?  @db.Text
-  skillsAcquired    String[]
-  achievements      String[]
-  certificateUrl    String?  @db.VarChar(500)
-  qrCodeUrl         String?  @db.VarChar(500)
-  status            CertificateStatus @default(draft)
-  issuedById        String   @db.Uuid
-  issuedBy          User     @relation("CertificateIssuedBy", fields: [issuedById], references: [id])
-  createdAt         DateTime @default(now()) @db.Timestamptz
-  updatedAt         DateTime @updatedAt @db.Timestamptz
-  revokedAt         DateTime? @db.Timestamptz
-  revokedById       String?  @db.Uuid
-  revokedBy         User?    @relation("CertificateRevokedBy", fields: [revokedById], references: [id])
-
-  @@index([learnerId])
-  @@index([enterpriseId])
-  @@index([enrollmentId])
-  @@index([certificateNumber])
-  @@index([status])
-  @@map("internship_certificates")
-}
-
 enum CertificateStatus {
   draft
   issued
@@ -963,24 +1027,6 @@ enum ProfileVisibility {
   public
   recruiters_only
 }
-
-model CertificateTemplate {
-  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String   @unique @db.VarChar(100)
-  description String?  @db.Text
-  htmlTemplate String  @db.Text
-  cssStyles   String?  @db.Text
-  isDefault   Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now()) @db.Timestamptz
-  updatedAt   DateTime @updatedAt @db.Timestamptz
-
-  @@map("certificate_templates")
-}
-
-// =============================================================================
-// Pricing & Billing Models (Phase 1)
-// =============================================================================
 
 enum Segment {
   SCHOOL
@@ -1009,61 +1055,6 @@ enum QuoteStatus {
   EXPIRED
 }
 
-model PricingTier {
-  id            String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name          String           @unique @db.VarChar(50)
-  segment       Segment
-  tierLevel     PricingTierLevel
-  basePriceVnd  Int              // Monthly base price
-  setupFeeVnd   Int?             // One-time setup fee
-  features      Json             // Feature flags per tier
-  limits        Json             // Usage limits
-  isActive      Boolean          @default(true)
-  createdAt     DateTime         @default(now()) @db.Timestamptz
-  updatedAt     DateTime         @updatedAt @db.Timestamptz
-
-  pricingRules  PricingRule[]
-  quotes        PriceQuote[]
-  subscriptions Subscription[]
-
-  @@index([segment, isActive])
-  @@map("pricing_tiers")
-}
-
-model PricingRule {
-  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  tierId      String   @db.Uuid
-  tier        PricingTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
-  ruleType    RuleType
-  config      Json     // { minVolume, discountPct, months, promoCode, ... }
-  startDate   DateTime? @db.Timestamptz
-  endDate     DateTime? @db.Timestamptz
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now()) @db.Timestamptz
-  updatedAt   DateTime @updatedAt @db.Timestamptz
-
-  @@map("pricing_rules")
-}
-
-model PriceQuote {
-  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  entityId      String   // schoolId or enterpriseId
-  entityType    Segment
-  tierId        String   @db.Uuid
-  tier          PricingTier @relation(fields: [tierId], references: [id])
-  appliedRules  Json     // Rules applied
-  finalPriceVnd Int      // Computed final price
-  currency      String   @default("VND")
-  validUntil    DateTime @db.Timestamptz
-  status        QuoteStatus @default(DRAFT)
-  createdAt     DateTime @default(now()) @db.Timestamptz
-  updatedAt     DateTime @updatedAt @db.Timestamptz
-
-  @@index([entityId, entityType])
-  @@map("price_quotes")
-}
-
-// Payment Gateway
 enum GatewayType {
   VNPAY
   MOMO
@@ -1080,42 +1071,6 @@ enum TransactionStatus {
   REFUNDED
 }
 
-model PaymentGateway {
-  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name          String    @unique @db.VarChar(50)
-  type          GatewayType
-  config        Json      // API keys, endpoints, secrets (encrypted)
-  isActive      Boolean   @default(true)
-  isTestMode    Boolean   @default(true)
-  createdAt     DateTime  @default(now()) @db.Timestamptz
-  updatedAt     DateTime  @updatedAt @db.Timestamptz
-
-  transactions  PaymentTransaction[]
-
-  @@map("payment_gateways")
-}
-
-model PaymentTransaction {
-  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  gatewayId       String    @db.Uuid
-  gateway         PaymentGateway @relation(fields: [gatewayId], references: [id])
-  invoiceId       Int?
-  invoice         Invoice?  @relation(fields: [invoiceId], references: [id])
-  amountVnd       Int
-  currency        String    @default("VND")
-  status          TransactionStatus @default(PENDING)
-  gatewayRef      String?   @db.VarChar(100) // External transaction ID
-  responseData    Json?
-  errorMessage    String?
-  createdAt       DateTime  @default(now()) @db.Timestamptz
-  completedAt     DateTime? @db.Timestamptz
-
-  @@index([gatewayId, status])
-  @@index([invoiceId])
-  @@map("payment_transactions")
-}
-
-// Subscriptions & Recurring Billing
 enum SubStatus {
   ACTIVE
   PAST_DUE
@@ -1138,101 +1093,66 @@ enum ScheduleStatus {
   SKIPPED
 }
 
-model Subscription {
-  id                   String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  entityId             String        // School/Enterprise ID
-  entityType           Segment
-  tierId               String        @db.Uuid
-  tier                 PricingTier   @relation(fields: [tierId], references: [id])
-  status               SubStatus     @default(ACTIVE)
-  billingCycle         BillingCycle  @default(MONTHLY)
-  currentPeriodStart   DateTime      @db.Timestamptz
-  currentPeriodEnd     DateTime      @db.Timestamptz
-  cancelAtPeriodEnd    Boolean       @default(false)
-  cancelledAt          DateTime?     @db.Timestamptz
-  trialEnd             DateTime?     @db.Timestamptz
-  metadata             Json?
-  createdAt            DateTime      @default(now()) @db.Timestamptz
-  updatedAt            DateTime      @updatedAt @db.Timestamptz
-
-  billingSchedules     BillingSchedule[]
-
-  @@index([entityId, entityType, status])
-  @@map("subscriptions")
-}
-
-model BillingSchedule {
-  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  subscriptionId  String         @db.Uuid
-  subscription    Subscription   @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  invoiceId       Int?
-  invoice         Invoice?       @relation(fields: [invoiceId], references: [id])
-  amountVnd       Int
-  status          ScheduleStatus @default(PENDING)
-  scheduledAt     DateTime       @db.Timestamptz
-  generatedAt     DateTime?      @db.Timestamptz
-  metadata        Json?
-  createdAt       DateTime       @default(now()) @db.Timestamptz
-  updatedAt       DateTime       @updatedAt @db.Timestamptz
-
-  @@index([subscriptionId, status])
-  @@index([scheduledAt])
-  @@map("billing_schedules")
-}
-
-// Multi-entity VAT
 enum EntityType {
   EDCO
   TECHCO
 }
 
-model LegalEntity {
-  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String    @db.VarChar(200)
-  type        EntityType
-  taxCode     String    @unique @db.VarChar(20)
-  vatRate     Float     // 0 for EdCo, 10 for TechCo
-  address     String    @db.Text
-  isDefault   Boolean   @default(false)
-  createdAt   DateTime  @default(now()) @db.Timestamptz
-  updatedAt   DateTime  @updatedAt @db.Timestamptz
+// ── Scholarship Fund ──────────────────────────────────────────────
 
-  vatClassifications VATClassification[]
+model ScholarshipFund {
+  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name              String   @db.VarChar(255)
+  description       String?  @db.Text
+  targetAmountVnd   BigInt
+  currentAmountVnd  BigInt   @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
 
-  @@map("legal_entities")
+  pillars           ScholarshipPillar[]
+  allocations       ScholarshipAllocation[]
+
+  @@map("scholarship_funds")
 }
 
-model VATClassification {
-  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  productCode     String    @unique @db.VarChar(50)
-  description     String    @db.Text
-  vatRate         Float
-  legalEntityId   String    @db.Uuid
-  legalEntity     LegalEntity @relation(fields: [legalEntityId], references: [id])
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now()) @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @db.Timestamptz
+model ScholarshipPillar {
+  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fundId            String   @db.Uuid
+  fund              ScholarshipFund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+  name              String   @db.VarChar(255)
+  pillarType        String   @db.VarChar(50)
+  allocationPercent Float
+  budgetVnd         BigInt
+  spentVnd          BigInt   @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
 
-  @@map("vat_classifications")
+  allocations       ScholarshipAllocation[]
+
+  @@index([fundId])
+  @@map("scholarship_pillars")
 }
 
-model UnitEconomicsDaily {
-  id                       String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  date                     DateTime @db.Date
-  schoolCac                Float
-  schoolLtv                Float
-  schoolPaybackMonths      Float
-  schoolNrr                Float
-  schoolGrossMargin        Float
-  schoolLtvCacRatio        Float
-  enterpriseCac            Float
-  enterpriseLtv            Float
-  enterprisePaybackMonths  Float
-  enterpriseNrr            Float
-  enterpriseGrossMargin    Float
-  enterpriseLtvCacRatio    Float
-  createdAt                DateTime @default(now()) @db.Timestamptz
+model ScholarshipAllocation {
+  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fundId            String   @db.Uuid
+  fund              ScholarshipFund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+  pillarId          String   @db.Uuid
+  pillar            ScholarshipPillar @relation(fields: [pillarId], references: [id], onDelete: Cascade)
+  learnerId         String   @db.Uuid
+  amountVnd         BigInt
+  academicYear      String   @db.VarChar(20)
+  status            String   @default("pending") @db.VarChar(20)
+  disbursedAt       DateTime? @db.Timestamptz(6)
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
 
-  @@unique([date])
-  @@map("unit_economics_daily")
+  @@index([fundId])
+  @@index([pillarId])
+  @@index([learnerId])
+  @@index([status])
+  @@map("scholarship_allocations")
 }

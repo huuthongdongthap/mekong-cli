@@ -1,0 +1,41 @@
+{
+  "name": "linkedu-vn-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LinkEduVN Platform — Hệ sinh thái liên kết đào tạo thực chiến Việt Nam",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "cd packages/api && prisma generate",
+    "db:migrate": "cd packages/api && prisma migrate dev",
+    "db:seed": "cd packages/api && prisma db seed",
+    "db:studio": "cd packages/api && prisma studio",
+    "db:push": "cd packages/api && prisma db push",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "module-alias": "^2.3.4",
+    "prisma": "^5.22.0",
+    "tsconfig-paths": "^4.2.0",
+    "turbo": "^2.3.3",
+    "typescript": "~5.6.0"
+  },
+  "packageManager": "pnpm@9.12.3",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.8.0",
+    "@prisma/client": "^5.22.0",
+    "react-hook-form": "^7.85.0",
+    "zod": "^4.4.3"
+  }
+}

@@ -1,0 +1,31 @@
+name: Web CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["packages/web/**", "packages/shared/**", "pnpm-lock.yaml"]
+  pull_request:
+    branches: [main]
+    paths: ["packages/web/**", "packages/shared/**", "pnpm-lock.yaml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Test
+        run: pnpm vitest run
+      - name: Build
+        run: pnpm run build

@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.build.json",
     "dev": "nest start --watch",
-    "start": "node dist/main.js",
+    "start": "node dist/bootstrap.js",
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
@@ -29,6 +29,8 @@
     "@nestjs/terminus": "^10.2.0",
     "@nestjs/throttler": "^6.0.0",
     "@prisma/client": "^5.22.0",
+    "@sentry/nestjs": "^10.70.0",
+    "@sentry/profiling-node": "^10.70.0",
     "@types/puppeteer": "^7.0.4",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.19.0",

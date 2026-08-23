@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaClient, Segment, Prisma } from '@prisma/client'
+import { Injectable } from '@nestjs/common'
+import { PrismaClient, Segment } from '@prisma/client'
 import { PrismaService } from '@linkedu/api/common/prisma/prisma.service'
 
 export interface CACLTVData {
@@ -98,7 +98,7 @@ export class UnitEconomicsService {
     }
   }
 
-  private async getMarketingSpend(start: Date, end: Date): Promise<{ schools: number; enterprises: number }> {
+  private async getMarketingSpend(_start: Date, _end: Date): Promise<{ schools: number; enterprises: number }> {
     // Simplified - in production this would come from actual marketing spend tracking
     // Using estimated values for now
     return { schools: 2_500_000, enterprises: 3_000_000 } // VND per day

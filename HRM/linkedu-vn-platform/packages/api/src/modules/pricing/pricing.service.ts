@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
-import { Prisma, PrismaClient, Segment, PricingTierLevel, RuleType, QuoteStatus, SubStatus, BillingCycle, GatewayType, TransactionStatus, EntityType } from '@prisma/client'
+import { Prisma, PrismaClient, Segment, PricingTierLevel, RuleType, GatewayType, TransactionStatus } from '@prisma/client'
 import { PrismaService } from '@linkedu/api/common/prisma/prisma.service'
 
 @Injectable()

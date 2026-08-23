@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`probe > a 1`] = `"<button type="button" tabindex="0" data-base-ui-click-trigger="" id="base-ui-_r_1_" aria-haspopup="dialog" aria-expanded="true" data-popup-open="" aria-controls="_r_0_">open</button>"`;
+
+exports[`probe > b 1`] = `"<button type="button" tabindex="0" data-base-ui-click-trigger="" id="base-ui-_r_4_" aria-haspopup="dialog" aria-expanded="true" data-popup-open="" aria-controls="_r_3_">open</button>"`;

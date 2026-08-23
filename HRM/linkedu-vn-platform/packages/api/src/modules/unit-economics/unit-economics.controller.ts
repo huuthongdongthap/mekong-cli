@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger'
+import { Controller, Get, Post, Query } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger'
 import { UnitEconomicsService } from './unit-economics.service'
-import { Segment } from '@prisma/client'
 
 @ApiTags('Unit Economics')
 @Controller('unit-economics')

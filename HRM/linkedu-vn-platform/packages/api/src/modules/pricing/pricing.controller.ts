@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Query, Put, Delete, HttpCode, HttpS
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger'
 import { PricingService } from './pricing.service'
 import { Prisma } from '@prisma/client'
-import { Segment, PricingTierLevel, RuleType, QuoteStatus, SubStatus, BillingCycle, GatewayType, TransactionStatus } from '@prisma/client'
+import { Segment, PricingTierLevel, RuleType, GatewayType, TransactionStatus, BillingCycle } from '@prisma/client'
 
 @ApiTags('Pricing')
 @Controller('pricing')

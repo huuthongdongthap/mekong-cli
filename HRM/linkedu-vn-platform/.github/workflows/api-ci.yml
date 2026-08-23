@@ -1,0 +1,33 @@
+name: API CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["packages/api/**", "packages/shared/**", "pnpm-lock.yaml"]
+  pull_request:
+    branches: [main]
+    paths: ["packages/api/**", "packages/shared/**", "pnpm-lock.yaml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install root
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Build
+        run: pnpm run build
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.build.json
+      - name: Test
+        run: npx jest --passWithNoTests

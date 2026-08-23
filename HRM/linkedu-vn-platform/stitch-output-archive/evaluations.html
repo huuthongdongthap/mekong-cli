@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Đánh giá người học - EduManager Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; } .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            "colors": {
+                "background": "#f9f9ff", "surface-variant": "#dce2f3", "text-main": "#0D0F12",
+                "primary": "#004bca", "surface": "#FFFFFF", "outline": "#737687",
+                "surface-container": "#e7eefe", "surface-dim": "#d3daea",
+                "on-background": "#151c27", "on-surface": "#151c27",
+                "surface-bright": "#f9f9ff", "surface-container-lowest": "#ffffff",
+                "inverse-surface": "#2a313d", "surface-tint": "#0052dc",
+                "border-subtle": "#E5E7EB", "primary-container": "#0061ff",
+                "surface-container-low": "#f0f3ff", "on-surface-variant": "#424656",
+                "on-primary": "#ffffff", "on-primary-container": "#f1f2ff",
+                "on-error": "#ffffff", "error": "#ba1a1a",
+                "secondary-fixed": "#d8e2ff", "secondary-fixed-dim": "#aec6ff",
+                "on-secondary-fixed": "#001a42", "error-container": "#ffdad6",
+                "background-alt": "#F9FAFB"
+            },
+            "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            "spacing": { "gutter": "24px", "container-max": "1280px", "margin-mobile": "16px", "margin-desktop": "40px", "base": "8px" },
+            "fontFamily": {
+                "label-sm": ["Inter"], "body-sm": ["Inter"], "body-md": ["Inter"],
+                "display-lg": ["Be Vietnam Pro"], "headline-lg": ["Be Vietnam Pro"],
+                "body-lg": ["Inter"], "label-md": ["Inter"],
+                "headline-lg-mobile": ["Be Vietnam Pro"], "headline-md": ["Be Vietnam Pro"]
+            },
+            "fontSize": {
+                "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+            }
+        }
+    }
+}
+</script>
+
+<style>
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-purple { background: #f3e8ff; color: #6b21a8; }
+  .badge-orange { background: #fff7ed; color: #9a3412; }
+  .badge-gray { background: #f3f4f6; color: #374151; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .star { color: #facc15; }
+  .star-empty { color: #d1d5db; }
+  .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .data-table th { background: #f0f3ff; padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #424656; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; }
+  .data-table td { padding: 14px 16px; border-bottom: 1px solid #f0f0f5; font-size: 14px; color: #151c27; }
+  .data-table tr:hover td { background: #f9f9ff; }
+  .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+  .filter-bar input, .filter-bar select { padding: 8px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white; color: #151c27; }
+  .filter-bar input:focus, .filter-bar select:focus { outline: none; border-color: #004bca; box-shadow: 0 0 0 2px rgba(0,75,202,0.1); }
+  .pagination { display: flex; align-items: center; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+  .pagination button { padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px; cursor: pointer; background: white; }
+  .pagination button.active { background: #004bca; color: white; border-color: #004bca; }
+  .pagination button:hover:not(.active) { background: #f0f3ff; }
+</style>
+
+</head>
+<body class="bg-background text-on-background font-body-md flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-surface border-r border-border-subtle fixed left-0 top-0 h-screen w-[280px] flex flex-col p-4 z-40">
+<div class="flex items-center gap-3 px-4 py-6 mb-2">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined fill">school</span>
+</div>
+<div>
+<h1 class="text-body-lg font-headline-md font-extrabold text-primary">EduManager Pro</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Enterprise Admin</p>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1 overflow-y-auto">
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">school</span>
+<span class="text-label-md font-label-md">Chương trình</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">domain</span>
+<span class="text-label-md font-label-md">Doanh nghiệp</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">group</span>
+<span class="text-label-md font-label-md">Người học</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">how_to_reg</span>
+<span class="text-label-md font-label-md">Ghi danh</span>
+</a>
+<!-- Active: Đánh giá -->
+<a class="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-surface-container rounded-lg scale-[0.98] transition-transform duration-150" href="#">
+<span class="material-symbols-outlined fill">analytics</span>
+<span class="text-label-md font-label-md">Đánh giá</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">work</span>
+<span class="text-label-md font-label-md">Thực tập</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">workspace_premium</span>
+<span class="text-label-md font-label-md">Học bổng</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">history_edu</span>
+<span class="text-label-md font-label-md">Nhật ký</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">map</span>
+<span class="text-label-md font-label-md">Địa lý</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">payments</span>
+<span class="text-label-md font-label-md">Định giá</span>
+</a>
+</div>
+<div class="mt-auto pt-4 border-t border-border-subtle">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-error transition-colors">logout</span>
+<span class="text-label-md font-label-md group-hover:text-error transition-colors">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="ml-[280px] flex-1 flex flex-col h-full overflow-hidden bg-background">
+<header class="px-margin-desktop pt-10 pb-6 flex justify-between items-end shrink-0">
+<div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Đánh giá người học</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2">Theo dõi kết quả đánh giá và phát triển năng lực của từng người học.</p>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-surface-tint transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span class="text-label-md font-label-md">Tạo đánh giá</span>
+</button>
+</header>
+<div class="flex-1 overflow-y-auto p-margin-desktop">
+<!-- Filters -->
+<div class="filter-bar">
+<input type="text" placeholder="Tìm kiếm..." class="flex-1 max-w-xs" />
+<select><option>Tất cả</option></select>
+</div>
+<!-- Table -->
+<div class="bg-surface rounded-xl border border-border-subtle shadow-[0px_4px_20px_rgba(0,36,87,0.05)] overflow-hidden">
+<table class="data-table">
+<thead><tr><th>Người học</th><th>Loại đánh giá</th><th>Điểm</th><th>Chương trình</th><th>Đánh giá viên</th><th>Ngày</th></tr></thead>
+<tbody>
+<tr><td><span class="font-medium">Trần Thị B</span></td><td><span class="badge-purple inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Học thuật</span></td><td><span class="text-green-600 font-semibold">92/100</span></td><td>Kỹ năng Lãnh đạo</td><td>PGS. TS. Minh</td><td>14/08/2026</td></tr>
+<tr><td><span class="font-medium">Nguyễn Văn H</span></td><td><span class="badge-blue inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Thực hành</span></td><td><span class="text-green-600 font-semibold">85/100</span></td><td>Lập trình Web</td><td>Th.S. Hương</td><td>13/08/2026</td></tr>
+<tr><td><span class="font-medium">Lê Thị I</span></td><td><span class="badge-orange inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Hành vi</span></td><td><span class="text-yellow-600 font-semibold">78/100</span></td><td>Quản trị Kinh doanh</td><td>TS. Dũng</td><td>12/08/2026</td></tr>
+<tr><td><span class="font-medium">Phạm Văn J</span></td><td><span class="badge-green inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Kỹ năng mềm</span></td><td><span class="text-green-600 font-semibold">88/100</span></td><td>Giao tiếp Đa văn hóa</td><td>ThS. Lan</td><td>11/08/2026</td></tr>
+<tr><td><span class="font-medium">Hoàng Thị K</span></td><td><span class="badge-gray inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Khác</span></td><td><span class="text-yellow-600 font-semibold">72/100</span></td><td>Marketing Số</td><td>TS. Trọng</td><td>10/08/2026</td></tr>
+<tr><td><span class="font-medium">Vũ Minh L</span></td><td><span class="badge-purple inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Học thuật</span></td><td><span class="text-green-600 font-semibold">95/100</span></td><td>Phân tích Dữ liệu</td><td>PGS. TS. An</td><td>09/08/2026</td></tr>
+<tr><td><span class="font-medium">Đỗ Thanh M</span></td><td><span class="badge-blue inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Thực hành</span></td><td><span class="text-green-600 font-semibold">81/100</span></td><td>Thiết kế UI/UX</td><td>Th.S. Hùng</td><td>08/08/2026</td></tr>
+<tr><td><span class="font-medium">Bùi Văn N</span></td><td><span class="badge-orange inline-block px-2.5 py-1 rounded-full text-label-sm font-label-sm">Hành vi</span></td><td><span class="text-red-600 font-semibold">65/100</span></td><td>Kỹ năng Lãnh đạo</td><td>TS. Mai</td><td>07/08/2026</td></tr>
+
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="pagination">
+<button class="active">1</button>
+<button>2</button>
+<button>3</button>
+<button>→</button>
+</div>
+</div>
+</main>
+</body></html>

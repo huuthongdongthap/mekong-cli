@@ -1,7 +1,8 @@
 import 'module-alias/register';
 import 'tsconfig-paths/register';
+import './instrument'
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, VERSION_NEUTRAL } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
@@ -51,6 +52,7 @@ async function bootstrap() {
       .addTag('Enterprises')
       .addTag('Programs (CTĐT)')
       .addTag('Learners')
+      .addTag('Learner Profile')
       .addTag('Enrollments')
       .addTag('Practice Records')
       .addTag('Evaluations')
@@ -58,6 +60,16 @@ async function bootstrap() {
       .addTag('MOA')
       .addTag('Invoices')
       .addTag('Documents')
+      .addTag('Academic Records')
+      .addTag('Internship Certificates')
+      .addTag('Geographic')
+      .addTag('Chat')
+      .addTag('Audit')
+      .addTag('Dashboard')
+      .addTag('Pricing')
+      .addTag('Unit Economics')
+      .addTag('Scholarship')
+      .addTag('Retention')
       .build();
 
     const document = SwaggerModule.createDocument(app, config, {
@@ -70,7 +82,7 @@ async function bootstrap() {
     console.log('📚 Swagger docs → http://localhost:3000/api/v1/docs');
   }
 
-  const PORT = Number(process.env.PORT) ?? 3000;
+  const PORT = Number(process.env.PORT) || 3000;
   await app.listen(PORT);
   console.log(`🚀 LinkEduVN API running at http://localhost:${PORT}/api/v1`);
 }

@@ -1,0 +1,129 @@
+version: '3.9'
+
+services:
+  # ==========================================================================
+  # PostgreSQL 16
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: linkededu-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: linkededu
+      POSTGRES_USER: linkededu
+      POSTGRES_PASSWORD: linkededu
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./packages/api/prisma/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linkededu -d linkededu"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - linkededu-net
+
+  # ==========================================================================
+  # Redis 7 — sessions, cache, rate-limit, job queue
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: linkededu-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - linkededu-net
+
+  # ==========================================================================
+  # API (NestJS) — development mode with hot-reload
+  # ==========================================================================
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    container_name: linkededu-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://linkededu:linkededu@postgres:5432/linkededu
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret}
+      JWT_EXPIRES_IN: 86400s
+      R2_ACCOUNT_ID: dev-placeholder
+      R2_ACCESS_KEY_ID: dev-placeholder
+      R2_SECRET_ACCESS_KEY: dev-placeholder
+      R2_BUCKET: linkededu-dev-files
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./packages/api/src:/app/packages/api/src:delegated
+    networks:
+      - linkededu-net
+
+  # ==========================================================================
+  # DB Migrate — runs prisma migrate deploy on startup, then exits
+  # ==========================================================================
+  db-migrate:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    container_name: linkededu-db-migrate
+    environment:
+      DATABASE_URL: postgresql://linkededu:linkededu@postgres:5432/linkededu
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./packages/api/prisma:/app/prisma
+      - ./packages/api/node_modules/.prisma:/app/node_modules/.prisma
+    command: ["sh", "-c", "npx prisma migrate deploy && echo 'Migrations applied'"]
+    networks:
+      - linkededu-net
+    restart: "no"
+
+  # ==========================================================================
+  # Web (Next.js) — production with standalone output
+  # ==========================================================================
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile
+    container_name: linkededu-web
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://api:3000/api/v1
+    depends_on:
+      - api
+    networks:
+      - linkededu-net
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+
+networks:
+  linkededu-net:
+    driver: bridge

@@ -1,0 +1,32 @@
+# Vibe Coding Factory — Layer Configuration
+layers:
+  studio:
+    chapter: "孫子兵法 — Art of War (Complete)"
+    role: "VC Studio / Venture Builder"
+    description: "Venture studio platform — portfolio, dealflow, expert matching"
+    cascades_to: [founder]
+  founder:
+    chapter: "始計 — Initial Calculations"
+    role: "Founder / CEO"
+    description: "Strategic vision, fundraising, OKRs"
+    cascades_to: [business]
+  business:
+    chapter: "作戰 — Waging War"
+    role: "Business Lead / GTM"
+    description: "Sales, marketing, finance, HR"
+    cascades_to: [product]
+  product:
+    chapter: "謀攻 — Attack by Stratagem"
+    role: "Product Manager / Designer"
+    description: "Roadmap, sprints, personas"
+    cascades_to: [engineering]
+  engineering:
+    chapter: "軍爭 — Military Contention"
+    role: "Engineer / Tech Lead"
+    description: "Code, build, test, deploy"
+    cascades_to: [ops]
+  ops:
+    chapter: "九變 — Nine Variations"
+    role: "DevOps / Platform"
+    description: "Audit, health, security, env"
+    cascades_to: []

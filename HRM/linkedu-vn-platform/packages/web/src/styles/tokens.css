@@ -1,0 +1,181 @@
+/* LinkEduVN Design Tokens — single source of truth for light + dark.
+ *
+ * Surface tokens (background/foreground/card/...) live here alongside the
+ * status palette used by badges, tags, and status pills across all 20 modules.
+ * Components reference these via var(--*) and never hardcode dark:* classes.
+ */
+
+:root {
+  /* ── Surface ─────────────────────────────────────────────── */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  /* Brand primary aligned to Stitch `#004bca` — the app's previous primary
+   * was achromatic grey; Stitch gives the platform its identity blue. */
+  --primary: oklch(0.365 0.776 294.6);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.365 0.776 294.6);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  /* Alternating panel surface (Stitch `#f9f9ff`) for grouped sections. */
+  --surface-alt: oklch(0.981 0.031 290.4);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+
+  /* ── Derived component tokens (theme-agnostic; no dark:* needed) ── */
+  --btn-outline-border: var(--border);
+  --btn-outline-bg: var(--background);
+  --btn-outline-bg-hover: var(--muted);
+  --btn-ghost-bg-hover: var(--muted);
+  --btn-destructive-bg: color-mix(in oklch, var(--destructive) 10%, transparent);
+  --btn-destructive-bg-hover: color-mix(in oklch, var(--destructive) 20%, transparent);
+  --btn-destructive-ring: color-mix(in oklch, var(--destructive) 20%, transparent);
+
+  /* ── Status palette (light) ──────────────────────────────── */
+  --status-blue: oklch(0.922 0.114 264.7);
+  --status-blue-fg: oklch(0.319 0.693 296.0);
+  --status-blue-border: oklch(0.85 0.12 264.7);
+
+  --status-green: oklch(0.962 0.157 155.2);
+  --status-green-fg: oklch(0.373 0.412 149.1);
+  --status-green-border: oklch(0.85 0.12 155.2);
+
+  --status-yellow: oklch(0.971 0.274 104.1);
+  --status-yellow-fg: oklch(0.384 0.473 66.3);
+  --status-yellow-border: oklch(0.88 0.14 104.1);
+
+  --status-red: oklch(0.921 0.102 20.1);
+  --status-red-fg: oklch(0.332 0.606 34.1);
+  --status-red-border: oklch(0.85 0.12 20.1);
+
+  --status-purple: oklch(0.934 0.125 308.7);
+  --status-purple-fg: oklch(0.319 0.802 313.8);
+  --status-purple-border: oklch(0.85 0.12 308.7);
+
+  --status-amber: oklch(0.95 0.09 70);
+  --status-amber-fg: oklch(0.35 0.12 70);
+  --status-amber-border: oklch(0.88 0.1 70);
+
+  --status-orange: oklch(0.976 0.058 80.3);
+  --status-orange-fg: oklch(0.367 0.586 45.5);
+  --status-orange-border: oklch(0.88 0.1 80.3);
+
+  --status-emerald: oklch(0.93 0.09 165);
+  --status-emerald-fg: oklch(0.32 0.12 165);
+  --status-emerald-border: oklch(0.85 0.1 165);
+
+  --status-teal: oklch(0.93 0.08 180);
+  --status-teal-fg: oklch(0.32 0.12 180);
+  --status-teal-border: oklch(0.85 0.1 180);
+
+  --status-indigo: oklch(0.93 0.09 260);
+  --status-indigo-fg: oklch(0.35 0.14 260);
+  --status-indigo-border: oklch(0.85 0.12 260);
+}
+
+.dark {
+  /* ── Surface ─────────────────────────────────────────────── */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+
+  /* ── Derived component tokens (theme-agnostic; no dark:* needed) ── */
+  --btn-outline-border: var(--input);
+  --btn-outline-bg: var(--input);
+  --btn-outline-bg-hover: var(--input);
+  --btn-ghost-bg-hover: var(--muted);
+  --btn-destructive-bg: color-mix(in oklch, var(--destructive) 20%, transparent);
+  --btn-destructive-bg-hover: color-mix(in oklch, var(--destructive) 30%, transparent);
+  --btn-destructive-ring: color-mix(in oklch, var(--destructive) 40%, transparent);
+
+  /* ── Status palette (dark) ───────────────────────────────── */
+  --status-blue: oklch(0.25 0.12 240 / 0.35);
+  --status-blue-fg: oklch(0.65 0.12 240);
+  --status-blue-border: oklch(0.4 0.12 240);
+
+  --status-green: oklch(0.25 0.1 150 / 0.35);
+  --status-green-fg: oklch(0.65 0.1 150);
+  --status-green-border: oklch(0.4 0.1 150);
+
+  --status-yellow: oklch(0.25 0.1 90 / 0.35);
+  --status-yellow-fg: oklch(0.7 0.1 90);
+  --status-yellow-border: oklch(0.4 0.1 90);
+
+  --status-red: oklch(0.25 0.1 25 / 0.35);
+  --status-red-fg: oklch(0.65 0.1 25);
+  --status-red-border: oklch(0.4 0.1 25);
+
+  --status-purple: oklch(0.25 0.1 290 / 0.35);
+  --status-purple-fg: oklch(0.65 0.1 290);
+  --status-purple-border: oklch(0.4 0.1 290);
+
+  --status-amber: oklch(0.25 0.1 70 / 0.35);
+  --status-amber-fg: oklch(0.7 0.1 70);
+  --status-amber-border: oklch(0.4 0.1 70);
+
+  --status-orange: oklch(0.25 0.1 40 / 0.35);
+  --status-orange-fg: oklch(0.65 0.1 40);
+  --status-orange-border: oklch(0.4 0.1 40);
+
+  --status-emerald: oklch(0.25 0.1 165 / 0.35);
+  --status-emerald-fg: oklch(0.65 0.1 165);
+  --status-emerald-border: oklch(0.4 0.1 165);
+
+  --status-teal: oklch(0.25 0.1 180 / 0.35);
+  --status-teal-fg: oklch(0.65 0.1 180);
+  --status-teal-border: oklch(0.4 0.1 180);
+
+  --status-indigo: oklch(0.25 0.1 260 / 0.35);
+  --status-indigo-fg: oklch(0.65 0.1 260);
+  --status-indigo-border: oklch(0.4 0.1 260);
+}

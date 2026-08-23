@@ -1,14 +1,8 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
-import { ThrottlerModule } from '@nestjs/throttler'
 import { ScheduleModule } from '@nestjs/schedule'
 
-// Infrastructure
-import { PrismaModule } from './common/prisma/prisma.module'
-import { RedisModule } from './modules/redis.module'
-import { StorageModule } from './modules/storage.module'
-import { LoggerModule } from './modules/logger.module'
-import { HealthModule } from './modules/health/health.module'
+// Infrastructure (ConfigModule, ThrottlerModule, PrismaModule, RedisModule,
+// StorageModule, LoggerModule, HealthModule, filters, interceptors — all in AppConfigModule)
 import { AppConfigModule } from './app.config'
 
 // Feature modules
@@ -40,40 +34,17 @@ import { PracticeRecordsModule } from './modules/practice-records/practice-recor
 import { EvaluationsModule } from './modules/evaluations/evaluations.module'
 import { DocumentsModule } from './modules/documents/documents.module'
 import { AuditModule } from './modules/audit/audit.module'
+import { ScholarshipModule } from './modules/scholarship/scholarship.module'
 
 @Module({
   imports: [
-    // -- Config --
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: ['.env', '.env.local', '.env.development'],
-    }),
-    // Global exception filter, throttler, transform interceptor
+    // Infrastructure (Config, Throttler, Prisma, Redis, Storage, Logger, Health, filters, interceptors)
     AppConfigModule,
 
-    // -- Scheduling --
+    // Scheduling
     ScheduleModule.forRoot(),
 
-    // -- Logging --
-    LoggerModule,
-
-    // -- Infrastructure --
-    PrismaModule,
-    RedisModule,
-    StorageModule,
-
-    // -- Rate limiting --
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60_000, // 60 seconds
-        limit: 100, // 100 requests per 60 seconds per IP
-      },
-    ]),
-
-    // -- Health checks --
-    HealthModule,
-
-    // -- Feature modules --
+    // Feature modules
     AuthModule,
     SchoolsModule,
     EnterprisesModule,
@@ -97,6 +68,7 @@ import { AuditModule } from './modules/audit/audit.module'
     // New Phase 1-2 modules
     PricingModule,
     UnitEconomicsModule,
+    ScholarshipModule,
 
     RetentionModule,
   ],

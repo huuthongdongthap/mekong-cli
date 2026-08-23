@@ -15,9 +15,6 @@ export interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private config: ConfigService) {
     const jwtSecret = config.get<string>('JWT_SECRET') || 'test-secret-key-for-development';
-    console.log('JwtStrategy constructor - ConfigService:', !!config);
-    console.log('JwtStrategy constructor - JWT_SECRET value:', jwtSecret);
-    console.log('JwtStrategy constructor - JWT_SECRET type:', typeof jwtSecret);
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

@@ -1,0 +1,41 @@
+{
+  "id": "dev-feature-complete-missing",
+  "goal": "bo sung hoan thien sau deep check cho du an linkedu-vn-platform",
+  "phases": [
+    {
+      "id": "phase-01-cleanup-duplicate-api",
+      "name": "Phase 1 — Xoa Duplicate api Root + Cleanup",
+      "status": "pending"
+    },
+    {
+      "id": "phase-02-add-critical-tests",
+      "name": "Phase 2 — Them tests cho Invoice / Enrollment / Placement",
+      "status": "pending"
+    },
+    {
+      "id": "phase-03-learner-profile-view",
+      "name": "Phase 3 — Learner Profile View (web)",
+      "status": "pending"
+    },
+    {
+      "id": "phase-04-online-cv",
+      "name": "Phase 4 — Online CV / Learner Profile page",
+      "status": "pending"
+    },
+    {
+      "id": "phase-05-chat-web-ui",
+      "name": "Phase 5 — Chat Web UI",
+      "status": "pending"
+    },
+    {
+      "id": "phase-06-document-management",
+      "name": "Phase 6 — Document Management page",
+      "status": "pending"
+    },
+    {
+      "id": "phase-07-ci-deploy",
+      "name": "Phase 7 — CI deploy workflow (staging/production)",
+      "status": "pending"
+    }
+  ]
+}
