@@ -138,6 +138,20 @@ class CommandSanitizer:
             sanitized_command=command.strip(),
         )
 
+        # LLM planners sometimes emit commands wrapped in markdown fences
+        # ("```bash\n...\n```"). Strip the fence markers so the inner command
+        # is judged on its own merits; the backticks are formatting, not
+        # shell substitution, when they wrap the whole command.
+        fenced = re.fullmatch(r"```[a-zA-Z]*\s*\n(.*)\n?```\s*", command.strip(), re.DOTALL)
+        if fenced:
+            command = fenced.group(1).strip()
+            result.warnings.append("Stripped markdown code fence from LLM output")
+        elif "```" in command:
+            # Fence fragments mixed into a real command line stay suspicious.
+            pass
+
+        result.sanitized_command = command
+
         if not command or not command.strip():
             result.is_safe = False
             result.blocked_reason = "Empty command"
