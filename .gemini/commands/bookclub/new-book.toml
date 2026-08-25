@@ -1,0 +1,22 @@
+[command]
+name = "bookclub/new-book"
+description = "Khởi tạo sách mới cho BOOKnBEYOND — sync Sheet, config, cover, deploy"
+argument_hint = "tên sách tiếng Việt"
+
+[command.prompt]
+text = """
+Thực hiện workflow khởi tạo sách mới "$ARGUMENTS" cho BOOKnBEYOND book club.
+
+Đọc hướng dẫn chi tiết tại: /Users/mac/mekong-cli/.claude/commands/bookclub/new-book.md
+
+Pipeline:
+1. Sheet Sync: đọc https://docs.google.com/spreadsheets/d/18JVy2EqdRsJDf_tzDfsqX-jE5I6gos8sWBVzcK06tRU/gviz/tq?tqx=out:csv → parse mục lục
+2. Cover: copy ảnh bìa vào assets/
+3. Config: cập nhật data/config.json (currentBook + schedule)
+4. Chapters: tạo data/{slug}-chapters.md
+5. Library: archive sách cũ, thêm sách mới
+6. Validate: python3 -m json.tool
+7. Deploy: git commit + push + wrangler deploy
+
+Working dir: /Users/mac/mekong-cli/BOOKnBEYOND
+"""
