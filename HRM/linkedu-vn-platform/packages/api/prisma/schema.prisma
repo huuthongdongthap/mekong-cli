@@ -69,6 +69,7 @@ model User {
   programsCreated        Program[]               @relation("ProgramCreatedBy")
   enterprise             Enterprise?             @relation(fields: [enterpriseId], references: [id])
   school                 School?                 @relation(fields: [schoolId], references: [id])
+  chatMessages           ChatMessage[]
 
   @@index([email])
   @@index([phone])
@@ -76,6 +77,20 @@ model User {
   @@index([schoolId, role])
   @@index([enterpriseId, role])
   @@map("users")
+}
+
+model ChatMessage {
+  id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId         String          @db.Uuid
+  conversationId String          @db.Uuid
+  role           ChatMessageRole
+  content        String
+  createdAt      DateTime        @default(now()) @db.Timestamptz(6)
+  user           User            @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([conversationId])
+  @@map("chat_messages")
 }
 
 model School {
@@ -821,6 +836,10 @@ enum UserRole {
   enterprise_admin
   enterprise_hr
   learner
+}
+enum ChatMessageRole {
+  user
+  assistant
 }
 
 enum SchoolType {

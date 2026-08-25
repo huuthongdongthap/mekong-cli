@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "strictPropertyInitialization": false,
+    "baseUrl": ".",
+    "noEmit": false,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "paths": {
+      "@linkedu/api/*": ["./src/*"],
+      "@linkedu/api/modules/*": ["./src/modules/*"],
+      "@linkedu/api/common/*": ["./src/common/*"],
+      "@linkedu/shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+}
