@@ -15,6 +15,11 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from src.core.opencore.archetype_catalog_registry import classify_archetype
+from src.core.opencore.grab_cross_repo_scanner import (
+    format_scan_lines,
+    scan_target_repository,
+)
 from src.core.opencore.opencore_25_step_deep_brainstorm_engine import (
     OpenCoreDeepBrainstormEngine,
 )
@@ -32,9 +37,10 @@ console = Console()
 
 
 def _is_opencore_saas_idea(idea: str, deep: bool) -> bool:
-    lowered = idea.lower()
-    keywords = ("25", "open-core", "opencore", "mã nguồn mở", "github", "saas")
-    return deep or any(k in lowered for k in keywords)
+    cls_res = classify_archetype(idea)
+    if cls_res.archetype == "REGULATED_TRUST_NETWORK":
+        return False
+    return deep or cls_res.archetype == "OPEN_CORE_SAAS"
 
 
 @app.command("run")
@@ -48,29 +54,14 @@ def idea_run(
 ) -> None:
     """Run the full idea pipeline: validate -> BMC -> PRD -> execution handoff -> blueprint on disk."""
     is_opencore = _is_opencore_saas_idea(idea_text, deep)
-    if json_output:
-        validation = stage_validate(idea_text, deep=deep)
-        bmc = stage_bmc(validation, is_opencore=is_opencore)
-        prd = stage_prd(bmc, is_opencore=is_opencore)
-        handoff = stage_handoff(prd, bmc, deep=deep)
-    else:
-        stages = (
-            ("Phase 1: Validate", lambda: stage_validate(idea_text, deep=deep)),
-            ("Phase 2: Business Model Canvas", lambda: stage_bmc(validation, is_opencore=is_opencore)),
-            ("Phase 3: PRD", lambda: stage_prd(bmc, is_opencore=is_opencore)),
-            ("Phase 4: Execution Handoff", lambda: stage_handoff(prd, bmc, deep=deep)),
-        )
+    validation = stage_validate(idea_text, deep=deep)
+    bmc = stage_bmc(validation, is_opencore=is_opencore)
+    prd = stage_prd(bmc, is_opencore=is_opencore)
+    handoff = stage_handoff(prd, bmc, deep=deep)
+    if not json_output:
         with Progress(SpinnerColumn(), TextColumn("[bold cyan]{task.description}[/bold cyan]"), console=console, transient=True) as progress:
-            for label, step in stages:
+            for label in ("Phase 1: Validate", "Phase 2: Business Model Canvas", "Phase 3: PRD", "Phase 4: Execution Handoff"):
                 progress.update(progress.add_task(label, total=1), completed=1)
-                if label.startswith("Phase 1"):
-                    validation = step()
-                elif label.startswith("Phase 2"):
-                    bmc = step()
-                elif label.startswith("Phase 3"):
-                    prd = step()
-                else:
-                    handoff = step()
 
     deep_run: dict[str, Any] | None = None
     result: dict[str, Any] = {
@@ -126,3 +117,22 @@ def idea_brainstorm(
     """Synthesize a bounded 4-field Brainstorm Contract & 3-option trade-off analysis for /idea."""
     report = OpenCoreDeepBrainstormEngine.synthesize(idea_text, repo_root=repo_root, deep=deep)
     typer.echo(json.dumps(report.to_dict(), indent=2, ensure_ascii=False))
+
+
+@app.command("scan")
+def idea_scan(
+    target_root: Path = typer.Option(Path("/Users/macbook/durios"), "--target-root", help="Target repository root to scan in read-only mode"),
+    archetype: str = typer.Option("auto", "--archetype", help="Archetype: auto | REGULATED_TRUST_NETWORK | OPEN_CORE_SAAS"),
+    idea_text: str = typer.Option("", "--idea", help="Optional idea text for deterministic keyword archetype classification"),
+    no_execute: bool = typer.Option(False, "--no-execute", help="Disable allowlisted bun -e runtime probes"),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Emit deterministic JSON report"),
+    replay: bool = typer.Option(False, "--replay", help="Replay deterministic scan output"),
+) -> None:
+    """Run the 25-step honest cross-repo diagnostic scan (ReadinessLabel + SequenceLabel)."""
+    _ = replay
+    report = scan_target_repository(target_root, archetype=archetype, idea_text=idea_text, execute_runtime=not no_execute)
+    if json_output:
+        typer.echo(json.dumps(report.to_dict(), indent=2, ensure_ascii=False, sort_keys=True))
+        return
+    for line in format_scan_lines(report):
+        typer.echo(line)

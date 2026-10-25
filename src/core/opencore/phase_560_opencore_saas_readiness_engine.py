@@ -119,7 +119,8 @@ class OpenCoreSaasReadinessEngine:
         tasks_path, plan_path, brainstorm_path = bp_dir / "tasks.md", bp_dir / "plan.md", bp_dir / "brainstorm-25-step-opencore-saas.md"
         company_path = root / ".mekong" / "company.json"
         tasks_text = _read_if_exists(tasks_path)
-        matched = [s.slug for s in TWENTY_FIVE_OPENCORE_STEPS if s.slug in tasks_text]
+        lines = tasks_text.splitlines()
+        matched = [s.slug for s in TWENTY_FIVE_OPENCORE_STEPS if any(ln.strip().startswith("- [x]") and f"`{s.slug}`" in ln for ln in lines)]
         lenses_ok = all(lens in tasks_text for lens in ("[Business]", "[Agentic]", "[Governance]"))
         company_clean = False
         if company_path.is_file():
@@ -134,8 +135,9 @@ class OpenCoreSaasReadinessEngine:
         }
 
     @classmethod
-    def audit_repository(cls, repo_root: str | Path, completed_steps: int = 25, jwt_license_gate_enforced: bool | None = None, mcu_http402_billing_wired: bool | None = None, verify_monetization: bool = True) -> OpenCoreReadinessReport:
+    def audit_repository(cls, repo_root: str | Path, completed_steps: int | None = None, jwt_license_gate_enforced: bool | None = None, mcu_http402_billing_wired: bool | None = None, verify_monetization: bool = True) -> OpenCoreReadinessReport:
         h = cls.verify_filesystem_hygiene(repo_root)
+        resolved_steps = completed_steps if completed_steps is not None else cls.audit_blueprint(repo_root)["matched_steps_count"]
         gaps: tuple[str, ...] = ()
         if verify_monetization and jwt_license_gate_enforced is None and mcu_http402_billing_wired is None:
             from src.core.opencore.monetization_gate_probes import probe
@@ -145,7 +147,7 @@ class OpenCoreSaasReadinessEngine:
         else:
             gate_enforced = bool(jwt_license_gate_enforced) if jwt_license_gate_enforced is not None else True
             billing_wired = bool(mcu_http402_billing_wired) if mcu_http402_billing_wired is not None else True
-        return cls.evaluate(OpenCoreReadinessTelemetry(completed_steps, h.leaked_secrets_detected, h.apps_tracked_files_count > 0 or not h.is_clean, gate_enforced, billing_wired, gaps))
+        return cls.evaluate(OpenCoreReadinessTelemetry(resolved_steps, h.leaked_secrets_detected, h.apps_tracked_files_count > 0 or not h.is_clean, gate_enforced, billing_wired, gaps))
 
     @staticmethod
     def evaluate(telemetry: OpenCoreReadinessTelemetry) -> OpenCoreReadinessReport:
@@ -155,9 +157,6 @@ class OpenCoreSaasReadinessEngine:
         if telemetry.leaked_secrets_detected > 0 or telemetry.private_dirs_exposed_in_git:
             return OpenCoreReadinessReport(OpenCoreReadinessVerdict.BLOCKED_SECRET_OR_BOUNDARY_LEAK, pct, total, False, False, "Secret leak or private apps/billing directory exposed in public git index.")
         if not (telemetry.jwt_license_gate_enforced and telemetry.mcu_http402_billing_wired) or clamped < total:
-            if telemetry.monetization_gaps:
-                rationale = "Public hygiene clean, but the paywall is unverified: " + "; ".join(telemetry.monetization_gaps)
-            else:
-                rationale = "Public hygiene clean, but JWT license_gate or HTTP 402 MCU billing incomplete."
+            rationale = "Public hygiene clean, but the paywall is unverified: " + "; ".join(telemetry.monetization_gaps) if telemetry.monetization_gaps else "Public hygiene clean, but JWT license_gate or HTTP 402 MCU billing incomplete."
             return OpenCoreReadinessReport(OpenCoreReadinessVerdict.MONETIZATION_GATE_INCOMPLETE, pct, total, True, False, rationale, telemetry.monetization_gaps)
         return OpenCoreReadinessReport(OpenCoreReadinessVerdict.PUBLIC_GITHUB_SAAS_READY, pct, total, True, True, "All 25 Open-Core steps verified: MIT public repo safe and Cloud SaaS paywall active.")
