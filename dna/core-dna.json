@@ -194,6 +194,16 @@
         ],
         "verdict": "reviewed",
         "note": "CLI wizard exit code alignment and test suite hardening; command surface unchanged (company group grandfathered in dna/command-surface.json, 39 groups preserved)."
+      },
+      {
+        "pr": 92,
+        "branch": "feat/durian-grab-honest-diagnosis",
+        "feature_surface_changes": [
+          "src/cli/idea_commands.py — add read-only `idea scan --target-root` subcommand and route `_is_opencore_saas_idea` through deterministic archetype classifier; 39 CLI groups preserved",
+          "src/core/opencore/ (grab_diagnostic_types.py, grab_market_facts.py, grab_probe_runner.py, durian_export_steps_p1_p3.py, durian_export_25_step_catalog.py, archetype_catalog_registry.py, grab_cross_repo_scanner.py, phase_560_opencore_saas_readiness_engine.py) — 25-step Grab-standard Durian Export diagnostic engine, six probe primitives, recomputed market facts, and schema-hardened blueprint audit"
+        ],
+        "verdict": "reviewed",
+        "note": "Issue #91 25-step Grab-standard Durian Export honest diagnostic engine and cross-repo scanner; top-level command surface unchanged (idea group grandfathered in dna/command-surface.json)."
       }
     ]
   }
