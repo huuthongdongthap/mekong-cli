@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { ShieldCheck, PackageCheck, ArrowUpRight, DollarSign, Activity, Lock } from 'lucide-react'
+import { ShieldCheck, PackageCheck, ArrowUpRight, DollarSign, Activity, Lock, Terminal, Copy } from 'lucide-react'
 import Link from 'next/link'
 import { CommandCenter, StatusLine } from '@/components/CommandCenter'
 import { UnifiedBridgeWidget } from '@/components/antigravity'
@@ -44,6 +44,14 @@ const METRICS = [
 ]
 
 export default function DashboardPage() {
+    const [copiedCmd, setCopiedCmd] = React.useState<string | null>(null)
+
+    const handleCopy = (cmd: string) => {
+        navigator.clipboard.writeText(cmd)
+        setCopiedCmd(cmd)
+        setTimeout(() => setCopiedCmd(null), 2000)
+    }
+
     return (
         <div className="space-y-6">
             {/* Status Line */}
@@ -79,6 +87,58 @@ export default function DashboardPage() {
                             Packs Registry
                         </Link>
                     </div>
+                </div>
+            </AgencyCard>
+
+            {/* Mekong CLI Command Bridge & Quick Launch */}
+            <AgencyCard variant="glass" className="p-5 border border-emerald-500/20 bg-[#070a10]">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                            <Terminal className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-white">Mekong CLI Command Bridge</h3>
+                            <p className="text-[11px] text-neutral-400">
+                                Terminal local đồng bộ thời gian thực với Web Cockpit qua SQLite WAL &amp; SHA-256 Gate
+                            </p>
+                        </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                        Live Bridge
+                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs">
+                    {[
+                        { label: 'Kế toán Thuế TT78', cmd: 'mekong ke-toan tt78 --quy 4' },
+                        { label: 'Chăm sóc Zalo OA', cmd: 'mekong zalo-oa broadcast --target hot' },
+                        { label: 'Giám đốc CMO Swarm', cmd: 'mekong marketing cmo-run "Growth"' },
+                    ].map((item) => (
+                        <div
+                            key={item.cmd}
+                            onClick={() => handleCopy(item.cmd)}
+                            className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-emerald-500/40 cursor-pointer transition-all flex items-center justify-between group"
+                        >
+                            <div>
+                                <div className="text-[10px] text-neutral-400 uppercase font-sans">{item.label}</div>
+                                <div className="text-emerald-400 font-bold mt-0.5 group-hover:text-emerald-300">
+                                    $ {item.cmd}
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                className="text-neutral-500 group-hover:text-emerald-400 p-1"
+                                title="Copy command"
+                            >
+                                {copiedCmd === item.cmd ? (
+                                    <span className="text-[10px] text-emerald-400 font-bold">✓</span>
+                                ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                )}
+                            </button>
+                        </div>
+                    ))}
                 </div>
             </AgencyCard>
 
