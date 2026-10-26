@@ -1,11 +1,13 @@
 ---
 id: 261026-1545-opc-2027-ui-ux-cockpit-and-landing
 title: "OPC 2027 UI/UX Architecture: Agentic Cockpit, Cryptographic Approval Card, Honest Usage Ledger & Dual-Rail RaaS"
-status: in_progress
+status: completed
 branch: feat/opc-2027-ui-ux-cockpit-and-landing
 created: 2026-10-26
 route: feature
 mode: official
+linked_issue: 109
+linked_pr: 110
 ---
 
 # Plan — OPC 2027 UI/UX Restructuring (`mekongmind.com` + `apps/dashboard` + `packages/raas-landing`)
@@ -34,7 +36,7 @@ Restructure 100% of the UI/UX across both `mekong-cli` (`apps/dashboard`, `packa
 
 ## 3. Acceptance Criteria
 
-- [ ] **AC1:** `/Users/macbook/mekongmind/mvp` has `src/app/globals.css` and `src/app/layout.tsx` importing it, zero `@polar-sh/sdk` references, OPC 2027 Hero & Dual-Rail RaaS pricing (`$199 / $399 / $799 / $4,999`), and `npm run build` exits 0.
-- [ ] **AC2:** `apps/dashboard` includes `/dashboard/opc` (4-step Intake -> Proposal -> SHA-256 Approval Gate -> Honest Usage Ledger) and `/dashboard/packs` (`opc-pack/v1` registry), and `npm run build` + `npm run typecheck` exit 0 with zero `:any` types.
-- [ ] **AC3:** `packages/raas-landing` is aligned with OPC 2027 and Dual-Rail RaaS (`VietQR` + `NOWPayments`) with zero `Polar.sh` references.
-- [ ] **AC4:** `tests/test_opc_2027_ui_contract.py` passes 100% (`<= 185 LOC`) alongside all existing Open-Core and OPC test suites.
+- [x] **AC1:** `/Users/macbook/mekongmind/mvp` has `src/app/globals.css` and `src/app/layout.tsx` importing it, zero `@polar-sh/sdk` references, OPC 2027 Hero & Dual-Rail RaaS pricing (`$199 / $399 / $799 / $4,999`), and `npm run build` exits 0.
+- [x] **AC2:** `apps/dashboard` includes `/dashboard/opc` (4-step Intake -> Proposal -> SHA-256 Approval Gate -> Honest Usage Ledger) and `/dashboard/packs` (`opc-pack/v1` registry), and `npm run build` + `npm run typecheck` exit 0 with zero `:any` types.
+- [x] **AC3:** `packages/raas-landing` is aligned with OPC 2027 and Dual-Rail RaaS (`VietQR` + `NOWPayments`) with zero `Polar.sh` references.
+- [x] **AC4:** `tests/test_opc_2027_ui_contract.py` passes 100% (`<= 185 LOC`) alongside all existing Open-Core and OPC test suites.
