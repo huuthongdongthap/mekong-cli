@@ -9,11 +9,26 @@ export function resolveEngineApiUrl(): string {
 }
 
 export function guardDashboardApiRoute(
-  _request: Request,
+  request: Request,
   options?: { allowSyntheticGet?: boolean }
 ): NextResponse | null {
-  if (options?.allowSyntheticGet) {
-    return null;
+  if (isDashboardDemoMode()) {
+    if (request.method === 'GET' && options?.allowSyntheticGet) {
+      return null;
+    }
+    return NextResponse.json(
+      { error: 'Endpoint disabled in demo mode' },
+      { status: 403 }
+    );
   }
+
+  const expectedToken = process.env.DASHBOARD_API_TOKEN || process.env.SERVICE_TOKEN;
+  if (expectedToken) {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ') || authHeader.slice(7) !== expectedToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
   return null;
 }
