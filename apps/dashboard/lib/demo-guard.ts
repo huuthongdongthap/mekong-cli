@@ -22,12 +22,17 @@ export function guardDashboardApiRoute(
     );
   }
 
-  const expectedToken = process.env.DASHBOARD_API_TOKEN || process.env.SERVICE_TOKEN;
-  if (expectedToken) {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ') || authHeader.slice(7) !== expectedToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const expectedToken = process.env.DASHBOARD_API_TOKEN;
+  if (!expectedToken) {
+    return NextResponse.json(
+      { error: 'Server authentication token not configured' },
+      { status: 503 }
+    );
+  }
+
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ') || authHeader.slice(7) !== expectedToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   return null;
