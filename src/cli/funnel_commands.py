@@ -294,6 +294,24 @@ def thue_main(
     from rich.panel import Panel
     from rich.table import Table
 
+    # The figures below are read from the statutory rule version in force today
+    # (src/core/vn_statutory_rules.py) — they used to be hardcoded, which made the
+    # panel state expired law as soon as a rule version changed.
+    from src.core.vn_statutory_rules import cit_rule, pit_rule
+
+    pit = pit_rule()
+    cit = cit_rule()
+    personal = pit.params["personal_deduction"]
+    dependent = pit.params["dependent_deduction"]
+    sme_small = cit.params.get("sme_small_rate")
+    sme_medium = cit.params.get("sme_medium_rate")
+    sme_line = (
+        f"Ưu đãi theo doanh thu: [bold green]{float(sme_small) * 100:.0f}%[/] ≤ 3 tỷ, "
+        f"[bold green]{float(sme_medium) * 100:.0f}%[/] 3–50 tỷ"
+        if sme_small is not None and sme_medium is not None
+        else "[dim]không có thuế suất ưu đãi SME trong kỳ này[/]"
+    )
+
     console = Console()
     console.print(
         Panel(
@@ -301,9 +319,12 @@ def thue_main(
             f"  Tổng số lượt tính:       [cyan]{status_data['total_calculations']}[/]\n"
             f"  Tổng tiền thuế mô phỏng: [yellow]{status_data['total_tax_simulated']:,.0f} đ[/]\n"
             f"  Hồ sơ thuế mẫu:          [magenta]{status_data['total_profiles']}[/]\n"
-            f"  Giảm trừ bản thân:       [bold]11.000.000 đ/tháng[/]\n"
-            f"  Giảm trừ người PT:       [bold]4.400.000 đ/người/tháng[/]\n"
-            f"  Thuế TNDN tiêu chuẩn:    [bold]20%[/] (Ưu đãi SME: [bold green]17%[/])",
+            f"  Giảm trừ bản thân:       [bold]{float(personal):,.0f} đ/tháng[/]\n"
+            f"  Giảm trừ người PT:       [bold]{float(dependent):,.0f} đ/người/tháng[/]\n"
+            f"  Thuế TNDN tiêu chuẩn:    [bold]{float(cit.params['standard_rate']) * 100:.0f}%[/] ({sme_line})\n"
+            f"  Biểu thuế TNCN:          [cyan]{len(pit.params['brackets'])} bậc[/]\n\n"
+            f"  [dim]Phiên bản quy tắc: TNCN {pit.version} · TNDN {cit.version}[/]\n"
+            f"  [dim]Căn cứ: {pit.citation}[/]",
             title="[bold blue]Thuế Doanh Nghiệp & Cá Nhân VN[/]",
             border_style="green",
         )
@@ -332,13 +353,24 @@ def thue_main(
 def thue_tncn(
     monthly_income: int = typer.Argument(..., help="Thu nhập gộp/tháng (VND)"),
     dependents: int = typer.Option(0, "--dependents", "-d", help="Số người phụ thuộc"),
+    ky_thue: str | None = typer.Option(
+        None, "--ky-thue", "--as-of",
+        help="Kỳ tính thuế (YYYY-MM-DD). Mặc định: hôm nay. Biểu thuế 7 bậc áp dụng "
+             "đến 31/12/2025; 5 bậc từ 01/01/2026 (Luật 109/2025/QH15).",
+    ),
     json_mode: bool = typer.Option(False, "--json", help="Xuất dữ liệu JSON"),
 ) -> None:
-    """Tính thuế TNCN lũy tiến (Điều 22, Luật thuế TNCN)."""
+    """Tính thuế TNCN lũy tiến theo kỳ tính thuế (Luật 109/2025/QH15 từ 2026)."""
     from src.core.thue_engine import ThueEngine
 
     engine = ThueEngine()
-    result = engine.calculate_tncn(monthly_income, dependents=dependents)
+    try:
+        result = engine.calculate_tncn(monthly_income, dependents=dependents, as_of=ky_thue)
+    except ValueError as exc:
+        # Statutory refusals (illegal period, negative income) are user errors,
+        # not crashes: report the reason on stderr and exit non-zero.
+        typer.echo(f"LỖI DỮ LIỆU ĐẦU VÀO: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
     if json_mode:
         typer.echo(json.dumps(result, indent=2, ensure_ascii=False))
@@ -363,14 +395,24 @@ def thue_tncn(
 def thue_tndn(
     annual_revenue: int = typer.Argument(..., help="Doanh thu năm (VND)"),
     profit: Optional[int] = typer.Option(None, "--profit", "-p", help="Lợi nhuận tính thuế (VND)"),
-    sme: bool = typer.Option(True, "--sme/--no-sme", help="Áp dụng ưu đãi SME 17% nếu ≤ 3 tỷ"),
+    sme: bool = typer.Option(True, "--sme/--no-sme",
+                             help="Áp dụng thuế suất ưu đãi theo doanh thu (Điều 10 Luật 67/2025/QH15)"),
+    ky_thue: str | None = typer.Option(
+        None, "--ky-thue", "--as-of",
+        help="Kỳ tính thuế năm (YYYY-MM-DD). Mặc định: hôm nay. Thuế suất 15%/17% chỉ áp "
+             "dụng từ 01/10/2025; trước đó chỉ có 20%.",
+    ),
     json_mode: bool = typer.Option(False, "--json", help="Xuất dữ liệu JSON"),
 ) -> None:
-    """Tính thuế TNDN (20% tiêu chuẩn, 17% SME ≤ 3 tỷ/năm)."""
+    """Tính thuế TNDN: 20% tiêu chuẩn; 15% (doanh thu ≤ 3 tỷ), 17% (3–50 tỷ) từ 01/10/2025."""
     from src.core.thue_engine import ThueEngine
 
     engine = ThueEngine()
-    result = engine.calculate_tndn(annual_revenue, profit=profit, is_sme=sme)
+    try:
+        result = engine.calculate_tndn(annual_revenue, profit=profit, is_sme=sme, as_of=ky_thue)
+    except ValueError as exc:
+        typer.echo(f"LỖI DỮ LIỆU ĐẦU VÀO: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
     if json_mode:
         typer.echo(json.dumps(result, indent=2, ensure_ascii=False))
@@ -393,13 +435,26 @@ def thue_tndn(
 def thue_gtgt(
     amount: int = typer.Argument(..., help="Số tiền trước thuế (VND)"),
     rate: int = typer.Option(10, "--rate", "-r", help="Thuế suất GTGT (0/5/8/10)"),
+    sector: str | None = typer.Option(
+        None, "--nganh", "--sector",
+        help="Ngành hàng/dịch vụ. Mức giảm 10% → 8% (NĐ 174/2025/NĐ-CP) loại trừ viễn thông, "
+             "tài chính–ngân hàng–bảo hiểm, bất động sản, kim loại, khai khoáng (trừ than).",
+    ),
+    ky_thue: str | None = typer.Option(
+        None, "--ky-thue", "--as-of",
+        help="Kỳ tính thuế (YYYY-MM-DD). Mặc định: hôm nay. Giảm 8% áp dụng 01/07/2025–31/12/2026.",
+    ),
     json_mode: bool = typer.Option(False, "--json", help="Xuất dữ liệu JSON"),
 ) -> None:
-    """Tính thuế GTGT."""
+    """Tính thuế GTGT theo kỳ (Luật 48/2024/QH15; giảm 8% theo NQ 204/2025/QH15)."""
     from src.core.thue_engine import ThueEngine
 
     engine = ThueEngine()
-    result = engine.calculate_gtgt(amount, rate=rate)
+    try:
+        result = engine.calculate_gtgt(amount, rate=rate, as_of=ky_thue, sector=sector)
+    except ValueError as exc:
+        typer.echo(f"LỖI DỮ LIỆU ĐẦU VÀO: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
     if json_mode:
         typer.echo(json.dumps(result, indent=2, ensure_ascii=False))
@@ -801,11 +856,15 @@ def bhxh_main(
         Panel(
             f"[bold green]Hệ Thống Bảo Hiểm Xã Hội Việt Nam (BHXH - BHYT - BHTN)[/]\n\n"
             f"  Căn cứ pháp lý:          [cyan]{regs['decree']}[/]\n"
-            f"  Mức lương cơ sở:         [yellow]{regs['base_salary_vnd']:,.0f} đ/tháng[/]\n"
+            f"  Kỳ đóng áp dụng:         [dim]{regs['contribution_period']}[/]\n"
+            f"  Mức tham chiếu:          [yellow]{regs['base_salary_vnd']:,.0f} đ/tháng[/]\n"
             f"  Mức trần đóng BHXH/BHYT: [magenta]{regs['ceiling_bhxh_bhyt_vnd']:,.0f} đ/tháng[/]\n"
-            f"  Tỷ lệ Người lao động:    [bold]10.5%[/] (BHXH 8%, BHYT 1.5%, BHTN 1%)\n"
-            f"  Tỷ lệ Doanh nghiệp:      [bold green]21.5%[/] (BHXH 17.5%, BHYT 3%, BHTN 1%)\n"
-            f"  Tổng trích nộp bắt buộc: [bold red]32.0%[/]\n"
+            f"  Trần BHTN vùng 1:        [magenta]{regs['ceiling_bhtn_vnd_by_region'][1]:,.0f} đ/tháng[/]\n"
+            f"  Tỷ lệ Người lao động:    [bold]{regs['employee_rate_total_pct']}%[/]\n"
+            f"  Tỷ lệ Doanh nghiệp:      [bold green]{regs['employer_rate_total_pct']}%[/]"
+            f" (+ KPCĐ {regs['employer_kpcd_pct']}%)\n"
+            f"  Tổng trích nộp bắt buộc: [bold red]"
+            f"{regs['employee_rate_total_pct'] + regs['employer_rate_total_pct']:.1f}%[/]\n"
             f"  Nhân sự đăng ký:         [cyan]{status_data['total_employees']}[/] (Hoạt động: {status_data['active_employees']})\n"
             f"  Hồ sơ kê khai D02-LT:    [bold blue]{status_data['total_declarations']}[/]\n"
             f"  Tổng quỹ trích nộp:      [yellow]{status_data['total_contributions_simulated']:,.0f} đ[/]",
@@ -839,13 +898,23 @@ def bhxh_calc(
     salary: float = typer.Argument(..., help="Mức tiền lương đóng bảo hiểm (Gross)"),
     region: int = typer.Option(1, "--region", "-r", help="Vùng lương tối thiểu (1, 2, 3, 4)"),
     kpcd: bool = typer.Option(False, "--kpcd", help="Bao gồm kinh phí công đoàn 2%"),
+    ky_dong: str | None = typer.Option(
+        None, "--ky-dong", "--as-of",
+        help="Kỳ đóng bảo hiểm (YYYY-MM-DD). Mặc định: hôm nay. Trần 20 × mức tham chiếu "
+             "= 46.800.000đ đến 30/06/2026, 50.600.000đ từ 01/07/2026 (NĐ 161/2026/NĐ-CP).",
+    ),
     json_mode: bool = typer.Option(False, "--json", help="Xuất dữ liệu JSON"),
 ) -> None:
-    """Tính chi tiết tỷ lệ trích nộp BHXH, BHYT, BHTN cho NLĐ và Doanh nghiệp."""
+    """Tính chi tiết tỷ lệ trích nộp BHXH, BHYT, BHTN cho NLĐ và Doanh nghiệp theo kỳ đóng."""
     from src.core.bhxh_engine import BhxhEngine, format_vnd
 
     engine = BhxhEngine()
-    res = engine.calculate_contribution(salary=salary, region=region, include_kpcd=kpcd)
+    try:
+        res = engine.calculate_contribution(salary=salary, region=region, include_kpcd=kpcd,
+                                            as_of=ky_dong)
+    except ValueError as exc:
+        typer.echo(f"LỖI DỮ LIỆU ĐẦU VÀO: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
     if json_mode:
         typer.echo(json.dumps(res, indent=2, ensure_ascii=False))
@@ -856,7 +925,10 @@ def bhxh_calc(
     from rich.table import Table
 
     console = Console()
-    capped_str = " (Đã chạm mức trần 46.800.000 đ)" if res["is_capped"] else ""
+    capped_str = (
+        f" (Đã chạm mức trần {res['ceiling_bhxh_bhyt']:,.0f} đ — {res['rule_version']})"
+        if res["is_capped"] else ""
+    )
     console.print(
         Panel(
             f"[bold]Mức lương tính bảo hiểm:[/] [yellow]{format_vnd(res['salary_gross'])}[/]{capped_str}\n"
@@ -864,7 +936,8 @@ def bhxh_calc(
             f"[bold]NLĐ trích nộp (10.5%):[/] [cyan]{format_vnd(res['employee']['total'])}[/]\n"
             f"[bold]DN trích nộp ({'23.5%' if kpcd else '21.5%'}):[/] [magenta]{format_vnd(res['employer']['total'])}[/]\n"
             f"[bold green]Tổng quỹ bảo hiểm nộp về CQ BHXH:[/] [bold green]{format_vnd(res['total_contribution'])}[/]\n"
-            f"[bold blue]Lương thực lĩnh sau bảo hiểm:[/] [bold blue]{format_vnd(res['net_salary_estimated'])}[/]",
+            f"[bold blue]Lương thực lĩnh sau bảo hiểm:[/] [bold blue]{format_vnd(res['net_salary_estimated'])}[/]\n"
+            f"[dim]Kỳ đóng {res['contribution_period']} · {res['rule_version']} · {res['rule_citation']}[/]",
             title=f"[bold green]Chi Tiết Trích Nộp BHXH — {res['calc_id']}[/]",
             border_style="green",
         )
